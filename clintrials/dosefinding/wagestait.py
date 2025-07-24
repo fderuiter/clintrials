@@ -193,6 +193,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
     >>> trial.most_likely_model_index
     2
 
+    Posterior toxicity and efficacy probabilities are obtained by integrating
+    over the uncertainty in the model parameters.
+
     """
 
     def __init__(self, skeletons, prior_tox_probs, tox_target, tox_limit, eff_limit,
@@ -243,8 +246,8 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         :param estimate_var: True to estimate the posterior variance of beta and theta
         :type estimate_var: bool
 
-        Posterior toxicity and efficacy curves are always calculated via Bayesian
-        integration.
+        Posterior toxicity and efficacy probabilities are always calculated via
+        Bayesian integration.
 
         """
 
@@ -287,10 +290,19 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         else:
             # _next_dose is set in this case by parent class
             self.randomise_at_start = False
-        self.crm = CRM(prior=prior_tox_probs, target=tox_target, first_dose=first_dose, max_size=max_size,
-                       F_func=empiric, inverse_F=inverse_empiric, beta_prior=beta_prior,
-                       use_quick_integration=use_quick_integration, estimate_var=estimate_var,
-                       plugin_mean=False)
+        # CRM uses Bayesian integration for toxicity probabilities
+        self.crm = CRM(
+            prior=prior_tox_probs,
+            target=tox_target,
+            first_dose=first_dose,
+            max_size=max_size,
+            F_func=empiric,
+            inverse_F=inverse_empiric,
+            beta_prior=beta_prior,
+            use_quick_integration=use_quick_integration,
+            estimate_var=estimate_var,
+            plugin_mean=False,
+        )
         self.post_tox_probs = np.zeros(self.I)
         self.post_eff_probs = np.zeros(self.I)
         self.theta_hats = np.zeros(self.K)
@@ -353,6 +365,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.w = w / sum(w)
         most_likely_model_index = np.argmax(w)
         self.most_likely_model_index = most_likely_model_index
+        # Posterior toxicity probabilities from CRM via Bayesian integration
         self.post_tox_probs = np.array(self.crm.prob_tox())
         a0 = 0
         theta0 = self.theta_prior.mean()
