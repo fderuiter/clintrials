@@ -1,5 +1,7 @@
 *.pyc
 .idea/
-dist
+dist/
 *.egg-info/
 .ipynb_checkpoints/
+.venv/
+poetry.lock
