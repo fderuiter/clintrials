@@ -47,15 +47,23 @@ The second clones this repo using git.
 Tutorials are provided in the tutorials directory.
 The one complication is getting the clinitrials package on your path.
 
-#### Using pip to get just the clintrials code
-To get the latest milestone release, use pip.
-Open up a terminal or DOS session and fire off a:
+#### Using Poetry to get just the clintrials code
+Poetry automatically creates a virtual environment and installs the project
+dependencies for you. If you do not have Poetry installed, run:
 
-`pip install clintrials`
+```bash
+pip install poetry
+```
 
-The advantage of this method is that clintrials is added to your path.
-The disadvantage is that you don't get the nice tutorial workbooks that illustrate the methods. 
-If you want those, use...
+Then install the project and drop into the environment with:
+
+```bash
+poetry install
+poetry shell
+```
+
+The package will be on your path inside the Poetry shell. If you would like the
+tutorial notebooks as well, use...
 
 #### Using git to clone this repo, including tutorial notebooks
 
