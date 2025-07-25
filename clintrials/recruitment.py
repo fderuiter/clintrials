@@ -14,21 +14,15 @@ class RecruitmentStream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def reset(self):
-        """Reset the recruitment stream to start anew.
-
-        :return: None
-        :rtype: None
-
-        """
+        """Reset the recruitment stream to start anew."""
         pass
 
     @abc.abstractmethod
     def next(self):
-        """Get the time that the next patient is recruited.
+        """Return the time until the next patient is recruited.
 
-        :return: The time that the next patient is recruited.
-        :rtype: float
-
+        Returns:
+            float: The time to the next patient.
         """
         pass
 

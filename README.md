@@ -110,3 +110,12 @@ pip install -e .[dev]
 pre-commit install
 pre-commit run --all-files
 ```
+
+### Building the documentation
+
+To build the HTML documentation locally:
+
+```bash
+pip install -e .[docs]
+make -C docs html
+```

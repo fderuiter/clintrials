@@ -5,3 +5,6 @@ dist/
 .ipynb_checkpoints/
 .venv/
 poetry.lock
+docs/_autosummary/
+docs/_build/
+docs/reference/_autosummary/
