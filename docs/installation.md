@@ -1,6 +1,6 @@
 # Installation
 
-Clintrials requires Python 3.8 or later. Install from PyPI with:
+Clintrials requires Python 3.9 or later. Install from PyPI with:
 
 ```bash
 pip install clintrials
