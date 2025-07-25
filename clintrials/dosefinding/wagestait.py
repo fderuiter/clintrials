@@ -12,7 +12,8 @@ Wages, N.A. and Tait, C. (2015). Seamless Phase I/II Adaptive Design For Oncolog
 
 import numpy as np
 from scipy.stats import norm, beta
-from scipy.integrate import quad, trapz
+from scipy.integrate import quad
+from numpy import trapz
 from random import sample
 
 from clintrials.common import empiric, inverse_empiric
@@ -76,8 +77,8 @@ def _wt_get_theta_hat(cases, skeletons, theta_prior, F=empiric, use_quick_integr
     theta_hats = []
     for skeleton in skeletons:
         if use_quick_integration:
-            n = 100 * max(np.log(len(cases) + 1) / 2, 1)  # My own rule of thumb for num points needed
-            z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=1)
+            n = int(100 * max(np.log(len(cases) + 1) / 2, 1))  # My own rule of thumb for num points needed
+            z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
             denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
             num_y = z * denom_y
             num = trapz(num_y, z, dz)
@@ -132,8 +133,8 @@ def _get_post_eff_bayes(cases, skeleton, dose_labels, theta_prior, F=empiric, us
     intercept = 0
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
-        n = 100 * max(np.log(len(cases) + 1) / 2, 1)  # My own rule of thumb for num points needed
-        z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=1)
+        n = int(100 * max(np.log(len(cases) + 1) / 2, 1))  # My own rule of thumb for num points needed
+        z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
         denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
         denom = trapz(denom_y, z, dz)
         for x in dose_labels:
@@ -193,6 +194,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
     >>> trial.most_likely_model_index
     2
 
+    Posterior toxicity and efficacy probabilities are obtained by integrating
+    over the uncertainty in the model parameters.
+
     """
 
     def __init__(self, skeletons, prior_tox_probs, tox_target, tox_limit, eff_limit,
@@ -200,7 +204,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                  F_func=empiric, inverse_F=inverse_empiric,
                  theta_prior=norm(0, np.sqrt(1.34)), beta_prior=norm(0, np.sqrt(1.34)),
                  excess_toxicity_alpha=0.025, deficient_efficacy_alpha=0.025,
-                 model_prior_weights=None, use_quick_integration=False, estimate_var=False, plugin_mean=False):
+                 model_prior_weights=None, use_quick_integration=False, estimate_var=False):
         """
 
         Params:
@@ -242,9 +246,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         :type use_quick_integration: bool
         :param estimate_var: True to estimate the posterior variance of beta and theta
         :type estimate_var: bool
-        :param plugin_mean: True to estimate event curves by plugging parameter estimate into function;
-                            False to estimate using full Bayesian integral (default).
-        :type plugin_mean: bool
+
+        Posterior toxicity and efficacy probabilities are always calculated via
+        Bayesian integration.
 
         """
 
@@ -276,7 +280,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             self.model_prior_weights = np.ones(self.K) / self.K
         self.use_quick_integration = use_quick_integration
         self.estimate_var = estimate_var
-        self.plugin_mean = plugin_mean
 
         # Reset
         self.most_likely_model_index = \
@@ -288,9 +291,19 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         else:
             # _next_dose is set in this case by parent class
             self.randomise_at_start = False
-        self.crm = CRM(prior=prior_tox_probs, target=tox_target, first_dose=first_dose, max_size=max_size,
-                       F_func=empiric, inverse_F=inverse_empiric, beta_prior=beta_prior,
-                       use_quick_integration=use_quick_integration, estimate_var=estimate_var, plugin_mean=plugin_mean)
+        # CRM uses Bayesian integration for toxicity probabilities
+        self.crm = CRM(
+            prior=prior_tox_probs,
+            target=tox_target,
+            first_dose=first_dose,
+            max_size=max_size,
+            F_func=empiric,
+            inverse_F=inverse_empiric,
+            beta_prior=beta_prior,
+            use_quick_integration=use_quick_integration,
+            estimate_var=estimate_var,
+            plugin_mean=False,
+        )
         self.post_tox_probs = np.zeros(self.I)
         self.post_eff_probs = np.zeros(self.I)
         self.theta_hats = np.zeros(self.K)
@@ -353,17 +366,18 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.w = w / sum(w)
         most_likely_model_index = np.argmax(w)
         self.most_likely_model_index = most_likely_model_index
+        # Posterior toxicity probabilities from CRM via Bayesian integration
         self.post_tox_probs = np.array(self.crm.prob_tox())
-        if self.plugin_mean:
-            self.post_eff_probs = empiric(self.skeletons[most_likely_model_index],
-                                          beta=theta_hats[most_likely_model_index])
-        else:
-            a0 = 0
-            theta0 = self.theta_prior.mean()
-            dose_labels = [self.inverse_F(p, a0=a0, beta=theta0) for p in self.skeletons[most_likely_model_index]]
-            self.post_eff_probs = _get_post_eff_bayes(cases, self.skeletons[most_likely_model_index], dose_labels,
-                                                      self.theta_prior, use_quick_integration=self.use_quick_integration
-                                                      )
+        a0 = 0
+        theta0 = self.theta_prior.mean()
+        dose_labels = [self.inverse_F(p, a0=a0, beta=theta0) for p in self.skeletons[most_likely_model_index]]
+        self.post_eff_probs = _get_post_eff_bayes(
+            cases,
+            self.skeletons[most_likely_model_index],
+            dose_labels,
+            self.theta_prior,
+            use_quick_integration=self.use_quick_integration,
+        )
 
         # Update combined model
         if self.size() < self.randomisation_stage_size:

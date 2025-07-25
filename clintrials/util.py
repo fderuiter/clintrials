@@ -4,7 +4,8 @@ __contact__ = 'kristian.brock@gmail.com'
 """ This module provides a home for all those useful bits-and-bobs that do not warrant their own module. """
 
 
-from collections import OrderedDict, Iterable
+from collections import OrderedDict
+from collections.abc import Iterable
 from copy import copy
 from datetime import datetime
 from itertools import product

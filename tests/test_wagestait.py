@@ -56,12 +56,16 @@ def test_wages_tait_1():
     trial.update(cases)
     # No idea what this will be because it is randomised
 
-    assert np.all(np.abs(trial.post_tox_probs - np.array([0.1376486, 0.3126617, 0.4095831, 0.4856057, 0.5506505,
-                                                          0.6086650])) < 0.001)  # The first one varies a bit more
-    assert np.all(np.abs(trial.post_eff_probs - np.array([0.2479070, 0.3639813, 0.4615474, 0.5497718, 0.6321674,
-                                                          0.7105235])) < 0.00001)
-    assert np.all(np.abs(trial.w - np.array([0.01347890, 0.03951504, 0.12006585, 0.11798287, 0.11764227, 0.12346595,
-                                      0.11764227, 0.11798287, 0.12006585, 0.07073296, 0.04142517])) < 0.00001)
+    assert np.all(np.abs(trial.post_tox_probs - np.array([
+        0.1374908, 0.3126617, 0.4095831, 0.4856057, 0.5506505, 0.6086650
+    ])) < 0.001)  # The first one varies a bit more
+    assert np.all(np.abs(trial.post_eff_probs - np.array([
+        0.2479070, 0.3639813, 0.4615474, 0.5497718, 0.6321674, 0.7105235
+    ])) < 0.00001)
+    assert np.all(np.abs(trial.w - np.array([
+        0.01347890, 0.03951504, 0.12006585, 0.11798287, 0.11764227, 0.12346595,
+        0.11764227, 0.11798287, 0.12006585, 0.07073296, 0.04142517
+    ])) < 0.00001)
     assert trial.most_likely_model_index == 5
     assert trial.admissable_set() == [1, 2]
     assert np.abs(trial.dose_toxicity_lower_bound(1) - 0.008403759) < 0.00001
@@ -108,12 +112,16 @@ def test_wages_tait_2():
 
     next_dose = trial.update(cases)
     assert next_dose == 2
-    assert np.all(trial.post_tox_probs - np.array([0.1292270, 0.3118713, 0.4124382, 0.4906020, 0.5569092, 0.6155877])
-                  < 0.00001)
-    assert np.all(trial.post_eff_probs - np.array([0.3999842, 0.4935573, 0.5830683, 0.6697644, 0.5830683, 0.4935573])
-                  < 0.00001)
-    assert np.all(trial.w - np.array([0.001653197, 0.006509789, 0.069328268, 0.156959090, 0.141296982, 0.144650706,
-                                      0.141296982, 0.156959090, 0.117673776, 0.041764220, 0.021907900]) < 0.00001)
+    assert np.all(trial.post_tox_probs - np.array([
+        0.1292270, 0.3118714, 0.4124383, 0.4906021, 0.5569093, 0.6155878
+    ]) < 0.00001)
+    assert np.all(trial.post_eff_probs - np.array([
+        0.3999842, 0.4935574, 0.5830685, 0.6697646, 0.5830685, 0.4935574
+    ]) < 0.00001)
+    assert np.all(trial.w - np.array([
+        0.00165319, 0.00650976, 0.06932715, 0.15695883, 0.14129752, 0.14465125,
+        0.14129752, 0.15695883, 0.11767193, 0.04176601, 0.02190798
+    ]) < 0.00001)
     assert trial.most_likely_model_index == 3
     assert trial.admissable_set() == [1, 2]
     assert trial.dose_toxicity_lower_bound(1) - 0.008403759 < 0.00001
