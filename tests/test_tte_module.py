@@ -1,6 +1,7 @@
 import numpy as np
-from clintrials.tte import BayesianTimeToEvent, matrix_cohort_analysis
+
 from clintrials.recruitment import ConstantRecruitmentStream
+from clintrials.tte import BayesianTimeToEvent, matrix_cohort_analysis
 
 
 def test_bayesian_time_to_event_update_and_test():
@@ -8,14 +9,14 @@ def test_bayesian_time_to_event_update_and_test():
     trial.update([(5, 0), (10, 0)])
 
     res = trial.test(time=5, cutoff=8, probability=0.8, less_than=True)
-    assert res['Patients'] == 2
-    assert res['Events'] == 0
-    assert abs(res['Probability'] - 0.69301655) < 1e-6
-    assert not res['Stop']
+    assert res["Patients"] == 2
+    assert res["Events"] == 0
+    assert abs(res["Probability"] - 0.69301655) < 1e-6
+    assert not res["Stop"]
 
     res = trial.test(time=12, cutoff=8, probability=0.5, less_than=False)
-    assert res['Events'] == 2
-    assert res['Stop']
+    assert res["Events"] == 2
+    assert res["Stop"]
 
 
 def test_matrix_cohort_analysis_deterministic():
@@ -36,8 +37,8 @@ def test_matrix_cohort_analysis_deterministic():
         final_analysis_time_delta=0,
         recruitment_stream=stream,
     )
-    assert report['Decision'] == 'StopAtInterim'
-    assert report['FinalPatients'] == 1
+    assert report["Decision"] == "StopAtInterim"
+    assert report["FinalPatients"] == 1
 
 
 def test_matrix_cohort_analysis_multiple_runs():

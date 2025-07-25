@@ -1019,9 +1019,7 @@ def solve_metrizable_efftox_scenario(
     conform_util = np.where(conform, util, -np.inf)
 
     if np.all(np.isnan(util)):
-        logging.warning(
-            "All NaN util encountered in solve_metrizable_efftox_scenario"
-        )
+        logging.warning("All NaN util encountered in solve_metrizable_efftox_scenario")
         return conform, util, np.nan, -1, np.nan
     elif np.all(np.isnan(conform_util)):
         logging.warning(

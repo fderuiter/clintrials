@@ -9,8 +9,8 @@ import numpy as np
 from numpy import trapz
 from scipy.integrate import quad
 from scipy.optimize import minimize
-from scipy.stats import norm
 from scipy.special import logsumexp
+from scipy.stats import norm
 
 from clintrials.common import empiric, inverse_empiric, inverse_logistic, logistic
 from clintrials.dosefinding import DoseFindingTrial

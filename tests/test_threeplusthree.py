@@ -1,4 +1,5 @@
 import pytest
+
 from clintrials.dosefinding import ThreePlusThree
 
 
