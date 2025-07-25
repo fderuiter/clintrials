@@ -6,7 +6,6 @@ import logging
 import numpy as np
 from scipy.stats import norm
 from scipy.integrate import quad
-from numpy import trapz
 from scipy.optimize import minimize
 
 from clintrials.dosefinding import DoseFindingTrial
@@ -102,12 +101,12 @@ def _get_beta_hat_bayes(F, intercept, codified_doses_given, toxs, beta_pdf, use_
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         num_y = z * _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         denom_y = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
-        num = trapz(num_y, z, dz)
-        denom = trapz(denom_y, z, dz)
+        num = np.trapz(num_y, z, dx=dz)
+        denom = np.trapz(denom_y, z, dx=dz)
         beta_hat = num / denom
         if estimate_var:
             num2_y = z ** 2 * _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
-            num2 = trapz(num2_y, z, dz)
+            num2 = np.trapz(num2_y, z, dx=dz)
             exp_x2 = num2 / denom
             var = exp_x2 - beta_hat ** 2
         else:
@@ -217,11 +216,11 @@ def _get_post_tox_bayes(F, intercept, dose_labels, codified_doses_given, toxs, b
         n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))  # My own rule of thumb
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         denom_y = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
-        denom = trapz(denom_y, z, dz)
+        denom = np.trapz(denom_y, z, dx=dz)
         # num_scale = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         for x in dose_labels:
             num_y = F(x, a0=intercept, beta=z) * denom_y
-            num = trapz(num_y, z, dz)
+            num = np.trapz(num_y, z, dx=dz)
             post_tox.append(num / denom)
     else:
         # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow

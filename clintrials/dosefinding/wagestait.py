@@ -13,7 +13,6 @@ Wages, N.A. and Tait, C. (2015). Seamless Phase I/II Adaptive Design For Oncolog
 import numpy as np
 from scipy.stats import norm, beta
 from scipy.integrate import quad
-from numpy import trapz
 from random import sample
 
 from clintrials.common import empiric, inverse_empiric
@@ -81,12 +80,12 @@ def _wt_get_theta_hat(cases, skeletons, theta_prior, F=empiric, use_quick_integr
             z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
             denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
             num_y = z * denom_y
-            num = trapz(num_y, z, dz)
-            denom = trapz(denom_y, z, dz)
+            num = np.trapz(num_y, z, dx=dz)
+            denom = np.trapz(denom_y, z, dx=dz)
             theta_hat = num / denom
             if estimate_var:
                 num2_y = z**2 * denom_y
-                num2 = trapz(num2_y, z, dz)
+                num2 = np.trapz(num2_y, z, dx=dz)
                 exp_x2 = num2 / denom
                 var = exp_x2 - theta_hat**2
                 theta_hats.append((theta_hat, var, denom))
@@ -136,10 +135,10 @@ def _get_post_eff_bayes(cases, skeleton, dose_labels, theta_prior, F=empiric, us
         n = int(100 * max(np.log(len(cases) + 1) / 2, 1))  # My own rule of thumb for num points needed
         z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
         denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
-        denom = trapz(denom_y, z, dz)
+        denom = np.trapz(denom_y, z, dx=dz)
         for x in dose_labels:
             num_y = F(x, a0=intercept, beta=z) * denom_y
-            num = trapz(num_y, z, dz)
+            num = np.trapz(num_y, z, dx=dz)
             post_eff.append(num / denom)
     else:
         # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow
