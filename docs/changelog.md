@@ -1,3 +1,5 @@
 # Changelog
 
-See the project ``CHANGELOG.md`` in the repository root for a full history of changes.
+This project maintains its release history in the root [CHANGELOG.md](../CHANGELOG.md).
+
+## v0.1.4 – initial release
