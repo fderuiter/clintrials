@@ -1,7 +1,7 @@
 from .design import (
     EffTox,
-    LpNormCurve,
     InverseQuadraticCurve,
+    LpNormCurve,
     efftox_dtp_detail,
     solve_metrizable_efftox_scenario,
 )
