@@ -1,22 +1,20 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
 
 import abc
 import copy
-import numpy as np
 
+import numpy as np
 
 """ Classes and functions for modelling recruitment to clinical trials. """
 
 
-class RecruitmentStream(object):
-
-    __metaclass__ = abc.ABCMeta
+class RecruitmentStream(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def reset(self):
-        """ Reset the recruitment stream to start anew.
+        """Reset the recruitment stream to start anew.
 
         :return: None
         :rtype: None
@@ -26,7 +24,7 @@ class RecruitmentStream(object):
 
     @abc.abstractmethod
     def next(self):
-        """ Get the time that the next patient is recruited.
+        """Get the time that the next patient is recruited.
 
         :return: The time that the next patient is recruited.
         :rtype: float
@@ -36,7 +34,7 @@ class RecruitmentStream(object):
 
 
 class ConstantRecruitmentStream(RecruitmentStream):
-    """ Recruitment stream where the intrapatient wait is constant.
+    """Recruitment stream where the intrapatient wait is constant.
 
     This is the simplest recruitment stream case. A patient arrives every delta units of time.
 
@@ -57,7 +55,7 @@ class ConstantRecruitmentStream(RecruitmentStream):
     """
 
     def __init__(self, intrapatient_gap):
-        """ Create instance
+        """Create instance
 
         :param intrapatient_gap: the gap between recruitment times, aka delta.
         :type intrapatient_gap: float
@@ -68,7 +66,7 @@ class ConstantRecruitmentStream(RecruitmentStream):
         self.cursor = 0
 
     def reset(self):
-        """ Reset the recruitment stream to start anew.
+        """Reset the recruitment stream to start anew.
 
         :return: None
         :rtype: None
@@ -78,7 +76,7 @@ class ConstantRecruitmentStream(RecruitmentStream):
         self.cursor = 0
 
     def next(self):
-        """ Get the time that the next patient is recruited.
+        """Get the time that the next patient is recruited.
 
         :return: The time that the next patient is recruited.
         :rtype: float
@@ -89,7 +87,7 @@ class ConstantRecruitmentStream(RecruitmentStream):
 
 
 class QuadrilateralRecruitmentStream(RecruitmentStream):
-    """ Recruitment stream that allows recruitment potential to vary as a function of time using vertices.
+    """Recruitment stream that allows recruitment potential to vary as a function of time using vertices.
     Between two vertices, recruitment potential is represented by areas of quadrilaterals. Recruitment potential
     may change linearly using interpolation, or instantananeously using steps. In the former case, the quadrilaterals
     are trapeziums; in the latter, rectangles.
@@ -151,7 +149,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
     """
 
     def __init__(self, intrapatient_gap, initial_intensity, vertices, interpolate=True):
-        """ Create instance
+        """Create instance
 
         :param intrapatient_gap: time to recruit one patient at 100% recruitment intensity, i.e. the gap between
                                     recruitment times when recruitment is at 100% intensity.
@@ -179,16 +177,18 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         v = vertices
         v.sort(key=lambda x: x[0])
         self.shapes = {}  # t1 -> t0, t1, y0, y1 vertex parameters
-        self.recruiment_mass = {}  # t1 -> recruitment mass available (i.e. area of quadrilateral) to left of t1
+        self.recruiment_mass = (
+            {}
+        )  # t1 -> recruitment mass available (i.e. area of quadrilateral) to left of t1
         if len(v) > 0:
             t0 = 0
             y0 = initial_intensity
             for x in v:
                 t1, y1 = x
                 if interpolate:
-                    mass = 0.5 * (t1-t0) * (y0+y1)  # Area of trapezium
+                    mass = 0.5 * (t1 - t0) * (y0 + y1)  # Area of trapezium
                 else:
-                    mass = (t1-t0) * y0  # Are of rectangle
+                    mass = (t1 - t0) * y0  # Are of rectangle
                 self.recruiment_mass[t1] = mass
                 self.shapes[t1] = (t0, t1, y0, y1)
                 t0, y0 = t1, y1
@@ -199,7 +199,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         self.cursor = 0
 
     def reset(self):
-        """ Reset the recruitment stream to start anew.
+        """Reset the recruitment stream to start anew.
 
         :return: None
         :rtype: None
@@ -210,7 +210,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         self.available_mass = copy.copy(self.recruiment_mass)
 
     def next(self):
-        """ Get the time that the next patient is recruited.
+        """Get the time that the next patient is recruited.
 
         :return: The time that the next patient is recruited.
         :rtype: float
@@ -224,12 +224,18 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             t0, _, y0, y1 = self.shapes[t1]
             if avail_mass >= sought_mass:
                 if self.interpolate:
-                    y_at_cursor = self._linearly_interpolate_y(self.cursor, t0, t1, y0, y1)
-                    new_cursor = self._invert(self.cursor, t1, y_at_cursor, y1, sought_mass)
+                    y_at_cursor = self._linearly_interpolate_y(
+                        self.cursor, t0, t1, y0, y1
+                    )
+                    new_cursor = self._invert(
+                        self.cursor, t1, y_at_cursor, y1, sought_mass
+                    )
                     self.cursor = new_cursor
                 else:
                     y_at_cursor = y0
-                    new_cursor = self._invert(self.cursor, t1, y_at_cursor, y1, sought_mass, as_rectangle=True)
+                    new_cursor = self._invert(
+                        self.cursor, t1, y_at_cursor, y1, sought_mass, as_rectangle=True
+                    )
                     self.cursor = new_cursor
 
                 self.available_mass[t1] -= sought_mass
@@ -249,16 +255,16 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             return np.nan
 
     def _linearly_interpolate_y(self, t, t0, t1, y0, y1):
-        """ Linearly interpolate y-value at t using line through (t0, y0) and (t1, y1) """
+        """Linearly interpolate y-value at t using line through (t0, y0) and (t1, y1)"""
         if t1 == t0:
             # The line either has infiniite gradient or is not a line at all, but a point. No logical response
             return np.nan
         else:
-            m = (y1-y0) / (t1-t0)
-            return y0 + m * (t-t0)
+            m = (y1 - y0) / (t1 - t0)
+            return y0 + m * (t - t0)
 
     def _invert(self, t0, t1, y0, y1, mass, as_rectangle=False):
-        """ Returns time t at which the area of quadrilateral with vertices at t0, t, f(t), f(t0) equals mass. """
+        """Returns time t at which the area of quadrilateral with vertices at t0, t, f(t), f(t0) equals mass."""
         if t1 == t0:
             # The quadrilateral has no area
             return np.nan
@@ -270,15 +276,15 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             return t0 + 1.0 * mass / y0
         else:
             # We require area of a trapezium. That requires solving a quadratic.
-            m = (y1-y0) / (t1-t0)
+            m = (y1 - y0) / (t1 - t0)
             discriminant = y0**2 + 2 * m * mass
             if discriminant < 0:
-                raise TypeError('Discriminant is negative')
+                raise TypeError("Discriminant is negative")
             z = np.sqrt(discriminant)
             tau0 = (-y0 + z) / m
             tau1 = (-y0 - z) / m
             if tau0 + t0 > 0:
                 return t0 + tau0
             else:
-                assert(t0 + tau1 > 0)
+                assert t0 + tau1 > 0
                 return t0 + tau1

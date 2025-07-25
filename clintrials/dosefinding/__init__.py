@@ -1,25 +1,30 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
 
 __all__ = ["crm", "efftox", "efficacytoxicity", "wagestait", "watu"]
 
 
 import abc
-from collections import OrderedDict
 import copy
-from itertools import product, combinations_with_replacement
 import logging
+from collections import OrderedDict
+from itertools import combinations_with_replacement, product
+
 import numpy as np
 from scipy.stats import uniform
 
-from clintrials.util import (atomic_to_json, iterable_to_json,
-                             correlated_binary_outcomes_from_uniforms, to_1d_list)
 from clintrials.simulation import filter_sims
+from clintrials.util import (
+    atomic_to_json,
+    correlated_binary_outcomes_from_uniforms,
+    iterable_to_json,
+    to_1d_list,
+)
 
 
-class DoseFindingTrial(object):
-    """ This is the base class for a dose-finding trial.
+class DoseFindingTrial(metaclass=abc.ABCMeta):
+    """This is the base class for a dose-finding trial.
 
     The interface for such a class is:
     status()
@@ -64,8 +69,6 @@ class DoseFindingTrial(object):
 
     """
 
-    __metaclass__ = abc.ABCMeta
-
     def __init__(self, first_dose, num_doses, max_size):
         """
 
@@ -77,7 +80,7 @@ class DoseFindingTrial(object):
         """
 
         if first_dose > num_doses:
-            raise ValueError('First dose must be no greater than number of doses.')
+            raise ValueError("First dose must be no greater than number of doses.")
 
         self._first_dose = first_dose
         self.num_doses = num_doses
@@ -99,27 +102,27 @@ class DoseFindingTrial(object):
         self.__reset()
 
     def number_of_doses(self):
-        """ How many dose-levels are under investigation?"""
+        """How many dose-levels are under investigation?"""
         return self.num_doses
 
     def dose_levels(self):
-        """ Get list of dose levels, aka dose indices
+        """Get list of dose levels, aka dose indices
         :return: list of dose indices
         """
-        return range(1, self.num_doses+1)
+        return range(1, self.num_doses + 1)
 
     def first_dose(self):
-        """ Get first dose
+        """Get first dose
         :return: First dose
         """
         return self._first_dose
 
     def size(self):
-        """ How many patients have been treated? """
+        """How many patients have been treated?"""
         return len(self._doses)
 
     def max_size(self):
-        """ Maximum number of trial patients. """
+        """Maximum number of trial patients."""
         return self._max_size
 
     def doses(self):
@@ -129,11 +132,11 @@ class DoseFindingTrial(object):
         return self._toxicities
 
     def treated_at_dose(self, dose):
-        """ Number of patients treated at a dose level. """
+        """Number of patients treated at a dose level."""
         return sum(np.array(self._doses) == dose)
 
     def toxicities_at_dose(self, dose):
-        """ Number of toxicities at (1-based) dose level. """
+        """Number of toxicities at (1-based) dose level."""
         return sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose])
 
     def maximum_dose_given(self):
@@ -150,26 +153,27 @@ class DoseFindingTrial(object):
 
     def tabulate(self):
         import pandas as pd
+
         tab_data = OrderedDict()
         treated_at_dose = [self.treated_at_dose(d) for d in self.dose_levels()]
         tox_at_dose = [self.toxicities_at_dose(d) for d in self.dose_levels()]
-        tab_data['Dose'] = self.dose_levels()
-        tab_data['N'] = treated_at_dose
-        tab_data['Toxicities'] = tox_at_dose
+        tab_data["Dose"] = self.dose_levels()
+        tab_data["N"] = treated_at_dose
+        tab_data["Toxicities"] = tox_at_dose
         df = pd.DataFrame(tab_data)
-        df['ToxRate'] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
+        df["ToxRate"] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
         return df
 
     def set_next_dose(self, dose):
-        """ Set the next dose that should be given. """
+        """Set the next dose that should be given."""
         self._next_dose = dose
 
     def next_dose(self):
-        """ Get the next dose that should be given. """
+        """Get the next dose that should be given."""
         return self._next_dose
 
     def update(self, cases):
-        """ Update the trial with a list of cases.
+        """Update the trial with a list of cases.
 
         Params:
         cases, list of 2-tuples, (dose, toxicity), where dose is the given (1-based) dose level
@@ -179,7 +183,7 @@ class DoseFindingTrial(object):
 
         """
 
-        for (dose, tox) in cases:
+        for dose, tox in cases:
             self._doses.append(dose)
             self._toxicities.append(tox)
 
@@ -187,19 +191,19 @@ class DoseFindingTrial(object):
         return self._next_dose
 
     def observed_toxicity_rates(self):
-        """ Get the observed rate of toxicity at all doses. """
+        """Get the observed rate of toxicity at all doses."""
         tox_rates = []
-        for d in range(1, self.num_doses+1):
+        for d in range(1, self.num_doses + 1):
             num_treated = self.treated_at_dose(d)
             if num_treated:
                 num_toxes = self.toxicities_at_dose(d)
-                tox_rates.append(1. * num_toxes / num_treated)
+                tox_rates.append(1.0 * num_toxes / num_treated)
             else:
                 tox_rates.append(np.nan)
         return np.array(tox_rates)
 
     def optimal_decision(self, prob_tox):
-        """ Get the optimal dose choice for a given dose-toxicity curve.
+        """Get the optimal dose choice for a given dose-toxicity curve.
 
         .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
         design can be calculated for a given set of patients with their own specific tolerances by
@@ -215,7 +219,7 @@ class DoseFindingTrial(object):
         raise NotImplementedError()
 
     def plot_outcomes(self, chart_title=None, use_ggplot=False):
-        """ Plot the outcomes of patients observed.
+        """Plot the outcomes of patients observed.
 
         :param chart_title: optional chart title. Default is fairly verbose
         :type chart_title: str
@@ -226,65 +230,89 @@ class DoseFindingTrial(object):
         """
 
         if not chart_title:
-            chart_title="Each point represents a patient\nA circle indicates no toxicity, a cross toxicity"
+            chart_title = "Each point represents a patient\nA circle indicates no toxicity, a cross toxicity"
             chart_title = chart_title + "\n"
 
         if use_ggplot:
             if self.size() > 0:
-                from ggplot import (ggplot, ggtitle, geom_text, aes, ylim)
                 import numpy as np
                 import pandas as pd
-                patient_number = range(1, self.size()+1)
-                symbol = np.where(self.toxicities(), 'X', 'O')
-                data = pd.DataFrame({'Patient number': patient_number,
-                                     'Dose level': self.doses(),
-                                     'DLT': self.toxicities(),
-                                     'Symbol': symbol})
+                from ggplot import aes, geom_text, ggplot, ggtitle, ylim
 
-                p = ggplot(data, aes(x='Patient number', y='Dose level', label='Symbol')) \
-                    + ggtitle(chart_title) + geom_text(aes(size=20, vjust=-0.07)) + ylim(1, 5)
+                patient_number = range(1, self.size() + 1)
+                symbol = np.where(self.toxicities(), "X", "O")
+                data = pd.DataFrame(
+                    {
+                        "Patient number": patient_number,
+                        "Dose level": self.doses(),
+                        "DLT": self.toxicities(),
+                        "Symbol": symbol,
+                    }
+                )
+
+                p = (
+                    ggplot(
+                        data, aes(x="Patient number", y="Dose level", label="Symbol")
+                    )
+                    + ggtitle(chart_title)
+                    + geom_text(aes(size=20, vjust=-0.07))
+                    + ylim(1, 5)
+                )
                 return p
         else:
             if self.size() > 0:
                 import matplotlib.pyplot as plt
                 import numpy as np
-                patient_number = np.arange(1, self.size()+1)
+
+                patient_number = np.arange(1, self.size() + 1)
                 doses_given = np.array(self.doses())
-                tox_loc = np.array(self.toxicities()).astype('bool')
+                tox_loc = np.array(self.toxicities()).astype("bool")
                 if sum(tox_loc):
-                    plt.scatter(patient_number[tox_loc], doses_given[tox_loc], marker='x', s=300,
-                                facecolors='none', edgecolors='k')
+                    plt.scatter(
+                        patient_number[tox_loc],
+                        doses_given[tox_loc],
+                        marker="x",
+                        s=300,
+                        facecolors="none",
+                        edgecolors="k",
+                    )
                 if sum(~tox_loc):
-                    plt.scatter(patient_number[~tox_loc], doses_given[~tox_loc], marker='o', s=300,
-                                facecolors='none', edgecolors='k')
+                    plt.scatter(
+                        patient_number[~tox_loc],
+                        doses_given[~tox_loc],
+                        marker="o",
+                        s=300,
+                        facecolors="none",
+                        edgecolors="k",
+                    )
 
                 plt.title(chart_title)
-                plt.ylabel('Dose level')
-                plt.xlabel('Patient number')
+                plt.ylabel("Dose level")
+                plt.xlabel("Patient number")
                 plt.yticks(self.dose_levels())
                 p = plt.gcf()
-                phi = (np.sqrt(5)+1)/2.
-                p.set_size_inches(12, 12/phi)
+                phi = (np.sqrt(5) + 1) / 2.0
+                p.set_size_inches(12, 12 / phi)
                 # return p
 
     @abc.abstractmethod
     def __reset(self):
-        """ Opportunity to run implementation-specific reset operations. """
+        """Opportunity to run implementation-specific reset operations."""
         return
 
     @abc.abstractmethod
     def has_more(self):
-        """ Is the trial ongoing? """
+        """Is the trial ongoing?"""
         return (self.size() < self.max_size()) and (self._status >= 0)
 
     @abc.abstractmethod
     def __calculate_next_dose(self):
-        """ Subclasses should override this method and return the desired next dose. """
+        """Subclasses should override this method and return the desired next dose."""
         return -1  # Default implementation
 
 
 class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
-    """ Simple design to monotonically increase dose until a certain number of toxicities are observed in aggregate.
+    """Simple design to monotonically increase dose until a certain number of toxicities are observed in aggregate.
 
     Recommends the highest dose given.
 
@@ -311,7 +339,9 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
 
     def __init__(self, first_dose, num_doses, max_size, max_toxicities=1):
 
-        DoseFindingTrial.__init__(self, first_dose=first_dose, num_doses=num_doses, max_size=max_size)
+        DoseFindingTrial.__init__(
+            self, first_dose=first_dose, num_doses=num_doses, max_size=max_size
+        )
 
         self.max_toxicities = max_toxicities
         # Reset
@@ -332,12 +362,15 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
             return max(self.doses())
 
     def has_more(self):
-        return DoseFindingTrial.has_more(self) and (sum(self.toxicities()) < self.max_toxicities) \
-               and self.maximum_dose_given() < self.number_of_doses()
+        return (
+            DoseFindingTrial.has_more(self)
+            and (sum(self.toxicities()) < self.max_toxicities)
+            and self.maximum_dose_given() < self.number_of_doses()
+        )
 
 
 class ThreePlusThree(DoseFindingTrial):
-    """ This is an object-oriented attempt at the 3+3 trial design.
+    """This is an object-oriented attempt at the 3+3 trial design.
 
     e.g. general usage
     >>> trial = ThreePlusThree(5)
@@ -386,7 +419,9 @@ class ThreePlusThree(DoseFindingTrial):
 
     def __init__(self, num_doses):
 
-        DoseFindingTrial.__init__(self, first_dose=1, num_doses=num_doses, max_size=6*num_doses)
+        DoseFindingTrial.__init__(
+            self, first_dose=1, num_doses=num_doses, max_size=6 * num_doses
+        )
 
         self.num_doses = num_doses
         self.cohort_size = 3
@@ -440,19 +475,25 @@ class ThreePlusThree(DoseFindingTrial):
                     self._status = -1
                 self._continue = False
         else:
-            msg = 'Doses in the 3+3 trial must be given in common batches of three.'
+            msg = "Doses in the 3+3 trial must be given in common batches of three."
             raise Exception(msg)
 
         return self._next_dose
 
     def has_more(self):
-        """ Is the trial ongoing? 3+3 stops when the MTD has been found. """
+        """Is the trial ongoing? 3+3 stops when the MTD has been found."""
         return DoseFindingTrial.has_more(self) and self._continue
 
 
-def simulate_dose_finding_trial(design, true_toxicities, tolerances=None, cohort_size=1,
-                                conduct_trial=1, calculate_optimal_decision=1):
-    """ Simulate a dose finding trial based on observed bivariate toxicity, like CRM, 3+3, etc.
+def simulate_dose_finding_trial(
+    design,
+    true_toxicities,
+    tolerances=None,
+    cohort_size=1,
+    conduct_trial=1,
+    calculate_optimal_decision=1,
+):
+    """Simulate a dose finding trial based on observed bivariate toxicity, like CRM, 3+3, etc.
 
     Params:
     :param design: the design with which to simulate a dose-finding trial.
@@ -482,7 +523,9 @@ def simulate_dose_finding_trial(design, true_toxicities, tolerances=None, cohort
         tolerances = uniform().rvs(design.max_size())
     else:
         if len(tolerances) < design.max_size():
-            logging.warn('You have provided fewer tolerances than maximum number of patients on trial. Beware errors!')
+            logging.warn(
+                "You have provided fewer tolerances than maximum number of patients on trial. Beware errors!"
+            )
 
     # Simulate trial
     if conduct_trial:
@@ -490,19 +533,22 @@ def simulate_dose_finding_trial(design, true_toxicities, tolerances=None, cohort
         design.reset()
         dose_level = design.next_dose()
         while i <= design.max_size() and design.has_more():
-            tox = [1 if x < true_toxicities[dose_level-1] else 0 for x in tolerances[i:i+cohort_size]]
+            tox = [
+                1 if x < true_toxicities[dose_level - 1] else 0
+                for x in tolerances[i : i + cohort_size]
+            ]
             cases = zip([dose_level] * cohort_size, tox)
             dose_level = design.update(cases)
             i += cohort_size
 
     # Report findings
     report = OrderedDict()
-    report['TrueToxicities'] = iterable_to_json(true_toxicities)
+    report["TrueToxicities"] = iterable_to_json(true_toxicities)
     if conduct_trial:
-        report['RecommendedDose'] = atomic_to_json(design.next_dose())
-        report['TrialStatus'] = atomic_to_json(design.status())
-        report['Doses'] = iterable_to_json(design.doses())
-        report['Toxicities'] = iterable_to_json(design.toxicities())
+        report["RecommendedDose"] = atomic_to_json(design.next_dose())
+        report["TrialStatus"] = atomic_to_json(design.status())
+        report["Doses"] = iterable_to_json(design.doses())
+        report["Toxicities"] = iterable_to_json(design.toxicities())
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
         try:
@@ -511,17 +557,23 @@ def simulate_dose_finding_trial(design, true_toxicities, tolerances=None, cohort
             tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
-            report['FullyInformedToxicityCurve'] = iterable_to_json(tox_hat)
-            report['OptimalAllocation'] = atomic_to_json(optimal_allocation)
+            report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)
+            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)
         except NotImplementedError:
             pass
 
     return report
 
 
-def simulate_dose_finding_trials(design_map, true_toxicities, tolerances=None, cohort_size=1,
-                                 conduct_trial=1, calculate_optimal_decision=1):
-    """ Simulate multiple toxicity-driven dose finding trials (like CRM, 3+3, etc) from the same patient data.
+def simulate_dose_finding_trials(
+    design_map,
+    true_toxicities,
+    tolerances=None,
+    cohort_size=1,
+    conduct_trial=1,
+    calculate_optimal_decision=1,
+):
+    """Simulate multiple toxicity-driven dose finding trials (like CRM, 3+3, etc) from the same patient data.
 
     This method lets you see how different designs handle a single common set of patient outcomes.
 
@@ -552,20 +604,27 @@ def simulate_dose_finding_trials(design_map, true_toxicities, tolerances=None, c
         tolerances = uniform().rvs(max_size)
     else:
         if len(tolerances) < max_size:
-            logging.warn('You have provided fewer tolerances than maximum number of patients on trial. Beware errors!')
+            logging.warn(
+                "You have provided fewer tolerances than maximum number of patients on trial. Beware errors!"
+            )
 
     report = OrderedDict()
-    report['TrueToxicities'] = iterable_to_json(true_toxicities)
-    for label, design in design_map.iteritems():
-        design_sim = simulate_dose_finding_trial(design, true_toxicities, tolerances=tolerances,
-                                                 cohort_size=cohort_size, conduct_trial=conduct_trial,
-                                                 calculate_optimal_decision=calculate_optimal_decision)
+    report["TrueToxicities"] = iterable_to_json(true_toxicities)
+    for label, design in design_map.items():
+        design_sim = simulate_dose_finding_trial(
+            design,
+            true_toxicities,
+            tolerances=tolerances,
+            cohort_size=cohort_size,
+            conduct_trial=conduct_trial,
+            calculate_optimal_decision=calculate_optimal_decision,
+        )
         report[label] = design_sim
     return report
 
 
 def find_mtd(toxicity_target, scenario, strictly_lte=False, verbose=False):
-    """ Find the MTD in a list of toxicity probabilities and a target toxicity rate.
+    """Find the MTD in a list of toxicity probabilities and a target toxicity rate.
 
     :param toxicity_target: target probability of toxicity
     :type toxicity_target: float
@@ -600,32 +659,36 @@ def find_mtd(toxicity_target, scenario, strictly_lte=False, verbose=False):
         # Return exact match
         loc = scenario.index(toxicity_target) + 1
         if verbose:
-            print('MTD is %s' % loc)
+            print("MTD is %s" % loc)
         return loc
     else:
         if strictly_lte:
             if sum(np.array(scenario) <= toxicity_target) == 0:
                 # Infeasible scenario
                 if verbose:
-                    print('All doses are too toxic')
+                    print("All doses are too toxic")
                 return 0
             else:
                 # Return highest tox no greater than target
-                objective = np.where(np.array(scenario)<=toxicity_target, toxicity_target-np.array(scenario), np.inf)
+                objective = np.where(
+                    np.array(scenario) <= toxicity_target,
+                    toxicity_target - np.array(scenario),
+                    np.inf,
+                )
                 loc = np.argmin(objective) + 1
                 if verbose:
-                    print('Highest dose below MTD is %s' % loc)
+                    print("Highest dose below MTD is %s" % loc)
                 return loc
         else:
             # Return nearest
             loc = np.argmin(np.abs(np.array(scenario) - toxicity_target)) + 1
             if verbose:
-                print('Dose nearest to MTD is %s' % loc)
+                print("Dose nearest to MTD is %s" % loc)
             return loc
 
 
 def summarise_dose_finding_sims(sims, label, num_doses, filter={}):
-    """ Summarise a list of dose-finding simulations for doses recommended, doses given and trial outcome.
+    """Summarise a list of dose-finding simulations for doses recommended, doses given and trial outcome.
 
     :param sims: list of JSON reps of dose-finding trial outcomes
     :type sims: list
@@ -650,29 +713,41 @@ def summarise_dose_finding_sims(sims, label, num_doses, filter={}):
         sims = filter_sims(sims, filter)
 
     # Recommended Doses
-    doses = [x[label]['RecommendedDose'] for x in sims]
-    df_doses = pd.DataFrame({'RecN': pd.Series(doses).value_counts()}, index=range(-1, num_doses+1))
+    doses = [x[label]["RecommendedDose"] for x in sims]
+    df_doses = pd.DataFrame(
+        {"RecN": pd.Series(doses).value_counts()}, index=range(-1, num_doses + 1)
+    )
     df_doses.RecN[np.isnan(df_doses.RecN)] = 0
-    df_doses['Rec%'] = 1.0 * df_doses['RecN'] / df_doses['RecN'].sum()
+    df_doses["Rec%"] = 1.0 * df_doses["RecN"] / df_doses["RecN"].sum()
     # Given Doses
-    doses_given = to_1d_list([x[label]['Doses'] for x in sims])
-    df_doses = df_doses.join(pd.DataFrame({'PatN': pd.Series(doses_given).value_counts()}))
+    doses_given = to_1d_list([x[label]["Doses"] for x in sims])
+    df_doses = df_doses.join(
+        pd.DataFrame({"PatN": pd.Series(doses_given).value_counts()})
+    )
     df_doses.PatN[np.isnan(df_doses.PatN)] = 0
-    df_doses['Pat%'] = 1.0 * df_doses['PatN'] / df_doses['PatN'].sum()
-    df_doses['MeanPat']= 1.0 * df_doses['PatN'] / len(sims)
+    df_doses["Pat%"] = 1.0 * df_doses["PatN"] / df_doses["PatN"].sum()
+    df_doses["MeanPat"] = 1.0 * df_doses["PatN"] / len(sims)
     # Order
-    df_doses = df_doses.loc[range(-1, num_doses+1)]
+    df_doses = df_doses.loc[range(-1, num_doses + 1)]
 
     # Trial Outcomes
-    statuses = [x[label]['TrialStatus'] for x in sims]
-    df_statuses = pd.DataFrame({'N': pd.Series(statuses).value_counts()})
-    df_statuses['%'] = 1.0 * df_statuses['N'] / df_statuses['N'].sum()
+    statuses = [x[label]["TrialStatus"] for x in sims]
+    df_statuses = pd.DataFrame({"N": pd.Series(statuses).value_counts()})
+    df_statuses["%"] = 1.0 * df_statuses["N"] / df_statuses["N"].sum()
 
-    return df_doses, df_statuses, np.array(doses), np.array(doses_given), np.array(statuses)
+    return (
+        df_doses,
+        df_statuses,
+        np.array(doses),
+        np.array(doses_given),
+        np.array(statuses),
+    )
 
 
-def batch_summarise_dose_finding_sims(sims, label, num_doses, dimensions=None, func1=None):
-    """ Batch summarise a list of dose-finding simulations.
+def batch_summarise_dose_finding_sims(
+    sims, label, num_doses, dimensions=None, func1=None
+):
+    """Batch summarise a list of dose-finding simulations.
 
     The dimensions along which to group and simmarise the simulations are determined via dimensions (see below)
 
@@ -695,35 +770,45 @@ def batch_summarise_dose_finding_sims(sims, label, num_doses, dimensions=None, f
     """
     if dimensions is not None:
         var_map, params = dimensions
-        z = [(k, params[v]) for k,v in var_map.iteritems()]
+        z = [(k, params[v]) for k, v in var_map.items()]
         labels, val_arrays = zip(*z)
         param_combinations = list(product(*val_arrays))
         for param_combo in param_combinations:
             for lab, vals in zip(labels, param_combo):
-                print('{}: {}'.format(lab, vals))
+                print(f"{lab}: {vals}")
             these_params = dict(zip(labels, param_combo))
-            abc = summarise_dose_finding_sims(sims, label, num_doses, filter=these_params)
+            abc = summarise_dose_finding_sims(
+                sims, label, num_doses, filter=these_params
+            )
             if func1:
                 print(func1(abc[0], these_params))
-                print('\n')
-                print('\n')
+                print("\n")
+                print("\n")
             else:
-                print('\n')
+                print("\n")
                 print(abc[0])
-                print('\n')
+                print("\n")
                 print(abc[1])
-                print('\n')
+                print("\n")
     else:
         abc = summarise_dose_finding_sims(sims, label, num_doses)
         print(abc[0])
-        print('\n')
+        print("\n")
         print(abc[1])
-        print('\n')
+        print("\n")
 
 
-def dose_transition_pathways_to_json(trial, next_dose, cohort_sizes, cohort_number=1, cases_already_observed=[],
-                                     custom_output_func=None, verbose=False, **kwargs):
-    """ Calculate the dose-transition pathways of a DoseFindingTrial.
+def dose_transition_pathways_to_json(
+    trial,
+    next_dose,
+    cohort_sizes,
+    cohort_number=1,
+    cases_already_observed=[],
+    custom_output_func=None,
+    verbose=False,
+    **kwargs,
+):
+    """Calculate the dose-transition pathways of a DoseFindingTrial.
 
     :param trial: subclass of DoseFindingTrial that will determine the dose path
     :type trial: clintrials.dosefinding.DoseFindingTrial
@@ -756,15 +841,17 @@ def dose_transition_pathways_to_json(trial, next_dose, cohort_sizes, cohort_numb
         cohort_size = cohort_sizes[0]
 
         path_outputs = []
-        possible_dlts = range(0, cohort_size+1)
+        possible_dlts = range(0, cohort_size + 1)
 
         for i, num_dlts in enumerate(possible_dlts):
 
             # Invoke dose-decision
-            cohort_cases = [(next_dose, 1)] * num_dlts + [(next_dose, 0)] * (cohort_size - num_dlts)
+            cohort_cases = [(next_dose, 1)] * num_dlts + [(next_dose, 0)] * (
+                cohort_size - num_dlts
+            )
             cases = cases_already_observed + cohort_cases
             if verbose:
-                print('Running %s' % cases)
+                print("Running %s" % cases)
             trial.reset()
             # print 'next_dose is', trial.next_dose()
             trial.set_next_dose(next_dose)
@@ -778,29 +865,45 @@ def dose_transition_pathways_to_json(trial, next_dose, cohort_sizes, cohort_numb
             # mtd = trial.update(cohort_cases, **kwargs)
 
             # Collect output
-            bag_o_tricks = OrderedDict([('Pat{}.{}'.format(cohort_number, j+1), 'Tox' if tox else 'No Tox')
-                                        for (j, (dose, tox)) in enumerate(cohort_cases)])
+            bag_o_tricks = OrderedDict(
+                [
+                    (f"Pat{cohort_number}.{j+1}", "Tox" if tox else "No Tox")
+                    for (j, (dose, tox)) in enumerate(cohort_cases)
+                ]
+            )
 
-            bag_o_tricks.update(OrderedDict([
-                        ('DoseGiven', atomic_to_json(next_dose)),
-                        ('RecommendedDose', atomic_to_json(mtd)),
-                        ('CohortSize', cohort_size),
-                        ('NumTox', atomic_to_json(num_dlts)),
-                    ]))
+            bag_o_tricks.update(
+                OrderedDict(
+                    [
+                        ("DoseGiven", atomic_to_json(next_dose)),
+                        ("RecommendedDose", atomic_to_json(mtd)),
+                        ("CohortSize", cohort_size),
+                        ("NumTox", atomic_to_json(num_dlts)),
+                    ]
+                )
+            )
             if custom_output_func:
                 bag_o_tricks.update(custom_output_func(trial))
 
             # Recurse subsequent cohorts
-            further_paths = dose_transition_pathways_to_json(trial, next_dose=mtd, cohort_sizes=cohort_sizes[1:],
-                                                     cohort_number=cohort_number+1, cases_already_observed=cases,
-                                                     custom_output_func=custom_output_func, verbose=verbose,
-                                                     **kwargs)
+            further_paths = dose_transition_pathways_to_json(
+                trial,
+                next_dose=mtd,
+                cohort_sizes=cohort_sizes[1:],
+                cohort_number=cohort_number + 1,
+                cases_already_observed=cases,
+                custom_output_func=custom_output_func,
+                verbose=verbose,
+                **kwargs,
+            )
             if further_paths:
-                bag_o_tricks['Next'] = further_paths
+                bag_o_tricks["Next"] = further_paths
 
             path_outputs.append(bag_o_tricks)
 
         return path_outputs
+
+
 dose_transition_pathways = dose_transition_pathways_to_json
 
 
@@ -808,14 +911,14 @@ def print_dtps(dtps, indent=0, dose_label_func=None):
     if dose_label_func is None:
         dose_label_func = lambda x: str(x)
     for x in dtps:
-        num_tox = x['NumTox']
-        mtd = x['RecommendedDose']
+        num_tox = x["NumTox"]
+        mtd = x["RecommendedDose"]
 
-        template_txt = '\t' * indent + '{} -> Dose {}'
+        template_txt = "\t" * indent + "{} -> Dose {}"
         print(template_txt.format(num_tox, dose_label_func(mtd)))
 
-        if 'Next' in x:
-            print_dtps(x['Next'], indent=indent+1, dose_label_func=dose_label_func)
+        if "Next" in x:
+            print_dtps(x["Next"], indent=indent + 1, dose_label_func=dose_label_func)
 
 
 def _dtps_to_rows(dtps, dose_label_func=None, pre=[]):
@@ -824,12 +927,14 @@ def _dtps_to_rows(dtps, dose_label_func=None, pre=[]):
     rows = []
     for x in dtps:
         this_row = copy.copy(pre)
-        num_tox = x['NumTox']
-        mtd = dose_label_func(x['RecommendedDose'])
+        num_tox = x["NumTox"]
+        mtd = dose_label_func(x["RecommendedDose"])
         this_row.extend([num_tox, mtd])
 
-        if 'Next' in x:
-            news_rows = _dtps_to_rows(x['Next'], dose_label_func=dose_label_func, pre=this_row)
+        if "Next" in x:
+            news_rows = _dtps_to_rows(
+                x["Next"], dose_label_func=dose_label_func, pre=this_row
+            )
             rows.extend(news_rows)
         else:
             rows.append(this_row)
@@ -838,6 +943,7 @@ def _dtps_to_rows(dtps, dose_label_func=None, pre=[]):
 
 def dtps_to_pandas(dtps, dose_label_func=None):
     import pandas as pd
+
     if dose_label_func is None:
         dose_label_func = lambda x: str(x)
     rows = _dtps_to_rows(dtps, dose_label_func=dose_label_func)
@@ -845,7 +951,7 @@ def dtps_to_pandas(dtps, dose_label_func=None):
     ncols = df.shape[1]
     cols = []
     for i in range(1, 1 + int(ncols / 2)):
-        cols.extend(['Cohort {} DLTs'.format(i), 'Cohort {} Dose'.format(i+1)])
+        cols.extend([f"Cohort {i} DLTs", f"Cohort {i+1} Dose"])
     df.columns = cols
 
     return df

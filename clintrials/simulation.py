@@ -1,16 +1,16 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
 
-from collections import OrderedDict
-from datetime import datetime
 import glob
 import itertools
 import json
+from collections import OrderedDict
+from datetime import datetime
 
 
 def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
-    """ Run simulations using a delegate function.
+    """Run simulations using a delegate function.
 
     :param sim_func: Delegate function to be called to yield single simulation.
     :type sim_func: func
@@ -37,16 +37,16 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
         sims += sims1
         if out_file:
             try:
-                with open(out_file, 'w') as outfile:
+                with open(out_file, "w") as outfile:
                     json.dump(sims, outfile)
             except Exception as e:
-                print('Error writing: %s' % e)
-        print('{} {} {}'.format(j, datetime.now(), len(sims)))
+                print("Error writing: %s" % e)
+        print(f"{j} {datetime.now()} {len(sims)}")
     return sims
 
 
 def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
-    """ Run simulations using a function and a ParameterSpace.
+    """Run simulations using a function and a ParameterSpace.
 
     :param sim_func: function to be called to yield single simulation. Parameters are provided via ps as unpacked kwargs
     :type sim_func: func
@@ -77,23 +77,21 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
         sims += sims1
         if out_file:
             try:
-                with open(out_file, 'w') as outfile:
+                with open(out_file, "w") as outfile:
                     json.dump(sims, outfile)
             except Exception as e:
-                print('Error writing: %s' % e)
-        print('{} {} {}'.format(j, datetime.now(), len(sims)))
+                print("Error writing: %s" % e)
+        print(f"{j} {datetime.now()} {len(sims)}")
     return sims
 
 
 def _open_json_local(file_loc):
-    return json.load(open(file_loc, 'r'))
+    return json.load(open(file_loc))
 
 
 def _open_json_url(url):
-    try:
-        from urllib2 import urlopen
-    except:
-        from urllib import urlopen
+    from urllib.request import urlopen
+
     return json.load(urlopen(url))
 
 
@@ -102,14 +100,14 @@ def go_fetch_json_sims(file_pattern):
     sims = []
     for f in files:
         sub_sims = _open_json_local(f)
-        print('{} {}'.format(f, len(sub_sims)))
+        print(f"{f} {len(sub_sims)}")
         sims += sub_sims
-    print('Fetched %s sims' % len(sims))
+    print("Fetched %s sims" % len(sims))
     return sims
 
 
 def filter_sims(sims, filter):
-    """ Filter a list of simulations.
+    """Filter a list of simulations.
 
     :param sims: list of simulations (probably in JSON format)
     :type sims: list
@@ -118,7 +116,7 @@ def filter_sims(sims, filter):
 
     """
 
-    for key, val in filter.iteritems():
+    for key, val in filter.items():
         # In JSON, tuples are masked as lists. In this filter, we treat them as equivalent:
         if isinstance(val, (tuple)):
             sims = [x for x in sims if x[key] == val or x[key] == list(val)]
@@ -128,7 +126,7 @@ def filter_sims(sims, filter):
 
 
 def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
-    """ Summarise a list of simulations.
+    """Summarise a list of simulations.
 
     Method partitions simulations into subsets that used the same set of parameters, and then invokes
     a collection of summary functions on each subset; outputs a pandas DataFrame with a multi-index.
@@ -164,19 +162,26 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
         these_params = dict(zip(labels, param_combo))
         these_sims = filter_sims(sims, these_params)
         if len(these_sims):
-            these_metrics = dict([(label, func(these_sims, these_params)) for label, func in func_map.iteritems()])
+            these_metrics = {
+                label: func(these_sims, these_params)
+                for label, func in func_map.items()
+            }
             index_tuples.append(param_combo)
             row_tuples.append(these_metrics)
     if len(row_tuples):
         if to_pandas:
             import pandas as pd
-            return pd.DataFrame(row_tuples, pd.MultiIndex.from_tuples(index_tuples, names=var_names))
+
+            return pd.DataFrame(
+                row_tuples, pd.MultiIndex.from_tuples(index_tuples, names=var_names)
+            )
         else:
             # TODO
             return row_tuples, index_tuples
     else:
         if to_pandas:
             import pandas as pd
+
             return pd.DataFrame(columns=func_map.keys())
         else:
             # TODO
@@ -203,11 +208,11 @@ def map_reduce_files(files, map_func, reduce_func):
         x = map(map_func, files)
         return reduce(reduce_func, x)
     else:
-        raise TypeError('No files')
+        raise TypeError("No files")
 
 
 def invoke_map_reduce_function_map(sims, function_map):
-    """ Invokes map/reduce pattern for many items on a list of simulations.
+    """Invokes map/reduce pattern for many items on a list of simulations.
     Functions are specified as "item name" -> (map_func, reduce_func) pairs in function_map.
     In each iteration, map_func is invoked on sims, and then reduce_func is invoked on result.
     As usual, map_func takes iterable as single argument and reduce_func takes x and y as args.
@@ -216,7 +221,7 @@ def invoke_map_reduce_function_map(sims, function_map):
     """
 
     response = OrderedDict()
-    for item, function_tuple in function_map.iteritems():
+    for item, function_tuple in function_map.items():
         map_func, reduce_func = function_tuple
         x = reduce(reduce_func, map(map_func, sims))
         response[item] = x
@@ -225,7 +230,7 @@ def invoke_map_reduce_function_map(sims, function_map):
 
 
 def reduce_maps_by_summing(x, y):
-    """ Reduces maps x and y by adding the value of every item in x to matching value in y.
+    """Reduces maps x and y by adding the value of every item in x to matching value in y.
 
     :param x: first map
     :type x: dict
@@ -245,7 +250,7 @@ def reduce_maps_by_summing(x, y):
 # I wrote the functions below during a specific analysis.
 # TODO: Do they make sense in a general package?
 def partition_and_aggregate(sims, ps, function_map):
-    """ Function partitions simulations into subsets that used the same set of parameters,
+    """Function partitions simulations into subsets that used the same set of parameters,
     and then invokes a collection of map/reduce function pairs on each subset.
 
     :param sims: list of simulations (probably in JSON format)
@@ -270,13 +275,13 @@ def partition_and_aggregate(sims, ps, function_map):
         these_params = dict(zip(labels, param_combo))
         these_sims = filter_sims(sims, these_params)
 
-        out[param_combo] =  invoke_map_reduce_function_map(these_sims, function_map)
+        out[param_combo] = invoke_map_reduce_function_map(these_sims, function_map)
 
     return out
 
 
 def fetch_partition_and_aggregate(f, ps, function_map, verbose=False):
-    """ Function loads JSON sims in file f and then hands off to partition_and_aggregate.
+    """Function loads JSON sims in file f and then hands off to partition_and_aggregate.
 
     :param f: file location
     :type f: str
@@ -292,12 +297,12 @@ def fetch_partition_and_aggregate(f, ps, function_map, verbose=False):
 
     sims = _open_json_local(f)
     if verbose:
-        print('Fetched {} sims from {}'.format(len(sims), f))
+        print(f"Fetched {len(sims)} sims from {f}")
     return partition_and_aggregate(sims, ps, function_map)
 
 
 def reduce_product_of_two_files_by_summing(x, y):
-    """ Reduce the summaries of two files by summing. """
+    """Reduce the summaries of two files by summing."""
     response = OrderedDict()
     for k in x.keys():
         response[k] = reduce_maps_by_summing(x[k], y[k])
@@ -305,7 +310,7 @@ def reduce_product_of_two_files_by_summing(x, y):
 
 
 def multiindex_dataframe_from_tuple_map(x, labels):
-    """ Create pandas.DataFrame from map of param-tuple -> value
+    """Create pandas.DataFrame from map of param-tuple -> value
 
     :param x: map of parameter-tuple -> value pairs
     :type x: dict
@@ -316,6 +321,7 @@ def multiindex_dataframe_from_tuple_map(x, labels):
 
     """
     import pandas as pd
-    k, v = zip(*[(k, v) for (k, v) in x.iteritems()])
+
+    k, v = zip(*[(k, v) for (k, v) in x.items()])
     i = pd.MultiIndex.from_tuples(k, names=labels)
     return pd.DataFrame(list(v), index=i)
