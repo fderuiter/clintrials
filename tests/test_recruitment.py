@@ -1,6 +1,8 @@
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
+import numpy as np
+import pytest
 from numpy.testing import assert_almost_equal
 
 from clintrials.recruitment import (
@@ -175,3 +177,14 @@ def test_quadrilateral_recruitment_stream_9():
     assert_almost_equal(s.next(), 275.0)
     s.reset()
     assert_almost_equal(s.next(), 144.72135954999578)
+
+
+def test_linearly_interpolate_y_when_t1_equals_t0_returns_nan():
+    s = QuadrilateralRecruitmentStream(1.0, 1.0, [])
+    assert np.isnan(s._linearly_interpolate_y(1, 0, 0, 1, 1))
+
+
+def test_invert_negative_discriminant_raises_typeerror():
+    s = QuadrilateralRecruitmentStream(1.0, 1.0, [])
+    with pytest.raises(TypeError):
+        s._invert(0, 1, 1, 0, 1)
