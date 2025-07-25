@@ -1,7 +1,7 @@
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-from nose.tools import assert_almost_equal
+from numpy.testing import assert_almost_equal
 
 from clintrials.recruitment import (
     ConstantRecruitmentStream,

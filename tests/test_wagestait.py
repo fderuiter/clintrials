@@ -4,7 +4,6 @@ __contact__ = "kristian.brock@gmail.com"
 """ Tests of the clintrials.dosefindings.wagestait module. """
 
 import numpy as np
-from nose.tools import with_setup
 from scipy.stats import norm
 
 from clintrials.common import empiric, inverse_empiric, inverse_logistic, logistic
@@ -19,7 +18,6 @@ def teardown_func():
     pass
 
 
-@with_setup(setup_func, teardown_func)
 def test_wages_tait_1():
 
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]

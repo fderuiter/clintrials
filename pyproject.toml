@@ -27,7 +27,7 @@ scipy = ">=0.15.1"
 statsmodels = ">=0.6.1"
 
 [tool.poetry.dev-dependencies]
-nose = "*"
+pytest = "^8.2.0"
 black = "^25.1.0"
 ruff = "^0.12.5"
 isort = "^6.0.1"
@@ -71,3 +71,7 @@ ignore = [
     "E713",
 ]
 exclude = ["clintrials/phase2/bebop/peps2v1.py", "tutorials/*.ipynb"]
+
+[tool.pytest.ini_options]
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
