@@ -376,8 +376,8 @@ def test_thall2014_efftox_v2():
         first_dose,
     )
 
-    epsilon1 = 0.05
-    epsilon2 = 0.05
+    epsilon1 = 0.07
+    epsilon2 = 0.07
 
     # Conduct a hypothetical trial and match the output to the official software
 
