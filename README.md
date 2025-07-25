@@ -116,3 +116,12 @@ Run the test suite with:
 ```bash
 pytest -q
 ```
+
+### Building the documentation
+
+Install the optional docs dependencies and run Sphinx:
+
+```bash
+pip install -e .[docs]
+make -C docs html
+```

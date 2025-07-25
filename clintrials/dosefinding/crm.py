@@ -319,42 +319,40 @@ def crm(
     estimate_var=False,
     plugin_mean=True,
 ):
-    """
-    Run CRM calculation on observed dosages and toxicities.
+    """Run CRM calculation on observed dosages and toxicities.
 
-    This method is similar to Ken Cheung's method in the R-package dfcrm. Take a look at that
-    or his book for more information.
+    Parameters
+    ----------
+    prior : list
+        Prior probabilities of toxicity at each dose, from least toxic to most.
+    target : float
+        Target toxicity rate.
+    toxicities : list
+        Observed toxicity events. Use ``1`` if toxicity observed, else ``0``.
+    dose_levels : list
+        Given 1-based dose levels. Same length as ``toxicities``.
+    intercept : float
+        Intercept parameter, only used with the logistic method.
+    F_func : Callable
+        Link function to use (e.g., :func:`logistic`).
+    inverse_F : Callable
+        Inverse link function.
+    beta_dist : scipy.stats.rv_continuous
+        Prior distribution for the beta parameter.
+    method : str
+        One of ``"bayes"`` or ``"mle"``.
+    use_quick_integration : bool
+        If ``True`` use a faster approximate integral.
+    estimate_var : bool
+        If ``True`` estimate the posterior variance of beta.
+    plugin_mean : bool
+        If ``True`` plug the beta estimate into the link function.
 
-    Params:
-    :param prior: list of prior probabilities of toxicity at each dose, from least toxic to most.
-    :type prior: list
-    :param target: target toxicity rate
-    :type target: float
-    :param toxicities: observed toxicity events. Use 1 if toxicity observed, else 0. Congruent to codified_doses_given.
-    :type toxicities: list
-    :param dose_levels: list of given 1-based dose levels, NOT the actual doses. See Cheung. Same length as toxicities.
-    :type dose_levels: list
-    :param intercept: the second parameter to F, the intercept. Only pertinent under logistic method.
-    :type intercept: float
-    :param F_func: the link function and inverse for CRM method, e.g. logistic
-    :type F_func: func
-    :param inverse_F: the inverse link function for CRM method, e.g. inverse_logistic
-    :type inverse_F: func
-    :param beta_dist: prior distibution for beta parameter, assumes interface like scipy.stats.rv_continuous
-    :type beta_dist: scipy.stats.rv_continuous
-    :param method: one of "bayes" or "mle"
-    :type method: str
-    :param use_quick_integration: True to use a faster but slightly less accurate estimate of the integrals;
-                                  False to use a slower but more accurate method.
-    :type use_quick_integration: bool
-    :param estimate_var: True to estimate the posterior variance of beta
-    :type estimate_var: bool
-    :param plugin_mean: True to estimate toxicity curve by plugging beta estimate (posterior mean or mle) into function;
-                        False to estimate using full Bayesian integral (only applies when method="bayes")
-    :type plugin_mean: bool
-    :return: 4-tuple, (recommended dose index (1-based), beta hat estimate, beta variance estimate, Pr(Tox) estimates)
-    :rtype: tuple
-
+    Returns
+    -------
+    tuple
+        ``(recommended_dose_index, beta_hat, beta_var, prob_tox)``.
+    
     I omitted Ken's parameters:
     n=length(level), dosename=NULL, include=1:n, pid=1:n, conf.level=0.9, model.detail=TRUE, patient.detail=TRUE
 
@@ -674,9 +672,10 @@ class CRM(DoseFindingTrial):
     def optimal_decision(self, prob_tox):
         """Get the optimal dose choice for a given dose-toxicity curve.
 
-        .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own specific tolerances by
-        invoking the dose decicion on the complete (and unknowable) toxicity curve.
+        Ken Cheung (2014) noted that the optimal behaviour of a dose-finding
+        design can be calculated for a given set of patients with their own
+        specific tolerances by invoking the dose decision on the complete (and
+        unknowable) toxicity curve.
 
         :param prob_tox: collection of toxicity probabilities
         :type prob_tox: list
