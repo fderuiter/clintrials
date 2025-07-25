@@ -5,8 +5,11 @@ __contact__ = "kristian.brock@gmail.com"
 import glob
 import itertools
 import json
+import logging
 from collections import OrderedDict
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
@@ -40,8 +43,8 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
                 with open(out_file, "w") as outfile:
                     json.dump(sims, outfile)
             except Exception as e:
-                print("Error writing: %s" % e)
-        print(f"{j} {datetime.now()} {len(sims)}")
+                logger.error("Error writing: %s", e)
+        logger.info(f"{j} {datetime.now()} {len(sims)}")
     return sims
 
 
@@ -80,8 +83,8 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
                 with open(out_file, "w") as outfile:
                     json.dump(sims, outfile)
             except Exception as e:
-                print("Error writing: %s" % e)
-        print(f"{j} {datetime.now()} {len(sims)}")
+                logger.error("Error writing: %s", e)
+        logger.info(f"{j} {datetime.now()} {len(sims)}")
     return sims
 
 
@@ -100,9 +103,9 @@ def go_fetch_json_sims(file_pattern):
     sims = []
     for f in files:
         sub_sims = _open_json_local(f)
-        print(f"{f} {len(sub_sims)}")
+        logger.info("%s %s", f, len(sub_sims))
         sims += sub_sims
-    print("Fetched %s sims" % len(sims))
+    logger.info("Fetched %s sims", len(sims))
     return sims
 
 
@@ -297,7 +300,7 @@ def fetch_partition_and_aggregate(f, ps, function_map, verbose=False):
 
     sims = _open_json_local(f)
     if verbose:
-        print(f"Fetched {len(sims)} sims from {f}")
+        logger.info("Fetched %s sims from %s", len(sims), f)
     return partition_and_aggregate(sims, ps, function_map)
 
 

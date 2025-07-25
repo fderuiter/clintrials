@@ -12,3 +12,8 @@ __all__ = [
     "tte",
     "util",
 ]
+
+import logging
+
+# Attach a NullHandler to avoid logging warnings on import
+logging.getLogger(__name__).addHandler(logging.NullHandler())

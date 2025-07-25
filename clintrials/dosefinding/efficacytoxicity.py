@@ -18,6 +18,9 @@ from clintrials.util import (
 # from clintrials.simulation import filter_sims
 
 
+logger = logging.getLogger(__name__)
+
+
 # Joint Phase I/II, Assessing efficacy and toxicity
 class EfficacyToxicityDoseFindingTrial(metaclass=abc.ABCMeta):
     """This is the base class for a dose-finding trial that jointly monitors toxicity and efficacy.
@@ -612,7 +615,7 @@ def dose_transition_pathways(
             cohort_cases = [(next_dose, x[0], x[1]) for x in path]
             cases = cases_already_observed + cohort_cases
             if verbose:
-                print("Running %s" % cases)
+                logger.debug("Running %s", cases)
             trial.reset()
             obd = trial.update(cases, **kwargs)
             # Collect output
@@ -682,7 +685,9 @@ def print_dtps(dtps, indent=0, dose_label_func=None):
             template_txt = "\t" * indent + "{} -> Dose {}, Superiority={} * tentative *"
         else:
             template_txt = "\t" * indent + "{} -> Dose {}, Superiority={}"
-        print(template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2)))
+        logger.info(
+            template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2))
+        )
 
         if "Next" in x:
             print_dtps(x["Next"], indent=indent + 1, dose_label_func=dose_label_func)
@@ -712,7 +717,7 @@ def print_dtps_verbose(dtps, indent=0, dose_label_func=None):
             "\t" * indent
             + "{} -> Dose {}, Sup={}, Util={}, Pr(Acc Eff)={}, Pr(Acc Tox)={}"
         )
-        print(
+        logger.info(
             template_txt.format(
                 path,
                 dose_label_func(obd),

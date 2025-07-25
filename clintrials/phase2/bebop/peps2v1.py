@@ -33,6 +33,8 @@ import pandas as pd
 from clintrials.stats import ProbabilityDensitySample, chi_squ_test, or_test
 from clintrials.util import atomic_to_json, correlated_binary_outcomes, iterable_to_json
 
+logger = logging.getLogger(__name__)
+
 
 def pi_t(disease_status, mutation_status, alpha0=0, alpha1=0, alpha2=0):
     z = alpha0 + alpha1 * disease_status + alpha2 * mutation_status
@@ -504,7 +506,7 @@ def simulate_peps2_trial_batch(
             log_every=0,
         )
         sims = sims + these_sims
-        print("Ran batch", i, datetime.datetime.now())
+        logger.info("Ran batch %s %s", i, datetime.datetime.now())
 
         sims_object = OrderedDict()
         sims_object["Parameters"] = peps2_parameters_report(
@@ -604,7 +606,7 @@ def simulate_peps2_trial(
     for i in range(num_sims):
 
         if log_every > 0 and i % log_every == 0:
-            print("Iteration", i, datetime.datetime.now())
+            logger.debug("Iteration %s %s", i, datetime.datetime.now())
 
         sim_output = OrderedDict()
 
@@ -743,10 +745,10 @@ def splice_sims(in_files_pattern, out_file=None):
     if len(files):
 
         sims = json.load(open(files[0]))
-        print("Fetched from", files[0])
+        logger.info("Fetched from %s", files[0])
         for f in files[1:]:
             sub_sims = json.load(open(f))
-            print("Fetched from", f)
+            logger.info("Fetched from %s", f)
             # Checks for homogeneity go here
             sims = _splice_sims(sims, sub_sims)
 
@@ -787,56 +789,56 @@ def tell_me_about_results(
         map(lambda x: x["BeBOP"]["Efficacy OR for PD-L1 +vs-"], sims["Simulations"])
     )
 
-    print("Params:")
-    print("Prob(Eff):", sims["Parameters"]["Prob(Efficacy)"])
-    print("Prob(Tox):", sims["Parameters"]["Prob(Toxicity)"])
-    print("Eff-Tox OR:", sims["Parameters"]["Efficacy-Toxicity OR"])
-    print("Prob(PreTreated):", sims["Parameters"]["Prob(Pretreated)"])
-    print("Prob(PD-L1+):", sims["Parameters"]["Prob(PD-L1+)"])
-    print()
-    print("NumSims:", num_sims)
-    print()
-    print("Events:")
-    print("Efficacy %:", 1.0 * sum(eff_by_group) / sum(n_by_group))
-    print("Toxicity %:", 1.0 * sum(tox_by_group) / sum(n_by_group))
-    print()
-    print("By Group:")
-    print("Size:", 1.0 * n_by_group / num_sims)
-    print("Efficacies:", 1.0 * eff_by_group / num_sims)
-    print("Efficacy %:", 1.0 * eff_by_group / n_by_group)
-    print("Toxicities:", 1.0 * tox_by_group / num_sims)
-    print("Toxicity %:", 1.0 * tox_by_group / n_by_group)
-    print()
-    print()
-    print("BeBOP:")
-    print()
-    print("Posterior:")
-    print(
-        "Prob(Eff):",
+    logger.info("Params:")
+    logger.info("Prob(Eff): %s", sims["Parameters"]["Prob(Efficacy)"])
+    logger.info("Prob(Tox): %s", sims["Parameters"]["Prob(Toxicity)"])
+    logger.info("Eff-Tox OR: %s", sims["Parameters"]["Efficacy-Toxicity OR"])
+    logger.info("Prob(PreTreated): %s", sims["Parameters"]["Prob(Pretreated)"])
+    logger.info("Prob(PD-L1+): %s", sims["Parameters"]["Prob(PD-L1+)"])
+    logger.info("")
+    logger.info("NumSims: %s", num_sims)
+    logger.info("")
+    logger.info("Events:")
+    logger.info("Efficacy %: %s", 1.0 * sum(eff_by_group) / sum(n_by_group))
+    logger.info("Toxicity %: %s", 1.0 * sum(tox_by_group) / sum(n_by_group))
+    logger.info("")
+    logger.info("By Group:")
+    logger.info("Size: %s", 1.0 * n_by_group / num_sims)
+    logger.info("Efficacies: %s", 1.0 * eff_by_group / num_sims)
+    logger.info("Efficacy %: %s", 1.0 * eff_by_group / n_by_group)
+    logger.info("Toxicities: %s", 1.0 * tox_by_group / num_sims)
+    logger.info("Toxicity %: %s", 1.0 * tox_by_group / n_by_group)
+    logger.info("")
+    logger.info("")
+    logger.info("BeBOP:")
+    logger.info("")
+    logger.info("Posterior:")
+    logger.info(
+        "Prob(Eff): %s",
         np.array(list(map(lambda x: x["BeBOP"]["ProbEff"], sims["Simulations"]))).mean(
             axis=0
         ),
     )
-    print(
-        "Prob(AccEff):",
+    logger.info(
+        "Prob(AccEff): %s",
         np.array(
             list(map(lambda x: x["BeBOP"]["ProbAccEff"], sims["Simulations"]))
         ).mean(axis=0),
     )
-    print(
-        "Prob(Tox):",
+    logger.info(
+        "Prob(Tox): %s",
         np.array(list(map(lambda x: x["BeBOP"]["ProbTox"], sims["Simulations"]))).mean(
             axis=0
         ),
     )
-    print(
-        "Prob(AccTox):",
+    logger.info(
+        "Prob(AccTox): %s",
         np.array(
             list(map(lambda x: x["BeBOP"]["ProbAccTox"], sims["Simulations"]))
         ).mean(axis=0),
     )
-    print()
-    print("Approve Treatment:")
+    logger.info("")
+    logger.info("Approve Treatment:")
     for eff_certainty, tox_certainty in product(
         eff_certainty_schemas, tox_certainty_schemas
     ):
@@ -846,13 +848,18 @@ def tell_me_about_results(
         accept_tox = np.array(
             map(lambda x: x["BeBOP"]["ProbAccTox"], sims["Simulations"])
         ) > np.array(tox_certainty)
-        print(eff_certainty, tox_certainty, (accept_eff & accept_tox).mean(axis=0))
-    print()
-    print("BeBOP Coverage:")
-    print("Pre-Treated:")
-    print("True OR:", pretreated_efficacy_or)
-    print(
-        "Coverage:",
+        logger.info(
+            "%s %s %s",
+            eff_certainty,
+            tox_certainty,
+            (accept_eff & accept_tox).mean(axis=0),
+        )
+    logger.info("")
+    logger.info("BeBOP Coverage:")
+    logger.info("Pre-Treated:")
+    logger.info("True OR: %s", pretreated_efficacy_or)
+    logger.info(
+        "Coverage: %s",
         np.mean(
             list(
                 map(
@@ -863,10 +870,10 @@ def tell_me_about_results(
             )
         ),
     )
-    print("PD-L1:")
-    print("True OR:", pdl1_efficacy_or)
-    print(
-        "Coverage:",
+    logger.info("PD-L1:")
+    logger.info("True OR: %s", pdl1_efficacy_or)
+    logger.info(
+        "Coverage: %s",
         np.mean(
             list(
                 map(
