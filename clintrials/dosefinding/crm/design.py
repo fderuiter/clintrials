@@ -172,7 +172,10 @@ def _get_beta_hat_bayes(
 def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=False):
     """Get maximum likelihood estimate of beta parameter (and optionally its variance) in MLE CRM.
 
-    TODO: how is estimating variance possible?
+    The estimate of :math:`\\widehat{\\operatorname{Var}}(\\hat\beta)` is obtained
+    from a finite-difference approximation to the observed Fisher information,
+    i.e. the negative second derivative of the log-likelihood evaluated at
+    ``beta_hat``.
 
     :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
     :type F: func
@@ -207,12 +210,28 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
         F, intercept, beta, codified_doses_given, toxs, log=True
     )
     res = minimize(f, x0=0, method="nelder-mead")
+    beta_hat = res.x[0]
+    var = None
     if estimate_var:
-        logging.warning(
-            "Variance estimation in MLE mode is not implemented because I do not think it makes sense. \
-        In dfcrm, Ken Cheung uses a method that I do not understand. It yields comparatively huge variances."
-        )
-    return res.x[0], None
+
+        def loglik(b):
+            return _compound_toxicity_likelihood(
+                F, intercept, b, codified_doses_given, toxs, log=True
+            )
+
+        eps = 1e-5
+        ll_p = loglik(beta_hat + eps)
+        ll_m = loglik(beta_hat - eps)
+        ll_0 = loglik(beta_hat)
+        info = -(ll_p - 2 * ll_0 + ll_m) / eps**2
+        if info <= 0:
+            logging.warning(
+                "Observed information non-positive; variance estimate unreliable"
+            )
+            var = np.inf
+        else:
+            var = 1.0 / info
+    return beta_hat, var
 
 
 def _estimate_prob_tox_from_param(F, intercept, beta_hat, dose_labels):
@@ -354,7 +373,7 @@ def crm(
     -------
     tuple
         ``(recommended_dose_index, beta_hat, beta_var, prob_tox)``.
-    
+
     I omitted Ken's parameters:
     n=length(level), dosename=NULL, include=1:n, pid=1:n, conf.level=0.9, model.detail=TRUE, patient.detail=TRUE
 
