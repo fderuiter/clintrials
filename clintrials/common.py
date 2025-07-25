@@ -8,19 +8,24 @@ import numpy as np
 
 
 def inverse_logit(x):
-    """Get the inverse logit function value:
+    """Return the inverse logit of ``x``.
 
-    :math:`\\frac{e^x}{e^x+1}`,
-    or equivalently, :math:`\\frac{1}{1 + e^{-x}}`
+    The inverse logit is ``1 / (1 + exp(-x))``.
 
-    :param x: x-variable
-    :type x: float
-    :return: Inverse logit function value.
-    :rtype: float
+    Parameters
+    ----------
+    x : float
+        Input value.
 
+    Returns
+    -------
+    float
+        Result of the inverse logit.
+
+    Examples
+    --------
     >>> inverse_logit(0)
     0.5
-
     """
 
     return 1 / (1 + np.exp(-x))

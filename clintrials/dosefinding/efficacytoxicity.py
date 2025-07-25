@@ -236,14 +236,15 @@ class EfficacyToxicityDoseFindingTrial(metaclass=abc.ABCMeta):
     def optimal_decision(self, prob_tox, prob_eff):
         """Get the optimal dose choice for a given dose-toxicity curve.
 
-        .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own specific tolerances by
-        invoking the dose decicion on the complete (and unknowable) toxicity and efficacy curves.
+        Ken Cheung (2014) noted that the optimal behaviour of a dose-finding
+        design can be calculated for a given set of patients with their own
+        specific tolerances by invoking the dose decision on the complete (and
+        unknowable) toxicity and efficacy curves.
 
         :param prob_tox: collection of toxicity probabilities
         :type prob_tox: list
-        :param prob_tox: collection of efficacy probabilities
-        :type prob_tox: list
+        :param prob_eff: collection of efficacy probabilities
+        :type prob_eff: list
         :return: the optimal (1-based) dose decision
         :rtype: int
 
