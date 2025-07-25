@@ -22,6 +22,8 @@ from clintrials.util import (
     to_1d_list,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class DoseFindingTrial(metaclass=abc.ABCMeta):
     """This is the base class for a dose-finding trial.
@@ -659,14 +661,14 @@ def find_mtd(toxicity_target, scenario, strictly_lte=False, verbose=False):
         # Return exact match
         loc = scenario.index(toxicity_target) + 1
         if verbose:
-            print("MTD is %s" % loc)
+            logger.info("MTD is %s", loc)
         return loc
     else:
         if strictly_lte:
             if sum(np.array(scenario) <= toxicity_target) == 0:
                 # Infeasible scenario
                 if verbose:
-                    print("All doses are too toxic")
+                    logger.warning("All doses are too toxic")
                 return 0
             else:
                 # Return highest tox no greater than target
@@ -677,13 +679,13 @@ def find_mtd(toxicity_target, scenario, strictly_lte=False, verbose=False):
                 )
                 loc = np.argmin(objective) + 1
                 if verbose:
-                    print("Highest dose below MTD is %s" % loc)
+                    logger.info("Highest dose below MTD is %s", loc)
                 return loc
         else:
             # Return nearest
             loc = np.argmin(np.abs(np.array(scenario) - toxicity_target)) + 1
             if verbose:
-                print("Dose nearest to MTD is %s" % loc)
+                logger.info("Dose nearest to MTD is %s", loc)
             return loc
 
 
@@ -775,27 +777,27 @@ def batch_summarise_dose_finding_sims(
         param_combinations = list(product(*val_arrays))
         for param_combo in param_combinations:
             for lab, vals in zip(labels, param_combo):
-                print(f"{lab}: {vals}")
+                logger.info("%s: %s", lab, vals)
             these_params = dict(zip(labels, param_combo))
             abc = summarise_dose_finding_sims(
                 sims, label, num_doses, filter=these_params
             )
             if func1:
-                print(func1(abc[0], these_params))
-                print("\n")
-                print("\n")
+                logger.info(func1(abc[0], these_params))
+                logger.info("")
+                logger.info("")
             else:
-                print("\n")
-                print(abc[0])
-                print("\n")
-                print(abc[1])
-                print("\n")
+                logger.info("")
+                logger.info(abc[0])
+                logger.info("")
+                logger.info(abc[1])
+                logger.info("")
     else:
         abc = summarise_dose_finding_sims(sims, label, num_doses)
-        print(abc[0])
-        print("\n")
-        print(abc[1])
-        print("\n")
+        logger.info(abc[0])
+        logger.info("")
+        logger.info(abc[1])
+        logger.info("")
 
 
 def dose_transition_pathways_to_json(
@@ -851,7 +853,7 @@ def dose_transition_pathways_to_json(
             )
             cases = cases_already_observed + cohort_cases
             if verbose:
-                print("Running %s" % cases)
+                logger.debug("Running %s", cases)
             trial.reset()
             # print 'next_dose is', trial.next_dose()
             trial.set_next_dose(next_dose)
@@ -915,7 +917,7 @@ def print_dtps(dtps, indent=0, dose_label_func=None):
         mtd = x["RecommendedDose"]
 
         template_txt = "\t" * indent + "{} -> Dose {}"
-        print(template_txt.format(num_tox, dose_label_func(mtd)))
+        logger.info(template_txt.format(num_tox, dose_label_func(mtd)))
 
         if "Next" in x:
             print_dtps(x["Next"], indent=indent + 1, dose_label_func=dose_label_func)

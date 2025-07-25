@@ -60,6 +60,7 @@ line_length = 88
 line-length = 88
 target-version = "py39"
 select = ["E", "F"]
+extend-select = ["T201"]
 ignore = [
     "E203",
     "E402",
