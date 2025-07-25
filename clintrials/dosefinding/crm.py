@@ -1,24 +1,24 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
-from collections import OrderedDict
 import logging
+from collections import OrderedDict
+
 import numpy as np
-from scipy.stats import norm
-from scipy.integrate import quad
 from numpy import trapz
+from scipy.integrate import quad
 from scipy.optimize import minimize
+from scipy.stats import norm
 
+from clintrials.common import empiric, inverse_empiric, inverse_logistic, logistic
 from clintrials.dosefinding import DoseFindingTrial
-from clintrials.common import empiric, logistic, inverse_empiric, inverse_logistic
 from clintrials.util import atomic_to_json, iterable_to_json
-
 
 _min_beta, _max_beta = -10, 10
 
 
 def _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False):
-    """ Calculate likelihood of toxicity outcome in CRM given link_func plus parameters and a dose & tox pair.
+    """Calculate likelihood of toxicity outcome in CRM given link_func plus parameters and a dose & tox pair.
 
     Note: this method can be Memoized to save iterations at the expense of memory.
     Also, this method allows vectorisation (in beta, importantly) if your link_func allows vectorisation.
@@ -39,11 +39,11 @@ def _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False):
     if log:
         return tox * np.log(p) + (1 - tox) * np.log(1 - p)
     else:
-        return p ** tox * (1 - p) ** (1 - tox)
+        return p**tox * (1 - p) ** (1 - tox)
 
 
 def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
-    """ Calculate the compound likelihood of many toxicity outcomes in CRM given many dose & tox pairs.
+    """Calculate the compound likelihood of many toxicity outcomes in CRM given many dose & tox pairs.
 
     Params:
     link_func, link function like logistic or empiric, taking params (dose_label, intercept, slope), returning a probability
@@ -58,7 +58,7 @@ def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
     """
 
     if len(doses) != len(toxs):
-        raise ValueError('doses and toxs should be same length.')
+        raise ValueError("doses and toxs should be same length.")
 
     if log:
         l = 0
@@ -72,9 +72,16 @@ def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
         return l
 
 
-def _get_beta_hat_bayes(F, intercept, codified_doses_given, toxs, beta_pdf, use_quick_integration=False,
-                        estimate_var=False):
-    """ Get posterior estimate of beta parameter (and optionally its variance) in Bayesian CRM.
+def _get_beta_hat_bayes(
+    F,
+    intercept,
+    codified_doses_given,
+    toxs,
+    beta_pdf,
+    use_quick_integration=False,
+    estimate_var=False,
+):
+    """Get posterior estimate of beta parameter (and optionally its variance) in Bayesian CRM.
 
     :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
     :type F: func
@@ -98,32 +105,64 @@ def _get_beta_hat_bayes(F, intercept, codified_doses_given, toxs, beta_pdf, use_
 
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
-        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))  # My own rule of thumb
+        n = int(
+            100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)
+        )  # My own rule of thumb
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
-        num_y = z * _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
-        denom_y = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
+        num_y = (
+            z
+            * _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs)
+            * beta_pdf(z)
+        )
+        denom_y = _compound_toxicity_likelihood(
+            F, intercept, z, codified_doses_given, toxs
+        ) * beta_pdf(z)
         num = trapz(num_y, z, dz)
         denom = trapz(denom_y, z, dz)
         beta_hat = num / denom
         if estimate_var:
-            num2_y = z ** 2 * _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
+            num2_y = (
+                z**2
+                * _compound_toxicity_likelihood(
+                    F, intercept, z, codified_doses_given, toxs
+                )
+                * beta_pdf(z)
+            )
             num2 = trapz(num2_y, z, dz)
             exp_x2 = num2 / denom
-            var = exp_x2 - beta_hat ** 2
+            var = exp_x2 - beta_hat**2
         else:
             var = None
     else:
         # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow
-        num = quad(lambda t: t * _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs) * \
-                             beta_pdf(t), -np.inf, np.inf)
-        denom = quad(lambda t: _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs) * \
-                               beta_pdf(t), -np.inf, np.inf)
+        num = quad(
+            lambda t: t
+            * _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs)
+            * beta_pdf(t),
+            -np.inf,
+            np.inf,
+        )
+        denom = quad(
+            lambda t: _compound_toxicity_likelihood(
+                F, intercept, t, codified_doses_given, toxs
+            )
+            * beta_pdf(t),
+            -np.inf,
+            np.inf,
+        )
         beta_hat = num[0] / denom[0]
         if estimate_var:
-            num2 = quad(lambda t: t ** 2 * _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs) *
-                                  beta_pdf(t), -np.inf, np.inf)
+            num2 = quad(
+                lambda t: t**2
+                * _compound_toxicity_likelihood(
+                    F, intercept, t, codified_doses_given, toxs
+                )
+                * beta_pdf(t),
+                -np.inf,
+                np.inf,
+            )
             exp_x2 = num2[0] / denom[0]
-            var = exp_x2 - beta_hat ** 2
+            var = exp_x2 - beta_hat**2
         else:
             var = None
 
@@ -131,7 +170,7 @@ def _get_beta_hat_bayes(F, intercept, codified_doses_given, toxs, beta_pdf, use_
 
 
 def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=False):
-    """ Get maximum likelihood estimate of beta parameter (and optionally its variance) in MLE CRM.
+    """Get maximum likelihood estimate of beta parameter (and optionally its variance) in MLE CRM.
 
     TODO: how is estimating variance possible?
 
@@ -155,21 +194,27 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
 
     """
     if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
-        msg = 'Need heterogeneity in toxic events (i.e. toxic and non-toxic outcomes must be observed) for MLE to ' \
-              'exist. See Cheung p.23.'
+        msg = (
+            "Need heterogeneity in toxic events (i.e. toxic and non-toxic outcomes must be observed) for MLE to "
+            "exist. See Cheung p.23."
+        )
         logging.warn()
         return np.nan, None
 
-    f = lambda beta: -1 * _compound_toxicity_likelihood(F, intercept, beta, codified_doses_given, toxs, log=True)
-    res = minimize(f, x0=0, method='nelder-mead')
+    f = lambda beta: -1 * _compound_toxicity_likelihood(
+        F, intercept, beta, codified_doses_given, toxs, log=True
+    )
+    res = minimize(f, x0=0, method="nelder-mead")
     if estimate_var:
-        logging.warn('Variance estimation in MLE mode is not implemented because I do not think it makes sense. \
-        In dfcrm, Ken Cheung uses a method that I do not understand. It yields comparatively huge variances.')
+        logging.warn(
+            "Variance estimation in MLE mode is not implemented because I do not think it makes sense. \
+        In dfcrm, Ken Cheung uses a method that I do not understand. It yields comparatively huge variances."
+        )
     return res.x[0], None
 
 
 def _estimate_prob_tox_from_param(F, intercept, beta_hat, dose_labels):
-    """ Estimate the probability of toxicity at doses by plugging in an estimate for beta.
+    """Estimate the probability of toxicity at doses by plugging in an estimate for beta.
 
     :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
     :type F: func
@@ -188,8 +233,16 @@ def _estimate_prob_tox_from_param(F, intercept, beta_hat, dose_labels):
     return post_tox
 
 
-def _get_post_tox_bayes(F, intercept, dose_labels, codified_doses_given, toxs, beta_pdf, use_quick_integration=False):
-    """ Calculate the posterior probability of toxicity at doses using the Bayesian integral
+def _get_post_tox_bayes(
+    F,
+    intercept,
+    dose_labels,
+    codified_doses_given,
+    toxs,
+    beta_pdf,
+    use_quick_integration=False,
+):
+    """Calculate the posterior probability of toxicity at doses using the Bayesian integral
 
     :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
     :type F: func
@@ -214,9 +267,13 @@ def _get_post_tox_bayes(F, intercept, dose_labels, codified_doses_given, toxs, b
     post_tox = []
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
-        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))  # My own rule of thumb
+        n = int(
+            100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)
+        )  # My own rule of thumb
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
-        denom_y = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
+        denom_y = _compound_toxicity_likelihood(
+            F, intercept, z, codified_doses_given, toxs
+        ) * beta_pdf(z)
         denom = trapz(denom_y, z, dz)
         # num_scale = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         for x in dose_labels:
@@ -225,21 +282,43 @@ def _get_post_tox_bayes(F, intercept, dose_labels, codified_doses_given, toxs, b
             post_tox.append(num / denom)
     else:
         # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow
-        denom = quad(lambda t: beta_pdf(t) * \
-                               _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs),
-                     -np.inf, np.inf)
+        denom = quad(
+            lambda t: beta_pdf(t)
+            * _compound_toxicity_likelihood(
+                F, intercept, t, codified_doses_given, toxs
+            ),
+            -np.inf,
+            np.inf,
+        )
         for x in dose_labels:
-            num = quad(lambda t: F(x, a0=intercept, beta=t) * beta_pdf(t) * \
-                                 _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs),
-                       -np.inf, np.inf)
+            num = quad(
+                lambda t: F(x, a0=intercept, beta=t)
+                * beta_pdf(t)
+                * _compound_toxicity_likelihood(
+                    F, intercept, t, codified_doses_given, toxs
+                ),
+                -np.inf,
+                np.inf,
+            )
             post_tox.append(num[0] / denom[0])
 
     return post_tox
 
 
-def crm(prior, target, toxicities, dose_levels, intercept=3, F_func=logistic, inverse_F=inverse_logistic,
-        beta_dist=norm(loc=0, scale=np.sqrt(1.34)), method="bayes", use_quick_integration=False,
-        estimate_var=False, plugin_mean=True):
+def crm(
+    prior,
+    target,
+    toxicities,
+    dose_levels,
+    intercept=3,
+    F_func=logistic,
+    inverse_F=inverse_logistic,
+    beta_dist=norm(loc=0, scale=np.sqrt(1.34)),
+    method="bayes",
+    use_quick_integration=False,
+    estimate_var=False,
+    plugin_mean=True,
+):
     """
     Run CRM calculation on observed dosages and toxicities.
 
@@ -282,23 +361,45 @@ def crm(prior, target, toxicities, dose_levels, intercept=3, F_func=logistic, in
     """
 
     if len(dose_levels) != len(toxicities):
-        raise ValueError('toxicities and dose_levels should be same length.')
+        raise ValueError("toxicities and dose_levels should be same length.")
 
     beta0 = beta_dist.mean()
-    codified_doses = [inverse_F(prior[dl - 1], a0=intercept, beta=beta0) for dl in dose_levels]
+    codified_doses = [
+        inverse_F(prior[dl - 1], a0=intercept, beta=beta0) for dl in dose_levels
+    ]
     dose_labels = [inverse_F(p, a0=intercept, beta=beta0) for p in prior]
-    if method == 'bayes':
-        beta_hat, var = _get_beta_hat_bayes(F_func, intercept, codified_doses, toxicities, beta_dist.pdf,
-                                            use_quick_integration, estimate_var)
+    if method == "bayes":
+        beta_hat, var = _get_beta_hat_bayes(
+            F_func,
+            intercept,
+            codified_doses,
+            toxicities,
+            beta_dist.pdf,
+            use_quick_integration,
+            estimate_var,
+        )
         if plugin_mean:
-            post_tox = _estimate_prob_tox_from_param(F_func, intercept, beta_hat, dose_labels)
+            post_tox = _estimate_prob_tox_from_param(
+                F_func, intercept, beta_hat, dose_labels
+            )
         else:
             # Bayesian integral
-            post_tox = _get_post_tox_bayes(F_func, intercept, dose_labels, codified_doses, toxicities, beta_dist.pdf,
-                                           use_quick_integration)
-    elif method == 'mle':
-        beta_hat, var = _get_beta_hat_mle(F_func, intercept, codified_doses, toxicities, estimate_var)
-        post_tox = _estimate_prob_tox_from_param(F_func, intercept, beta_hat, dose_labels)
+            post_tox = _get_post_tox_bayes(
+                F_func,
+                intercept,
+                dose_labels,
+                codified_doses,
+                toxicities,
+                beta_dist.pdf,
+                use_quick_integration,
+            )
+    elif method == "mle":
+        beta_hat, var = _get_beta_hat_mle(
+            F_func, intercept, codified_doses, toxicities, estimate_var
+        )
+        post_tox = _estimate_prob_tox_from_param(
+            F_func, intercept, beta_hat, dose_labels
+        )
     else:
         msg = "Only 'bayes' and 'mle' methods are implemented."
         raise ValueError(msg)
@@ -309,7 +410,7 @@ def crm(prior, target, toxicities, dose_levels, intercept=3, F_func=logistic, in
 
 
 class CRM(DoseFindingTrial):
-    """ This is an object-oriented attempt at the CRM method.
+    """This is an object-oriented attempt at the CRM method.
 
     e.g. general usage
 
@@ -333,12 +434,28 @@ class CRM(DoseFindingTrial):
 
     """
 
-    def __init__(self, prior, target, first_dose, max_size, F_func=empiric, inverse_F=inverse_empiric,
-                 beta_prior=norm(0, np.sqrt(1.34)), method="bayes", use_quick_integration=False, estimate_var=True,
-                 avoid_skipping_untried_escalation=False, avoid_skipping_untried_deescalation=False,
-                 lowest_dose_too_toxic_hurdle=0.0, lowest_dose_too_toxic_certainty=0.0,
-                 coherency_threshold=0.0, principle_escalation_func=None, termination_func=None, plugin_mean=True,
-                 intercept=3):
+    def __init__(
+        self,
+        prior,
+        target,
+        first_dose,
+        max_size,
+        F_func=empiric,
+        inverse_F=inverse_empiric,
+        beta_prior=norm(0, np.sqrt(1.34)),
+        method="bayes",
+        use_quick_integration=False,
+        estimate_var=True,
+        avoid_skipping_untried_escalation=False,
+        avoid_skipping_untried_deescalation=False,
+        lowest_dose_too_toxic_hurdle=0.0,
+        lowest_dose_too_toxic_certainty=0.0,
+        coherency_threshold=0.0,
+        principle_escalation_func=None,
+        termination_func=None,
+        plugin_mean=True,
+        intercept=3,
+    ):
         """
 
         Params:
@@ -403,7 +520,9 @@ class CRM(DoseFindingTrial):
 
         """
 
-        DoseFindingTrial.__init__(self, first_dose=first_dose, num_doses=len(prior), max_size=max_size)
+        DoseFindingTrial.__init__(
+            self, first_dose=first_dose, num_doses=len(prior), max_size=max_size
+        )
 
         self.prior = prior
         self.target = target
@@ -424,7 +543,9 @@ class CRM(DoseFindingTrial):
         self.intercept = intercept
         if lowest_dose_too_toxic_hurdle and lowest_dose_too_toxic_certainty:
             if not self.estimate_var:
-                logging.warn('To monitor toxicity at lowest dose, I had to enable beta variance estimation.')
+                logging.warn(
+                    "To monitor toxicity at lowest dose, I had to enable beta variance estimation."
+                )
             self.estimate_var = True
         # Reset
         self.beta_hat, self.beta_var = beta_prior.mean(), beta_prior.var()
@@ -445,21 +566,33 @@ class CRM(DoseFindingTrial):
         current_dose = self.next_dose()
         max_dose_given = self.maximum_dose_given()
         min_dose_given = self.minimum_dose_given()
-        proposed_dose, beta_hat, beta_var, post_tox = crm(prior=self.prior, target=self.target,
-                                                          toxicities=self._toxicities, dose_levels=self._doses,
-                                                          intercept=self.intercept, F_func=self.F_func,
-                                                          inverse_F=self.inverse_F,
-                                                          beta_dist=self.beta_prior, method=self.method,
-                                                          use_quick_integration=self.use_quick_integration,
-                                                          estimate_var=self.estimate_var, plugin_mean=self.plugin_mean)
+        proposed_dose, beta_hat, beta_var, post_tox = crm(
+            prior=self.prior,
+            target=self.target,
+            toxicities=self._toxicities,
+            dose_levels=self._doses,
+            intercept=self.intercept,
+            F_func=self.F_func,
+            inverse_F=self.inverse_F,
+            beta_dist=self.beta_prior,
+            method=self.method,
+            use_quick_integration=self.use_quick_integration,
+            estimate_var=self.estimate_var,
+            plugin_mean=self.plugin_mean,
+        )
         self.beta_hat = beta_hat
         self.beta_var = beta_var
         self.post_tox = post_tox
 
         # Excess toxicity at lowest dose?
         if self.lowest_dose_too_toxic_hurdle and self.lowest_dose_too_toxic_certainty:
-            labels = [self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean()) for p in self.prior]
-            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(1000000)  # N.b. normal sample a la prior
+            labels = [
+                self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
+                for p in self.prior
+            ]
+            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(
+                1000000
+            )  # N.b. normal sample a la prior
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 
@@ -473,18 +606,29 @@ class CRM(DoseFindingTrial):
             # print 'Testing coherence'
             tox_rate_at_current = self.observed_toxicity_rates()[current_dose - 1]
             # print 'Tox at current', tox_rate_at_current
-            if not np.isnan(tox_rate_at_current) and tox_rate_at_current > self.coherency_threshold:
+            if (
+                not np.isnan(tox_rate_at_current)
+                and tox_rate_at_current > self.coherency_threshold
+            ):
                 # Avoid escalation. Stay at current
                 # print 'Throttling for coherence'
                 proposed_dose = current_dose
                 return proposed_dose
 
         # Skipping doses
-        if self.avoid_skipping_untried_escalation and max_dose_given and proposed_dose - max_dose_given > 1:
+        if (
+            self.avoid_skipping_untried_escalation
+            and max_dose_given
+            and proposed_dose - max_dose_given > 1
+        ):
             # Avoid skipping untried doses in escalation by setting proposed dose to max_dose_given + 1
             proposed_dose = max_dose_given + 1
             return proposed_dose
-        elif self.avoid_skipping_untried_deescalation and min_dose_given and min_dose_given - proposed_dose > 1:
+        elif (
+            self.avoid_skipping_untried_deescalation
+            and min_dose_given
+            and min_dose_given - proposed_dose > 1
+        ):
             # Avoid skipping untried doses in de-escalation by setting proposed dose to min_dose_given - 1
             proposed_dose = min_dose_given - 1
             return proposed_dose
@@ -495,7 +639,7 @@ class CRM(DoseFindingTrial):
     def prob_tox(self):
         return list(self.post_tox)
 
-    def prob_tox_exceeds(self, tox_cutoff, n=10 ** 6):
+    def prob_tox_exceeds(self, tox_cutoff, n=10**6):
         if self.estimate_var:
             # Estimate probability of toxicity exceeds tox_cutoff using plug-in mean and variance for beta, and randomly
             # sampling values from normal. Why normal? Because the prior for is normal and the posterior
@@ -503,15 +647,23 @@ class CRM(DoseFindingTrial):
 
             # TODO: research replacing this with a proper posterior integral when in bayes mode.
 
-            labels = [self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean()) for p in self.prior]
+            labels = [
+                self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
+                for p in self.prior
+            ]
             beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(n)
-            p0_sample = [self.F_func(label, a0=self.intercept, beta=beta_sample) for label in labels]
+            p0_sample = [
+                self.F_func(label, a0=self.intercept, beta=beta_sample)
+                for label in labels
+            ]
             return np.array([np.mean(x > tox_cutoff) for x in p0_sample])
         else:
-            raise Exception('CRM can only estimate posterior probabilities when estimate_var=True')
+            raise Exception(
+                "CRM can only estimate posterior probabilities when estimate_var=True"
+            )
 
     def has_more(self):
-        """ Is the trial ongoing? """
+        """Is the trial ongoing?"""
         if not DoseFindingTrial.has_more(self):
             return False
         if self.termination_func:
@@ -520,7 +672,7 @@ class CRM(DoseFindingTrial):
             return True
 
     def optimal_decision(self, prob_tox):
-        """ Get the optimal dose choice for a given dose-toxicity curve.
+        """Get the optimal dose choice for a given dose-toxicity curve.
 
         .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
         design can be calculated for a given set of patients with their own specific tolerances by
@@ -536,7 +688,7 @@ class CRM(DoseFindingTrial):
         return np.argmin(np.abs(prob_tox - self.target)) + 1
 
     def get_tox_prob_quantile(self, p):
-        """ Get the quantiles of the probabilities of toxicity at each dose using normal approximation.
+        """Get the quantiles of the probabilities of toxicity at each dose using normal approximation.
         :param p: probability, i.e. 0.05 means 5th quantile, i.e. 95% of values are greater
         :type p: float
         :return: the quantiles of the probabilities of toxicity at each dose
@@ -544,12 +696,15 @@ class CRM(DoseFindingTrial):
         """
         norm_crit = norm.ppf(p)
         beta_est = self.beta_hat - norm_crit * np.sqrt(self.beta_var)
-        labels = [self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean()) for p in self.prior]
+        labels = [
+            self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
+            for p in self.prior
+        ]
         p = [self.F_func(x, a0=self.intercept, beta=beta_est) for x in labels]
         return p
 
     def plot_toxicity_probabilities(self, chart_title=None, use_ggplot=False):
-        """ Plot prior and posterior dose-toxicity curves.
+        """Plot prior and posterior dose-toxicity curves.
 
         :param chart_title: optional chart title. Default is fairly verbose
         :type chart_title: str
@@ -564,58 +719,76 @@ class CRM(DoseFindingTrial):
             chart_title = chart_title + "\n"
 
         if use_ggplot:
-            from ggplot import (ggplot, ggtitle, geom_line, geom_hline, aes, ylim)
             import numpy as np
             import pandas as pd
-            data = pd.DataFrame({'Dose level': self.dose_levels(),
-                                 'Prior': self.prior,
-                                 'Posterior': self.prob_tox(),
-                                 #                      'Lower': crm.get_tox_prob_quantile(0.05),
-                                 #                      'Upper': crm.get_tox_prob_quantile(0.95)
-                                 })
-            var_name = 'Type'
-            value_name = 'Probability of toxicity'
-            melted_data = pd.melt(data, id_vars='Dose level', var_name=var_name, value_name=value_name)
+            from ggplot import aes, geom_hline, geom_line, ggplot, ggtitle, ylim
+
+            data = pd.DataFrame(
+                {
+                    "Dose level": self.dose_levels(),
+                    "Prior": self.prior,
+                    "Posterior": self.prob_tox(),
+                    #                      'Lower': crm.get_tox_prob_quantile(0.05),
+                    #                      'Upper': crm.get_tox_prob_quantile(0.95)
+                }
+            )
+            var_name = "Type"
+            value_name = "Probability of toxicity"
+            melted_data = pd.melt(
+                data, id_vars="Dose level", var_name=var_name, value_name=value_name
+            )
             # melted_data['LineType'] =  np.where(melted_data.Type=='Posterior', '--', np.where(melted_data.Type=='Prior', '-', '..'))
             # melted_data['LineType'] =  np.where(melted_data.Type=='Posterior', '--', np.where(melted_data.Type=='Prior', '-', '..'))
             # melted_data['Col'] =  np.where(melted_data.Type=='Posterior', 'green', np.where(melted_data.Type=='Prior', 'blue', 'yellow'))
             # np.where(melted_data.Type=='Posterior', '--', '-')
 
-            p = ggplot(melted_data, aes(x='Dose level', y=value_name, linetype=var_name)) + geom_line() \
-                + ggtitle(chart_title) + ylim(0, 1) + geom_hline(yintercept=self.target, color='black')
+            p = (
+                ggplot(
+                    melted_data, aes(x="Dose level", y=value_name, linetype=var_name)
+                )
+                + geom_line()
+                + ggtitle(chart_title)
+                + ylim(0, 1)
+                + geom_hline(yintercept=self.target, color="black")
+            )
             # Can add confidence intervals once I work out linetype=??? in ggplot
 
             return p
         else:
             import matplotlib.pyplot as plt
             import numpy as np
+
             dl = self.dose_levels()
             prior_tox = self.prior
             post_tox = self.prob_tox()
             post_tox_lower = self.get_tox_prob_quantile(0.05)
             post_tox_upper = self.get_tox_prob_quantile(0.95)
-            plt.plot(dl, prior_tox, '--', c='black')
-            plt.plot(dl, post_tox, '-', c='black')
-            plt.plot(dl, post_tox_lower, '-.', c='black')
-            plt.plot(dl, post_tox_upper, '-.', c='black')
-            plt.scatter(dl, prior_tox, marker='x', s=300, facecolors='none', edgecolors='k')
-            plt.scatter(dl, post_tox, marker='o', s=300, facecolors='none', edgecolors='k')
+            plt.plot(dl, prior_tox, "--", c="black")
+            plt.plot(dl, post_tox, "-", c="black")
+            plt.plot(dl, post_tox_lower, "-.", c="black")
+            plt.plot(dl, post_tox_upper, "-.", c="black")
+            plt.scatter(
+                dl, prior_tox, marker="x", s=300, facecolors="none", edgecolors="k"
+            )
+            plt.scatter(
+                dl, post_tox, marker="o", s=300, facecolors="none", edgecolors="k"
+            )
             plt.axhline(self.target)
             plt.ylim(0, 1)
             plt.xlim(np.min(dl), np.max(dl))
             plt.xticks(dl)
-            plt.ylabel('Probability of toxicity')
-            plt.xlabel('Dose level')
+            plt.ylabel("Probability of toxicity")
+            plt.xlabel("Dose level")
             plt.title(chart_title)
 
             p = plt.gcf()
-            phi = (np.sqrt(5) + 1) / 2.
+            phi = (np.sqrt(5) + 1) / 2.0
             p.set_size_inches(12, 12 / phi)
             # return p
 
 
 def crm_dtp_detail(trial):
-    """ Performs the CRM-specific extra reporting when calculating DTPs
+    """Performs the CRM-specific extra reporting when calculating DTPs
     :param trial: instance of CRM
     :return: OrderedDict
 
@@ -624,13 +797,13 @@ def crm_dtp_detail(trial):
     to_return = OrderedDict()
 
     if trial.beta_hat is not None:
-        to_return['BetaHat'] = atomic_to_json(trial.beta_hat)
+        to_return["BetaHat"] = atomic_to_json(trial.beta_hat)
     if trial.beta_var is not None:
-        to_return['BetaVar'] = atomic_to_json(trial.beta_var)
+        to_return["BetaVar"] = atomic_to_json(trial.beta_var)
 
     if trial.prob_tox() is not None:
-        to_return['ProbTox'] = iterable_to_json(trial.prob_tox())
+        to_return["ProbTox"] = iterable_to_json(trial.prob_tox())
         for i, dl in enumerate(trial.dose_levels()):
-            to_return['ProbTox{}'.format(dl)] = trial.prob_tox()[i]
+            to_return[f"ProbTox{dl}"] = trial.prob_tox()[i]
 
     return to_return

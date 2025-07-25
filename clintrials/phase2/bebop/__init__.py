@@ -1,5 +1,5 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
 __all__ = ["peps2v1", "peps2v2"]
 
@@ -34,9 +34,8 @@ import pandas as pd
 from clintrials.stats import ProbabilityDensitySample
 
 
-class BeBOP():
-    """
-    """
+class BeBOP:
+    """ """
 
     def __init__(self, theta_priors, efficacy_model, toxicity_model, joint_model):
         """
@@ -103,8 +102,8 @@ class BeBOP():
     def get_case_elements(self, i):
         return [case[i] for case in self.cases]
 
-    def update(self, cases, n=10**6, epsilon = 0.00001, **kwargs):
-        """ TODO
+    def update(self, cases, n=10**6, epsilon=0.00001, **kwargs):
+        """TODO
 
         :param n:
         :param epsilon:
@@ -112,9 +111,14 @@ class BeBOP():
         """
 
         self.cases.extend(cases)
-        limits = [(dist.ppf(epsilon), dist.ppf(1-epsilon)) for dist in self.priors]
-        samp = numpy.column_stack([numpy.random.uniform(*limit_pair, size=n) for limit_pair in limits])
-        lik_integrand = lambda x: self._l_n(cases, x) * numpy.prod(numpy.array([dist.pdf(col) for (dist, col) in zip(self.priors, x.T)]), axis=0)
+        limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in self.priors]
+        samp = numpy.column_stack(
+            [numpy.random.uniform(*limit_pair, size=n) for limit_pair in limits]
+        )
+        lik_integrand = lambda x: self._l_n(cases, x) * numpy.prod(
+            numpy.array([dist.pdf(col) for (dist, col) in zip(self.priors, x.T)]),
+            axis=0,
+        )
         self._pds = ProbabilityDensitySample(samp, lik_integrand)
         return
 
@@ -123,31 +127,63 @@ class BeBOP():
         eff_probs = self._pi_e(x, samp)
         tox_probs = self._pi_t(x, samp)
         from collections import OrderedDict
-        predictions = OrderedDict([
-            ('Pr(Eff)', pds.expectation(eff_probs)),
-            ('Pr(Tox)', pds.expectation(tox_probs)),
-            ('Pr(AccEff)', pds.expectation((eff_probs > eff_cutoff))),
-            ('Pr(AccTox)', pds.expectation((tox_probs < tox_cutoff))),
-        ])
+
+        predictions = OrderedDict(
+            [
+                ("Pr(Eff)", pds.expectation(eff_probs)),
+                ("Pr(Tox)", pds.expectation(tox_probs)),
+                ("Pr(AccEff)", pds.expectation(eff_probs > eff_cutoff)),
+                ("Pr(AccTox)", pds.expectation(tox_probs < tox_cutoff)),
+            ]
+        )
 
         if estimate_ci:
-            predictions['Pr(Eff) Lower'] = pds.quantile_vector(eff_probs, 0.05, start_value=0.05)
-            predictions['Pr(Eff) Upper'] = pds.quantile_vector(eff_probs, 0.95, start_value=0.95)
-            predictions['Pr(Tox) Lower'] = pds.quantile_vector(tox_probs, 0.05, start_value=0.05)
-            predictions['Pr(Tox) Upper'] = pds.quantile_vector(tox_probs, 0.95, start_value=0.95)
+            predictions["Pr(Eff) Lower"] = pds.quantile_vector(
+                eff_probs, 0.05, start_value=0.05
+            )
+            predictions["Pr(Eff) Upper"] = pds.quantile_vector(
+                eff_probs, 0.95, start_value=0.95
+            )
+            predictions["Pr(Tox) Lower"] = pds.quantile_vector(
+                tox_probs, 0.05, start_value=0.05
+            )
+            predictions["Pr(Tox) Upper"] = pds.quantile_vector(
+                tox_probs, 0.95, start_value=0.95
+            )
         return predictions
 
-    def predict(self, cases, eff_cutoff, tox_cutoff, to_pandas=False, estimate_ci=False):
+    def predict(
+        self, cases, eff_cutoff, tox_cutoff, to_pandas=False, estimate_ci=False
+    ):
         if self._pds is not None:
             pds = self._pds
             samp = pds._samp
-            fitted = [self._predict_case(x, eff_cutoff, tox_cutoff, pds, samp, estimate_ci=estimate_ci) for x in cases]
+            fitted = [
+                self._predict_case(
+                    x, eff_cutoff, tox_cutoff, pds, samp, estimate_ci=estimate_ci
+                )
+                for x in cases
+            ]
             if to_pandas:
                 if estimate_ci:
-                    return pd.DataFrame(fitted, columns=['Pr(Eff)', 'Pr(Tox)', 'Pr(AccEff)', 'Pr(AccTox)',
-                                                         'Pr(Eff) Lower', 'Pr(Eff) Upper', 'Pr(Tox) Lower', 'Pr(Tox) Upper'])
+                    return pd.DataFrame(
+                        fitted,
+                        columns=[
+                            "Pr(Eff)",
+                            "Pr(Tox)",
+                            "Pr(AccEff)",
+                            "Pr(AccTox)",
+                            "Pr(Eff) Lower",
+                            "Pr(Eff) Upper",
+                            "Pr(Tox) Lower",
+                            "Pr(Tox) Upper",
+                        ],
+                    )
                 else:
-                    return pd.DataFrame(fitted, columns=['Pr(Eff)', 'Pr(Tox)', 'Pr(AccEff)', 'Pr(AccTox)'])
+                    return pd.DataFrame(
+                        fitted,
+                        columns=["Pr(Eff)", "Pr(Tox)", "Pr(AccEff)", "Pr(AccTox)"],
+                    )
             else:
                 return fitted
         else:
@@ -155,22 +191,31 @@ class BeBOP():
 
     def get_posterior_param_means(self):
         if self._pds:
-            return numpy.apply_along_axis(lambda x: self._pds.expectation(x), 0, self._pds._samp)
+            return numpy.apply_along_axis(
+                lambda x: self._pds.expectation(x), 0, self._pds._samp
+            )
         else:
             return []
 
     def theta_estimate(self, i, alpha=0.05):
-        """ Get posterior confidence interval and mean estimate of element i in parameter vector.
+        """Get posterior confidence interval and mean estimate of element i in parameter vector.
 
         Returns (lower, mean, upper)
 
         """
 
         if j < len(self.priors):
-            mu = self._pds.expectation(self._pds._samp[:,i])
-            return numpy.array([self._pds.quantile(i, alpha/2), mu, self._pds.quantile(i, 1-alpha/2)])
+            mu = self._pds.expectation(self._pds._samp[:, i])
+            return numpy.array(
+                [
+                    self._pds.quantile(i, alpha / 2),
+                    mu,
+                    self._pds.quantile(i, 1 - alpha / 2),
+                ]
+            )
         else:
-            return (0,0,0)
+            return (0, 0, 0)
+
 
 #     def efficacy_effect(self, j, alpha=0.05):
 #         """ Get confidence interval and mean estimate of the effect on efficacy, expressed as odds-ratios.

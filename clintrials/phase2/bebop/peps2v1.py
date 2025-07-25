@@ -742,10 +742,10 @@ def splice_sims(in_files_pattern, out_file=None):
     files = glob.glob(in_files_pattern)
     if len(files):
 
-        sims = json.load(open(files[0], "r"))
+        sims = json.load(open(files[0]))
         print("Fetched from", files[0])
         for f in files[1:]:
-            sub_sims = json.load(open(f, "r"))
+            sub_sims = json.load(open(f))
             print("Fetched from", f)
             # Checks for homogeneity go here
             sims = _splice_sims(sims, sub_sims)

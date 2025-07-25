@@ -1,11 +1,11 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
 """ Functions and classes for manipulating collections. """
 
 
 def to_1d_list_gen(x):
-    """ Generator function to reduce lists of lists of arbitrary depth (and scalars) to single depth-1 list.
+    """Generator function to reduce lists of lists of arbitrary depth (and scalars) to single depth-1 list.
 
     .. note:: this function is recursive.
 
@@ -13,14 +13,13 @@ def to_1d_list_gen(x):
 
     if isinstance(x, list):
         for y in x:
-            for z in to_1d_list_gen(y):
-                yield z
+            yield from to_1d_list_gen(y)
     else:
         yield x
 
 
 def to_1d_list(x):
-    """ Reshape scalars, lists and lists of lists of arbitrary depth as a single flat list, i.e. list of depth 1.
+    """Reshape scalars, lists and lists of lists of arbitrary depth as a single flat list, i.e. list of depth 1.
 
     .. note:: this function basically offloads all its work to a generator function because **we like yield**!
 

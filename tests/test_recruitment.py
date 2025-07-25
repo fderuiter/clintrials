@@ -1,9 +1,12 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
 from nose.tools import assert_almost_equal
 
-from clintrials.recruitment import ConstantRecruitmentStream, QuadrilateralRecruitmentStream
+from clintrials.recruitment import (
+    ConstantRecruitmentStream,
+    QuadrilateralRecruitmentStream,
+)
 
 
 def test_constant_recruitment_stream():
@@ -134,7 +137,7 @@ def test_quadrilateral_recruitment_stream_7():
     assert_almost_equal(s.next(), 89.442719099991578)
     assert_almost_equal(s.next(), 99.999999999999986)
     assert_almost_equal(s.next(), 110.0)
-    assert_almost_equal(s.next(), 120.)
+    assert_almost_equal(s.next(), 120.0)
     s.reset()
     assert_almost_equal(s.next(), 44.721359549995789)
 
@@ -142,7 +145,7 @@ def test_quadrilateral_recruitment_stream_7():
 def test_quadrilateral_recruitment_stream_8():
 
     initial = 0.0
-    vertices=[(100, 1.0), (130, 0.0), (150, 0.5)]
+    vertices = [(100, 1.0), (130, 0.0), (150, 0.5)]
     s = QuadrilateralRecruitmentStream(10.0, initial, vertices, interpolate=False)
 
     assert_almost_equal(s.next(), 110.0)

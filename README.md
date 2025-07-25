@@ -101,3 +101,12 @@ Documentation will eventually appear at
 ### Contact ###
 The repo owner is Kristian Brock, @brockk.
 Feel free to get in contact through GitHub.
+
+### Development ###
+Install development requirements and run the style checks using pre-commit:
+
+```bash
+pip install -e .[dev]
+pre-commit install
+pre-commit run --all-files
+```
