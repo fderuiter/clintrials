@@ -61,3 +61,24 @@ def test_matrix_cohort_analysis_multiple_runs():
     )
     assert isinstance(reports, list)
     assert len(reports) == 2
+
+
+def test_matrix_cohort_analysis_go_at_final():
+    np.random.seed(0)
+    stream = ConstantRecruitmentStream(1)
+    report = matrix_cohort_analysis(
+        n_simulations=1,
+        n_patients=2,
+        true_median=5,
+        alpha_prior=2,
+        beta_prior=2,
+        lower_cutoff=2,
+        upper_cutoff=4,
+        interim_certainty=0.2,
+        final_certainty=0.1,
+        interim_analysis_after_patients=[],
+        interim_analysis_time_delta=0,
+        final_analysis_time_delta=0,
+        recruitment_stream=stream,
+    )
+    assert report["Decision"] == "GoAtFinal"
