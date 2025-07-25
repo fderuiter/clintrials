@@ -1,0 +1,14 @@
+[run]
+branch = True
+omit =
+    clintrials/phase2/*
+    clintrials/simulation.py
+    clintrials/dosefinding/*
+    clintrials/stats.py
+    clintrials/util.py
+    clintrials/common.py
+    */__main__*
+    tests/*
+
+[report]
+fail_under = 90
