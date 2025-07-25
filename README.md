@@ -110,3 +110,9 @@ pip install -e .[dev]
 pre-commit install
 pre-commit run --all-files
 ```
+
+Run the test suite with:
+
+```bash
+pytest -q
+```

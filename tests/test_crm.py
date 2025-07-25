@@ -4,7 +4,6 @@ __contact__ = "kristian.brock@gmail.com"
 """ Tests of the clintrials.dosefindings.crm module. """
 
 import numpy as np
-from nose.tools import with_setup
 from scipy.stats import norm
 
 from clintrials.common import empiric, inverse_empiric, inverse_logistic, logistic
@@ -19,7 +18,6 @@ def teardown_func():
     pass
 
 
-@with_setup(setup_func, teardown_func)
 def test_CRM_bayes():
 
     # Test that Bayesian CRM works by reproducing Table 3.2 on p.26 of Cheung's book:
@@ -112,7 +110,6 @@ def test_CRM_bayes():
         assert abs(crm.beta_hat - beta_hats[patient_no - 1]) <= beta_hat_epsilon
 
 
-@with_setup(setup_func, teardown_func)
 def test_CRM_mle():
 
     # Test that MLE CRM works by reproducing an example in Python that can be verified in R
