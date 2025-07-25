@@ -12,12 +12,23 @@ on:
       - "docs/**"
       - "clintrials/**"
       - "pyproject.toml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.x'
@@ -31,7 +42,25 @@ jobs:
           sphinx-build -b html -n -W docs docs/_build/html
       - name: Linkcheck
         run: sphinx-build -b linkcheck docs docs/_build/linkcheck
-      - uses: actions/upload-artifact@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
         with:
-          name: html-docs
-          path: docs/_build/html
+          source: docs/_build/html
+          destination: ./_site
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
