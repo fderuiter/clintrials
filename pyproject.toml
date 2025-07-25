@@ -7,9 +7,18 @@ authors = ["Kristian Brock <kristian.brock@gmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/brockk/clintrials"
 repository = "https://github.com/brockk/clintrials"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 
 [tool.poetry.dependencies]
-python = ">=2.7,<4"
+python = ">=3.8"
 ggplot = ">=0.6.5"
 matplotlib = ">=1.4.3"
 numpy = ">=1.9.2"

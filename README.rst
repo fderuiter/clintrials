@@ -20,7 +20,7 @@ What does clintrials do?
 * I expect to add more designs in the future.
 * It is written in pure Python, intentionally. This library would be quicker if it was written in C++ or Java but it would not be as portable or readable.
 * Some of the code is fairly mature but the repo itself is young and in flux.
-* I use 64 bit Python 3.5 but endeavour to maintain 2.7 compatibility.
+* This project now requires Python 3.8 or newer.
 
 
 Why Python?
