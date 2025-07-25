@@ -2,6 +2,7 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 import logging
+import warnings
 from collections import OrderedDict
 
 import numpy as np
@@ -9,6 +10,7 @@ from numpy import trapz
 from scipy.integrate import quad
 from scipy.optimize import minimize
 from scipy.stats import norm
+from scipy.special import logsumexp
 
 from clintrials.common import empiric, inverse_empiric, inverse_logistic, logistic
 from clintrials.dosefinding import DoseFindingTrial
@@ -354,7 +356,7 @@ def crm(
     -------
     tuple
         ``(recommended_dose_index, beta_hat, beta_var, prob_tox)``.
-    
+
     I omitted Ken's parameters:
     n=length(level), dosename=NULL, include=1:n, pid=1:n, conf.level=0.9, model.detail=TRUE, patient.detail=TRUE
 
@@ -639,28 +641,62 @@ class CRM(DoseFindingTrial):
     def prob_tox(self):
         return list(self.post_tox)
 
-    def prob_tox_exceeds(self, tox_cutoff, n=10**6):
-        if self.estimate_var:
-            # Estimate probability of toxicity exceeds tox_cutoff using plug-in mean and variance for beta, and randomly
-            # sampling values from normal. Why normal? Because the prior for is normal and the posterior
-            # is asymptotically normal. For low n, non-normality may lead to bias.
+    def _prob_tox_exceeds_quadrature(self, tox_cutoff, deg=40):
+        """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
+        mu0 = self.beta_prior.mean()
+        sd0 = np.sqrt(self.beta_prior.var())
+        nodes, weights = np.polynomial.hermite.hermgauss(deg)
+        betas = mu0 + np.sqrt(2) * sd0 * nodes
+        log_w = np.log(weights)
+        dose_labels = [
+            self.inverse_F(self.prior[d - 1], a0=self.intercept, beta=mu0)
+            for d in self.doses()
+        ]
+        ll = _compound_toxicity_likelihood(
+            self.F_func,
+            self.intercept,
+            betas,
+            dose_labels,
+            self.toxicities(),
+            log=True,
+        )
+        log_post = log_w + ll
+        log_denom = logsumexp(log_post)
+        post_weights = np.exp(log_post - log_denom)
+        labels = [
+            self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
+            for p in self.prior
+        ]
+        out = []
+        for lab in labels:
+            tox_probs = self.F_func(lab, a0=self.intercept, beta=betas)
+            out.append(np.sum(post_weights * (tox_probs > tox_cutoff)))
+        return np.array(out)
 
-            # TODO: research replacing this with a proper posterior integral when in bayes mode.
-
-            labels = [
-                self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
-                for p in self.prior
-            ]
-            beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(n)
-            p0_sample = [
-                self.F_func(label, a0=self.intercept, beta=beta_sample)
-                for label in labels
-            ]
-            return np.array([np.mean(x > tox_cutoff) for x in p0_sample])
-        else:
+    def prob_tox_exceeds(self, tox_cutoff, backend="quadrature", n=10**6):
+        if backend == "quadrature":
+            return self._prob_tox_exceeds_quadrature(tox_cutoff)
+        if backend == "laplace":
+            warnings.warn(
+                "laplace backend is deprecated", DeprecationWarning, stacklevel=2
+            )
+            if self.estimate_var:
+                labels = [
+                    self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
+                    for p in self.prior
+                ]
+                beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(
+                    n
+                )
+                p0_sample = [
+                    self.F_func(label, a0=self.intercept, beta=beta_sample)
+                    for label in labels
+                ]
+                return np.array([np.mean(x > tox_cutoff) for x in p0_sample])
             raise Exception(
                 "CRM can only estimate posterior probabilities when estimate_var=True"
             )
+        raise ValueError("Unknown backend")
 
     def has_more(self):
         """Is the trial ongoing?"""
