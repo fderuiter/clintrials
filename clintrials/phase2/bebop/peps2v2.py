@@ -1,5 +1,5 @@
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 
 
 """ Probability models for the BeBOP model used in PePS2 trial.
@@ -26,23 +26,23 @@ import numpy
 
 
 def pi_e(x, theta):
-    z = theta[:,0] + theta[:, 1]*x[2] + theta[:, 2]*x[3] + theta[:, 3]*x[4]
-    return 1/(1+numpy.exp(-z))
+    z = theta[:, 0] + theta[:, 1] * x[2] + theta[:, 2] * x[3] + theta[:, 3] * x[4]
+    return 1 / (1 + numpy.exp(-z))
 
 
 def pi_t(x, theta):
-    z = theta[:,4]
-    return 1 / (1+numpy.exp(-z))
+    z = theta[:, 4]
+    return 1 / (1 + numpy.exp(-z))
 
 
 def pi_ab(x, theta):
-    b = x[0] # had efficacy
-    a = x[1] # had_toxicity
+    b = x[0]  # had efficacy
+    a = x[1]  # had_toxicity
     psi = theta[:, 5]
     pe = pi_e(x, theta)
     pt = pi_t(x, theta)
-    joint_prob = pe**b * (1-pe)**(1-b) * pt**a * (1-pt)**(1-a)
-    joint_prob = joint_prob + (-1)**(a+b) * pe * (1-pe) * pt * (1-pt) * (numpy.exp(psi) - 1) / (numpy.exp(psi) + 1)
+    joint_prob = pe**b * (1 - pe) ** (1 - b) * pt**a * (1 - pt) ** (1 - a)
+    joint_prob = joint_prob + (-1) ** (a + b) * pe * (1 - pe) * pt * (1 - pt) * (
+        numpy.exp(psi) - 1
+    ) / (numpy.exp(psi) + 1)
     return joint_prob
-
-

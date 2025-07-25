@@ -28,6 +28,10 @@ statsmodels = ">=0.6.1"
 
 [tool.poetry.dev-dependencies]
 nose = "*"
+black = "^25.1.0"
+ruff = "^0.12.5"
+isort = "^6.0.1"
+pre-commit = "^4.2.0"
 
 [build-system]
 requires = ["poetry-core>=1.0"]
@@ -40,3 +44,30 @@ changelog_file = "CHANGELOG.md"
 tag_format = "v{version}"
 upload_to_pypi = false
 commit_author = "github-actions <github-actions@github.com>"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+select = ["E", "F"]
+ignore = [
+    "E203",
+    "E402",
+    "E731",
+    "E722",
+    "E741",
+    "E712",
+    "E501",
+    "F821",
+    "F401",
+    "F841",
+    "E713",
+]
+exclude = ["clintrials/phase2/bebop/peps2v1.py", "tutorials/*.ipynb"]

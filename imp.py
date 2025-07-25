@@ -1,7 +1,8 @@
-import importlib.util
 import importlib.machinery
-import sys
+import importlib.util
 import os
+import sys
+
 
 def find_module(name, path=None):
     if path is None:
@@ -12,10 +13,11 @@ def find_module(name, path=None):
     filename = spec.origin
     if filename is None:
         raise ImportError(f"Cannot find module {name}")
-    file = open(filename, 'rb')
+    file = open(filename, "rb")
     suffix = os.path.splitext(filename)[1]
     mode = file.mode
     return file, filename, (suffix, mode, 0)
+
 
 def load_module(name, file, filename, desc):
     if name in sys.modules:
@@ -26,8 +28,10 @@ def load_module(name, file, filename, desc):
     spec.loader.exec_module(module)
     return module
 
+
 def acquire_lock():
     pass
+
 
 def release_lock():
     pass
