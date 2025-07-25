@@ -525,7 +525,7 @@ def simulate_dose_finding_trial(
         tolerances = uniform().rvs(design.max_size())
     else:
         if len(tolerances) < design.max_size():
-            logging.warn(
+            logging.warning(
                 "You have provided fewer tolerances than maximum number of patients on trial. Beware errors!"
             )
 
@@ -606,7 +606,7 @@ def simulate_dose_finding_trials(
         tolerances = uniform().rvs(max_size)
     else:
         if len(tolerances) < max_size:
-            logging.warn(
+            logging.warning(
                 "You have provided fewer tolerances than maximum number of patients on trial. Beware errors!"
             )
 
