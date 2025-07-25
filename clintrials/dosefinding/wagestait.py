@@ -12,7 +12,8 @@ Wages, N.A. and Tait, C. (2015). Seamless Phase I/II Adaptive Design For Oncolog
 
 import numpy as np
 from scipy.stats import norm, beta
-from scipy.integrate import quad, trapz
+from scipy.integrate import quad
+from numpy import trapz
 from random import sample
 
 from clintrials.common import empiric, inverse_empiric
@@ -76,8 +77,8 @@ def _wt_get_theta_hat(cases, skeletons, theta_prior, F=empiric, use_quick_integr
     theta_hats = []
     for skeleton in skeletons:
         if use_quick_integration:
-            n = 100 * max(np.log(len(cases) + 1) / 2, 1)  # My own rule of thumb for num points needed
-            z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=1)
+            n = int(100 * max(np.log(len(cases) + 1) / 2, 1))  # My own rule of thumb for num points needed
+            z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
             denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
             num_y = z * denom_y
             num = trapz(num_y, z, dz)
@@ -132,8 +133,8 @@ def _get_post_eff_bayes(cases, skeleton, dose_labels, theta_prior, F=empiric, us
     intercept = 0
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
-        n = 100 * max(np.log(len(cases) + 1) / 2, 1)  # My own rule of thumb for num points needed
-        z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=1)
+        n = int(100 * max(np.log(len(cases) + 1) / 2, 1))  # My own rule of thumb for num points needed
+        z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
         denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
         denom = trapz(denom_y, z, dz)
         for x in dose_labels:

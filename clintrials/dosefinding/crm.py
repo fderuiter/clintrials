@@ -5,7 +5,8 @@ from collections import OrderedDict
 import logging
 import numpy as np
 from scipy.stats import norm
-from scipy.integrate import quad, trapz
+from scipy.integrate import quad
+from numpy import trapz
 from scipy.optimize import minimize
 
 from clintrials.dosefinding import DoseFindingTrial
@@ -97,8 +98,8 @@ def _get_beta_hat_bayes(F, intercept, codified_doses_given, toxs, beta_pdf, use_
 
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
-        n = 100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)  # My own rule of thumb
-        z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=1)
+        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))  # My own rule of thumb
+        z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         num_y = z * _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         denom_y = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         num = trapz(num_y, z, dz)
@@ -213,8 +214,8 @@ def _get_post_tox_bayes(F, intercept, dose_labels, codified_doses_given, toxs, b
     post_tox = []
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
-        n = 100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)  # My own rule of thumb
-        z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=1)
+        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))  # My own rule of thumb
+        z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         denom_y = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         denom = trapz(denom_y, z, dz)
         # num_scale = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
