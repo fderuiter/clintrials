@@ -125,3 +125,7 @@ Install the optional docs dependencies and run Sphinx:
 pip install -e .[docs]
 make -C docs html
 ```
+
+Documentation changes pushed to `main` are automatically deployed to
+GitHub Pages using a Jekyll workflow defined in
+`.github/workflows/docs.yml`.
