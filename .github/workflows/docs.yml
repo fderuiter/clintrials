@@ -7,7 +7,7 @@ on:
       - "clintrials/**"
       - "pyproject.toml"
   push:
-    branches: [main]
+    branches: [main, gh-pages]
     paths:
       - "docs/**"
       - "clintrials/**"
@@ -55,6 +55,7 @@ jobs:
           path: ./_site
 
   deploy:
+    if: github.ref == 'refs/heads/gh-pages'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
