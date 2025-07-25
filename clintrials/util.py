@@ -5,7 +5,10 @@ __contact__ = 'kristian.brock@gmail.com'
 
 
 from collections import OrderedDict
-from collections.abc import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:  # Python <3.3
+    from collections import Iterable
 from copy import copy
 from datetime import datetime
 from itertools import product
