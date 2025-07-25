@@ -201,7 +201,7 @@ class EfficacyToxicityDoseFindingTrial(metaclass=abc.ABCMeta):
 
             self._next_dose = self.__calculate_next_dose(**kwargs)
         else:
-            logging.warn("Cannot update design with no cases")
+            logging.warning("Cannot update design with no cases")
 
         return self._next_dose
 
@@ -458,7 +458,7 @@ def simulate_trial(
         tolerances = np.random.uniform(size=3 * n_patients).reshape(n_patients, 3)
 
     if tox_eff_odds_ratio != 1.0 and calculate_optimal_decision:
-        logging.warn(
+        logging.warning(
             "Patient outcomes are not sequential when toxicity and efficacy events are correlated. "
             + "E.g. toxicity at d_1 dose not necessarily imply toxicity at d_2. It is important "
             + "to appreciate this when calculating optimal decisions."
@@ -533,7 +533,7 @@ def simulate_efficacy_toxicity_dose_finding_trials(
         tolerances = np.random.uniform(size=3 * max_size).reshape(max_size, 3)
 
     if tox_eff_odds_ratio != 1.0 and calculate_optimal_decision:
-        logging.warn(
+        logging.warning(
             "Patient outcomes are not sequential when toxicity and efficacy events are correlated. "
             + "E.g. toxicity at d_1 dose not necessarily imply toxicity at d_2. It is important "
             + "to appreciate this when calculating optimal decisions."
