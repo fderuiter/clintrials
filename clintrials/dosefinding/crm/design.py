@@ -174,8 +174,6 @@ def _get_beta_hat_bayes(
 def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=False):
     """Get maximum likelihood estimate of beta parameter (and optionally its variance) in MLE CRM.
 
-    TODO: how is estimating variance possible?
-
     :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
     :type F: func
     :param intercept: the second parameter to F, the intercept

@@ -103,7 +103,7 @@ class BeBOP:
         return [case[i] for case in self.cases]
 
     def update(self, cases, n=10**6, epsilon=0.00001, **kwargs):
-        """TODO
+        """Update the sampler with additional ``cases``.
 
         :param n:
         :param epsilon:

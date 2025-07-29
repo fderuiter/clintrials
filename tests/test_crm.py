@@ -243,4 +243,3 @@ def test_CRM_bayes_again():
     # These are verifiable in R
 
 
-# TODO: tests of full Bayes CRM, verified against bcrm in R
