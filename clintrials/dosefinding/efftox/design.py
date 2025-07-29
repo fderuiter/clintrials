@@ -133,7 +133,7 @@ def efftox_get_posterior_probs(
     # 6 dimensions. The limits of integration should capture all probability density, but not be too
     # generous, e.g. -1000 to 1000 would be stupid because the density at most points would be practically zero.
     # I use percentage points of the various prior distributions. The risk is that if the prior
-    # does not cover the posterior range well, it will not estimate it well. This needs attention. TODO
+    # does not cover the posterior range well, it will not estimate it well. This needs attention.
     epsilon = 0.000001
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
     samp = np.column_stack(
@@ -213,7 +213,7 @@ def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5):
     # 6 dimensions. The limits of integration should capture all probability density, but not be too
     # generous, e.g. -1000 to 1000 would be stupid because the density at most points would be practically zero.
     # I use percentage points of the various prior distributions. The risk is that if the prior
-    # does not cover the posterior range well, it will not estimate it well. This needs attention. TODO
+    # does not cover the posterior range well, it will not estimate it well. This needs attention.
     epsilon = 0.000001
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
     samp = np.column_stack(
@@ -486,7 +486,6 @@ class InverseQuadraticCurve:
 
     def solve(self, prob_eff=None, prob_tox=None, delta=0):
         """Specify exactly one of prob_eff or prob_tox and this will return the other, for given delta"""
-        # TODO
         raise NotImplementedError()
 
     def plot_contours(
@@ -536,7 +535,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     See Thall, P.F. & Cook, J.D. (2004) - Dose-Finding Based on Efficacy-Toxicity Trade-Offs
 
     e.g. general usage
-    (for now, parameter means and standard deviations were fetched from MD Anderson's EffTox software. TODO)
+    (for now, parameter means and standard deviations were fetched from MD Anderson's EffTox software.)
     >>> real_doses = [7.5, 15, 30, 45]
     >>> tox_cutoff = 0.40
     >>> eff_cutoff = 0.45

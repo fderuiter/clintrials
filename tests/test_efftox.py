@@ -1,8 +1,6 @@
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-# TODO
-
 # from nose.tools import with_setup
 from collections import OrderedDict
 

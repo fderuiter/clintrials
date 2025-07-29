@@ -154,7 +154,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         :param avoid_skipping_untried_deescalation_stage_2: True to avoid skipping untried doses in de-escalation in
         stage 2
         :type avoid_skipping_untried_deescalation_stage_2: bool
-        :param must_try_lowest_dose: Unused, TODO
+        :param must_try_lowest_dose: Unused
         :type must_try_lowest_dose: bool
         :param plugin_mean: True to estimate event curves by plugging parameter estimate into function;
                             False to estimate using full Bayesian integral (default).
@@ -343,7 +343,6 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         # Estimate probability of efficacy exceeds eff_cutoff using plug-in mean and variance for theta
         # and randomly sampling values from normal. Why normal? Because the prior for is normal and the posterior
         # is asymptotically normal. For low n, non-normality may lead to bias.
-        # TODO: research replacing this with a proper posterior integral
         theta_sample = norm(
             loc=self.model_theta_hat(), scale=np.sqrt(self.model_theta_var())
         ).rvs(n)
@@ -368,7 +367,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         prob_unacc_tox = self.crm.prob_tox_exceeds(
             self.tox_limit, n=10**5
-        )  # TODO: make n=10**5 editable
+        )
         prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=10**5)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
@@ -426,7 +425,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         prob_unacc_tox = self.crm.prob_tox_exceeds(
             self.tox_limit, n=10**5
-        )  # TODO: make n=10**5 editable
+        )
         prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=10**5)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))

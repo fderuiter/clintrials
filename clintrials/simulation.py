@@ -179,7 +179,6 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
                 row_tuples, pd.MultiIndex.from_tuples(index_tuples, names=var_names)
             )
         else:
-            # TODO
             return row_tuples, index_tuples
     else:
         if to_pandas:
@@ -187,7 +186,6 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
 
             return pd.DataFrame(columns=func_map.keys())
         else:
-            # TODO
             return [], []
 
 
@@ -251,7 +249,6 @@ def reduce_maps_by_summing(x, y):
 
 
 # I wrote the functions below during a specific analysis.
-# TODO: Do they make sense in a general package?
 def partition_and_aggregate(sims, ps, function_map):
     """Function partitions simulations into subsets that used the same set of parameters,
     and then invokes a collection of map/reduce function pairs on each subset.

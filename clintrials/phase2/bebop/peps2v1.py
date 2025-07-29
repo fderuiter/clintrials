@@ -82,7 +82,7 @@ def l_n(D, alpha0, beta0, beta1, beta2, psi):
 
 
 def get_posterior_probs(D, priors, tox_cutoffs, eff_cutoffs, n=10**5):
-    """Get the posterior probabilities after having observed cumulative data D in a TODO trial.
+    """Get the posterior probabilities after having observed cumulative data ``D`` in a trial.
 
     Note: This function evaluates the posterior integrals using Monte Carlo integration. Thall & Cook
     use the method of Monahan & Genz. I imagine that is quicker and more accurate but it is also
@@ -408,7 +408,7 @@ class PePS2BeBOP:
 #
 #     def correlation_effect(self, alpha=0.05):
 #         """ Get confidence interval and mean estimate of the correlation between efficacy and toxicity. """
-#         # TODO: Confidence interval for correlation is described here
+#         # Confidence interval for correlation is described here
 #         # http://ncss.wpengine.netdna-cdn.com/wp-content/themes/ncss/pdf/Procedures/PASS/Confidence_Interval_for_Pearsons_Correlation.pdf
 #         return [-1, np.corrcoef(self.toxicities(), self.efficacies())[0,1], 1]
 #

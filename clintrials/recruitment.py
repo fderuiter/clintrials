@@ -157,7 +157,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         :param initial_intensity: recruitment commences at this % of total power.
                                     E.g. if it takes 2 days to recruit a patient at full recruitment power,
                                             at intensity 0.1 it will take 20 days to recruit a patient.
-                                    TODO: zero? negative?
+                                    Zero? negative?
         :type initial_intensity: float
         :param vertices: list of additional vertices as (time t, intensity r) tuples, where recruitment power is r% at t
                         Recruitment intensity is linearly extrapolated between vertex times, including the origin, t=0.
