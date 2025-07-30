@@ -126,6 +126,7 @@ pip install -e .[docs]
 make -C docs html
 ```
 
-Documentation changes pushed to `gh-pages` are automatically deployed to
-GitHub Pages using a Jekyll workflow defined in
-`.github/workflows/docs.yml`.
+Documentation is deployed to GitHub Pages by the
+workflow `.github/workflows/docs.yml` when changes are pushed to the
+`main` branch. Ensure that the GitHub environment permits deployments
+from `main`.
