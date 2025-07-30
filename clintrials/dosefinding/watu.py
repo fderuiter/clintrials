@@ -365,9 +365,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
     # Private interface
     def _stage_one_next_dose(self):
 
-        prob_unacc_tox = self.crm.prob_tox_exceeds(
-            self.tox_limit, n=10**5
-        )
+        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=10**5)
         prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=10**5)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
@@ -423,9 +421,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
     def _stage_two_next_dose(self, tox_probs, eff_probs):
 
-        prob_unacc_tox = self.crm.prob_tox_exceeds(
-            self.tox_limit, n=10**5
-        )
+        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=10**5)
         prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=10**5)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))

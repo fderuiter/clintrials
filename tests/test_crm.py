@@ -241,5 +241,3 @@ def test_CRM_bayes_again():
         < 0.001
     )
     # These are verifiable in R
-
-
