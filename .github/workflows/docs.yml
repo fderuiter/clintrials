@@ -1,17 +1,11 @@
-name: Deploy Jekyll documentation
+name: Deploy Jekyll with GitHub Pages dependencies preinstalled
 
 on:
-  pull_request:
-    paths:
-      - "docs/**"
-      - "clintrials/**"
-      - "pyproject.toml"
+  # Runs on pushes targeting the default branch
   push:
-    branches: [main, gh-pages]
-    paths:
-      - "docs/**"
-      - "clintrials/**"
-      - "pyproject.toml"
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
@@ -55,7 +49,6 @@ jobs:
           path: ./_site
 
   deploy:
-    if: github.ref == 'refs/heads/gh-pages'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
