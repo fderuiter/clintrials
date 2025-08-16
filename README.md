@@ -44,7 +44,7 @@ There are two ways.
 The first method uses pip and the Python package index.
 The extras like the tutorials are not provided.
 The second clones this repo using git.
-Tutorials are provided in the tutorials directory.
+Tutorials are provided in the `docs/tutorials` directory.
 The one complication is getting the clinitrials package on your path.
 
 #### Using Poetry to get just the clintrials code
@@ -85,7 +85,7 @@ Or, in Windows run
 
 Then, load a jupyter notebook session for the tutorials using:
 
-`jupyter notebook --notebook-dir=tutorials`
+`jupyter notebook --notebook-dir=docs/tutorials`
 
 A browser window should appear and you should see the tutorials.
 Tutorials related to the _Implementing the EffTox Dose-Finding Design in the Matchpoint Trial_ publication

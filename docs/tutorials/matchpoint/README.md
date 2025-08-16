@@ -14,7 +14,7 @@ Ambivalence.ipynb
 are provided to complement the publication _Implementing the EffTox Dose-Finding Design in the Matchpoint Trial_ (Brock et al.,in submission).
 Please consult the paper for the clinical background, the methodology details, and full explanation of the terminology.
 
-These notebooks can be viewed online at https://github.com/brockk/clintrials/tree/master/tutorials/matchpoint
+These notebooks can be viewed online at https://github.com/brockk/clintrials/tree/master/docs/tutorials/matchpoint
 but to run them, you will need Python and Jupyter.
 We recommended you install Anaconda because it greatly simplifies the process of installing Python and the common add-ons like jupyter, numpy, scipy, pandas, etc.
 Install it from https://www.continuum.io/downloads.
@@ -43,7 +43,7 @@ Or, in Windows run
 
 Then, load a jupyter notebook session for the tutorials using:
 
-`jupyter notebook --notebook-dir=tutorials/matchpoint`
+`jupyter notebook --notebook-dir=docs/tutorials/matchpoint`
 
 A browser window should appear and you should see the tutorials.
 "Test ggplot.ipynb" is a notebook to test whether ggplot is correctly installed. 
