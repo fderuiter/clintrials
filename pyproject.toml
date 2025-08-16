@@ -74,7 +74,7 @@ ignore = [
     "F841",
     "E713",
 ]
-exclude = ["clintrials/phase2/bebop/peps2v1.py", "tutorials/*.ipynb"]
+exclude = ["clintrials/phase2/bebop/peps2v1.py", "docs/tutorials/*.ipynb"]
 
 [tool.pytest.ini_options]
 addopts = "-ra -q --strict-markers"
