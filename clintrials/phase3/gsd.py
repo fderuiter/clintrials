@@ -1,10 +1,12 @@
 """
 Module for Group Sequential Designs (GSDs).
 """
+
 from typing import Callable, List
+
 import numpy as np
-from scipy.stats import norm, multivariate_normal
 from scipy.optimize import brentq
+from scipy.stats import multivariate_normal, norm
 
 
 def spending_function_pocock(t: float, alpha: float) -> float:
@@ -66,6 +68,7 @@ class GroupSequentialDesign:
         A list of information fractions for each look. If None, assumes
         equally spaced looks, by default None.
     """
+
     def __init__(
         self,
         k: int,
@@ -81,11 +84,11 @@ class GroupSequentialDesign:
         self.k = k
         self.alpha = alpha
         self.sfu = sfu
-        self.timing = timing if timing is not None else np.linspace(1/k, 1, k)
+        self.timing = timing if timing is not None else np.linspace(1 / k, 1, k)
 
         if len(self.timing) != k:
             raise ValueError("Length of timing must be equal to k.")
-        if any(self.timing[i] >= self.timing[i+1] for i in range(k-1)):
+        if any(self.timing[i] >= self.timing[i + 1] for i in range(k - 1)):
             raise ValueError("Timing must be strictly increasing.")
         if self.timing[-1] != 1.0:
             raise ValueError("The last element of timing must be 1.0.")
@@ -101,7 +104,7 @@ class GroupSequentialDesign:
         """
         boundaries = []
         for i in range(1, self.k + 1):
-            target_alpha = self.sfu(self.timing[i-1], self.alpha)
+            target_alpha = self.sfu(self.timing[i - 1], self.alpha)
 
             # Target probability for the CDF (prob of not stopping)
             target_cdf = 1 - target_alpha
@@ -150,8 +153,8 @@ class GroupSequentialDesign:
                 boundary = brentq(root_func, -50, 50)
                 boundaries[-1] = boundary
             except ValueError:
-                 # If it still fails, something is wrong with the design.
-                 raise RuntimeError("Could not find a valid final boundary.")
+                # If it still fails, something is wrong with the design.
+                raise RuntimeError("Could not find a valid final boundary.")
 
         return boundaries
 
@@ -200,10 +203,10 @@ class GroupSequentialDesign:
 
         for i in range(self.k):
             # Identify trials that are still ongoing
-            ongoing_trials = (stopped_at == self.k + 1)
+            ongoing_trials = stopped_at == self.k + 1
 
             # Check if they stop at the current look
-            stopping_now = (simulated_z[:, i] >= self.efficacy_boundaries[i])
+            stopping_now = simulated_z[:, i] >= self.efficacy_boundaries[i]
 
             # Update trials that are both ongoing and stopping now
             update_mask = ongoing_trials & stopping_now
@@ -214,18 +217,24 @@ class GroupSequentialDesign:
         rejection_prob = np.mean(rejected)
 
         # Get counts of stopping at each look (and not stopping)
-        stop_counts = np.bincount(stopped_at, minlength=self.k + 2)[1:] # Index 0 is unused
+        stop_counts = np.bincount(stopped_at, minlength=self.k + 2)[
+            1:
+        ]  # Index 0 is unused
         stopping_dist = stop_counts / n_sims
 
         # Expected information is the weighted average of stopping times
-        info_at_stop = np.array(self.timing + [self.timing[-1]]) # Add final time for non-stoppers
+        info_at_stop = np.array(
+            self.timing + [self.timing[-1]]
+        )  # Add final time for non-stoppers
 
         # Get the information time for each trial's stopping point
-        trial_stop_info = np.array([self.timing[s-1] if s <= self.k else self.timing[-1] for s in stopped_at])
+        trial_stop_info = np.array(
+            [self.timing[s - 1] if s <= self.k else self.timing[-1] for s in stopped_at]
+        )
         expected_info = np.mean(trial_stop_info)
 
         return {
             "rejection_prob": rejection_prob,
-            "stopping_dist": stopping_dist[:self.k], # Only for looks 1 to k
+            "stopping_dist": stopping_dist[: self.k],  # Only for looks 1 to k
             "expected_info": expected_info,
         }

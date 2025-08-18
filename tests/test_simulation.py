@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+
 from clintrials.simulation import extract_sim_data, summarise_sims
 from clintrials.util import ParameterSpace
 
@@ -79,7 +80,5 @@ def test_summarise_sims_deprecated(sample_sims, sample_ps):
         assert isinstance(result, pd.DataFrame)
 
     with pytest.deprecated_call():
-        result_tuple = summarise_sims(
-            sample_sims, sample_ps, func_map, to_pandas=False
-        )
+        result_tuple = summarise_sims(sample_sims, sample_ps, func_map, to_pandas=False)
         assert isinstance(result_tuple, tuple)

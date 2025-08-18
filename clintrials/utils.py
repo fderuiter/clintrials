@@ -43,7 +43,9 @@ def filter_list_of_dicts(list_of_dicts, filter_dict):
     for key, val in filter_dict.items():
         # In JSON, tuples are masked as lists. In this filter, we treat them as equivalent:
         if isinstance(val, (tuple)):
-            list_of_dicts = [x for x in list_of_dicts if x[key] == val or x[key] == list(val)]
+            list_of_dicts = [
+                x for x in list_of_dicts if x[key] == val or x[key] == list(val)
+            ]
         else:
             list_of_dicts = [x for x in list_of_dicts if x[key] == val]
     return list_of_dicts
