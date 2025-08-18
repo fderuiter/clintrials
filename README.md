@@ -92,6 +92,20 @@ Tutorials related to the _Implementing the EffTox Dose-Finding Design in the Mat
 are in the `matchpoint` directory.
 
 
+### Interactive Dashboard
+
+This project includes an interactive web-based dashboard for visualizing simulation results.
+To run the dashboard, make sure you have installed the project dependencies with Poetry, as described above.
+Then, run the following command:
+
+```bash
+poetry run dashboard
+```
+
+This will start a local web server and open the dashboard in your browser.
+You can then upload your simulation results in JSON format and explore them interactively.
+
+
 ### Documentation
 
 Documentation will eventually appear at
