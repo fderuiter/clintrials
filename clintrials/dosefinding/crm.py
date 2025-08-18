@@ -173,7 +173,6 @@ def _get_beta_hat_bayes(
 
 def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=False):
     """Get maximum likelihood estimate of beta parameter (and optionally its variance) in MLE CRM.
-
     :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
     :type F: func
     :param intercept: the second parameter to F, the intercept
@@ -191,7 +190,6 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
     :type estimate_var: bool
     :return: a 2-tuple, (posterior mean, posterior variance)
     :rtype: tuple
-
     """
     if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
         msg = (
@@ -206,13 +204,37 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
     f = lambda beta: -1 * _compound_toxicity_likelihood(
         F, intercept, beta, codified_doses_given, toxs, log=True
     )
-    res = minimize(f, x0=0, method="nelder-mead")
+    res = minimize(f, x0=0, method="BFGS")
+    var = None
     if estimate_var:
-        logging.warning(
-            "Variance estimation in MLE mode is not implemented because I do not think it makes sense. \
-        In dfcrm, Ken Cheung uses a method that I do not understand. It yields comparatively huge variances."
+        if res.success:
+            var = res.hess_inv[0, 0]
+        else:
+            logging.warning("Minimization failed; cannot estimate variance.")
+
+    return res.x[0], var
+
+
+def _get_beta_hat_mle_bootstrap(
+    F, intercept, beta_hat, codified_doses_given, B=200
+):
+    """
+    Perform parametric bootstrap to estimate the variance of beta_hat.
+    """
+    beta_hats_boot = []
+    for _ in range(B):
+        # Simulate new toxicity outcomes
+        tox_probs = [F(dose, intercept, beta_hat) for dose in codified_doses_given]
+        toxs_boot = [np.random.binomial(1, p) for p in tox_probs]
+
+        # Re-estimate beta_hat
+        beta_hat_boot, _ = _get_beta_hat_mle(
+            F, intercept, codified_doses_given, toxs_boot, estimate_var=False
         )
-    return res.x[0], None
+        if not np.isnan(beta_hat_boot):
+            beta_hats_boot.append(beta_hat_boot)
+
+    return np.var(beta_hats_boot)
 
 
 def _estimate_prob_tox_from_param(F, intercept, beta_hat, dose_labels):
@@ -320,9 +342,10 @@ def crm(
     use_quick_integration=False,
     estimate_var=False,
     plugin_mean=True,
+    mle_var_method="hessian",
+    bootstrap_samples=200,
 ):
     """Run CRM calculation on observed dosages and toxicities.
-
     Parameters
     ----------
     prior : list
@@ -349,17 +372,17 @@ def crm(
         If ``True`` estimate the posterior variance of beta.
     plugin_mean : bool
         If ``True`` plug the beta estimate into the link function.
-
+    mle_var_method : str
+        One of ``"hessian"`` or ``"bootstrap"``.
+    bootstrap_samples : int
+        Number of bootstrap samples to use if ``mle_var_method="bootstrap"``.
     Returns
     -------
     tuple
         ``(recommended_dose_index, beta_hat, beta_var, prob_tox)``.
-
     I omitted Ken's parameters:
     n=length(level), dosename=NULL, include=1:n, pid=1:n, conf.level=0.9, model.detail=TRUE, patient.detail=TRUE
-
     """
-
     if len(dose_levels) != len(toxicities):
         raise ValueError("toxicities and dose_levels should be same length.")
 
@@ -395,8 +418,13 @@ def crm(
             )
     elif method == "mle":
         beta_hat, var = _get_beta_hat_mle(
-            F_func, intercept, codified_doses, toxicities, estimate_var
+            F_func, intercept, codified_doses, toxicities, estimate_var=(mle_var_method == "hessian")
         )
+        if estimate_var and mle_var_method == "bootstrap":
+            var = _get_beta_hat_mle_bootstrap(
+                F_func, intercept, beta_hat, codified_doses, B=bootstrap_samples
+            )
+
         post_tox = _estimate_prob_tox_from_param(
             F_func, intercept, beta_hat, dose_labels
         )
@@ -455,6 +483,8 @@ class CRM(DoseFindingTrial):
         termination_func=None,
         plugin_mean=True,
         intercept=3,
+        mle_var_method="hessian",
+        bootstrap_samples=200,
     ):
         """
 
@@ -517,6 +547,10 @@ class CRM(DoseFindingTrial):
         :type plugin_mean: bool
         :param intercept: the second parameter to F, the intercept. Only pertinent under logistic method.
         :type intercept: float
+        :param mle_var_method: One of ``"hessian"`` or ``"bootstrap"``.
+        :type mle_var_method: str
+        :param bootstrap_samples: Number of bootstrap samples to use if ``mle_var_method="bootstrap"``.
+        :type bootstrap_samples: int
 
         """
 
@@ -541,6 +575,9 @@ class CRM(DoseFindingTrial):
         self.termination_func = termination_func
         self.plugin_mean = plugin_mean
         self.intercept = intercept
+        self.mle_var_method = mle_var_method
+        self.bootstrap_samples = bootstrap_samples
+
         if lowest_dose_too_toxic_hurdle and lowest_dose_too_toxic_certainty:
             if not self.estimate_var:
                 logging.warning(
@@ -579,6 +616,8 @@ class CRM(DoseFindingTrial):
             use_quick_integration=self.use_quick_integration,
             estimate_var=self.estimate_var,
             plugin_mean=self.plugin_mean,
+            mle_var_method=self.mle_var_method,
+            bootstrap_samples=self.bootstrap_samples,
         )
         self.beta_hat = beta_hat
         self.beta_var = beta_var
