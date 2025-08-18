@@ -114,11 +114,16 @@ def filter_sims(sims, filter_dict):
     return filter_list_of_dicts(sims, filter_dict)
 
 
-def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
-    """Summarise a list of simulations.
+def extract_sim_data(
+    sims, ps, func_map, var_map=None, return_type="dataframe"
+):
+    """Extract and summarise a list of simulations.
 
     Method partitions simulations into subsets that used the same set of parameters, and then invokes
-    a collection of summary functions on each subset; outputs a pandas DataFrame with a multi-index.
+    a collection of summary functions on each subset.
+
+    The return type is a pandas DataFrame by default, but can be switched to a tuple of lists
+    for backward compatibility.
 
     :param sims: list of simulations (probably in JSON format)
     :type sims: list
@@ -129,8 +134,8 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
     :param func_map: map from item name to function that takes list of sims and parameter map as args and returns
                         a summary statistic or object.
     :type func_map: dict
-    :param to_pandas: True, to get a pandas.DataFrame; False, to get several lists
-    :type to_pandas: bool
+    :param return_type: 'dataframe' to get a pandas.DataFrame; 'tuple' to get a tuple of lists.
+    :type return_type: str
 
     """
 
@@ -158,7 +163,7 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
             index_tuples.append(param_combo)
             row_tuples.append(these_metrics)
     if len(row_tuples):
-        if to_pandas:
+        if return_type == "dataframe":
             import pandas as pd
 
             return pd.DataFrame(
@@ -167,12 +172,48 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
         else:
             return row_tuples, index_tuples
     else:
-        if to_pandas:
+        if return_type == "dataframe":
             import pandas as pd
 
             return pd.DataFrame(columns=func_map.keys())
         else:
             return [], []
+
+
+
+def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
+    """Summarise a list of simulations. (DEPRECATED)"""
+    import warnings
+
+    warnings.warn(
+        "summarise_sims is deprecated, use extract_sim_data instead",
+        DeprecationWarning,
+    )
+    return_type = "dataframe" if to_pandas else "tuple"
+    return extract_sim_data(sims, ps, func_map, var_map, return_type=return_type)
+
+
+# Map-Reduce methods for summarising sims in memory-efficient ways
+def map_reduce_files(files, map_func, reduce_func):
+    """
+    Invoke map_func on each file in sim_files and reduce results using reduce_func.
+
+    :param files: list of files that contain simulations
+    :type files: list
+    :param map_func:function to create summary content for object x
+    :type map_func: function
+    :param reduce_func: function to reduce summary content of objects x & y
+    :type reduce_func: function
+
+    :returns: ?
+    :rtype: ?
+
+    """
+    if len(files):
+        x = map(map_func, files)
+        return reduce(reduce_func, x)
+    else:
+        raise TypeError("No files")
 
 
 def invoke_map_reduce_function_map(sims, function_map):
