@@ -241,3 +241,81 @@ def test_CRM_bayes_again():
         < 0.001
     )
     # These are verifiable in R
+
+
+class TestCRMMLEVariance:
+    def setup_method(self):
+        self.prior = [0.05, 0.12, 0.25, 0.40, 0.55]
+        self.target = 0.25
+        self.F_func = logistic
+        self.inverse_F = inverse_logistic
+        self.beta_prior = norm(loc=0, scale=np.sqrt(1.34))
+        self.doses = [3, 3, 1, 2, 2, 3, 3, 2, 3, 2, 1, 2, 1, 1, 1, 2, 2]
+        self.tox = [0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0]
+
+    def test_mle_variance_hessian(self):
+        trial = CRM(
+            self.prior,
+            self.target,
+            first_dose=3,
+            max_size=len(self.doses),
+            F_func=self.F_func,
+            inverse_F=self.inverse_F,
+            beta_prior=self.beta_prior,
+            method="mle",
+            estimate_var=True,
+            mle_var_method="hessian",
+        )
+        trial.update(list(zip(self.doses, self.tox)))
+        assert trial.beta_var is not None
+        assert trial.beta_var > 0
+
+    def test_mle_variance_bootstrap(self):
+        trial = CRM(
+            self.prior,
+            self.target,
+            first_dose=3,
+            max_size=len(self.doses),
+            F_func=self.F_func,
+            inverse_F=self.inverse_F,
+            beta_prior=self.beta_prior,
+            method="mle",
+            estimate_var=True,
+            mle_var_method="bootstrap",
+            bootstrap_samples=50,  # Smaller sample for faster test
+        )
+        trial.update(list(zip(self.doses, self.tox)))
+        assert trial.beta_var is not None
+        assert trial.beta_var > 0
+
+    def test_mle_variance_comparison(self):
+        trial_hessian = CRM(
+            self.prior,
+            self.target,
+            first_dose=3,
+            max_size=len(self.doses),
+            F_func=self.F_func,
+            inverse_F=self.inverse_F,
+            beta_prior=self.beta_prior,
+            method="mle",
+            estimate_var=True,
+            mle_var_method="hessian",
+        )
+        trial_hessian.update(list(zip(self.doses, self.tox)))
+
+        trial_bootstrap = CRM(
+            self.prior,
+            self.target,
+            first_dose=3,
+            max_size=len(self.doses),
+            F_func=self.F_func,
+            inverse_F=self.inverse_F,
+            beta_prior=self.beta_prior,
+            method="mle",
+            estimate_var=True,
+            mle_var_method="bootstrap",
+            bootstrap_samples=200,
+        )
+        trial_bootstrap.update(list(zip(self.doses, self.tox)))
+
+        assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.2)
