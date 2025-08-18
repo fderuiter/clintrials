@@ -134,3 +134,39 @@ def hyperbolic_tan(x, a0=0, beta=0):
 
 def inverse_hyperbolic_tan(x, a0=0, beta=0):
     return np.arctanh(2 * x ** np.exp(-beta) - 1)
+
+
+def logit1(x, a0=3, beta=0):
+    """Get the 1-parameter logistic function value:
+
+    :math:`\\frac{e^{3+\\alpha x}}{1 + e^{3+\\alpha x}}`
+
+    where :math:`\\alpha = e^{\\beta}`.
+
+    :param x: x-variable
+    :type x: float
+    :param a0: intercept parameter.
+    :type a0: float
+    :param beta: slope parameter
+    :type beta: float
+    :return: Logistic function value
+    :rtype: float
+    """
+    return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
+
+
+def inverse_logit1(x, a0=3, beta=0):
+    """Get the inverse 1-parameter logistic function value.
+
+    .. note:: this function is the inverse of :func:`clintrials.common.logit1`.
+
+    :param x: x-variable
+    :type x: float
+    :param a0: intercept parameter.
+    :type a0: float
+    :param beta: slope parameter
+    :type beta: float
+    :return: Inverse logistic function value
+    :rtype: float
+    """
+    return (np.log(x / (1 - x)) - a0) / np.exp(beta)
