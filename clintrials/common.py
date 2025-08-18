@@ -54,6 +54,7 @@ def empiric(x, a0=None, beta=0):
 
     """
 
+    beta = np.clip(beta, -10, 10)
     return x ** np.exp(beta)
 
 
@@ -101,6 +102,7 @@ def logistic(x, a0=0, beta=0):
 
     """
 
+    beta = np.clip(beta, -10, 10)
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 
@@ -152,6 +154,7 @@ def logit1(x, a0=3, beta=0):
     :return: Logistic function value
     :rtype: float
     """
+    beta = np.clip(beta, -10, 10)
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 

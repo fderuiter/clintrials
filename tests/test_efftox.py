@@ -153,7 +153,7 @@ def test_thall2014_efftox():
     # Cohort 3 - Eff, Tox and a Both at dose level 3
     cases = cases + [(3, 0, 1), (3, 1, 0), (3, 1, 1)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)
+            run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(20)
     ]
 
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
