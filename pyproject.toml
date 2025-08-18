@@ -84,7 +84,6 @@ ignore = [
 exclude = ["clintrials/phase2/bebop/peps2v1.py", "docs/tutorials/*.ipynb"]
 
 [tool.pytest.ini_options]
-addopts = "-ra -q --strict-markers"
 testpaths = ["tests"]
 
 [tool.poetry.extras]

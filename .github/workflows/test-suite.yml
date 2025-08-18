@@ -19,11 +19,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: pipx install poetry
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install pytest pytest-cov numpy pandas scipy matplotlib ggplot statsmodels hypothesis
-          python -m pip install .
+          poetry install --with dev
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Run tests
