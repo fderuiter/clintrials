@@ -1196,6 +1196,7 @@ def efftox_dtp_detail(trial):
 
     return to_return
 
+
 __all__ = [
     "EffTox",
     "LpNormCurve",

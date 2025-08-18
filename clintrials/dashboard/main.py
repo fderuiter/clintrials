@@ -1,6 +1,9 @@
-import streamlit as st
-from clintrials.dashboard.views import crm_view, efftox_view
 import json
+
+import streamlit as st
+
+from clintrials.dashboard.views import crm_view, efftox_view
+
 
 def main():
     st.title("Interactive Simulation Dashboard")
@@ -8,11 +11,13 @@ def main():
     st.sidebar.header("Select Trial Design")
     design_type = st.sidebar.selectbox(
         "Choose the type of trial design for your simulation results:",
-        ("CRM", "EffTox")
+        ("CRM", "EffTox"),
     )
 
     st.sidebar.header("Upload Simulation Results")
-    uploaded_file = st.sidebar.file_uploader("Upload a JSON file with simulation results", type=["json"])
+    uploaded_file = st.sidebar.file_uploader(
+        "Upload a JSON file with simulation results", type=["json"]
+    )
 
     if uploaded_file is not None:
         string_data = uploaded_file.getvalue().decode("utf-8")
@@ -23,6 +28,7 @@ def main():
             crm_view.render(sims)
         elif design_type == "EffTox":
             efftox_view.render(sims)
+
 
 if __name__ == "__main__":
     main()

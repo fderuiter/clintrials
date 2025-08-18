@@ -1,9 +1,12 @@
-import streamlit as st
+import json
+
 import pandas as pd
 import plotly.express as px
-import json
+import streamlit as st
+
 from clintrials.simulation import summarise_sims
 from clintrials.util import ParameterSpace
+
 
 def render(sims):
     st.header("CRM Simulation Results")
@@ -14,7 +17,7 @@ def render(sims):
     # Example parameter space for CRM - this should be adapted based on expected sim structure
     # This assumes the simulations were run over a parameter space of true toxicity probabilities.
     param_space_config = {
-        'true_tox': [[0.05, 0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4, 0.5]]
+        "true_tox": [[0.05, 0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4, 0.5]]
     }
     ps = ParameterSpace(param_space_config)
 
@@ -23,8 +26,12 @@ def render(sims):
 
     # Define summary functions for CRM
     func_map = {
-        'N': lambda s, p: len(s),
-        'recommended_dose_prob': lambda s, p: pd.Series([x['recommended_dose'] for x in s]).value_counts(normalize=True).sort_index()
+        "N": lambda s, p: len(s),
+        "recommended_dose_prob": lambda s, p: pd.Series(
+            [x["recommended_dose"] for x in s]
+        )
+        .value_counts(normalize=True)
+        .sort_index(),
     }
 
     try:
@@ -36,33 +43,38 @@ def render(sims):
         # Plotting
         st.header("Operating Characteristics")
 
-        if not summary_df.empty and 'recommended_dose_prob' in summary_df.columns:
+        if not summary_df.empty and "recommended_dose_prob" in summary_df.columns:
             st.subheader("Dose Recommendation Probability")
 
             # The 'recommended_dose_prob' column contains dictionaries. We need to expand it into a DataFrame.
-            rec_dose_df = summary_df['recommended_dose_prob'].apply(pd.Series).fillna(0)
+            rec_dose_df = summary_df["recommended_dose_prob"].apply(pd.Series).fillna(0)
 
             # We need to melt the DataFrame to plot it with plotly express
             rec_dose_df_melted = rec_dose_df.reset_index().melt(
                 id_vars=[col for col in rec_dose_df.index.names],
-                var_name='Dose Level',
-                value_name='Probability'
+                var_name="Dose Level",
+                value_name="Probability",
             )
 
             # Create an interactive bar chart
             fig = px.bar(
                 rec_dose_df_melted,
-                x='true_tox',
-                y='Probability',
-                color='Dose Level',
-                barmode='group',
-                labels={'true_tox': 'True Toxicity Scenario', 'Probability': 'Recommendation Probability'},
-                title='Dose Recommendation Probabilities by Scenario'
+                x="true_tox",
+                y="Probability",
+                color="Dose Level",
+                barmode="group",
+                labels={
+                    "true_tox": "True Toxicity Scenario",
+                    "Probability": "Recommendation Probability",
+                },
+                title="Dose Recommendation Probabilities by Scenario",
             )
             st.plotly_chart(fig)
 
         else:
-            st.warning("Could not generate Dose Recommendation Probability plot. Check simulation data and summary output.")
+            st.warning(
+                "Could not generate Dose Recommendation Probability plot. Check simulation data and summary output."
+            )
 
     except Exception as e:
         st.error(f"An error occurred during summarization or plotting: {e}")

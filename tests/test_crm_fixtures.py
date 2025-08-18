@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from clintrials.common import logit1, inverse_logit1
+from clintrials.common import inverse_logit1, logit1
 from clintrials.dosefinding.crm import crm
 
 
@@ -31,7 +31,9 @@ def test_CRM_with_bcrm_fixtures():
     recommended_dose_1 = np.argmin(np.abs(np.array(prob_tox_1) - target_tox_1)) + 1
 
     expected_prob_tox_1 = expected_probs[expected_probs.scenario == 1].prob.values
-    expected_next_dose_1 = expected_doses[expected_doses.scenario == 1].next_dose.values[0]
+    expected_next_dose_1 = expected_doses[
+        expected_doses.scenario == 1
+    ].next_dose.values[0]
 
     assert np.allclose(prob_tox_1, expected_prob_tox_1, atol=1e-2)
     assert recommended_dose_1 == expected_next_dose_1
@@ -56,7 +58,9 @@ def test_CRM_with_bcrm_fixtures():
     recommended_dose_2 = np.argmin(np.abs(np.array(prob_tox_2) - target_tox_2)) + 1
 
     expected_prob_tox_2 = expected_probs[expected_probs.scenario == 2].prob.values
-    expected_next_dose_2 = expected_doses[expected_doses.scenario == 2].next_dose.values[0]
+    expected_next_dose_2 = expected_doses[
+        expected_doses.scenario == 2
+    ].next_dose.values[0]
 
     assert np.allclose(prob_tox_2, expected_prob_tox_2, atol=1e-1)
     assert recommended_dose_2 == expected_next_dose_2
