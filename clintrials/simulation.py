@@ -114,9 +114,7 @@ def filter_sims(sims, filter_dict):
     return filter_list_of_dicts(sims, filter_dict)
 
 
-def extract_sim_data(
-    sims, ps, func_map, var_map=None, return_type="dataframe"
-):
+def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
     """Extract and summarise a list of simulations.
 
     Method partitions simulations into subsets that used the same set of parameters, and then invokes
@@ -180,7 +178,6 @@ def extract_sim_data(
             return [], []
 
 
-
 def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
     """Summarise a list of simulations. (DEPRECATED)"""
     import warnings
@@ -194,28 +191,6 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
 
 
 # Map-Reduce methods for summarising sims in memory-efficient ways
-def map_reduce_files(files, map_func, reduce_func):
-    """
-    Invoke map_func on each file in sim_files and reduce results using reduce_func.
-
-    :param files: list of files that contain simulations
-    :type files: list
-    :param map_func:function to create summary content for object x
-    :type map_func: function
-    :param reduce_func: function to reduce summary content of objects x & y
-    :type reduce_func: function
-
-    :returns: ?
-    :rtype: ?
-
-    """
-    if len(files):
-        x = map(map_func, files)
-        return reduce(reduce_func, x)
-    else:
-        raise TypeError("No files")
-
-
 def invoke_map_reduce_function_map(sims, function_map):
     warnings.warn(
         "invoke_map_reduce_function_map is deprecated; use invoke_map_reduce_on_list instead",
@@ -283,27 +258,3 @@ def reduce_product_of_two_files_by_summing(x, y):
     for k in x.keys():
         response[k] = reduce_maps_by_summing(x[k], y[k])
     return response
-
-
-def multiindex_dataframe_from_tuple_map(x, labels):
-    warnings.warn(
-        "multiindex_dataframe_from_tuple_map is deprecated; use multiindex_dataframe_from_tuple_map from clintrials.utils instead",
-        DeprecationWarning,
-    )
-    return multiindex_dataframe_from_tuple_map(x, labels)
-
-
-def reduce_maps_by_summing(x, y):
-    warnings.warn(
-        "reduce_maps_by_summing is deprecated; use reduce_maps_by_summing from clintrials.utils instead",
-        DeprecationWarning,
-    )
-    return reduce_maps_by_summing(x, y)
-
-
-def map_reduce_files(files, map_func, reduce_func):
-    warnings.warn(
-        "map_reduce_files is deprecated; use map_reduce_files from clintrials.utils instead",
-        DeprecationWarning,
-    )
-    return map_reduce_files(files, map_func, reduce_func)

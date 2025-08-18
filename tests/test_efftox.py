@@ -1,21 +1,23 @@
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-import pytest
 from collections import OrderedDict
-import numpy as np
-from scipy.stats import norm
 from unittest.mock import patch
-from hypothesis import given, strategies as st, settings, HealthCheck
+
+import numpy as np
+import pytest
+from hypothesis import HealthCheck, given, settings
+from hypothesis import strategies as st
+from scipy.stats import norm
 
 from clintrials.dosefinding.efftox import (
     EffTox,
     LpNormCurve,
-    scale_doses,
-    _pi_T,
-    _pi_E,
-    _pi_ab,
     _L_n,
+    _pi_ab,
+    _pi_E,
+    _pi_T,
+    scale_doses,
 )
 
 
@@ -254,6 +256,7 @@ def test_matchpoint_efftox():
         < epsilon2
     )
 
+
 def test_thall2014_efftox_v2():
     real_doses = [1, 2, 4, 6.6, 10]
     trial_size = 39
@@ -333,6 +336,7 @@ def test_thall2014_efftox_v2():
     ]
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
 
+
 @pytest.fixture
 def lp_norm_curve():
     return LpNormCurve(
@@ -341,6 +345,7 @@ def lp_norm_curve():
         hinge_prob_eff=0.5,
         hinge_prob_tox=0.4,
     )
+
 
 class TestLpNormCurve:
     def test_constructor_invalid_hinge_points(self):
@@ -371,15 +376,23 @@ class TestLpNormCurve:
 
     def test_get_tox(self, lp_norm_curve):
         assert np.isclose(lp_norm_curve.get_tox(eff=0.5, util=0), 0.4)
-        assert lp_norm_curve.get_tox(eff=0.6, util=0.1) < lp_norm_curve.get_tox(eff=0.6, util=0)
-        assert lp_norm_curve.get_tox(eff=0.6, util=-0.1) > lp_norm_curve.get_tox(eff=0.6, util=0)
+        assert lp_norm_curve.get_tox(eff=0.6, util=0.1) < lp_norm_curve.get_tox(
+            eff=0.6, util=0
+        )
+        assert lp_norm_curve.get_tox(eff=0.6, util=-0.1) > lp_norm_curve.get_tox(
+            eff=0.6, util=0
+        )
 
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(
-        st.floats(0.01, 0.99), st.floats(0.01, 0.99),
-        st.floats(0.01, 0.99), st.floats(0.01, 0.99)
+        st.floats(0.01, 0.99),
+        st.floats(0.01, 0.99),
+        st.floats(0.01, 0.99),
+        st.floats(0.01, 0.99),
     )
-    def test_utility_monotonicity(self, lp_norm_curve, prob_eff1, prob_eff2, prob_tox1, prob_tox2):
+    def test_utility_monotonicity(
+        self, lp_norm_curve, prob_eff1, prob_eff2, prob_tox1, prob_tox2
+    ):
         u1 = lp_norm_curve(prob_eff1, prob_tox1)
         if prob_eff2 > prob_eff1:
             assert lp_norm_curve(prob_eff2, prob_tox1) >= u1
@@ -394,16 +407,19 @@ class TestLpNormCurve:
     @given(prob_eff=st.floats(0.01, 0.99))
     def test_solve_consistency(self, lp_norm_curve, prob_eff):
         prob_tox = lp_norm_curve.solve(prob_eff=prob_eff)
-        if np.iscomplex(prob_tox).any(): return
+        if np.iscomplex(prob_tox).any():
+            return
         assert np.isclose(lp_norm_curve(prob_eff, prob_tox), 0)
 
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(eff=st.floats(0.01, 0.99), util=st.floats(-0.5, 0.5))
     def test_get_tox_consistency(self, lp_norm_curve, eff, util):
         tox = lp_norm_curve.get_tox(eff=eff, util=util)
-        if np.iscomplex(tox).any(): return
+        if np.iscomplex(tox).any():
+            return
         if 0 < tox < 1:
             assert np.isclose(lp_norm_curve(eff, tox), util)
+
 
 class TestCoreMaths:
     def test_scale_doses(self):
@@ -432,12 +448,21 @@ class TestCoreMaths:
     def test_L_n(self):
         cases = [(0, 1, 1), (0.5, 0, 1)]
         params = np.array([[-1, 1, 1, 1, 0, 0], [0, 1, 0, 1, 0, 0]])
-        likelihood = _L_n(cases, params[:,0], params[:,1], params[:,2], params[:,3], params[:,4], params[:,5])
+        likelihood = _L_n(
+            cases,
+            params[:, 0],
+            params[:, 1],
+            params[:, 2],
+            params[:, 3],
+            params[:, 4],
+            params[:, 5],
+        )
         assert likelihood.shape == (2,)
         p1 = _pi_ab(0, 1, 1, -1, 1, 1, 1, 0, 0) * _pi_ab(0.5, 0, 1, -1, 1, 1, 1, 0, 0)
         p2 = _pi_ab(0, 1, 1, 0, 1, 0, 1, 0, 0) * _pi_ab(0.5, 0, 1, 0, 1, 0, 1, 0, 0)
         assert np.isclose(likelihood[0], p1)
         assert np.isclose(likelihood[1], p2)
+
 
 @pytest.fixture
 def efftox_trial():
@@ -452,12 +477,16 @@ def efftox_trial():
         max_size=30,
     )
 
+
 class TestEffToxAdmissibleSet:
     @patch("clintrials.dosefinding.efftox.efftox_get_posterior_probs")
     def test_admissible_set_logic(self, mock_post_probs, efftox_trial):
         prob_acc_tox = [0.8, 0.95, 0.8, 0.8, 0.8]
         prob_acc_eff = [0.8, 0.95, 0.8, 0.8, 0.8]
-        mock_post_probs.return_value = (list(zip([0.1]*5, [0.6]*5, prob_acc_tox, prob_acc_eff)), None)
+        mock_post_probs.return_value = (
+            list(zip([0.1] * 5, [0.6] * 5, prob_acc_tox, prob_acc_eff)),
+            None,
+        )
         efftox_trial._update_integrals()
         assert efftox_trial.admissable_set() == [2]
 
@@ -465,33 +494,54 @@ class TestEffToxAdmissibleSet:
     def test_admissible_set_special_rule(self, mock_post_probs, efftox_trial):
         with patch.object(efftox_trial, "maximum_dose_given", return_value=1):
             prob_acc = [0.8, 0.95, 0.8, 0.8, 0.8]
-            mock_post_probs.return_value = (list(zip([0.1]*5, [0.6]*5, prob_acc, [0.8]*5)), None)
+            mock_post_probs.return_value = (
+                list(zip([0.1] * 5, [0.6] * 5, prob_acc, [0.8] * 5)),
+                None,
+            )
             efftox_trial._update_integrals()
             assert efftox_trial.admissable_set() == [2]
 
+
 def test_myeloma_integration_deterministic(mocker):
     real_doses = [25, 50, 75, 100, 125]
-    priors = [norm(loc=-8, scale=3.5), norm(loc=1.5, scale=3.5), norm(loc=0.7, scale=2.5),
-              norm(loc=3.4, scale=2.4), norm(loc=0, scale=0.2), norm(loc=0, scale=1)]
+    priors = [
+        norm(loc=-8, scale=3.5),
+        norm(loc=1.5, scale=3.5),
+        norm(loc=0.7, scale=2.5),
+        norm(loc=3.4, scale=2.4),
+        norm(loc=0, scale=0.2),
+        norm(loc=0, scale=1),
+    ]
     metric = LpNormCurve(0.2, 0.3, 0.5, 0.15)
     trial = EffTox(real_doses, priors, 0.3, 0.2, 0.9, 0.9, metric, 30, 1, True)
-    mock_post_probs = mocker.patch("clintrials.dosefinding.efftox.efftox_get_posterior_probs")
+    mock_post_probs = mocker.patch(
+        "clintrials.dosefinding.efftox.efftox_get_posterior_probs"
+    )
     assert trial.next_dose() == 1
 
     prob_tox = [0.1, 0.12, 0.15, 0.2, 0.25]
     prob_eff = [0.3, 0.5, 0.6, 0.55, 0.5]
     acc_tox = [0.95] * 5
     acc_eff = [0.95] * 5
-    mock_post_probs.return_value = (list(zip(prob_tox, prob_eff, acc_tox, acc_eff)), None)
+    mock_post_probs.return_value = (
+        list(zip(prob_tox, prob_eff, acc_tox, acc_eff)),
+        None,
+    )
     trial.update([(1, 0, 0)] * 3)
     assert trial.next_dose() == 2
 
     prob_eff = [0.3, 0.6, 0.5, 0.55, 0.5]
-    mock_post_probs.return_value = (list(zip(prob_tox, prob_eff, acc_tox, acc_eff)), None)
+    mock_post_probs.return_value = (
+        list(zip(prob_tox, prob_eff, acc_tox, acc_eff)),
+        None,
+    )
     trial.update([(2, 1, 0), (2, 0, 0), (2, 0, 0)])
     assert trial.next_dose() == 2
 
     prob_eff = [0.1, 0.5, 0.6, 0.55, 0.5]
-    mock_post_probs.return_value = (list(zip(prob_tox, prob_eff, acc_tox, acc_eff)), None)
+    mock_post_probs.return_value = (
+        list(zip(prob_tox, prob_eff, acc_tox, acc_eff)),
+        None,
+    )
     trial.update([(2, 0, 0)] * 3)
     assert trial.next_dose() == 3

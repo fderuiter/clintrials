@@ -1,10 +1,12 @@
-import pytest
 import numpy as np
+import pytest
+
 from clintrials.phase3.gsd import (
     GroupSequentialDesign,
     spending_function_obrien_fleming,
     spending_function_pocock,
 )
+
 
 def test_obrien_fleming_boundaries():
     """
@@ -18,27 +20,35 @@ def test_obrien_fleming_boundaries():
     alpha = 0.025
     expected_boundaries = [4.048, 2.862, 2.337, 2.024]
 
-    design = GroupSequentialDesign(k=k, alpha=alpha, sfu=spending_function_obrien_fleming)
+    design = GroupSequentialDesign(
+        k=k, alpha=alpha, sfu=spending_function_obrien_fleming
+    )
 
     assert len(design.efficacy_boundaries) == k
-    np.testing.assert_allclose(design.efficacy_boundaries, expected_boundaries, rtol=0.08)
+    np.testing.assert_allclose(
+        design.efficacy_boundaries, expected_boundaries, rtol=0.08
+    )
+
 
 def test_spending_functions_at_t1():
-    """ Test that spending functions spend the full alpha at t=1. """
+    """Test that spending functions spend the full alpha at t=1."""
     alpha = 0.025
     assert spending_function_pocock(1.0, alpha) == pytest.approx(alpha)
     assert spending_function_obrien_fleming(1.0, alpha) == pytest.approx(alpha)
 
+
 def test_simulation_type1_error():
-    """ Test that the simulated Type I error is close to alpha. """
+    """Test that the simulated Type I error is close to alpha."""
     k = 4
     alpha = 0.025
-    design = GroupSequentialDesign(k=k, alpha=alpha, sfu=spending_function_obrien_fleming)
+    design = GroupSequentialDesign(
+        k=k, alpha=alpha, sfu=spending_function_obrien_fleming
+    )
 
     # This is a stochastic test, so it might fail by chance.
     # A high number of sims and a reasonable tolerance are needed.
-    n_sims = 20000 # Increased for stability
+    n_sims = 20000  # Increased for stability
     results = design.simulate(n_sims=n_sims, theta=0)
 
     # Allow for some Monte Carlo error.
-    assert results['rejection_prob'] == pytest.approx(alpha, abs=0.01)
+    assert results["rejection_prob"] == pytest.approx(alpha, abs=0.01)

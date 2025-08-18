@@ -215,9 +215,7 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
     return res.x[0], var
 
 
-def _get_beta_hat_mle_bootstrap(
-    F, intercept, beta_hat, codified_doses_given, B=200
-):
+def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=200):
     """
     Perform parametric bootstrap to estimate the variance of beta_hat.
     """
@@ -424,7 +422,11 @@ def crm(
             )
     elif method == "mle":
         beta_hat, var = _get_beta_hat_mle(
-            F_func, intercept, codified_doses, toxicities, estimate_var=(mle_var_method == "hessian")
+            F_func,
+            intercept,
+            codified_doses,
+            toxicities,
+            estimate_var=(mle_var_method == "hessian"),
         )
         if estimate_var and mle_var_method == "bootstrap":
             var = _get_beta_hat_mle_bootstrap(
@@ -887,5 +889,6 @@ def crm_dtp_detail(trial):
             to_return[f"ProbTox{dl}"] = trial.prob_tox()[i]
 
     return to_return
+
 
 __all__ = ["CRM", "crm", "crm_dtp_detail"]
