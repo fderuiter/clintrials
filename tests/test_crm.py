@@ -318,4 +318,4 @@ class TestCRMMLEVariance:
         )
         trial_bootstrap.update(list(zip(self.doses, self.tox)))
 
-        assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.2)
+        assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.3)

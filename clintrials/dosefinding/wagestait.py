@@ -13,7 +13,7 @@ Wages, N.A. and Tait, C. (2015). Seamless Phase I/II Adaptive Design For Oncolog
 from random import sample
 
 import numpy as np
-from numpy import trapz
+from numpy import trapezoid
 from scipy.integrate import quad
 from scipy.stats import beta, norm
 
@@ -91,12 +91,12 @@ def _wt_get_theta_hat(
             z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
             denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
             num_y = z * denom_y
-            num = trapz(num_y, z, dz)
-            denom = trapz(denom_y, z, dz)
+            num = trapezoid(num_y, z, dz)
+            denom = trapezoid(denom_y, z, dz)
             theta_hat = num / denom
             if estimate_var:
                 num2_y = z**2 * denom_y
-                num2 = trapz(num2_y, z, dz)
+                num2 = trapezoid(num2_y, z, dz)
                 exp_x2 = num2 / denom
                 var = exp_x2 - theta_hat**2
                 theta_hats.append((theta_hat, var, denom))
@@ -164,10 +164,10 @@ def _get_post_eff_bayes(
         )  # My own rule of thumb for num points needed
         z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
         denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
-        denom = trapz(denom_y, z, dz)
+        denom = trapezoid(denom_y, z, dz)
         for x in dose_labels:
             num_y = F(x, a0=intercept, beta=z) * denom_y
-            num = trapz(num_y, z, dz)
+            num = trapezoid(num_y, z, dz)
             post_eff.append(num / denom)
     else:
         # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow

@@ -6,7 +6,7 @@ import warnings
 from collections import OrderedDict
 
 import numpy as np
-from numpy import trapz
+from numpy import trapezoid
 from scipy.integrate import quad
 from scipy.optimize import minimize
 from scipy.special import logsumexp
@@ -119,8 +119,8 @@ def _get_beta_hat_bayes(
         denom_y = _compound_toxicity_likelihood(
             F, intercept, z, codified_doses_given, toxs
         ) * beta_pdf(z)
-        num = trapz(num_y, z, dz)
-        denom = trapz(denom_y, z, dz)
+        num = trapezoid(num_y, z, dz)
+        denom = trapezoid(denom_y, z, dz)
         beta_hat = num / denom
         if estimate_var:
             num2_y = (
@@ -130,7 +130,7 @@ def _get_beta_hat_bayes(
                 )
                 * beta_pdf(z)
             )
-            num2 = trapz(num2_y, z, dz)
+            num2 = trapezoid(num2_y, z, dz)
             exp_x2 = num2 / denom
             var = exp_x2 - beta_hat**2
         else:
@@ -296,11 +296,11 @@ def _get_post_tox_bayes(
         denom_y = _compound_toxicity_likelihood(
             F, intercept, z, codified_doses_given, toxs
         ) * beta_pdf(z)
-        denom = trapz(denom_y, z, dz)
+        denom = trapezoid(denom_y, z, dz)
         # num_scale = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         for x in dose_labels:
             num_y = F(x, a0=intercept, beta=z) * denom_y
-            num = trapz(num_y, z, dz)
+            num = trapezoid(num_y, z, dz)
             post_tox.append(num / denom)
     else:
         # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow
