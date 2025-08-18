@@ -103,7 +103,11 @@ poetry run dashboard
 ```
 
 This will start a local web server and open the dashboard in your browser.
-You can then upload your simulation results in JSON format and explore them interactively.
+
+The dashboard supports tailored visualizations for different trial designs.
+Use the sidebar to select the appropriate trial design (e.g., CRM, EffTox)
+before uploading your simulation results in JSON format to explore them
+interactively.
 
 
 ### Documentation
