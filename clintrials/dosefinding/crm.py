@@ -363,7 +363,13 @@ def crm(
     if len(dose_levels) != len(toxicities):
         raise ValueError("toxicities and dose_levels should be same length.")
 
-    beta0 = beta_dist.mean()
+    # The bcrm package uses the mean of alpha (log-normal) for sdose calculation with logit1
+    if "logit1" in F_func.__name__ and isinstance(beta_dist, type(norm())):
+        alpha0 = np.exp(beta_dist.mean() + beta_dist.var() / 2)
+        beta0 = np.log(alpha0)
+    else:
+        beta0 = beta_dist.mean()
+
     codified_doses = [
         inverse_F(prior[dl - 1], a0=intercept, beta=beta0) for dl in dose_levels
     ]
