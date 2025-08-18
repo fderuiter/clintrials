@@ -14,13 +14,13 @@ from itertools import combinations_with_replacement, product
 import numpy as np
 from scipy.stats import uniform
 
-from clintrials.simulation import filter_sims
 from clintrials.util import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,
     iterable_to_json,
     to_1d_list,
 )
+from clintrials.utils import filter_list_of_dicts
 
 logger = logging.getLogger(__name__)
 
@@ -712,7 +712,7 @@ def summarise_dose_finding_sims(sims, label, num_doses, filter={}):
     import pandas as pd
 
     if len(filter):
-        sims = filter_sims(sims, filter)
+        sims = filter_list_of_dicts(sims, filter)
 
     # Recommended Doses
     doses = [x[label]["RecommendedDose"] for x in sims]
