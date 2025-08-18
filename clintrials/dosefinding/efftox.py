@@ -312,7 +312,7 @@ class LpNormCurve:
             r_to_the_p = a**self.p + b**self.p
             return 1 - r_to_the_p ** (1.0 / self.p)
         else:
-            response = np.zeros_like(x)
+            response = np.zeros_like(x, dtype=float)
             response *= np.nan
             return response
 
