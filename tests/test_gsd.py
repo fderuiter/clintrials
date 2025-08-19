@@ -53,6 +53,7 @@ def test_simulation_type1_error():
     # Allow for some Monte Carlo error.
     assert results["rejection_prob"] == pytest.approx(alpha, abs=0.01)
 
+
 def test_gsd_with_timing():
     k = 4
     alpha = 0.025
@@ -62,25 +63,37 @@ def test_gsd_with_timing():
     )
     assert len(design.efficacy_boundaries) == k
 
+
 def test_gsd_with_invalid_timing():
     k = 4
     alpha = 0.025
     with pytest.raises(ValueError):
         GroupSequentialDesign(
-            k=k, alpha=alpha, sfu=spending_function_obrien_fleming, timing=[0.25, 0.5, 0.75]
+            k=k,
+            alpha=alpha,
+            sfu=spending_function_obrien_fleming,
+            timing=[0.25, 0.5, 0.75],
         )
     with pytest.raises(ValueError):
         GroupSequentialDesign(
-            k=k, alpha=alpha, sfu=spending_function_obrien_fleming, timing=[0.25, 0.5, 0.5, 1.0]
+            k=k,
+            alpha=alpha,
+            sfu=spending_function_obrien_fleming,
+            timing=[0.25, 0.5, 0.5, 1.0],
         )
     with pytest.raises(ValueError):
         GroupSequentialDesign(
-            k=k, alpha=alpha, sfu=spending_function_obrien_fleming, timing=[0.25, 0.5, 0.75, 1.1]
+            k=k,
+            alpha=alpha,
+            sfu=spending_function_obrien_fleming,
+            timing=[0.25, 0.5, 0.75, 1.1],
         )
+
 
 def test_gsd_with_invalid_k():
     with pytest.raises(ValueError):
         GroupSequentialDesign(k=0)
+
 
 def test_gsd_with_invalid_alpha():
     with pytest.raises(ValueError):
