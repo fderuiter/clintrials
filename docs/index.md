@@ -8,7 +8,9 @@ Welcome to **clintrials**, a Python library providing clinical trial designs and
 
 installation
 user_guide/tutorials
+tutorials/matchpoint/README.md
 how_to/recipes
+win_ratio_simulation
 reference/index
 contributing
 changelog
