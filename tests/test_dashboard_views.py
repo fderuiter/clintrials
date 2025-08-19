@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pandas as pd
 
 from clintrials.dashboard import main
-from clintrials.dashboard.views import crm_view, efftox_view
+from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
 
 
 def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
@@ -43,6 +43,35 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
     return st
 
 
+def _make_winratio_streamlit_mock():
+    """Create a minimal mock for the Win Ratio view."""
+
+    sidebar = SimpleNamespace(
+        header=MagicMock(),
+        number_input=MagicMock(
+            side_effect=[100, 50, 1000, 0.5, 0.5, 0.75, 0.25, 0.43, 0.27, 0.05]
+        ),
+        button=MagicMock(return_value=True),
+    )
+
+    class DummySpinner:
+        def __enter__(self):
+            return None
+
+        def __exit__(self, exc_type, exc, tb):
+            return None
+
+    st = SimpleNamespace(
+        header=MagicMock(),
+        sidebar=sidebar,
+        spinner=lambda msg: DummySpinner(),
+        success=MagicMock(),
+        subheader=MagicMock(),
+        write=MagicMock(),
+    )
+    return st
+
+
 def test_dashboard_main_routes_to_crm(monkeypatch):
     """main() should invoke crm_view.render when CRM is selected."""
     st_mock = _make_streamlit_mock(selectbox_return="CRM")
@@ -71,6 +100,21 @@ def test_dashboard_main_routes_to_efftox(monkeypatch):
     monkeypatch.setattr(main.efftox_view, "render", fake_render)
     main.main()
     assert called["data"] == [{"foo": "bar"}]
+
+
+def test_dashboard_main_routes_to_winratio(monkeypatch):
+    """main() should invoke winratio_view.render when Win Ratio is selected."""
+    st_mock = _make_streamlit_mock(selectbox_return="Win Ratio")
+    monkeypatch.setattr(main, "st", st_mock)
+
+    called = {}
+
+    def fake_render():
+        called["called"] = True
+
+    monkeypatch.setattr(main.winratio_view, "render", fake_render)
+    main.main()
+    assert called["called"]
 
 
 def test_crm_view_render_success(monkeypatch):
@@ -157,3 +201,20 @@ def test_efftox_view_warns_when_empty(monkeypatch):
 
     efftox_view.render([{}])
     st_mock.warning.assert_called_once()
+
+
+def test_winratio_view_render_success(monkeypatch):
+    """Win Ratio view should run the simulation and display results."""
+    st_mock = _make_winratio_streamlit_mock()
+    monkeypatch.setattr(winratio_view, "st", st_mock)
+    run_sim = MagicMock(return_value=(0.8, (0.1, 0.2)))
+    monkeypatch.setattr(winratio_view, "run_simulation", run_sim)
+
+    winratio_view.render()
+
+    run_sim.assert_called_once_with(
+        100, 50, 1000, 0.5, 0.5, 0.75, 0.25, 0.43, 0.27, 0.05
+    )
+    st_mock.success.assert_called_once()
+    st_mock.write.assert_any_call("Power of the test: 0.8000")
+    st_mock.write.assert_any_call("Average 95% Confidence Interval: (0.1000, 0.2000)")
