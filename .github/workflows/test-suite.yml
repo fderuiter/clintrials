@@ -28,4 +28,4 @@ jobs:
           PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Run tests
         run: |
-          pytest -q --cov=clintrials --cov-report=xml --cov-report=term
+          poetry run pytest -q --cov=clintrials --cov-report=xml --cov-report=term
