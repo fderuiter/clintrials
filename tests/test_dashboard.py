@@ -83,6 +83,19 @@ def test_main_dispatches_to_efftox(fake_streamlit, fake_plotly, monkeypatch):
     main.crm_view.render.assert_not_called()
 
 
+def test_main_dispatches_to_winratio(fake_streamlit, fake_plotly, monkeypatch):
+    fake_streamlit.sidebar.selectbox.return_value = "Win Ratio"
+
+    main = reload_module("clintrials.dashboard.main")
+    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    monkeypatch.setattr(main.efftox_view, "render", MagicMock())
+    monkeypatch.setattr(main.winratio_view, "render", MagicMock())
+    main.main()
+    main.winratio_view.render.assert_called_once()
+    main.crm_view.render.assert_not_called()
+    main.efftox_view.render.assert_not_called()
+
+
 def test_crm_render_creates_plot(fake_streamlit, fake_plotly, monkeypatch):
     crm_view = reload_module("clintrials.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
