@@ -106,9 +106,10 @@ poetry run dashboard
 This will start a local web server and open the dashboard in your browser.
 
 The dashboard supports tailored visualizations for different trial designs.
-Use the sidebar to select the appropriate trial design (e.g., CRM, EffTox)
-before uploading your simulation results in JSON format to explore them
-interactively.
+Use the sidebar to select the appropriate trial design (e.g., CRM, EffTox, Win Ratio).
+For CRM and EffTox, upload your simulation results in JSON format to explore them
+interactively. The Win Ratio option lets you configure parameters and run simulations
+directly in the browser.
 
 
 ### Documentation
