@@ -1,12 +1,10 @@
+import importlib
+import json
 import sys
 import types
-import importlib
 from unittest.mock import MagicMock
 
-import json
 import pandas as pd
-
-
 import pytest
 
 
@@ -89,6 +87,7 @@ def test_crm_render_creates_plot(fake_streamlit, fake_plotly, monkeypatch):
     crm_view = reload_module("clintrials.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
     monkeypatch.setattr(crm_view, "px", fake_plotly)
+
     class DummyPS:
         def __init__(self, config):
             self.config = config
@@ -116,13 +115,16 @@ def test_efftox_render_creates_plots(fake_streamlit, fake_plotly, monkeypatch):
     efftox_view = reload_module("clintrials.dashboard.views.efftox_view")
     monkeypatch.setattr(efftox_view, "st", fake_streamlit)
     monkeypatch.setattr(efftox_view, "px", fake_plotly)
+
     class DummyPS:
         def __init__(self, config):
             self.config = config
 
     monkeypatch.setattr(efftox_view, "ParameterSpace", DummyPS)
 
-    index = pd.MultiIndex.from_tuples([(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"])
+    index = pd.MultiIndex.from_tuples(
+        [(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"]
+    )
     summary_df = pd.DataFrame(
         {
             "N": [1],
@@ -146,6 +148,7 @@ def test_efftox_render_creates_plots(fake_streamlit, fake_plotly, monkeypatch):
 def test_crm_render_warning_branch(fake_streamlit, fake_plotly, monkeypatch):
     crm_view = reload_module("clintrials.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
+
     class DummyPS:
         def __init__(self, config):
             self.config = config
