@@ -12,6 +12,7 @@ It is provided "as-is" and the author accepts absolutely no responsibility whats
 * This library implements some designs used in clinical trials.
 * It has implementations of O'Quigley's CRM design, Thall & Cook's EffTox design, and Wages & Tait's efficacy+toxicity design.
 * There is also an implementation of my very own BEBOP trial design for the simultaneous study of bivariate binary outcomes (like efficacy and toxicity) in the presence of predictive variables, both continuous and binary.
+* A win-ratio simulation module estimates the power of hierarchical composite endpoints.
 * There is a bias towards phase I and II trial designs because that is my research area.
 * I expect to add more designs in the future.
 * It is written in pure Python, intentionally. This library would be quicker if it was written in C++ or Java but it would not be as portable or readable.
