@@ -335,7 +335,10 @@ class LpNormCurve:
         else:
             # Solve for y
             a = (1 - x) / (1 - x_l)
-            b = (scaled_delta - a**self.p) ** (1 / self.p)
+            b_term = scaled_delta - a**self.p
+            if b_term <= 0:
+                return complex(np.nan, np.nan)
+            b = b_term ** (1 / self.p)
             return b * y_l
 
     def get_tox(self, eff, util=0.0):
