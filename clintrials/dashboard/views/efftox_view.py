@@ -4,8 +4,8 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-from clintrials.simulation import summarise_sims
-from clintrials.util import ParameterSpace
+from clintrials.core.simulation import summarise_sims
+from clintrials.utils import ParameterSpace
 
 
 def render(sims):

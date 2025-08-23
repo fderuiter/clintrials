@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from clintrials.common import inverse_logit1, logit1
+from clintrials.core.math import inverse_logit1, logit1
 from clintrials.dosefinding.crm import crm
 
 

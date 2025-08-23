@@ -1,0 +1,4 @@
+# file: /app/clintrials/core/simulation.py
+# hypothesis_version: 6.138.2
+
+['Error writing: %s', 'Kristian Brock', 'dataframe', 'tuple', 'w']
