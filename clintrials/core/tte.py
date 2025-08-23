@@ -8,7 +8,7 @@ from collections import OrderedDict
 import numpy as np
 from scipy.stats import expon, invgamma, poisson
 
-from clintrials.util import atomic_to_json, iterable_to_json
+from clintrials.utils import atomic_to_json, iterable_to_json
 
 
 class BayesianTimeToEvent:

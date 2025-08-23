@@ -1,0 +1,4 @@
+# file: /app/clintrials/dosefinding/__init__.py
+# hypothesis_version: 6.138.2
+
+[-0.07, 1.0, 2.0, 100, 300, '%', '%s: %s', 'CohortSize', 'DLT', 'Dose', 'Dose level', 'DoseGiven', 'Doses', 'Kristian Brock', 'MTD is %s', 'MeanPat', 'N', 'Next', 'No Tox', 'NumTox', 'O', 'OptimalAllocation', 'Pat%', 'PatN', 'Patient number', 'Rec%', 'RecN', 'RecommendedDose', 'Running %s', 'Symbol', 'Tox', 'ToxRate', 'Toxicities', 'TrialStatus', 'TrueToxicities', 'X', 'bool', 'crm', 'efficacytoxicity', 'efftox', 'k', 'none', 'o', 'wagestait', 'watu', 'x', '{} -> Dose {}']

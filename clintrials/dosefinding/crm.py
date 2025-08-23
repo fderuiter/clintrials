@@ -12,9 +12,9 @@ from scipy.optimize import minimize
 from scipy.special import logsumexp
 from scipy.stats import norm
 
-from clintrials.common import empiric, inverse_empiric, inverse_logistic, logistic
+from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic
 from clintrials.dosefinding import DoseFindingTrial
-from clintrials.util import atomic_to_json, iterable_to_json
+from clintrials.utils import atomic_to_json, iterable_to_json
 
 _min_beta, _max_beta = -10, 10
 

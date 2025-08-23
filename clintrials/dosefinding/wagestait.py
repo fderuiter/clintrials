@@ -17,7 +17,7 @@ from numpy import trapezoid
 from scipy.integrate import quad
 from scipy.stats import beta, norm
 
-from clintrials.common import empiric, inverse_empiric
+from clintrials.core.math import empiric, inverse_empiric
 
 # from clintrials.util import correlated_binary_outcomes_from_uniforms
 from clintrials.dosefinding.crm import CRM

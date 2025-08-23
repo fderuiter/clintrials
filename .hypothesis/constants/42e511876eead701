@@ -1,0 +1,4 @@
+# file: /app/clintrials/dashboard/main.py
+# hypothesis_version: 6.138.2
+
+['CRM', 'EffTox', 'Select Trial Design', 'Win Ratio', '__main__', 'json', 'utf-8']

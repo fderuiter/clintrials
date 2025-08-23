@@ -31,7 +31,7 @@ __all__ = ["peps2v1", "peps2v2"]
 import numpy
 import pandas as pd
 
-from clintrials.stats import ProbabilityDensitySample
+from clintrials.core.stats import ProbabilityDensitySample
 
 
 class BeBOP:

@@ -4,6 +4,11 @@ API Reference
 .. autosummary::
    :toctree: generated
 
-   clintrials.common
+   clintrials.core.math
+   clintrials.core.numerics
+   clintrials.core.recruitment
+   clintrials.core.simulation
+   clintrials.core.stats
+   clintrials.core.tte
    clintrials.coll
-   clintrials.recruitment
+   clintrials.utils
