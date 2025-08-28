@@ -86,19 +86,20 @@ def l_n(D, alpha0, beta0, beta1, beta2, psi):
 
 
 def get_posterior_probs(D, priors, tox_cutoffs, eff_cutoffs, n=10**5):
-    """Get the posterior probabilities after having observed cumulative data ``D`` in a trial.
+    """Get the posterior probabilities after having observed cumulative data ``D`` in the PePS2 trial.
 
-    Note: This function evaluates the posterior integrals using Monte Carlo integration. Thall & Cook
-    use the method of Monahan & Genz. I imagine that is quicker and more accurate but it is also
-    more difficult to program, so I have skipped it. It remains a medium-term aim, however, because
-    this method is slow.
+    The PePS2 trial studies efficacy and toxicity, stratifying patients by two binary covariates:
+    pre-treatment status and PD-L1 expression. This function calculates the posterior probabilities
+    of efficacy and toxicity for each of the four resulting subgroups.
+
+    Note: This function evaluates the posterior integrals using Monte Carlo integration.
 
     Params:
-    D, list of 3-tuples, (disease_status, mutation_status, toxicity, efficacy), where:
-                            disease_status = 0 for stage 1; 1 for stage 2,
-                            mutation_status = 0 for mutation negative; 1 for mutation positive,
-                            toxicity = 1 for toxic event, 0 for tolerance event,
-                            and efficacy = 1 for efficacious outcome, 0 for alternative.
+    D, list of 4-tuples, (disease_status, mutation_status, efficacy, toxicity), where:
+                            disease_status: 1 if patient has been pre-treated, 0 otherwise.
+                            mutation_status: 1 if patient is PD-L1 positive, 0 otherwise.
+                            efficacy: 1 for an efficacious outcome, 0 for alternative.
+                            toxicity: 1 for a toxic event, 0 for tolerance event.
     priors, list of prior distributions corresponding to alpha_0, beta_0, beta_1, beta_2, psi respectively
             Each prior object should support obj.ppf(x) and obj.pdf(x)
     tox_cutoffs, list, the desired maximum toxicity cutoffs for the four groups
@@ -106,10 +107,12 @@ def get_posterior_probs(D, priors, tox_cutoffs, eff_cutoffs, n=10**5):
     n, number of random points to use in Monte Carlo integration.
 
     Returns:
-    nested lists of posterior probabilities, [ Prob(Toxicity, Prob(Efficacy), Prob(Toxicity less than cutoff),
-                Prob(Efficacy greater than cutoff)], for each patient cohort,
-            running from (disease_status, mutation_status) = (0,0), (0,1), (1,0), (1,1)
-            i.e. returned obj is of length 4 and each interior list of length 4.
+    A tuple containing:
+        - A nested list of posterior probabilities: [Prob(Toxicity), Prob(Efficacy),
+          Prob(Toxicity < cutoff), Prob(Efficacy > cutoff)], for each patient cohort.
+          The cohorts are ordered: (Not pre-treated, PD-L1 neg), (Not pre-treated, PD-L1 pos),
+          (Pre-treated, PD-L1 neg), (Pre-treated, PD-L1 pos).
+        - The ProbabilityDensitySample object used for the calculations.
 
     """
 

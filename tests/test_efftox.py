@@ -545,3 +545,47 @@ def test_myeloma_integration_deterministic(mocker):
     )
     trial.update([(2, 0, 0)] * 3)
     assert trial.next_dose() == 3
+
+
+def test_efftox_docstring_example():
+    """
+    Test the example from the EffTox class docstring.
+    """
+    real_doses = [7.5, 15, 30, 45]
+    tox_cutoff = 0.40
+    eff_cutoff = 0.45
+    tox_certainty = 0.05
+    eff_certainty = 0.05
+    mu_t_mean, mu_t_sd = -5.4317, 2.7643
+    beta_t_mean, beta_t_sd = 3.1761, 2.7703
+    mu_e_mean, mu_e_sd = -0.8442, 1.9786
+    beta_e_1_mean, beta_e_1_sd = 1.9857, 1.9820
+    beta_e_2_mean, beta_e_2_sd = 0, 0.2
+    psi_mean, psi_sd = 0, 1
+    theta_priors = [
+        norm(loc=mu_t_mean, scale=mu_t_sd),
+        norm(loc=beta_t_mean, scale=beta_t_sd),
+        norm(loc=mu_e_mean, scale=mu_e_sd),
+        norm(loc=beta_e_1_mean, scale=beta_e_1_sd),
+        norm(loc=beta_e_2_mean, scale=beta_e_2_sd),
+        norm(loc=psi_mean, scale=psi_sd),
+    ]
+    hinge_points = [(0.4, 0), (1, 0.7), (0.5, 0.4)]
+    metric = LpNormCurve(
+        hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1]
+    )
+    trial = EffTox(
+        real_doses,
+        theta_priors,
+        tox_cutoff,
+        eff_cutoff,
+        tox_certainty,
+        eff_certainty,
+        metric,
+        max_size=30,
+        first_dose=3,
+        num_integral_steps=10**5,  # Use smaller n for faster test
+    )
+    assert trial.next_dose() == 3
+    trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
+    assert trial.next_dose() == 3

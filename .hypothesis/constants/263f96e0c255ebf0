@@ -1,0 +1,4 @@
+# file: /app/clintrials/dosefinding/efftox.py
+# hypothesis_version: 6.138.7
+
+[-0.8, 0.0, 1e-07, 1e-05, 0.0001, 0.001, 0.2, 0.5, 0.6, 0.8, 0.999, 1.0, 2.0, 100, 1000, '-', 'Admissible', 'Desirable', 'Dose', 'EffTox', 'Kristian Brock', 'LpNormCurve', 'MinProbSuperiority', 'Mixed', 'Monotonic', 'Optimal', 'P(AccEff)', 'P(AccTox)', 'P(Eff)', 'P(Tox)', 'Plateau', 'Prob(Efficacy)', 'Prob(Toxicity)', 'ProbAccEff', 'ProbAccTox', 'ProbEff', 'ProbTox', 'Stop', 'SuperiorityMatrix', 'Tolerable', 'Toxic', 'Unimodal', 'Utility', 'Weird', 'b^', 'efftox_dtp_detail', 'hinge points', 'k', 'neutral utility', 'priors', 'ro']

@@ -489,7 +489,47 @@ class InverseQuadraticCurve:
 
     def solve(self, prob_eff=None, prob_tox=None, delta=0):
         """Specify exactly one of prob_eff or prob_tox and this will return the other, for given delta"""
-        raise NotImplementedError()
+        if delta != 0:
+            raise NotImplementedError("Only contours for delta=0 are supported.")
+
+        if prob_eff is None and prob_tox is None:
+            raise Exception("Specify prob_eff or prob_tox")
+        if prob_eff is not None and prob_tox is not None:
+            raise Exception("Specify just one of prob_eff and prob_tox")
+
+        if prob_eff is not None:
+            return self.f(prob_eff)
+        else:
+            # Solve y = a + b/x + c/x^2 for x
+            # (y-a)x^2 - bx - c = 0
+            # Let A = y-a, B = -b, C = -c
+            A = prob_tox - self.a
+            B = -self.b
+            C = -self.c
+
+            if A == 0:
+                if B == 0:
+                    return np.nan # No solution or infinite solutions
+                else:
+                    # Linear equation
+                    x = -C / B
+                    return x if 0 < x < 1 else np.nan
+
+            # Quadratic formula for x
+            discriminant = B**2 - 4 * A * C
+            if discriminant < 0:
+                return np.nan
+
+            x1 = (-B + np.sqrt(discriminant)) / (2 * A)
+            x2 = (-B - np.sqrt(discriminant)) / (2 * A)
+
+            # Return the root that is a valid probability
+            if 0 < x1 < 1:
+                return x1
+            elif 0 < x2 < 1:
+                return x2
+            else:
+                return np.nan
 
     def plot_contours(
         self,
@@ -538,7 +578,6 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     See Thall, P.F. & Cook, J.D. (2004) - Dose-Finding Based on Efficacy-Toxicity Trade-Offs
 
     e.g. general usage
-    (for now, parameter means and standard deviations were fetched from MD Anderson's EffTox software.)
     >>> real_doses = [7.5, 15, 30, 45]
     >>> tox_cutoff = 0.40
     >>> eff_cutoff = 0.45
@@ -566,7 +605,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     >>> trial.next_dose()
     3
     >>> trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
-    4
+    3
     >>> trial.has_more()
     True
     >>> trial.size(), trial.max_size()

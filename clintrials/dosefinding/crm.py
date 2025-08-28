@@ -207,6 +207,15 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
     res = minimize(f, x0=0, method="BFGS")
     var = None
     if estimate_var:
+        # The variance of the MLE is estimated by the inverse of the observed
+        # Fisher information matrix. The observed Fisher information is the
+        # negative of the second derivative of the log-likelihood function,
+        # evaluated at the MLE. The BFGS algorithm approximates the inverse
+        # of the Hessian matrix of the function being minimized. Here, we
+        # minimize the negative log-likelihood, so the Hessian is the
+        # observed Fisher information, and its inverse is the variance-
+        # covariance matrix of the MLE. For a one-parameter model, this is
+        # simply the variance.
         if res.success:
             var = res.hess_inv[0, 0]
         else:
