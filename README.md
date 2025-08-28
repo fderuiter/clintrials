@@ -114,9 +114,13 @@ directly in the browser.
 
 ### Documentation
 
-Documentation will eventually appear at
+The documentation is hosted on GitHub Pages and can be found at:
 
-<http://brockk.github.io/clintrials/>
+<https://fderuiter.github.io/clintrials/>
+
+### Contributing
+
+Contributions are welcome! Please see the [contributing guide](docs/contributing.md) for more details on how to get involved.
 
 ### Contact ###
 The repo owner is Kristian Brock, @brockk.
