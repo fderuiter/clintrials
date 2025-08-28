@@ -246,6 +246,84 @@ def row_to_json(row, **kwargs):
     return doc
 
 
+def _serialize_table_structure(df):
+    doc = OrderedDict()
+    doc["Format"] = "Table"
+    rows = []
+    for i, row_name in enumerate(df.index):
+        rows.append(
+            OrderedDict(
+                [
+                    ("ID", str(i)),
+                    ("Position", i + 1),
+                    ("Label", atomic_to_json(row_name)),
+                ]
+            )
+        )
+    doc["Rows"] = rows
+    doc["NumRows"] = len(df.index)
+    cols = []
+    for i, col_name in enumerate(df):
+        cols.append(
+            OrderedDict(
+                [
+                    ("ID", str(i)),
+                    ("Position", i + 1),
+                    ("Label", atomic_to_json(col_name)),
+                ]
+            )
+        )
+    doc["Cols"] = cols
+    doc["NumCols"] = len(df.columns)
+    table_data = OrderedDict()
+    for j, col_name in enumerate(df):
+        col_data = OrderedDict()
+        for i, o in enumerate(df[col_name]):
+            col_data[i] = atomic_to_json(o)
+        table_data[str(j)] = col_data
+    doc["Data"] = table_data
+    return doc
+
+
+def _calculate_value_counts(df, definitely_do_value_counts=False):
+    freqs = OrderedDict()
+    for col_name in df:
+        vc = df[col_name].value_counts()
+        if len(vc) < len(df) or definitely_do_value_counts:
+            freqs[atomic_to_json(col_name)] = {
+                atomic_to_json(k): atomic_to_json(v) for k, v in vc.items()
+            }
+    return freqs
+
+
+def _calculate_column_summaries(df):
+    col_summaries = OrderedDict()
+    for i, col_name in enumerate(df):
+        col_summary = OrderedDict()
+        try:
+            col_summary["Mean"] = df[col_name].mean()
+        except:
+            pass
+        try:
+            col_summary["Sum"] = df[col_name].sum()
+        except:
+            pass
+        col_summaries[str(i)] = col_summary
+    return col_summaries
+
+
+def _calculate_row_summaries(df):
+    row_summaries = OrderedDict()
+    for i, row_name in enumerate(df.index):
+        row_summary = OrderedDict()
+        try:
+            row_summary["Sum"] = df.loc[row_name].sum()
+        except:
+            pass
+        row_summaries[str(i)] = row_summary
+    return row_summaries
+
+
 def df_to_json(
     df,
     do_value_counts=True,
@@ -272,81 +350,16 @@ def df_to_json(
     :rtype: dict
 
     """
-
-    doc = OrderedDict()
-    doc["Format"] = "Table"
-
-    rows = []
-    for i, row_name in enumerate(df.index):
-        rows.append(
-            OrderedDict(
-                [
-                    ("ID", str(i)),
-                    ("Position", i + 1),
-                    ("Label", atomic_to_json(row_name)),
-                ]
-            )
-        )
-    doc["Rows"] = rows
-    doc["NumRows"] = len(df.index)
-
-    cols = []
-    for i, col_name in enumerate(df):
-        cols.append(
-            OrderedDict(
-                [
-                    ("ID", str(i)),
-                    ("Position", i + 1),
-                    ("Label", atomic_to_json(col_name)),
-                ]
-            )
-        )
-    doc["Cols"] = cols
-    doc["NumCols"] = len(df.columns)
-
-    table_data = OrderedDict()
-    for j, col_name in enumerate(df):
-        col_data = OrderedDict()
-        for i, o in enumerate(df[col_name]):
-            col_data[i] = atomic_to_json(o)
-        table_data[str(j)] = col_data
-    doc["Data"] = table_data
+    doc = _serialize_table_structure(df)
 
     if do_value_counts:
-        freqs = OrderedDict()
-        for col_name in df:
-            vc = df[col_name].value_counts()
-            if len(vc) < len(df) or definitely_do_value_counts:
-                freqs[atomic_to_json(col_name)] = {
-                    atomic_to_json(k): atomic_to_json(v) for k, v in vc.items()
-                }
-        doc["Frequencies"] = freqs
+        doc["Frequencies"] = _calculate_value_counts(df, definitely_do_value_counts)
 
     if do_column_summaries:
-        col_summaries = OrderedDict()
-        for i, col_name in enumerate(df):
-            col_summary = OrderedDict()
-            try:
-                col_summary["Mean"] = df[col_name].mean()
-            except:
-                pass
-            try:
-                col_summary["Sum"] = df[col_name].sum()
-            except:
-                pass
-            col_summaries[str(i)] = col_summary
-        doc["ColumnSummary"] = col_summaries
+        doc["ColumnSummary"] = _calculate_column_summaries(df)
 
     if do_row_summaries:
-        row_summaries = OrderedDict()
-        for i, row_name in enumerate(df.index):
-            row_summary = OrderedDict()
-            try:
-                row_summary["Sum"] = df.loc[row_name].sum()
-            except:
-                pass
-            row_summaries[str(i)] = row_summary
-        doc["RowSummary"] = row_summaries
+        doc["RowSummary"] = _calculate_row_summaries(df)
 
     return doc
 
@@ -526,6 +539,15 @@ def correlated_binary_outcomes_from_uniforms(unifs, u, psi):
         raise ValueError("unifs must be an n*3 array")
 
 
+def _create_conf_int_report(conf_int, alpha, method_name):
+    report = OrderedDict()
+    report["Lower"] = conf_int[0]
+    report["Upper"] = conf_int[1]
+    report["Alpha"] = alpha
+    report["Method"] = method_name
+    return report
+
+
 def get_proportion_confint_report(
     num_successes,
     num_trials,
@@ -538,7 +560,6 @@ def get_proportion_confint_report(
     do_binom_test=False,
 ):
     """Get confidence intervals of proportion num_successes / num_trials using different methods in JSON-friendly form.
-
     :param num_successes: number of successes
     :type num_successes: int
     :param num_trials: number of trials or attempts
@@ -559,94 +580,40 @@ def get_proportion_confint_report(
     :type do_binom_test: bool
     :return: JSON-able dict report
     :rtype: dict
-
     Why do I use normal, agresti_coull and wilson by default?
-
     1) Normal, because it is the widely-used but flawed option.
     2) AgrestiCoull & Wilson, because Lawrence D. Brown, T. Tony Cai and Anirban DasGupta in their paper
         `Interval Estimation for a Binomial Proportion` say 'we recommend the Wilson interval for small n and the
         interval suggested in Agresti and Coull for larger n'
-
     Call to proportion_confint allows methods:
-
     - `normal` : asymptotic normal approximation
     - `agresti_coull` : Agresti-Coull interval
     - `beta` : Clopper-Pearson interval based on Beta distribution
     - `wilson` : Wilson Score interval
     - `jeffrey` : Jeffrey's Bayesian Interval
     - `binom_test`
-
     """
 
     from statsmodels.stats.proportion import proportion_confint
 
     conf_int_reports = OrderedDict()
+    methods = {
+        "Normal": ("normal", do_normal),
+        "AgrestiCoull": ("agresti_coull", do_agresti_coull),
+        "Beta": ("beta", do_beta),
+        "Wilson": ("wilson", do_wilson),
+        "Jeffrey": ("jeffrey", do_jeffrey),
+        "BinomTest": ("binom_test", do_binom_test),
+    }
 
-    if do_normal:
-        conf_int = proportion_confint(
-            num_successes, num_trials, alpha=alpha, method="normal"
-        )
-        conf_int_report = OrderedDict()
-        conf_int_report["Lower"] = conf_int[0]
-        conf_int_report["Upper"] = conf_int[1]
-        conf_int_report["Alpha"] = alpha
-        conf_int_report["Method"] = "Normal"
-        conf_int_reports["Normal"] = conf_int_report
-
-    if do_agresti_coull:
-        conf_int = proportion_confint(
-            num_successes, num_trials, alpha=alpha, method="agresti_coull"
-        )
-        conf_int_report = OrderedDict()
-        conf_int_report["Lower"] = conf_int[0]
-        conf_int_report["Upper"] = conf_int[1]
-        conf_int_report["Alpha"] = alpha
-        conf_int_report["Method"] = "AgrestiCoull"
-        conf_int_reports["AgrestiCoull"] = conf_int_report
-
-    if do_beta:
-        conf_int = proportion_confint(
-            num_successes, num_trials, alpha=alpha, method="beta"
-        )
-        conf_int_report = OrderedDict()
-        conf_int_report["Lower"] = conf_int[0]
-        conf_int_report["Upper"] = conf_int[1]
-        conf_int_report["Alpha"] = alpha
-        conf_int_report["Method"] = "Beta"
-        conf_int_reports["Beta"] = conf_int_report
-
-    if do_wilson:
-        conf_int = proportion_confint(
-            num_successes, num_trials, alpha=alpha, method="wilson"
-        )
-        conf_int_report = OrderedDict()
-        conf_int_report["Lower"] = conf_int[0]
-        conf_int_report["Upper"] = conf_int[1]
-        conf_int_report["Alpha"] = alpha
-        conf_int_report["Method"] = "Wilson"
-        conf_int_reports["Wilson"] = conf_int_report
-
-    if do_jeffrey:
-        conf_int = proportion_confint(
-            num_successes, num_trials, alpha=alpha, method="jeffrey"
-        )
-        conf_int_report = OrderedDict()
-        conf_int_report["Lower"] = conf_int[0]
-        conf_int_report["Upper"] = conf_int[1]
-        conf_int_report["Alpha"] = alpha
-        conf_int_report["Method"] = "Jeffrey"
-        conf_int_reports["Jeffrey"] = conf_int_report
-
-    if do_binom_test:
-        conf_int = proportion_confint(
-            num_successes, num_trials, alpha=alpha, method="binom_test"
-        )
-        conf_int_report = OrderedDict()
-        conf_int_report["Lower"] = conf_int[0]
-        conf_int_report["Upper"] = conf_int[1]
-        conf_int_report["Alpha"] = alpha
-        conf_int_report["Method"] = "BinomTest"
-        conf_int_reports["BinomTest"] = conf_int_report
+    for report_name, (method_name, do_method) in methods.items():
+        if do_method:
+            conf_int = proportion_confint(
+                num_successes, num_trials, alpha=alpha, method=method_name
+            )
+            conf_int_reports[report_name] = _create_conf_int_report(
+                conf_int, alpha, report_name
+            )
 
     return conf_int_reports
 
