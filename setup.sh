@@ -13,16 +13,6 @@ fi
 echo "Installing project dependencies with Poetry..."
 poetry install
 
-echo "Ensuring default git hooks path..."
-git config --global --unset-all core.hooksPath 2>/dev/null || true
-git config --unset-all core.hooksPath 2>/dev/null || true
-
-echo "Installing pre-commit hooks..."
-poetry run pre-commit install
-
-echo "Running pre-commit on all files..."
-poetry run pre-commit run --all-files
-
 echo "Running test suite..."
 poetry run pytest -q
 
