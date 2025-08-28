@@ -100,8 +100,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         avoid_skipping_untried_deescalation_stage_1=True,
         avoid_skipping_untried_escalation_stage_2=True,
         avoid_skipping_untried_deescalation_stage_2=True,
-        must_try_lowest_dose=True,
         plugin_mean=False,
+        mc_sample_size=10**5,
     ):
         """
 
@@ -154,11 +154,11 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         :param avoid_skipping_untried_deescalation_stage_2: True to avoid skipping untried doses in de-escalation in
         stage 2
         :type avoid_skipping_untried_deescalation_stage_2: bool
-        :param must_try_lowest_dose: Unused
-        :type must_try_lowest_dose: bool
         :param plugin_mean: True to estimate event curves by plugging parameter estimate into function;
                             False to estimate using full Bayesian integral (default).
         :type plugin_mean: bool
+        :param mc_sample_size: The number of samples to use in Monte Carlo estimation methods.
+        :type mc_sample_size: int
 
         """
 
@@ -204,8 +204,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.avoid_skipping_untried_deescalation_stage_2 = (
             avoid_skipping_untried_deescalation_stage_2
         )
-        self.must_try_lowest_dose = must_try_lowest_dose
         self.plugin_mean = plugin_mean
+        self.mc_sample_size = mc_sample_size
 
         # Reset
         self.most_likely_model_index = np.random.choice(
@@ -338,19 +338,54 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         )
         return obd
 
-    def prob_eff_exceeds(self, eff_cutoff, n=10**6):
+    def prob_eff_exceeds(self, eff_cutoff, n=None):
+        """
+        Calculates the probability that the efficacy at each dose level exceeds a given cutoff.
+        This is done by calculating the posterior probability P(p_eff > eff_cutoff) for each dose.
+        It uses the assumption that the posterior distribution of the efficacy parameter theta
+        is approximately normal.
+        The link function is p_eff = skeleton ** theta.
+        p_eff > eff_cutoff  <=> skeleton ** theta > eff_cutoff
+        Since skeleton is a probability (0, 1), log(skeleton) is negative.
+        theta * log(skeleton) > log(eff_cutoff)
+        theta < log(eff_cutoff) / log(skeleton)
+        :param eff_cutoff:
+        :type eff_cutoff: float
+        :param n: Not used. Present for API compatibility.
+        :return:
+        """
 
-        # Estimate probability of efficacy exceeds eff_cutoff using plug-in mean and variance for theta
-        # and randomly sampling values from normal. Why normal? Because the prior for is normal and the posterior
-        # is asymptotically normal. For low n, non-normality may lead to bias.
-        theta_sample = norm(
-            loc=self.model_theta_hat(), scale=np.sqrt(self.model_theta_var())
-        ).rvs(n)
-        p0_sample = [
-            empiric(prob, beta=theta_sample)
-            for prob in self.skeletons[self.most_likely_model_index]
-        ]
-        return np.array([np.mean(x > eff_cutoff) for x in p0_sample])
+        skeleton = np.array(self.skeletons[self.most_likely_model_index])
+        probs = np.zeros_like(skeleton, dtype=float)
+
+        if eff_cutoff >= 1.0:
+            return probs  # all 0
+
+        if eff_cutoff < 0.0:
+            return np.ones_like(skeleton, dtype=float)
+
+        theta_posterior = norm(loc=self.model_theta_hat(), scale=np.sqrt(self.model_theta_var()))
+
+        # Doses where skeleton is 1
+        one_mask = skeleton == 1.0
+        probs[one_mask] = 1.0  # P(1 > eff_cutoff) is 1 since eff_cutoff < 1
+
+        # Doses where skeleton is 0
+        zero_mask = skeleton == 0.0
+        probs[zero_mask] = 0.0  # P(0 > eff_cutoff) is 0 since eff_cutoff >= 0
+
+        # Doses where skeleton is between 0 and 1
+        middle_mask = ~(one_mask | zero_mask)
+        if np.any(middle_mask):
+            sub_skeleton = skeleton[middle_mask]
+
+            # eff_cutoff can be 0.
+            eff_cutoff_clipped = np.maximum(eff_cutoff, 1e-9)
+
+            thresholds = np.log(eff_cutoff_clipped) / np.log(sub_skeleton)
+            probs[middle_mask] = theta_posterior.cdf(thresholds)
+
+        return probs
 
     def prob_acc_eff(self, threshold=None, **kwargs):
         if threshold is None:
@@ -365,8 +400,12 @@ class WATU(EfficacyToxicityDoseFindingTrial):
     # Private interface
     def _stage_one_next_dose(self):
 
-        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=10**5)
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=10**5)
+        prob_unacc_tox = self.crm.prob_tox_exceeds(
+            self.tox_limit, n=self.mc_sample_size
+        )
+        prob_unacc_eff = 1 - self.prob_eff_exceeds(
+            self.eff_limit, n=self.mc_sample_size
+        )
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))
@@ -404,14 +443,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                         self._next_dose = dose_level
                         break
             else:
-                if self.must_try_lowest_dose and self.treated_at_dose(1) <= 0:
-                    # Lowest dose has not been tried. Try it now rather than stop:
-                    self._next_dose = 1
-                    self._status = 1
-                else:
-                    # No dose can be selected so stop
-                    self._next_dose = -1
-                    self._status = -1
+                # No dose can be selected so stop
+                self._next_dose = -1
+                self._status = -1
         else:
             # Trial has not yet started
             self._next_dose = self.first_dose()
@@ -421,8 +455,12 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
     def _stage_two_next_dose(self, tox_probs, eff_probs):
 
-        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=10**5)
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=10**5)
+        prob_unacc_tox = self.crm.prob_tox_exceeds(
+            self.tox_limit, n=self.mc_sample_size
+        )
+        prob_unacc_eff = 1 - self.prob_eff_exceeds(
+            self.eff_limit, n=self.mc_sample_size
+        )
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))
@@ -461,14 +499,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                         self._next_dose = dose_level
                         break
             else:
-                if self.must_try_lowest_dose and self.treated_at_dose(1) <= 0:
-                    # Lowest dose has not been tried. Try it now rather than stop:
-                    self._next_dose = 1
-                    self._status = 1
-                else:
-                    # No dose can be selected so stop
-                    self._next_dose = -1
-                    self._status = -1
+                # No dose can be selected so stop
+                self._next_dose = -1
+                self._status = -1
         else:
             # Trial has not yet started
             self._next_dose = self.first_dose()

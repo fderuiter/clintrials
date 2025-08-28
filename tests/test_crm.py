@@ -4,9 +4,17 @@ __contact__ = "kristian.brock@gmail.com"
 """ Tests of the clintrials.dosefindings.crm module. """
 
 import numpy as np
+import pandas as pd
 from scipy.stats import norm
 
-from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic
+from clintrials.core.math import (
+    empiric,
+    inverse_empiric,
+    inverse_logistic,
+    inverse_logit1,
+    logistic,
+    logit1,
+)
 from clintrials.dosefinding.crm import CRM
 
 
@@ -319,3 +327,69 @@ class TestCRMMLEVariance:
         trial_bootstrap.update(list(zip(self.doses, self.tox)))
 
         assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.3)
+
+
+def test_CRM_class_with_bcrm_fixtures():
+    # Load the fixtures
+    expected_probs = pd.read_csv("tests/fixtures/expected_posterior_dlt_probs.csv")
+    expected_doses = pd.read_csv("tests/fixtures/next_dose_recommendations.csv")
+
+    # Scenario 1
+    p_tox_prior_1 = [0.1, 0.2, 0.3, 0.4]
+    target_tox_1 = 0.3
+    doses_1 = [1, 1, 2, 2, 3, 3]
+    dlt_1 = [0, 0, 0, 1, 1, 1]
+    cases_1 = list(zip(doses_1, dlt_1))
+
+    trial1 = CRM(
+        prior=p_tox_prior_1,
+        target=target_tox_1,
+        first_dose=1,
+        max_size=30,
+        F_func=logit1,
+        inverse_F=inverse_logit1,
+        beta_prior=norm(loc=0, scale=np.sqrt(1.34)),
+        method="bayes",
+        plugin_mean=False,
+    )
+    trial1.update(cases_1)
+    prob_tox_1 = trial1.prob_tox()
+    recommended_dose_1 = trial1.next_dose()
+
+    expected_prob_tox_1 = expected_probs[expected_probs.scenario == 1].prob.values
+    expected_next_dose_1 = expected_doses[
+        expected_doses.scenario == 1
+    ].next_dose.values[0]
+
+    assert np.allclose(prob_tox_1, expected_prob_tox_1, atol=1e-2)
+    assert recommended_dose_1 == expected_next_dose_1
+
+    # Scenario 2
+    p_tox_prior_2 = [0.05, 0.1, 0.2, 0.35, 0.5]
+    target_tox_2 = 0.2
+    doses_2 = [1, 1, 1, 2, 2, 2]
+    dlt_2 = [0, 0, 0, 0, 0, 0]
+    cases_2 = list(zip(doses_2, dlt_2))
+
+    trial2 = CRM(
+        prior=p_tox_prior_2,
+        target=target_tox_2,
+        first_dose=1,
+        max_size=30,
+        F_func=logit1,
+        inverse_F=inverse_logit1,
+        beta_prior=norm(loc=0, scale=np.sqrt(1.34)),
+        method="bayes",
+        plugin_mean=False,
+    )
+    trial2.update(cases_2)
+    prob_tox_2 = trial2.prob_tox()
+    recommended_dose_2 = trial2.next_dose()
+
+    expected_prob_tox_2 = expected_probs[expected_probs.scenario == 2].prob.values
+    expected_next_dose_2 = expected_doses[
+        expected_doses.scenario == 2
+    ].next_dose.values[0]
+
+    assert np.allclose(prob_tox_2, expected_prob_tox_2, atol=1e-1)
+    assert recommended_dose_2 == expected_next_dose_2

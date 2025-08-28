@@ -103,13 +103,29 @@ class BeBOP:
         return [case[i] for case in self.cases]
 
     def update(self, cases, n=10**6, epsilon=0.00001, **kwargs):
-        """Update the sampler with additional ``cases``.
+        """Update the model with new observed cases.
 
-        :param n:
-        :param epsilon:
+        This method updates the posterior distribution of the model parameters
+        based on new data. It uses Monte Carlo integration to approximate the
+        posterior. The posterior is stored as a `ProbabilityDensitySample`
+        object in `self._pds`.
 
+        :param cases: A list of case vectors. Each vector represents a patient
+                      and should contain the outcome variables followed by the
+                      predictor variables, as expected by the efficacy, toxicity,
+                      and joint probability models.
+        :type cases: list[list]
+        :param n: The number of samples to use for the Monte Carlo integration.
+                  A larger number will produce more accurate estimates but will
+                  be slower.
+        :type n: int
+        :param epsilon: A small value used to determine the integration limits
+                        by taking the `epsilon` and `1-epsilon` quantiles of
+                        the prior distributions. This defines a hyperrectangle
+                        from which to sample.
+        :type epsilon: float
+        :param kwargs: Not used.
         """
-
         self.cases.extend(cases)
         limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in self.priors]
         samp = numpy.column_stack(

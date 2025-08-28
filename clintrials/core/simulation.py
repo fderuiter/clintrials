@@ -199,7 +199,10 @@ def invoke_map_reduce_function_map(sims, function_map):
     return invoke_map_reduce_on_list(sims, function_map)
 
 
-# I wrote the functions below during a specific analysis.
+# The following functions are helper functions for processing simulation results.
+# They have been reviewed and are considered to be specific enough to the
+# simulation workflow to remain in this module rather than being moved to a
+# more general utility module.
 def partition_and_aggregate(sims, ps, function_map):
     """Function partitions simulations into subsets that used the same set of parameters,
     and then invokes a collection of map/reduce function pairs on each subset.
