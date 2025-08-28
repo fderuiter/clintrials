@@ -13,8 +13,5 @@ fi
 echo "Installing project dependencies with Poetry..."
 poetry install
 
-echo "Running test suite..."
-poetry run pytest -q
-
 echo "Setup complete."
 
