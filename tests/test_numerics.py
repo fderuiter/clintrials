@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import norm
 
-from clintrials.numerics import integrate_posterior_1d
+from clintrials.core.numerics import integrate_posterior_1d
 
 
 def test_integrate_posterior_1d_expands():

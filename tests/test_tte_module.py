@@ -1,7 +1,7 @@
 import numpy as np
 
-from clintrials.recruitment import ConstantRecruitmentStream
-from clintrials.tte import BayesianTimeToEvent, matrix_cohort_analysis
+from clintrials.core.recruitment import ConstantRecruitmentStream
+from clintrials.core.tte import BayesianTimeToEvent, matrix_cohort_analysis
 
 
 def test_bayesian_time_to_event_update_and_test():

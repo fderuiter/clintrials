@@ -8,7 +8,7 @@ from itertools import combinations_with_replacement, product
 
 import numpy as np
 
-from clintrials.util import (
+from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,
     iterable_to_json,

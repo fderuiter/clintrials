@@ -64,7 +64,7 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
     :param sim_func: function to be called to yield single simulation. Parameters are provided via ps as unpacked kwargs
     :type sim_func: func
     :param ps: Parameter space to explore via simulation
-    :type ps: clintrials.util.ParameterSpace
+    :type ps: clintrials.utils.ParameterSpace
     :param n1: Number of batches
     :type n1: int
     :param n2: Number of iterations per batch

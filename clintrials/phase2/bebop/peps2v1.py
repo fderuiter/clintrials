@@ -30,8 +30,12 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
-from clintrials.stats import ProbabilityDensitySample, chi_squ_test, or_test
-from clintrials.util import atomic_to_json, correlated_binary_outcomes, iterable_to_json
+from clintrials.core.stats import ProbabilityDensitySample, chi_squ_test, or_test
+from clintrials.utils import (
+    atomic_to_json,
+    correlated_binary_outcomes,
+    iterable_to_json,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ __contact__ = "kristian.brock@gmail.com"
 import numpy as np
 from scipy.stats import norm
 
-from clintrials.common import empiric, inverse_empiric, inverse_logistic, logistic
+from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic
 from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
 

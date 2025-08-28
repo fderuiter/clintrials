@@ -63,7 +63,7 @@ def inverse_empiric(x, a0=0, beta=0):
 
     :math:`x^{e^{-\\beta}}`
 
-    .. note:: this function is the inverse of :func:`clintrials.common.empiric`.
+    .. note:: this function is the inverse of :func:`clintrials.core.math.empiric`.
 
     :param x: x-variable
     :type x: float
@@ -111,7 +111,7 @@ def inverse_logistic(x, a0=0, beta=0):
 
     :math:`\\frac{\\log(\\frac{x}{1-x}) - a_0}{e^\\beta}`
 
-    .. note:: this function is the inverse of :func:`clintrials.common.logistic`.
+    .. note:: this function is the inverse of :func:`clintrials.core.math.logistic`.
 
     :param x: x-variable
     :type x: float
@@ -161,7 +161,7 @@ def logit1(x, a0=3, beta=0):
 def inverse_logit1(x, a0=3, beta=0):
     """Get the inverse 1-parameter logistic function value.
 
-    .. note:: this function is the inverse of :func:`clintrials.common.logit1`.
+    .. note:: this function is the inverse of :func:`clintrials.core.math.logit1`.
 
     :param x: x-variable
     :type x: float

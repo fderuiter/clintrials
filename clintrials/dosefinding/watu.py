@@ -20,7 +20,7 @@ from random import sample
 import numpy as np
 from scipy.stats import beta, norm
 
-from clintrials.common import empiric, inverse_empiric
+from clintrials.core.math import empiric, inverse_empiric
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 from clintrials.dosefinding.efftox import solve_metrizable_efftox_scenario

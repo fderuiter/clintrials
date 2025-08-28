@@ -14,13 +14,13 @@ from itertools import combinations_with_replacement, product
 import numpy as np
 from scipy.stats import uniform
 
-from clintrials.util import (
+from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,
+    filter_list_of_dicts,
     iterable_to_json,
     to_1d_list,
 )
-from clintrials.utils import filter_list_of_dicts
 
 logger = logging.getLogger(__name__)
 
