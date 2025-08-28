@@ -2,7 +2,7 @@ import logging
 
 from clintrials.core.simulation import run_sims
 from clintrials.dosefinding import find_mtd
-from clintrials.logging import get_logger
+from clintrials.utils import get_logger
 
 
 def dummy_sim():
