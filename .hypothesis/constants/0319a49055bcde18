@@ -1,0 +1,4 @@
+# file: /app/clintrials/utils.py
+# hypothesis_version: 6.138.7
+
+[-0.5, 0.0, 0.05, 1.0, '%s %s', '.', 'AgrestiCoull', 'Alpha', 'Beta', 'BinomTest', 'Cols', 'ColumnSummary', 'Data', 'Fetched %s sims', 'Format', 'Frequencies', 'ID', 'Jeffrey', 'Kristian Brock', 'Label', 'Lower', 'Mean', 'Method', 'No files', 'Normal', 'NumCols', 'NumRows', 'Position', 'RowSummary', 'Rows', 'Sum', 'Table', 'Upper', 'Wilson', '__main__', 'agresti_coull', 'beta', 'binom_test', 'iso-8859-1', 'jeffrey', 'normal', 'wilson']
