@@ -11,7 +11,7 @@ user_guide/tutorials
 tutorials/matchpoint/README.md
 how_to/recipes
 win_ratio_simulation
-reference/index
+reference/modules
 contributing
 changelog
 ```

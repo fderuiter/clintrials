@@ -7,6 +7,35 @@ This library is intended to facilitate research.
 It is provided "as-is" and the author accepts absolutely no responsibility whatsoever for the correctness or integrity of the calculations.
 
 
+### Getting Started
+
+Here is a simple example of how to use the `clintrials` library to run a CRM simulation:
+
+```python
+from clintrials.dosefinding import crm
+
+# Define the toxicity probabilities for each dose level
+dose_tox_probs = [0.05, 0.1, 0.2, 0.3, 0.4, 0.5]
+
+# Create a CRM simulator
+simulator = crm.CRMSimulator(dose_tox_probs, target_dlt_prob=0.2)
+
+# Run the simulation for 100 trials
+results = simulator.simulate(
+    num_trials=100,
+    cohort_size=3,
+    starting_dose=1,
+)
+
+# Print the results
+print(results.describe())
+```
+
+### Contributing
+
+Contributions are welcome! Please see the [contributing guide](docs/contributing.md) for more details on how to get involved.
+
+
 ### What does clintrials do? ###
 
 * This library implements some designs used in clinical trials.
@@ -116,11 +145,7 @@ directly in the browser.
 
 The documentation is hosted on GitHub Pages and can be found at:
 
-<https://fderuiter.github.io/clintrials/>
-
-### Contributing
-
-Contributions are welcome! Please see the [contributing guide](docs/contributing.md) for more details on how to get involved.
+<https://brockk.github.io/clintrials/>
 
 ### Contact ###
 The repo owner is Kristian Brock, @brockk.
