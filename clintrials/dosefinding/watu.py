@@ -338,7 +338,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         )
         return obd
 
-    def prob_eff_exceeds(self, eff_cutoff, n=None):
+    def prob_eff_exceeds(self, eff_cutoff):
         """
         Calculates the probability that the efficacy at each dose level exceeds a given cutoff.
         This is done by calculating the posterior probability P(p_eff > eff_cutoff) for each dose.
@@ -351,7 +351,6 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         theta < log(eff_cutoff) / log(skeleton)
         :param eff_cutoff:
         :type eff_cutoff: float
-        :param n: Not used. Present for API compatibility.
         :return:
         """
 
@@ -387,10 +386,10 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         return probs
 
-    def prob_acc_eff(self, threshold=None, **kwargs):
+    def prob_acc_eff(self, threshold=None):
         if threshold is None:
             threshold = self.eff_limit
-        return self.prob_eff_exceeds(threshold, **kwargs)
+        return self.prob_eff_exceeds(threshold)
 
     def prob_acc_tox(self, threshold=None, **kwargs):
         if threshold is None:
@@ -403,9 +402,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         prob_unacc_tox = self.crm.prob_tox_exceeds(
             self.tox_limit, n=self.mc_sample_size
         )
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(
-            self.eff_limit, n=self.mc_sample_size
-        )
+        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))
@@ -458,9 +455,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         prob_unacc_tox = self.crm.prob_tox_exceeds(
             self.tox_limit, n=self.mc_sample_size
         )
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(
-            self.eff_limit, n=self.mc_sample_size
-        )
+        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))

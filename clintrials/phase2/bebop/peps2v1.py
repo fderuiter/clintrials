@@ -63,9 +63,9 @@ def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2
     return response
 
 
-def l_n(D, alpha0, beta0, beta1, beta2, psi):
-    if len(D) > 0:
-        disease_status, mutation_status, eff, tox = zip(*D)
+def l_n(cases, alpha0, beta0, beta1, beta2, psi):
+    if len(cases) > 0:
+        disease_status, mutation_status, eff, tox = zip(*cases)
         response = np.ones_like(alpha0)
         for i in range(len(tox)):
             p = pi_ab(
@@ -85,35 +85,42 @@ def l_n(D, alpha0, beta0, beta1, beta2, psi):
         return np.ones_like(alpha0)
 
 
-def get_posterior_probs(D, priors, tox_cutoffs, eff_cutoffs, n=10**5):
-    """Get the posterior probabilities after having observed cumulative data ``D`` in the PePS2 trial.
+def get_posterior_probs(
+    cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilon=1e-5
+):
+    """Get the posterior probabilities for the PePS2 trial using the BeBOP design.
 
-    The PePS2 trial studies efficacy and toxicity, stratifying patients by two binary covariates:
-    pre-treatment status and PD-L1 expression. This function calculates the posterior probabilities
-    of efficacy and toxicity for each of the four resulting subgroups.
+    This function calculates the posterior probabilities of efficacy and toxicity for each of the
+    four subgroups in the PePS2 trial, which are defined by two binary covariates:
+    pre-treatment status and PD-L1 expression.
 
-    Note: This function evaluates the posterior integrals using Monte Carlo integration.
+    The calculation is done using Monte Carlo integration.
 
-    Params:
-    D, list of 4-tuples, (disease_status, mutation_status, efficacy, toxicity), where:
-                            disease_status: 1 if patient has been pre-treated, 0 otherwise.
-                            mutation_status: 1 if patient is PD-L1 positive, 0 otherwise.
-                            efficacy: 1 for an efficacious outcome, 0 for alternative.
-                            toxicity: 1 for a toxic event, 0 for tolerance event.
-    priors, list of prior distributions corresponding to alpha_0, beta_0, beta_1, beta_2, psi respectively
-            Each prior object should support obj.ppf(x) and obj.pdf(x)
-    tox_cutoffs, list, the desired maximum toxicity cutoffs for the four groups
-    eff_cutoffs, list, the desired minimum efficacy cutoffs for the four groups
-    n, number of random points to use in Monte Carlo integration.
+    Args:
+        cases (list): A list of 4-tuples, where each tuple represents a patient and contains:
+            (disease_status, mutation_status, efficacy, toxicity).
+            - disease_status (int): 1 if patient has been pre-treated, 0 otherwise.
+            - mutation_status (int): 1 if patient is PD-L1 positive, 0 otherwise.
+            - efficacy (int): 1 for an efficacious outcome, 0 for alternative.
+            - toxicity (int): 1 for a toxic event, 0 for tolerance event.
+        priors (list): A list of prior distributions for the model parameters:
+            - alpha_0 (scipy.stats.rv_continuous): Prior for the toxicity intercept.
+            - beta_0 (scipy.stats.rv_continuous): Prior for the efficacy intercept.
+            - beta_1 (scipy.stats.rv_continuous): Prior for the efficacy effect of pre-treatment.
+            - beta_2 (scipy.stats.rv_continuous): Prior for the efficacy effect of PD-L1 status.
+            - psi (scipy.stats.rv_continuous): Prior for the correlation parameter.
+        tox_cutoffs (list or float): The desired maximum toxicity cutoffs for the four groups.
+        eff_cutoffs (list or float): The desired minimum efficacy cutoffs for the four groups.
+        n (int, optional): Number of random points to use in Monte Carlo integration. Defaults to 10**5.
+        epsilon (float, optional): A small number to define the integration range via the ppf of the priors. Defaults to 1e-5.
 
     Returns:
-    A tuple containing:
-        - A nested list of posterior probabilities: [Prob(Toxicity), Prob(Efficacy),
-          Prob(Toxicity < cutoff), Prob(Efficacy > cutoff)], for each patient cohort.
-          The cohorts are ordered: (Not pre-treated, PD-L1 neg), (Not pre-treated, PD-L1 pos),
-          (Pre-treated, PD-L1 neg), (Pre-treated, PD-L1 pos).
-        - The ProbabilityDensitySample object used for the calculations.
-
+        tuple: A tuple containing:
+            - A nested list of posterior probabilities: [Prob(Toxicity), Prob(Efficacy),
+              Prob(Toxicity < cutoff), Prob(Efficacy > cutoff)], for each patient cohort.
+              The cohorts are ordered: (Not pre-treated, PD-L1 neg), (Not pre-treated, PD-L1 pos),
+              (Pre-treated, PD-L1 neg), (Pre-treated, PD-L1 pos).
+            - The ProbabilityDensitySample object used for the calculations.
     """
 
     if not isinstance(tox_cutoffs, list):
@@ -121,14 +128,13 @@ def get_posterior_probs(D, priors, tox_cutoffs, eff_cutoffs, n=10**5):
     if not isinstance(eff_cutoffs, list):
         eff_cutoffs = [eff_cutoffs] * 4
 
-    epsilon = 0.00001
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
     samp = np.column_stack(
         [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
     )
 
     lik_integrand = (
-        lambda x: l_n(D, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4])
+        lambda x: l_n(cases, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4])
         * priors[0].pdf(x[:, 0])
         * priors[1].pdf(x[:, 1])
         * priors[2].pdf(x[:, 2])
@@ -169,7 +175,13 @@ def get_posterior_probs(D, priors, tox_cutoffs, eff_cutoffs, n=10**5):
 class PePS2BeBOP:
 
     def __init__(
-        self, theta_priors, tox_cutoffs, eff_cutoffs, tox_certainty, eff_certainty
+        self,
+        theta_priors,
+        tox_cutoffs,
+        eff_cutoffs,
+        tox_certainty,
+        eff_certainty,
+        epsilon=1e-5,
     ):
         """
 
@@ -180,6 +192,7 @@ class PePS2BeBOP:
         eff_cutoff, scalar or list, the minimium acceptable probabilities of efficacy per group
         tox_certainty, scalar or list, the posterior certainty required that toxicity is less than cutoff
         eff_certainty, scalar or list, the posterior certainty required that efficacy is greater than than cutoff
+        epsilon, a small number to define the integration range via the ppf of the priors.
 
         tox_cuttoffs, eff_cutoffs, etc take the order:
         (0,0) - Not pre-treated, biomarker negative
@@ -194,6 +207,7 @@ class PePS2BeBOP:
         self.eff_cutoffs = eff_cutoffs
         self.tox_certainty = tox_certainty
         self.eff_certainty = eff_certainty
+        self.epsilon = epsilon
 
         # Initialise model
         self.reset()
@@ -226,7 +240,12 @@ class PePS2BeBOP:
 
         # Update probabilities a-posteriori given observed cases
         post_probs, pds = get_posterior_probs(
-            self.cases, self.priors, self.tox_cutoffs, self.eff_cutoffs, n
+            self.cases,
+            self.priors,
+            self.tox_cutoffs,
+            self.eff_cutoffs,
+            n,
+            self.epsilon,
         )
         self._update(post_probs)
         self._pds = pds

@@ -87,7 +87,7 @@ def _L_n(D, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi):
 
 
 def efftox_get_posterior_probs(
-    cases, priors, scaled_doses, tox_cutoff, eff_cutoff, n=10**5
+    cases, priors, scaled_doses, tox_cutoff, eff_cutoff, n=10**5, epsilon=1e-6
 ):
     """Get the posterior probabilities after having observed cumulative data D in an EffTox trial.
 
@@ -106,6 +106,7 @@ def efftox_get_posterior_probs(
     tox_cutoff, the desired maximum toxicity
     eff_cutoff, the desired minimum efficacy
     n, number of random points to use in Monte Carlo integration.
+    epsilon, a small number to define the integration range via the ppf of the priors.
 
     Returns:
     nested lists of posterior probabilities, [ Prob(Toxicity, Prob(Efficacy), Prob(Toxicity less than cutoff),
@@ -134,7 +135,6 @@ def efftox_get_posterior_probs(
     # generous, e.g. -1000 to 1000 would be stupid because the density at most points would be practically zero.
     # I use percentage points of the various prior distributions. The risk is that if the prior
     # does not cover the posterior range well, it will not estimate it well. This needs attention.
-    epsilon = 0.000001
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
     samp = np.column_stack(
         [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
@@ -167,7 +167,7 @@ def efftox_get_posterior_probs(
     return probs, pds
 
 
-def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5):
+def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5, epsilon=1e-6):
     """Get the posterior parameter estimates after having observed cumulative data D in an EffTox trial.
 
     Note: This function evaluates the posterior integrals using Monte Carlo integration. Thall & Cook
@@ -185,6 +185,7 @@ def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5):
     tox_cutoff, the desired maximum toxicity
     eff_cutoff, the desired minimum efficacy
     n, number of random points to use in Monte Carlo integration.
+    epsilon, a small number to define the integration range via the ppf of the priors.
 
     Returns:
     list of posterior parameters as tuples, [ (mu_T, beta_T, mu_E, beta_T_1, beta_T_2, psi) ], and that's it for now.
@@ -214,7 +215,6 @@ def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5):
     # generous, e.g. -1000 to 1000 would be stupid because the density at most points would be practically zero.
     # I use percentage points of the various prior distributions. The risk is that if the prior
     # does not cover the posterior range well, it will not estimate it well. This needs attention.
-    epsilon = 0.000001
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
     samp = np.column_stack(
         [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
@@ -590,6 +590,8 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     >>> beta_e_2_mean, beta_e_2_sd = 0, 0.2
     >>> psi_mean, psi_sd = 0, 1
     >>> from scipy.stats import norm
+    >>> # The following parameter values are for illustration only.
+    >>> # Users should provide their own priors based on their specific trial.
     >>> theta_priors = [
     ...                   norm(loc=mu_t_mean, scale=mu_t_sd),
     ...                   norm(loc=beta_t_mean, scale=beta_t_sd),
@@ -627,6 +629,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         avoid_skipping_untried_escalation=True,
         avoid_skipping_untried_deescalation=True,
         num_integral_steps=10**5,
+        epsilon=1e-6,
     ):
         """
 
@@ -657,6 +660,8 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         :type avoid_skipping_untried_deescalation: bool
         :param num_integral_steps: number of points to use in Monte Carlo integration.
         :type num_integral_steps: int
+        :param epsilon: a small number to define the integration range via the ppf of the priors.
+        :type epsilon: float
 
         Note: dose_allocation_mode has been suppressed. Remove once I know it is not needed. KB
         # Instances have a dose_allocation_mode property that is set according to this schedule:
@@ -694,6 +699,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.avoid_skipping_untried_escalation = avoid_skipping_untried_escalation
         self.avoid_skipping_untried_deescalation = avoid_skipping_untried_deescalation
         self.num_integral_steps = num_integral_steps
+        self.epsilon = epsilon
 
         # Reset
         self.reset()
@@ -706,7 +712,13 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             n = self.num_integral_steps
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         post_probs, _pds = efftox_get_posterior_probs(
-            cases, self.priors, self._scaled_doses, self.tox_cutoff, self.eff_cutoff, n
+            cases,
+            self.priors,
+            self._scaled_doses,
+            self.tox_cutoff,
+            self.eff_cutoff,
+            n,
+            self.epsilon,
         )
         prob_tox, prob_eff, prob_acc_tox, prob_acc_eff = zip(*post_probs)
         admissable = np.array(
@@ -820,7 +832,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             n = self.num_integral_steps
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         post_params, pds = efftox_get_posterior_params(
-            cases, self.priors, self._scaled_doses, n
+            cases, self.priors, self._scaled_doses, n, self.epsilon
         )
         return post_params
 
