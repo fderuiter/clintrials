@@ -1,4 +1,0 @@
-# file: /app/clintrials/core/tte.py
-# hypothesis_version: 6.138.2
-
-['AlphaPosterior', 'BetaPosterior', 'Certainty', 'Cutoff', 'Decision', 'EventTimes', 'Events', 'FinalAnalysis', 'FinalCertainty', 'FinalEvents', 'FinalPatients', 'FinalTotalEventTime', 'GoAtFinal', 'InterimAnalyses', 'InterimCertainty', 'Kristian Brock', 'LessThan', 'LowerCutoff', 'MaxPatients', 'Patients', 'PriorAlpha', 'PriorBeta', 'Probability', 'RecruitmentTimes', 'Stop', 'StopAtFinal', 'StopAtInterim', 'Time', 'TotalEventTime', 'TrueMedianEventTime', 'UpperCutoff']

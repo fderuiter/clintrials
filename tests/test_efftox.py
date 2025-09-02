@@ -478,7 +478,82 @@ def efftox_trial():
     )
 
 
+class TestInverseQuadraticCurve:
+    def test_constructor(self):
+        from clintrials.dosefinding.efftox import InverseQuadraticCurve
+
+        points = [(0.2, 0.1), (0.5, 0.3), (0.8, 0.6)]
+        curve = InverseQuadraticCurve(points)
+        assert curve is not None
+
+    def test_solve(self):
+        from clintrials.dosefinding.efftox import InverseQuadraticCurve
+
+        points = [(0.2, 0.1), (0.5, 0.3), (0.8, 0.6)]
+        curve = InverseQuadraticCurve(points)
+        # The fit is not perfect, so we use a tolerance
+        assert np.isclose(curve.solve(prob_eff=0.5), 0.3, atol=1e-1)
+        with pytest.raises(NotImplementedError):
+            curve.solve(prob_eff=0.5, delta=0.1)
+
+
 class TestEffToxAdmissibleSet:
+    def test_epsilon_parameter(self):
+        real_doses = [7.5, 15, 30, 45]
+        tox_cutoff = 0.40
+        eff_cutoff = 0.45
+        tox_certainty = 0.05
+        eff_certainty = 0.05
+        mu_t_mean, mu_t_sd = -5.4317, 2.7643
+        beta_t_mean, beta_t_sd = 3.1761, 2.7703
+        mu_e_mean, mu_e_sd = -0.8442, 1.9786
+        beta_e_1_mean, beta_e_1_sd = 1.9857, 1.9820
+        beta_e_2_mean, beta_e_2_sd = 0, 0.2
+        psi_mean, psi_sd = 0, 1
+        theta_priors = [
+            norm(loc=mu_t_mean, scale=mu_t_sd),
+            norm(loc=beta_t_mean, scale=beta_t_sd),
+            norm(loc=mu_e_mean, scale=mu_e_sd),
+            norm(loc=beta_e_1_mean, scale=beta_e_1_sd),
+            norm(loc=beta_e_2_mean, scale=beta_e_2_sd),
+            norm(loc=psi_mean, scale=psi_sd),
+        ]
+        hinge_points = [(0.4, 0), (1, 0.7), (0.5, 0.4)]
+        metric = LpNormCurve(
+            hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1]
+        )
+        trial1 = EffTox(
+            real_doses,
+            theta_priors,
+            tox_cutoff,
+            eff_cutoff,
+            tox_certainty,
+            eff_certainty,
+            metric,
+            max_size=30,
+            first_dose=3,
+            num_integral_steps=10**3,  # smaller n for faster test
+            epsilon=1e-6,
+        )
+        trial2 = EffTox(
+            real_doses,
+            theta_priors,
+            tox_cutoff,
+            eff_cutoff,
+            tox_certainty,
+            eff_certainty,
+            metric,
+            max_size=30,
+            first_dose=3,
+            num_integral_steps=10**3,  # smaller n for faster test
+            epsilon=1e-2,
+        )
+        cases = [(3, 0, 1), (3, 1, 1), (3, 0, 0)]
+        trial1.update(cases)
+        trial2.update(cases)
+        # Probabilities should be different because of the different epsilon
+        assert not np.allclose(trial1.prob_eff, trial2.prob_eff)
+
     @patch("clintrials.dosefinding.efftox.efftox_get_posterior_probs")
     def test_admissible_set_logic(self, mock_post_probs, efftox_trial):
         prob_acc_tox = [0.8, 0.95, 0.8, 0.8, 0.8]

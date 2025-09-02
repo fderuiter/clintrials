@@ -1,4 +1,0 @@
-# file: /app/clintrials/dosefinding/efficacytoxicity.py
-# hypothesis_version: 6.138.2
-
-[0.6, 1.0, 'Both', 'CohortSize', 'Dose', 'DoseGiven', 'Doses', 'EffRate', 'Efficacies', 'Efficacy', 'Error', 'MinProbSuperiority', 'N', 'Neither', 'Next', 'NumEff', 'NumTox', 'OptimalAllocation', 'Pat', 'ProbAccEff1', 'ProbAccEff2', 'ProbAccEff3', 'ProbAccEff4', 'ProbAccTox1', 'ProbAccTox2', 'ProbAccTox3', 'ProbAccTox4', 'RecommendedDose', 'Running %s', 'ToxRate', 'Toxicities', 'Toxicity', 'TrialStatus', 'Utility1', 'Utility2', 'Utility3', 'Utility4', 'brockk']
