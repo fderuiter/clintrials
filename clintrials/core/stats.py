@@ -14,32 +14,28 @@ from scipy.stats import chi2, gaussian_kde, norm
 
 
 def bootstrap(x):
-    """Bootstrap sample a list.
+    """Creates a bootstrap sample from a list of observations.
 
-    :param x: sample observations
-    :type x: list
-    :return: bootstrap sample
-    :rtype: numpy.array
+    Args:
+        x (list): A list of sample observations.
 
+    Returns:
+        numpy.ndarray: A bootstrap sample of the same size as `x`.
     """
-
     return np.random.choice(x, size=len(x), replace=1)
 
 
 def density(x, n_points=100, covariance_factor=0.25):
-    """Calculate and plot approximate densoty function from a sample.
+    """Calculates and plots an approximate density function from a sample.
 
-    :param x: sample observations
-    :type x: list
-    :param n_points: number of points in density function to estimate
-    :type n_points: int
-    :param covariance_factor: covariance factor in scipy routine, see scipy.stats.gaussian_kde
-    :type covariance_factor: float
-    :return: None (yet)
-    :rtype: None
-
+    Args:
+        x (list): A list of sample observations.
+        n_points (int, optional): The number of points in the density
+            function to estimate. Defaults to 100.
+        covariance_factor (float, optional): The covariance factor for the
+            Gaussian KDE. See `scipy.stats.gaussian_kde` for details.
+            Defaults to 0.25.
     """
-
     d = gaussian_kde(x)
     xs = np.linspace(min(x), max(x), n_points)
     d.covariance_factor = lambda: covariance_factor
@@ -49,44 +45,48 @@ def density(x, n_points=100, covariance_factor=0.25):
 
 
 def beta_like_normal(mu, sigma):
-    """If X ~ N(mu, sigma^2), get alpha and beta s.t. Y ~ Beta(alpha, beta) has:
-        E[X] = E[Y] & Var[X] = Var[Y]
+    """Calculates beta distribution parameters that match a normal distribution.
 
-        This is useful for quickly estimating the effective sample size of a normal prior,
-        using the principle that the effective sample size of Beta(a, b) is a+b.
+    Given a normal distribution with mean `mu` and standard deviation `sigma`,
+    this function finds the `alpha` and `beta` parameters of a beta
+    distribution such that the two distributions have the same mean and
+    variance.
 
-    :param mu: Mean of a normal r.v.
-    :type mu: float
-    :param sigma: Standard deviation of a normal r.v.
-    :type sigma: float
-    :return: (alpha, beta) pair of floats
-    :rtype: tuple
+    This is useful for estimating the effective sample size of a normal prior,
+    using the principle that the effective sample size of Beta(a, b) is a+b.
 
+    Args:
+        mu (float): The mean of the normal distribution.
+        sigma (float): The standard deviation of the normal distribution.
+
+    Returns:
+        tuple[float, float]: A tuple containing the `alpha` and `beta`
+            parameters.
     """
-
     alpha = (mu / sigma) ** 2 * (1 - mu) - mu
     beta = ((1 - mu) / mu) * alpha
     return alpha, beta
 
 
 def or_test(a, b, c, d, ci_alpha=0.05):
-    """Calculate odds ratio and asymptotic confidence interval for events with counts a, b, c, and d.
+    """Calculates the odds ratio and its confidence interval.
 
-    :param a: Number of observations with positive exposure (e.g. treated) and positive outcome (e.g cured)
-    :type a: int
-    :param b: Number of observations with positive exposure (e.g. treated) and negative outcome (e.g not cured)
-    :type b: int
-    :param c: Number of observations with negative exposure (e.g. not treated) and positive outcome (e.g cured)
-    :type c: int
-    :param d: Number of observations with negative exposure (e.g. not treated) and negative outcome (e.g not cured)
-    :type d: int
-    :param ci_alpha: significance for asymptotic confidence ionterval of odds-ratio
-    :type ci_alpha: float
-    :return: A dict object with all available statistics
-    :rtype: collections.OrderedDict
+    Args:
+        a (int): The number of observations with positive exposure and
+            positive outcome.
+        b (int): The number of observations with positive exposure and
+            negative outcome.
+        c (int): The number of observations with negative exposure and
+            positive outcome.
+        d (int): The number of observations with negative exposure and
+            negative outcome.
+        ci_alpha (float, optional): The significance level for the confidence
+            interval. Defaults to 0.05.
 
+    Returns:
+        collections.OrderedDict: A dictionary containing the odds ratio,
+            log(OR) standard error, confidence interval, and alpha.
     """
-
     abcd = [a, b, c, d]
     to_return = OrderedDict()
     to_return["ABCD"] = abcd
@@ -112,21 +112,22 @@ def or_test(a, b, c, d, ci_alpha=0.05):
 
 
 def chi_squ_test(x, y, x_positive_value=None, y_positive_value=None, ci_alpha=0.05):
-    """Run a chi-squared test for association between x and y.
+    """Performs a chi-squared test for association between two variables.
 
-    :param x:
-    :type x: list
-    :param y:
-    :type y: list
-    :param x_positive_value: item in x corresponding to positive event, 1 by default
-    :type x_positive_value: object
-    :param y_positive_value: item in y corresponding to positive event, 1 by default
-    :type y_positive_value: object
-    :param ci_alpha: significance for asymptotic confidence ionterval of odds-ratio
-    :type ci_alpha: float
-    :return: A dict object with all available statistics
-    :rtype: collections.OrderedDict
+    Args:
+        x (list): The first variable.
+        y (list): The second variable.
+        x_positive_value (object, optional): The value in `x` that
+            corresponds to a positive event. Defaults to 1.
+        y_positive_value (object, optional): The value in `y` that
+            corresponds to a positive event. Defaults to 1.
+        ci_alpha (float, optional): The significance level for the confidence
+            interval of the odds ratio (if applicable). Defaults to 0.05.
 
+    Returns:
+        collections.OrderedDict: A dictionary containing the test statistic,
+            p-value, degrees of freedom, and odds ratio results (for 2x2
+            tables).
     """
     sum_oe = 0.0
     x_set = set(x)
@@ -167,32 +168,111 @@ def chi_squ_test(x, y, x_positive_value=None, y_positive_value=None, ci_alpha=0.
 
 
 class ProbabilityDensitySample:
+    """Represents a sample from a probability density function.
+
+    This class provides methods to calculate properties of the distribution,
+    such as expectation, variance, CDF, and quantiles.
+    """
 
     def __init__(self, samp, func):
+        """Initializes a ProbabilityDensitySample object.
+
+        Args:
+            samp (numpy.ndarray): The sample from the distribution.
+            func (callable): A function that takes the sample and returns
+                the probabilities.
+        """
         self._samp = samp
         self._probs = func(samp)
         self._scale = self._probs.mean()
 
     def expectation(self, vector):
+        """Calculates the expectation of a vector.
+
+        Args:
+            vector (numpy.ndarray): The vector for which to calculate the
+                expectation.
+
+        Returns:
+            float: The expectation of the vector.
+        """
         return np.mean(vector * self._probs / self._scale)
 
     def variance(self, vector):
+        """Calculates the variance of a vector.
+
+        Args:
+            vector (numpy.ndarray): The vector for which to calculate the
+                variance.
+
+        Returns:
+            float: The variance of the vector.
+        """
         exp = self.expectation(vector)
         exp2 = self.expectation(vector**2)
         return exp2 - exp**2
 
     def cdf(self, i, y):
-        """Get the cumulative density of the parameter in position i that is less than y."""
+        """Calculates the cumulative density function (CDF).
+
+        This method calculates the probability that the parameter at a given
+        position is less than a certain value.
+
+        Args:
+            i (int): The index of the parameter in the sample.
+            y (float): The value to compare against.
+
+        Returns:
+            float: The cumulative density.
+        """
         return self.expectation(self._samp[:, i] < y)
 
     def quantile(self, i, p, start_value=0.1):
-        """Get the value of the parameter at position i for which p of the probability mass is in the left-tail."""
+        """Calculates the quantile.
+
+        This method finds the value of the parameter at a given position for
+        which a certain proportion of the probability mass is in the
+        left-tail.
+
+        Args:
+            i (int): The index of the parameter in the sample.
+            p (float): The desired probability (between 0 and 1).
+            start_value (float, optional): The starting value for the solver.
+                Defaults to 0.1.
+
+        Returns:
+            float: The quantile value.
+        """
         return fsolve(lambda z: self.cdf(i, z) - p, start_value)[0]
 
     def cdf_vector(self, vector, y):
-        """Get the cumulative density of sample vector that is less than y."""
+        """Calculates the CDF for a vector.
+
+        This method calculates the probability that the given vector is less
+        than a certain value.
+
+        Args:
+            vector (numpy.ndarray): The vector.
+            y (float): The value to compare against.
+
+        Returns:
+            float: The cumulative density.
+        """
         return self.expectation(vector < y)
 
     def quantile_vector(self, vector, p, start_value=0.1):
-        """Get the value of a vector for which p of the probability mass is in the left-tail."""
+        """Calculates the quantile for a vector.
+
+        This method finds the value for which a certain proportion of the
+        probability mass of the given vector is in the left-tail.
+
+        Args:
+            vector (numpy.ndarray): The vector.
+            p (float): The desired probability (between 0 and 1).
+            start_value (float, optional): The starting value for the solver.
+                Defaults to 0.1.
+
+        Returns:
+            float: The quantile value.
+        """
         return fsolve(lambda z: self.cdf_vector(vector, z) - p, start_value)[0]

@@ -26,18 +26,45 @@ import numpy
 
 
 def pi_e(x, theta):
+    """Calculates the probability of efficacy.
+
+    Args:
+        x (numpy.ndarray): A patient data vector.
+        theta (numpy.ndarray): A 2D array of model parameters.
+
+    Returns:
+        numpy.ndarray: An array of efficacy probabilities.
+    """
     z = theta[:, 0] + theta[:, 1] * x[2] + theta[:, 2] * x[3] + theta[:, 3] * x[4]
     return 1 / (1 + numpy.exp(-z))
 
 
 def pi_t(x, theta):
+    """Calculates the probability of toxicity.
+
+    Args:
+        x (numpy.ndarray): A patient data vector.
+        theta (numpy.ndarray): A 2D array of model parameters.
+
+    Returns:
+        numpy.ndarray: An array of toxicity probabilities.
+    """
     z = theta[:, 4]
     return 1 / (1 + numpy.exp(-z))
 
 
 def pi_ab(x, theta):
-    b = x[0]  # had efficacy
-    a = x[1]  # had_toxicity
+    """Calculates the joint probability of efficacy and toxicity.
+
+    Args:
+        x (numpy.ndarray): A patient data vector.
+        theta (numpy.ndarray): A 2D array of model parameters.
+
+    Returns:
+        numpy.ndarray: An array of joint probabilities.
+    """
+    b = x[0]
+    a = x[1]
     psi = theta[:, 5]
     pe = pi_e(x, theta)
     pt = pi_t(x, theta)

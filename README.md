@@ -1,103 +1,91 @@
-# clintrials #
+# clintrials
 
-## README ##
+`clintrials` is a Python library for designing and simulating clinical trials. It provides implementations of various trial designs, with a focus on early-phase oncology trials.
 
-clintrials is a library of clinical trial designs and methods in Python.
-This library is intended to facilitate research.
-It is provided "as-is" and the author accepts absolutely no responsibility whatsoever for the correctness or integrity of the calculations.
+## Features
 
+*   **Dose-Finding Designs:**
+    *   Continual Reassessment Method (CRM)
+    *   Efficacy-Toxicity (EffTox) design by Thall & Cook
+    *   Efficacy-Toxicity design by Wages & Tait
+    *   BEBOP design for bivariate binary outcomes with predictive variables
+*   **Phase II Designs:**
+    *   Two-stage Bayesian design for dichotomous endpoints
+    *   Chi-squared test for two-arm comparison
+*   **Phase III Designs:**
+    *   Group Sequential Designs (GSDs) with Pocock and O'Brien-Fleming-like spending functions
+*   **Simulation Tools:**
+    *   Tools for simulating patient recruitment and trial outcomes
+    *   Parameter space exploration for simulation studies
+*   **Interactive Dashboard:**
+    *   A web-based dashboard for visualizing simulation results.
 
-### What does clintrials do? ###
+## Project Structure
 
-* This library implements some designs used in clinical trials.
-* It has implementations of O'Quigley's CRM design, Thall & Cook's EffTox design, and Wages & Tait's efficacy+toxicity design.
-* There is also an implementation of my very own BEBOP trial design for the simultaneous study of bivariate binary outcomes (like efficacy and toxicity) in the presence of predictive variables, both continuous and binary.
-* A win-ratio simulation module estimates the power of hierarchical composite endpoints.
-* There is a bias towards phase I and II trial designs because that is my research area.
-* I expect to add more designs in the future.
-* It is written in pure Python, intentionally. This library would be quicker if it was written in C++ or Java but it would not be as portable or readable.
-* Some of the code is fairly mature but the repo itself is young and in flux.
-* This project now requires Python 3.9 or newer.
+The repository is organized as follows:
 
-Why Python?
-----
-No biostatisticians use Python, they use R / Stata / SAS, so why is this in Python?
-Well, Python is used in lots of other sciences because it is rich and pleasant to work with.
-Python is object-orientated, which is important when you are writing a bunch of classes that do a similar job in fundamentally different ways, like clinical trial designs, say.
-It is nice to program in Python.
-I think it is sadly underused in clinical trials.
-Python also offers lots of extras and the parallel capabilities of IPython are having a positive impact on my work.
+*   `clintrials/`: The main Python package containing the library's source code.
+    *   `core/`: Core components like math functions, simulation tools, and statistical utilities.
+    *   `dosefinding/`: Implementations of various dose-finding trial designs.
+    *   `phase2/`: Implementations of Phase II trial designs.
+    *   `phase3/`: Implementations of Phase III trial designs.
+    *   `winratio/`: Tools for win-ratio analysis.
+    *   `dashboard/`: The source code for the interactive web dashboard.
+*   `docs/`: Documentation files, including tutorials and user guides.
+*   `tests/`: Unit tests for the library.
 
-If you have never used Python, I recommend you install Anaconda, a distribution of Python aimed at academics and researchers that includes the tools we need, switch to the tutorial directory of clintrials and then fire up jupyter notebook.
+## Installation
 
-### Dependencies ###
-
-* numpy, scipy, pandas & statsmodels - all of these are installed by Anaconda so I highly recommend that.
-Install Anaconda from https://www.continuum.io/downloads
-* Some features also require matplotlib and ggplot. matplotlib also comes with Anaconda but ggplot will require a separate install.
-If you need ggplot, be nice to yourself and use pip:
- `pip install ggplot`
-
-
-### How do I get set up? ###
-
-There are two ways.
-The first method uses pip and the Python package index.
-The extras like the tutorials are not provided.
-The second clones this repo using git.
-Tutorials are provided in the `docs/tutorials` directory.
-The one complication is getting the clinitrials package on your path.
-
-#### Using Poetry to get just the clintrials code
-Poetry automatically creates a virtual environment and installs the project
-dependencies for you. If you do not have Poetry installed, run:
+To get started with `clintrials`, you can install it using Poetry. If you don't have Poetry installed, you can install it with pip:
 
 ```bash
 pip install poetry
 ```
 
-Then install the project and drop into the environment with:
+Then, to install the project and its dependencies, run:
 
 ```bash
 poetry install
+```
+
+This will create a virtual environment with all the necessary packages. To activate the environment, run:
+
+```bash
 poetry shell
 ```
 
-The package will be on your path inside the Poetry shell. If you would like the
-tutorial notebooks as well, use...
+## Usage
 
-#### Using git to clone this repo, including tutorial notebooks
+Here is a simple example of how to use the `CRM` class to simulate a dose-finding trial:
 
-Navigate in terminal or DOS to a directory where you want the code and run
+```python
+from clintrials.dosefinding.crm import CRM
 
-`git clone https://github.com/brockk/clintrials.git`
+# Define the prior probabilities of toxicity
+prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
+# Define the target toxicity rate
+tox_target = 0.35
+# Define the starting dose
+first_dose = 3
+# Define the maximum number of patients
+trial_size = 30
 
-`cd clintrials`
+# Create a CRM trial object
+trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)
 
-You need to put clintrials on your path. 
-An easy way to do this is to edit the PYTHONPATH environment variable.
-To do this in Mac or Linux, run 
- 
-`export PYTHONPATH=$PYTHONPATH:$(pwd)`
- 
-Or, in Windows run
- 
-`set PYTHONPATH=%PYTHONPATH%;%CD%`
+# Get the next recommended dose
+next_dose = trial.next_dose()
+print(f"Next dose: {next_dose}")
 
-Then, load a jupyter notebook session for the tutorials using:
+# Update the trial with new patient data
+trial.update([(3, 0), (3, 0), (3, 0)])
+next_dose = trial.next_dose()
+print(f"Next dose after update: {next_dose}")
+```
 
-`jupyter notebook --notebook-dir=docs/tutorials`
+## Interactive Dashboard
 
-A browser window should appear and you should see the tutorials.
-Tutorials related to the _Implementing the EffTox Dose-Finding Design in the Matchpoint Trial_ publication
-are in the `matchpoint` directory.
-
-
-### Interactive Dashboard
-
-This project includes an interactive web-based dashboard for visualizing simulation results.
-To run the dashboard, make sure you have installed the project dependencies with Poetry, as described above.
-Then, run the following command:
+This project includes an interactive web-based dashboard for visualizing simulation results. To run the dashboard, make sure you have installed the project dependencies with Poetry, as described above. Then, run the following command:
 
 ```bash
 poetry run dashboard
@@ -105,29 +93,19 @@ poetry run dashboard
 
 This will start a local web server and open the dashboard in your browser.
 
-The dashboard supports tailored visualizations for different trial designs.
-Use the sidebar to select the appropriate trial design (e.g., CRM, EffTox, Win Ratio).
-For CRM and EffTox, upload your simulation results in JSON format to explore them
-interactively. The Win Ratio option lets you configure parameters and run simulations
-directly in the browser.
+## Documentation
 
-
-### Documentation
-
-The documentation is hosted on GitHub Pages and can be found at:
+The full documentation, including tutorials and API reference, is hosted on GitHub Pages and can be found at:
 
 <https://fderuiter.github.io/clintrials/>
 
-### Contributing
+## Contributing
 
 Contributions are welcome! Please see the [contributing guide](docs/contributing.md) for more details on how to get involved.
 
-### Contact ###
-The repo owner is Kristian Brock, @brockk.
-Feel free to get in contact through GitHub.
+## Development
 
-### Development ###
-Install development requirements and run the style checks using pre-commit:
+To set up a development environment, install the development requirements and run the style checks using pre-commit:
 
 ```bash
 pip install -e .[dev]
@@ -141,16 +119,17 @@ Run the test suite with:
 pytest -q
 ```
 
-### Building the documentation
+### Building the Documentation
 
-Install the optional docs dependencies and run Sphinx:
+To build the documentation locally, install the optional docs dependencies and run Sphinx:
 
 ```bash
 pip install -e .[docs]
 make -C docs html
 ```
 
-Documentation is deployed to GitHub Pages by the
-workflow `.github/workflows/docs.yml` when changes are pushed to the
-`main` branch. Ensure that the GitHub environment permits deployments
-from `main`.
+The documentation will be generated in the `docs/_build/html` directory.
+
+## Contact
+
+The repo owner is Kristian Brock, @brockk. Feel free to get in contact through GitHub.

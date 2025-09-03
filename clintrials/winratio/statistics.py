@@ -7,7 +7,17 @@ from scipy.stats import norm
 
 
 def calculate_confidence_intervals(wr: float, wins: int, losses: int):
-    """Calculate 95% confidence intervals for the win ratio."""
+    """Calculates the 95% confidence intervals for the win ratio.
+
+    Args:
+        wr (float): The win ratio.
+        wins (int): The number of wins.
+        losses (int): The number of losses.
+
+    Returns:
+        tuple[float, float]: A tuple containing the lower and upper bounds of
+            the confidence interval.
+    """
     if wins == 0 or losses == 0:
         return (0, 0)
     variance = 1 / wins + 1 / losses
@@ -22,7 +32,16 @@ def calculate_confidence_intervals(wr: float, wins: int, losses: int):
 
 
 def calculate_p_value(wr: float, wins: int, losses: int) -> float:
-    """Calculate the p-value for the observed win ratio."""
+    """Calculates the p-value for the observed win ratio.
+
+    Args:
+        wr (float): The win ratio.
+        wins (int): The number of wins.
+        losses (int): The number of losses.
+
+    Returns:
+        float: The p-value.
+    """
     if wins == 0 or losses == 0:
         return 1.0
     observed_z = (np.log(wr)) / np.sqrt((1 / wins) + (1 / losses))
@@ -30,7 +49,15 @@ def calculate_p_value(wr: float, wins: int, losses: int) -> float:
 
 
 def calculate_win_ratio(wins: int, losses: int) -> float:
-    """Return the win ratio or infinity if there are no losses."""
+    """Calculates the win ratio.
+
+    Args:
+        wins (int): The number of wins.
+        losses (int): The number of losses.
+
+    Returns:
+        float: The win ratio, or infinity if there are no losses.
+    """
     if losses == 0:
         return float("inf")
     return wins / losses

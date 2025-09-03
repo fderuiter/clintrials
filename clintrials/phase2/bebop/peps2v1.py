@@ -1,24 +1,15 @@
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
+"""
+This module contains the first version of classes and functions for the PePS2
+trial. PePS2 studies the efficacy and toxicity of a drug in a population of
+performance status 2 lung cancer patients. Patient outcomes may be affected by
+whether they have been treated before and their PD-L1 expression rate.
 
-""" First attempt at classes and functions for the PePs2 trial.
-
-    PePS2 studies the efficacy and toxicity of a drug in a population
-    of performance status 2 lung cancer patients. Patient outcomes
-    may plausibly be effected by whether or not they have been
-    treated before, and the expression rate of PD-L1 in their cells.
-
-    Our all-comers trial uses Brock et al's BeBOP design to incorporate
-    this potentially predictive data to find the sub population(s)
-    where the drug works and is tolerable.
-
-    This script is version 1 because it is frightfully highly coupled
-    with the predictive variables chosen. For example, we initially
-    treated PD-L1 as two groups, high and low. When I came to change
-    this to high / medium and low, I had trouble.
-
-    """
+The trial uses the BeBOP design to incorporate this predictive data to find
+the subpopulation(s) where the drug is effective and tolerable.
+"""
 
 import datetime
 import glob
@@ -41,17 +32,57 @@ logger = logging.getLogger(__name__)
 
 
 def pi_t(disease_status, mutation_status, alpha0=0, alpha1=0, alpha2=0):
+    """Calculates the probability of toxicity.
+
+    Args:
+        disease_status (int): 1 if pre-treated, 0 otherwise.
+        mutation_status (int): 1 if biomarker positive, 0 otherwise.
+        alpha0 (float, optional): Intercept parameter. Defaults to 0.
+        alpha1 (float, optional): Disease status coefficient. Defaults to 0.
+        alpha2 (float, optional): Mutation status coefficient. Defaults to 0.
+
+    Returns:
+        float: The probability of toxicity.
+    """
     z = alpha0 + alpha1 * disease_status + alpha2 * mutation_status
     response = 1 / (1 + np.exp(-z))
     return response
 
 
 def pi_e(disease_status, mutation_status, beta0=0, beta1=0, beta2=0):
+    """Calculates the probability of efficacy.
+
+    Args:
+        disease_status (int): 1 if pre-treated, 0 otherwise.
+        mutation_status (int): 1 if biomarker positive, 0 otherwise.
+        beta0 (float, optional): Intercept parameter. Defaults to 0.
+        beta1 (float, optional): Disease status coefficient. Defaults to 0.
+        beta2 (float, optional): Mutation status coefficient. Defaults to 0.
+
+    Returns:
+        float: The probability of efficacy.
+    """
     z = beta0 + beta1 * disease_status + beta2 * mutation_status
     return 1 / (1 + np.exp(-z))
 
 
 def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2, psi):
+    """Calculates the likelihood of a joint efficacy-toxicity outcome.
+
+    Args:
+        disease_status (int): 1 if pre-treated, 0 otherwise.
+        mutation_status (int): 1 if biomarker positive, 0 otherwise.
+        eff (int): Efficacy outcome (1 or 0).
+        tox (int): Toxicity outcome (1 or 0).
+        alpha0 (float): Toxicity intercept.
+        beta0 (float): Efficacy intercept.
+        beta1 (float): Efficacy disease status coefficient.
+        beta2 (float): Efficacy mutation status coefficient.
+        psi (float): Correlation parameter.
+
+    Returns:
+        float: The likelihood of the outcome.
+    """
     a = tox
     b = eff
     p1 = pi_t(disease_status, mutation_status, alpha0)
@@ -64,6 +95,19 @@ def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2
 
 
 def l_n(cases, alpha0, beta0, beta1, beta2, psi):
+    """Calculates the compound likelihood for a set of cases.
+
+    Args:
+        cases (list): A list of patient cases.
+        alpha0 (float): Toxicity intercept.
+        beta0 (float): Efficacy intercept.
+        beta1 (float): Efficacy disease status coefficient.
+        beta2 (float): Efficacy mutation status coefficient.
+        psi (float): Correlation parameter.
+
+    Returns:
+        float: The compound likelihood.
+    """
     if len(cases) > 0:
         disease_status, mutation_status, eff, tox = zip(*cases)
         response = np.ones_like(alpha0)
@@ -88,7 +132,7 @@ def l_n(cases, alpha0, beta0, beta1, beta2, psi):
 def get_posterior_probs(
     cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilon=1e-5
 ):
-    """Get the posterior probabilities for the PePS2 trial using the BeBOP design.
+    """Gets the posterior probabilities for the PePS2 trial using the BeBOP design.
 
     This function calculates the posterior probabilities of efficacy and toxicity for each of the
     four subgroups in the PePS2 trial, which are defined by two binary covariates:
@@ -122,7 +166,6 @@ def get_posterior_probs(
               (Pre-treated, PD-L1 neg), (Pre-treated, PD-L1 pos).
             - The ProbabilityDensitySample object used for the calculations.
     """
-
     if not isinstance(tox_cutoffs, list):
         tox_cutoffs = [tox_cutoffs] * 4
     if not isinstance(eff_cutoffs, list):
@@ -158,8 +201,6 @@ def get_posterior_probs(
             beta2=samp[:, 3],
         )
 
-        # print np.mean(samp[:,1]), np.mean(samp[:,2]), np.mean(samp[:,3]), np.mean(eff_probs)
-
         probs.append(
             (
                 pds.expectation(tox_probs),
@@ -173,6 +214,7 @@ def get_posterior_probs(
 
 
 class PePS2BeBOP:
+    """A class to manage a PePS2 trial using the BeBOP design."""
 
     def __init__(
         self,
@@ -183,25 +225,22 @@ class PePS2BeBOP:
         eff_certainty,
         epsilon=1e-5,
     ):
+        """Initializes a PePS2BeBOP trial object.
+
+        Args:
+            theta_priors (list): A list of prior distributions for the model
+                parameters.
+            tox_cutoffs (list or float): The maximum acceptable toxicity
+                probabilities.
+            eff_cutoffs (list or float): The minimum acceptable efficacy
+                probabilities.
+            tox_certainty (list or float): The posterior certainty required for
+                acceptable toxicity.
+            eff_certainty (list or float): The posterior certainty required for
+                acceptable efficacy.
+            epsilon (float, optional): A small number to define the integration
+                range. Defaults to 1e-5.
         """
-
-        Params:
-        theta_priors, list of prior distributions corresponding to alpha0, beta0, beta1, beta2, psi
-                        respectively. Each prior object should support obj.ppf(x) and obj.pdf(x)
-        tox_cutoff, scalar or list, the maximum acceptable probabilities of toxicity per group
-        eff_cutoff, scalar or list, the minimium acceptable probabilities of efficacy per group
-        tox_certainty, scalar or list, the posterior certainty required that toxicity is less than cutoff
-        eff_certainty, scalar or list, the posterior certainty required that efficacy is greater than than cutoff
-        epsilon, a small number to define the integration range via the ppf of the priors.
-
-        tox_cuttoffs, eff_cutoffs, etc take the order:
-        (0,0) - Not pre-treated, biomarker negative
-        (0,1) - Not pre-treated, biomarker positive
-        (1,0) - Pre-treated, biomarker negative
-        (1,1) - Pre-treated, biomarker positive
-
-        """
-
         self.priors = theta_priors
         self.tox_cutoffs = tox_cutoffs
         self.eff_cutoffs = eff_cutoffs
@@ -209,10 +248,10 @@ class PePS2BeBOP:
         self.eff_certainty = eff_certainty
         self.epsilon = epsilon
 
-        # Initialise model
         self.reset()
 
     def reset(self):
+        """Resets the trial to its initial state."""
         self.cases = []
         self.prob_tox = []
         self.prob_eff = []
@@ -220,25 +259,60 @@ class PePS2BeBOP:
         self.prob_acc_eff = []
 
     def size(self):
+        """Gets the current number of patients in the trial.
+
+        Returns:
+            int: The number of patients.
+        """
         return len(self.cases)
 
     def pretreated_statuses(self):
+        """Gets the pre-treated statuses of all patients.
+
+        Returns:
+            list[int]: A list of pre-treated statuses.
+        """
         return [case[0] for case in self.cases]
 
     def mutation_statuses(self):
+        """Gets the mutation statuses of all patients.
+
+        Returns:
+            list[int]: A list of mutation statuses.
+        """
         return [case[1] for case in self.cases]
 
     def efficacies(self):
+        """Gets the efficacy outcomes of all patients.
+
+        Returns:
+            list[int]: A list of efficacy outcomes.
+        """
         return [case[2] for case in self.cases]
 
     def toxicities(self):
+        """Gets the toxicity outcomes of all patients.
+
+        Returns:
+            list[int]: A list of toxicity outcomes.
+        """
         return [case[3] for case in self.cases]
 
     def update(self, cases, n=10**6, **kwargs):
+        """Updates the trial with new patient cases.
+
+        Args:
+            cases (list): A list of new patient cases.
+            n (int, optional): The number of samples for Monte Carlo
+                integration. Defaults to 10**6.
+            **kwargs: Additional keyword arguments.
+
+        Returns:
+            int: Always returns 0.
+        """
         for disease_status, mutation_status, eff, tox in cases:
             self.cases.append((disease_status, mutation_status, eff, tox))
 
-        # Update probabilities a-posteriori given observed cases
         post_probs, pds = get_posterior_probs(
             self.cases,
             self.priors,
@@ -252,12 +326,15 @@ class PePS2BeBOP:
         return 0
 
     def decision(self, i):
-        """Get the trial-outcome decision in group i.
+        """Determines the trial outcome decision for a specific group.
 
-        True means approve treatment.
+        Args:
+            i (int): The index of the group.
 
+        Returns:
+            bool: `True` if the treatment is approved for the group, `False`
+                otherwise.
         """
-
         eff_prob_hurdle = (
             self.eff_certainty[i]
             if isinstance(self.eff_certainty, list)
@@ -274,15 +351,18 @@ class PePS2BeBOP:
         )
 
     def efficacy_effect(self, j, alpha=0.05):
-        """Get confidence interval and mean estimate of the effect on efficacy, expressed as odds-ratios.
+        """Gets the confidence interval and mean estimate for an efficacy effect.
 
-        Use:
-        - j=0, to get treatment effect of the intercept variable
-        - j=1, to get treatment effect of the pre-treated status variable
-        - j=2, to get treatment effect of the mutation status variable
+        Args:
+            j (int): The index of the effect (0 for intercept, 1 for
+                pre-treated, 2 for mutation).
+            alpha (float, optional): The significance level for the confidence
+                interval. Defaults to 0.05.
 
+        Returns:
+            numpy.ndarray: An array containing the lower bound, mean, and
+                upper bound of the odds ratio.
         """
-
         if j == 0:
             expected_log_or = self._pds.expectation(self._pds._samp[:, 1])
             return np.exp(
@@ -314,13 +394,18 @@ class PePS2BeBOP:
             return (0, 0, 0)
 
     def toxicity_effect(self, j=0, alpha=0.05):
-        """Get confidence interval and mean estimate of the effect on toxicity, expressed as odds-ratios.
+        """Gets the confidence interval and mean estimate for a toxicity effect.
 
-        Use:
-        - j=0, to get effect on toxicity of the intercept variable
+        Args:
+            j (int, optional): The index of the effect (0 for intercept).
+                Defaults to 0.
+            alpha (float, optional): The significance level for the confidence
+                interval. Defaults to 0.05.
 
+        Returns:
+            numpy.ndarray: An array containing the lower bound, mean, and
+                upper bound of the odds ratio.
         """
-
         if j == 0:
             expected_log_or = self._pds.expectation(self._pds._samp[:, 0])
             return np.exp(
@@ -334,7 +419,17 @@ class PePS2BeBOP:
             return (0, 0, 0)
 
     def correlation_effect(self, alpha=0.05):
-        """Get confidence interval and mean estimate of the correlation between efficacy and toxicity."""
+        """Gets the confidence interval and mean estimate for the correlation
+        between efficacy and toxicity.
+
+        Args:
+            alpha (float, optional): The significance level for the confidence
+                interval. Defaults to 0.05.
+
+        Returns:
+            numpy.ndarray: An array containing the lower bound, mean, and
+                upper bound of the correlation.
+        """
         expected_psi = self._pds.expectation(self._pds._samp[:, 4])
         psi_levels = np.array(
             [
@@ -346,15 +441,6 @@ class PePS2BeBOP:
         return (np.exp(psi_levels) - 1) / (np.exp(psi_levels) + 1)
 
     def _update(self, post_probs):
-        """Private method to update the model.
-
-        Params:
-        post_probs, numpy array of probabilities output from get_posterior_probs
-
-        Returns: 0
-
-        """
-
         prob_tox, prob_eff, prob_acc_tox, prob_acc_eff = zip(*post_probs)
         self.prob_tox = prob_tox
         self.prob_eff = prob_eff
@@ -363,121 +449,24 @@ class PePS2BeBOP:
         return 0
 
 
-# class PePs2BryantAndDayStage(Phase2EffToxBase):
-#
-#     def __init__(self, min_efficacy_events, max_tox_events, effects_mode='ChiSqu'):
-#
-#         """ A stage in a Bryant & Day trial accepts a treatment by comparing number of efficacy and tox
-#         events to some critical (optimal) thresholds.
-#
-#         I have bolted on ways of testing treatment effects. The method of testing treatment effects is
-#         governed by effects_mode:
-#         - 'ChiSqu' to measure association by chi-squared tests;
-#         - 'Logit' to measure effects using joint logit GLM
-#
-#         """
-#
-#         self.min_efficacy_events = min_efficacy_events
-#         self.max_tox_events = max_tox_events
-#         self.effects_mode = effects_mode
-#         self.reset()
-#
-#     def reset(self):
-#         self.cases = []
-#         self.num_eff = 0
-#         self.num_tox = 0
-#
-#     def update(self, cases):
-#         for disease_status, mutation_status, tox, eff in cases:
-#             self.cases.append((disease_status, mutation_status, tox, eff))
-#
-#         self.num_eff = sum(self.efficacies())
-#         self.num_tox = sum(self.toxicities())
-#
-#
-#     def decision(self, i):
-#         """ Get the trial-outcome decision in group i.
-#
-#         True means approve treatment.
-#
-#         """
-#
-#         return self.num_eff >= self.min_efficacy_events and self.num_tox <= self.max_tox_events
-#
-#     def efficacy_effect(self, j, alpha=0.05):
-#         """ Get confidence interval and mean estimate of the effect on efficacy, expressed as odds-ratios.
-#
-#         Use:
-#         - j=0, to get treatment effect of the intercept variable
-#         - j=1, to get treatment effect of the pre-treated status variable
-#         - j=2, to get treatment effect of the mutation status variable
-#
-#         """
-#
-#         if self.effects_mode == 'ChiSqu':
-#             return self._response_effect_by_chisqu(j, alpha)
-#         elif self.effects_mode == 'Logit':
-#             return self._response_effect_by_logit(j, alpha)
-#         else:
-#             return [0,0,0]
-#
-#     def toxicity_effect(self, j=0, alpha=0.05):
-#         """ Get confidence interval and mean estimate of the effect on toxicity, expressed as odds-ratios.
-#
-#         Use:
-#         - j=0, to get effect on toxicity of the intercept variable
-#
-#         """
-#
-#         # These could be added by running the appropriate tests. But they're not required yet.
-#         return (0,0,0)
-#
-#     def correlation_effect(self, alpha=0.05):
-#         """ Get confidence interval and mean estimate of the correlation between efficacy and toxicity. """
-#         # Confidence interval for correlation is described here
-#         # http://ncss.wpengine.netdna-cdn.com/wp-content/themes/ncss/pdf/Procedures/PASS/Confidence_Interval_for_Pearsons_Correlation.pdf
-#         return [-1, np.corrcoef(self.toxicities(), self.efficacies())[0,1], 1]
-#
-#     def _response_effect_by_chisqu(self, j, alpha):
-#         if j==0:
-#             return [0,0,0]
-#         elif j==1:
-#             test = chi_squ_test(self.pretreated_statuses(), self.efficacies(), ci_alpha=alpha)
-#             ci = test['Odds']['OR CI']
-#             return [ci[0], test['Odds']['OR'], ci[1]]
-#         elif j==2:
-#             test = chi_squ_test(self.mutation_statuses(), self.efficacies(), ci_alpha=alpha)
-#             ci = test['Odds']['OR CI']
-#             return [ci[0], test['Odds']['OR'], ci[1]]
-#         else:
-#             return (0,0,0)
-#
-#     def _response_effect_by_logit(self, j, alpha):
-#         import statsmodels.api as sm
-#         if j==0:
-#             return [0,0,0]
-#         elif j==1:
-#             eff_logit_model = sm.Logit(self.efficacies(), pd.DataFrame({'PreTreated': self.pretreated_statuses(),
-#                                                                         'Mutation': self.mutation_statuses()}))
-#             eff_logit_model_result = eff_logit_model.fit(disp=0)
-#             ci = eff_logit_model_result.conf_int(alpha=alpha).loc['PreTreated'].values
-#             return np.exp([ci[0], eff_logit_model_result.params['PreTreated'], ci[1]])
-#         elif j==2:
-#             eff_logit_model = sm.Logit(self.efficacies(), pd.DataFrame({'PreTreated': self.pretreated_statuses(),
-#                                                                         'Mutation': self.mutation_statuses()}))
-#             eff_logit_model_result = eff_logit_model.fit(disp=0)
-#             ci = eff_logit_model_result.conf_int(alpha=alpha).loc['Mutation'].values
-#             return np.exp([ci[0], eff_logit_model_result.params['Mutation'], ci[1]])
-#         else:
-#             # return [0,0,0]
-
-
 def simulate_peps2_patients(num_patients, prob_pretreated, prob_mutated, params):
-    """
-    :param params: list of (prob_eff, prob_tox, efftox_or) tuples
+    """Simulates a cohort of patients for the PePS2 trial.
 
-    Returns 2-tuple. First item is np.array with binary variable cols PreTreated, PD-L1 +ve, Eff event, Tox event.
-                     Second item is tuple of groups sizes in C00, C01, C10, C11
+    Args:
+        num_patients (int): The number of patients to simulate.
+        prob_pretreated (float): The probability of a patient being
+            pre-treated.
+        prob_mutated (float): The probability of a patient being biomarker
+            positive.
+        params (list[tuple[float, float, float]]): A list of tuples, where
+            each tuple contains the probability of efficacy, probability of
+            toxicity, and the efficacy-toxicity odds ratio for a subgroup.
+
+    Returns:
+        tuple: A tuple containing:
+            - A numpy array with patient data (PreTreated, PD-L1+, Efficacy,
+              Toxicity).
+            - A tuple of group sizes (C00, C01, C10, C11).
     """
     subsample_sizes = np.random.multinomial(
         num_patients,
@@ -517,6 +506,27 @@ def simulate_peps2_trial_batch(
     num_sims_per_batch,
     out_file=None,
 ):
+    """Simulates a batch of PePS2 trials.
+
+    Args:
+        model (PePS2BeBOP): The trial model object.
+        num_patients (int): The number of patients per trial.
+        prob_pretreated (float): The probability of being pre-treated.
+        prob_biomarker (float): The probability of being biomarker positive.
+        prob_effes (list[float]): A list of efficacy probabilities for each
+            subgroup.
+        prob_toxes (list[float]): A list of toxicity probabilities for each
+            subgroup.
+        efftox_ors (list[float]): A list of efficacy-toxicity odds ratios.
+        num_batches (int): The number of batches to simulate.
+        num_sims_per_batch (int): The number of simulations per batch.
+        out_file (str, optional): The output file to save the results.
+            Defaults to `None`.
+
+    Returns:
+        collections.OrderedDict: A dictionary containing the simulation
+            parameters and results.
+    """
     sims = []
     sims_object = {}
     for i in range(num_batches):
@@ -558,12 +568,33 @@ def simulate_peps2_trial_batch(
 
 
 def get_corr(x):
+    """Calculates the correlation between two columns of a matrix.
+
+    Args:
+        x (numpy.ndarray): A 2D numpy array.
+
+    Returns:
+        float: The correlation coefficient.
+    """
     return np.corrcoef(x[:, 0], x[:, 1])[0, 1]
 
 
 def peps2_parameters_report(
     num_patients, prob_pretreated, prob_biomarker, prob_effes, prob_toxes, efftox_ors
 ):
+    """Generates a report of the PePS2 trial parameters.
+
+    Args:
+        num_patients (int): The number of patients.
+        prob_pretreated (float): The probability of being pre-treated.
+        prob_biomarker (float): The probability of being biomarker positive.
+        prob_effes (list[float]): The efficacy probabilities.
+        prob_toxes (list[float]): The toxicity probabilities.
+        efftox_ors (list[float]): The efficacy-toxicity odds ratios.
+
+    Returns:
+        collections.OrderedDict: A dictionary with the parameter report.
+    """
     parameters = OrderedDict()
     parameters["NumPatients"] = atomic_to_json(num_patients)
     parameters["Prob(Pretreated)"] = atomic_to_json(prob_pretreated)
@@ -577,7 +608,6 @@ def peps2_parameters_report(
         "Pretreated, PD-L1 negative",
         "Pretreated, PD-L1 positive",
     ]
-    # Derived parameters
     pretreated_response_prob = prob_effes[3] * prob_biomarker + prob_effes[2] * (
         1 - prob_biomarker
     )
@@ -627,7 +657,23 @@ def simulate_peps2_trial(
     num_sims=5,
     log_every=0,
 ):
+    """Simulates a single PePS2 trial.
 
+    Args:
+        model (PePS2BeBOP): The trial model object.
+        num_patients (int): The number of patients.
+        prob_pretreated (float): The probability of being pre-treated.
+        prob_biomarker (float): The probability of being biomarker positive.
+        prob_effes (list[float]): The efficacy probabilities.
+        prob_toxes (list[float]): The toxicity probabilities.
+        efftox_ors (list[float]): The efficacy-toxicity odds ratios.
+        num_sims (int, optional): The number of simulations to run.
+            Defaults to 5.
+        log_every (int, optional): The logging frequency. Defaults to 0.
+
+    Returns:
+        list: A list of simulation output dictionaries.
+    """
     sims = []
     for i in range(num_sims):
 
@@ -636,7 +682,6 @@ def simulate_peps2_trial(
 
         sim_output = OrderedDict()
 
-        # Simulate patient statuses (x) and outcomes (y)
         x, n = simulate_peps2_patients(
             num_patients,
             prob_pretreated,
@@ -650,9 +695,7 @@ def simulate_peps2_trial(
         df = pd.DataFrame(x, columns=["PreTreated", "Mutated", "Eff", "Tox"])
         df["One"] = 1
         grouped = df.groupby(["PreTreated", "Mutated"])
-        # Group sizes
         sub_df = grouped["One"].agg(np.sum)
-        # Eff events by group
         num_pats = [
             sub_df.get((0, 0), default=0),
             sub_df.get((0, 1), default=0),
@@ -660,7 +703,6 @@ def simulate_peps2_trial(
             sub_df.get((1, 1), default=0),
         ]
         sim_output["GroupSizes"] = num_pats
-        # Eff events by group
         sub_df = grouped["Eff"].agg(np.sum)
         num_effs = [
             int(sub_df.get((0, 0), default=0)),
@@ -669,7 +711,6 @@ def simulate_peps2_trial(
             int(sub_df.get((1, 1), default=0)),
         ]
         sim_output["GroupEfficacies"] = num_effs
-        # Tox events by group
         sub_df = grouped["Tox"].agg(np.sum)
         num_toxs = [
             int(sub_df.get((0, 0), default=0)),
@@ -702,7 +743,17 @@ def simulate_peps2_trial(
 
 
 def splice_sims(in_files_pattern, out_file=None):
+    """Splices simulation results from multiple files.
 
+    Args:
+        in_files_pattern (str): A glob pattern for the input files.
+        out_file (str, optional): The output file to save the spliced
+            results. Defaults to `None`.
+
+    Returns:
+        dict or None: The spliced simulation results, or `None` if no files
+            are found.
+    """
     def _splice_sims(sims1, sims2):
         sims1["NumSims"] = atomic_to_json(sims1["NumSims"] + sims2["NumSims"])
         sims1["Group Sizes"] = [
@@ -775,7 +826,6 @@ def splice_sims(in_files_pattern, out_file=None):
         for f in files[1:]:
             sub_sims = json.load(open(f))
             logger.info("Fetched from %s", f)
-            # Checks for homogeneity go here
             sims = _splice_sims(sims, sub_sims)
 
     if out_file:
@@ -792,6 +842,15 @@ def tell_me_about_results(
     eff_certainty_schemas=[[0.8] * 4, [0.7] * 4],
     tox_certainty_schemas=[[0.8] * 4, [0.7] * 4],
 ):
+    """Prints a summary of the simulation results.
+
+    Args:
+        sims (dict): The simulation results object.
+        eff_certainty_schemas (list[list[float]], optional): A list of
+            efficacy certainty schemas.
+        tox_certainty_schemas (list[list[float]], optional): A list of
+            toxicity certainty schemas.
+    """
     pretreated_efficacy_or = sims["Parameters"]["Efficacy OR for Pretreated"]
     pdl1_efficacy_or = sims["Parameters"]["Efficacy OR for PD-L1 +vs-"]
 
