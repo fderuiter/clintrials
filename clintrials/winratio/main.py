@@ -25,7 +25,25 @@ def run_simulation(
     p_y3_B: float,
     significance_level: float = 0.05,
 ):
-    """Run a Monte Carlo simulation to estimate win-ratio power."""
+    """Runs a Monte Carlo simulation to estimate win-ratio power.
+
+    Args:
+        num_subjects_A (int): The number of subjects in Group A.
+        num_subjects_B (int): The number of subjects in Group B.
+        num_simulations (int): The number of simulations to run.
+        p_y1_A (float): The probability of outcome y1=1 for Group A.
+        p_y1_B (float): The probability of outcome y1=1 for Group B.
+        p_y2_A (float): The probability of outcome y2=1 for Group A.
+        p_y2_B (float): The probability of outcome y2=1 for Group B.
+        p_y3_A (float): The probability of outcome y3=1 for Group A.
+        p_y3_B (float): The probability of outcome y3=1 for Group B.
+        significance_level (float, optional): The significance level for the
+            p-value. Defaults to 0.05.
+
+    Returns:
+        tuple[float, tuple[float, float]]: A tuple containing the estimated
+            power and the average confidence interval.
+    """
     successes = 0
     all_cis = []
     for _ in range(num_simulations):

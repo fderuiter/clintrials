@@ -99,10 +99,9 @@ def _get_beta_hat_bayes(
             `False`.
     """
     if use_quick_integration:
-        # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
         n = int(
             100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)
-        )  # My own rule of thumb
+        )
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         num_y = (
             z
@@ -129,7 +128,6 @@ def _get_beta_hat_bayes(
         else:
             var = None
     else:
-        # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow
         num = quad(
             lambda t: t
             * _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs)
@@ -195,15 +193,6 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
     res = minimize(f, x0=0, method="BFGS")
     var = None
     if estimate_var:
-        # The variance of the MLE is estimated by the inverse of the observed
-        # Fisher information matrix. The observed Fisher information is the
-        # negative of the second derivative of the log-likelihood function,
-        # evaluated at the MLE. The BFGS algorithm approximates the inverse
-        # of the Hessian matrix of the function being minimized. Here, we
-        # minimize the negative log-likelihood, so the Hessian is the
-        # observed Fisher information, and its inverse is the variance-
-        # covariance matrix of the MLE. For a one-parameter model, this is
-        # simply the variance.
         if res.success:
             var = res.hess_inv[0, 0]
         else:
@@ -227,11 +216,9 @@ def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=
     """
     beta_hats_boot = []
     for _ in range(B):
-        # Simulate new toxicity outcomes
         tox_probs = [F(dose, intercept, beta_hat) for dose in codified_doses_given]
         toxs_boot = [np.random.binomial(1, p) for p in tox_probs]
 
-        # Re-estimate beta_hat
         beta_hat_boot, _ = _get_beta_hat_mle(
             F, intercept, codified_doses_given, toxs_boot, estimate_var=False
         )
@@ -285,22 +272,19 @@ def _get_post_tox_bayes(
     """
     post_tox = []
     if use_quick_integration:
-        # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
         n = int(
             100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)
-        )  # My own rule of thumb
+        )
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         denom_y = _compound_toxicity_likelihood(
             F, intercept, z, codified_doses_given, toxs
         ) * beta_pdf(z)
         denom = trapezoid(denom_y, z, dz)
-        # num_scale = _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs) * beta_pdf(z)
         for x in dose_labels:
             num_y = F(x, a0=intercept, beta=z) * denom_y
             num = trapezoid(num_y, z, dz)
             post_tox.append(num / denom)
     else:
-        # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow
         denom = quad(
             lambda t: beta_pdf(t)
             * _compound_toxicity_likelihood(
@@ -380,7 +364,6 @@ def crm(
     if len(dose_levels) != len(toxicities):
         raise ValueError("toxicities and dose_levels should be same length.")
 
-    # The bcrm package uses the mean of alpha (log-normal) for sdose calculation with logit1
     if "logit1" in F_func.__name__ and isinstance(beta_dist, type(norm())):
         alpha0 = np.exp(beta_dist.mean() + beta_dist.var() / 2)
         beta0 = np.log(alpha0)
@@ -406,7 +389,6 @@ def crm(
                 F_func, intercept, beta_hat, dose_labels
             )
         else:
-            # Bayesian integral
             post_tox = _get_post_tox_bayes(
                 F_func,
                 intercept,
@@ -575,7 +557,6 @@ class CRM(DoseFindingTrial):
                     "To monitor toxicity at the lowest dose, beta variance estimation was enabled."
                 )
             self.estimate_var = True
-        # Reset
         self.beta_hat, self.beta_var = beta_prior.mean(), beta_prior.var()
         self.post_tox = list(self.prior)
 
@@ -613,7 +594,6 @@ class CRM(DoseFindingTrial):
         self.beta_var = beta_var
         self.post_tox = post_tox
 
-        # Excess toxicity at lowest dose?
         if self.lowest_dose_too_toxic_hurdle and self.lowest_dose_too_toxic_certainty:
             labels = [
                 self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
@@ -621,7 +601,7 @@ class CRM(DoseFindingTrial):
             ]
             beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(
                 1000000
-            )  # N.b. normal sample a la prior
+            )
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 
@@ -630,27 +610,20 @@ class CRM(DoseFindingTrial):
                 self._status = -1
                 return proposed_dose
 
-        # Coherency
         if self.coherency_threshold and proposed_dose > current_dose:
-            # print 'Testing coherence'
             tox_rate_at_current = self.observed_toxicity_rates()[current_dose - 1]
-            # print 'Tox at current', tox_rate_at_current
             if (
                 not np.isnan(tox_rate_at_current)
                 and tox_rate_at_current > self.coherency_threshold
             ):
-                # Avoid escalation. Stay at current
-                # print 'Throttling for coherence'
                 proposed_dose = current_dose
                 return proposed_dose
 
-        # Skipping doses
         if (
             self.avoid_skipping_untried_escalation
             and max_dose_given
             and proposed_dose - max_dose_given > 1
         ):
-            # Avoid skipping untried doses in escalation by setting proposed dose to max_dose_given + 1
             proposed_dose = max_dose_given + 1
             return proposed_dose
         elif (
@@ -658,10 +631,8 @@ class CRM(DoseFindingTrial):
             and min_dose_given
             and min_dose_given - proposed_dose > 1
         ):
-            # Avoid skipping untried doses in de-escalation by setting proposed dose to min_dose_given - 1
             proposed_dose = min_dose_given - 1
             return proposed_dose
-        # Note: other methods of limiting dose escalation and de-escalation are possible.
 
         return proposed_dose
 
@@ -816,8 +787,6 @@ class CRM(DoseFindingTrial):
                     "Dose level": self.dose_levels(),
                     "Prior": self.prior,
                     "Posterior": self.prob_tox(),
-                    #                      'Lower': crm.get_tox_prob_quantile(0.05),
-                    #                      'Upper': crm.get_tox_prob_quantile(0.95)
                 }
             )
             var_name = "Type"
@@ -825,10 +794,6 @@ class CRM(DoseFindingTrial):
             melted_data = pd.melt(
                 data, id_vars="Dose level", var_name=var_name, value_name=value_name
             )
-            # melted_data['LineType'] =  np.where(melted_data.Type=='Posterior', '--', np.where(melted_data.Type=='Prior', '-', '..'))
-            # melted_data['LineType'] =  np.where(melted_data.Type=='Posterior', '--', np.where(melted_data.Type=='Prior', '-', '..'))
-            # melted_data['Col'] =  np.where(melted_data.Type=='Posterior', 'green', np.where(melted_data.Type=='Prior', 'blue', 'yellow'))
-            # np.where(melted_data.Type=='Posterior', '--', '-')
 
             p = (
                 ggplot(
@@ -839,7 +804,6 @@ class CRM(DoseFindingTrial):
                 + ylim(0, 1)
                 + geom_hline(yintercept=self.target, color="black")
             )
-            # Can add confidence intervals once I work out linetype=??? in ggplot
 
             return p
         else:
@@ -872,7 +836,6 @@ class CRM(DoseFindingTrial):
             p = plt.gcf()
             phi = (np.sqrt(5) + 1) / 2.0
             p.set_size_inches(12, 12 / phi)
-            # return p
 
 
 def crm_dtp_detail(trial):
