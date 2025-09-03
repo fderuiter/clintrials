@@ -20,23 +20,20 @@ _min_beta, _max_beta = -10, 10
 
 
 def _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False):
-    """Calculate likelihood of toxicity outcome in CRM given link_func plus parameters and a dose & tox pair.
+    """Calculates the likelihood of a single toxicity outcome.
 
-    Note: this method can be Memoized to save iterations at the expense of memory.
-    Also, this method allows vectorisation (in beta, importantly) if your link_func allows vectorisation.
+    Args:
+        link_func (callable): The link function (e.g., logistic or empiric).
+        a0 (float): The intercept parameter for the link function.
+        beta (float): The slope parameter for the link function.
+        dose (float): The dose level.
+        tox (int): The toxicity outcome (1 for toxicity, 0 for no toxicity).
+        log (bool, optional): If `True`, returns the log-likelihood.
+            Defaults to `False`.
 
-    Params:
-    link_func, link function like logistic or empiric, taking params (dose_label, intercept, slope), returning a probability
-    a0, the second parameter to link_func, the intercept
-    beta, the third parameter to link_func, the slope
-    dose, the first parameter to link_func, the dose label (often derived by backwards substitution!)
-    tox, use 1 if toxicity observed, 0 if not.
-    log, True to return log likelihood
-
-    Returns a probability (or the log of a probability)
-
+    Returns:
+        float: The likelihood or log-likelihood of the toxicity outcome.
     """
-
     p = link_func(dose, a0, beta)
     if log:
         return tox * np.log(p) + (1 - tox) * np.log(1 - p)
@@ -45,20 +42,20 @@ def _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False):
 
 
 def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
-    """Calculate the compound likelihood of many toxicity outcomes in CRM given many dose & tox pairs.
+    """Calculates the compound likelihood of multiple toxicity outcomes.
 
-    Params:
-    link_func, link function like logistic or empiric, taking params (dose_label, intercept, slope), returning a probability
-    a0, the second parameter to link_func, the intercept
-    beta, the third parameter to link_func, the slope
-    doses, a list of the first parameters to link_func, the dose labels (often derived by backwards substitution!)
-    toxs, a list of toxicity markers. Use 1 if toxicity observed, 0 if not. Should be same length as doses.
-    log, True to return log likelihood
+    Args:
+        link_func (callable): The link function.
+        a0 (float): The intercept parameter.
+        beta (float): The slope parameter.
+        doses (list[float]): A list of dose levels.
+        toxs (list[int]): A list of toxicity outcomes.
+        log (bool, optional): If `True`, returns the log-likelihood.
+            Defaults to `False`.
 
-    Returns a probability (or the log of a probability)
-
+    Returns:
+        float: The compound likelihood or log-likelihood.
     """
-
     if len(doses) != len(toxs):
         raise ValueError("doses and toxs should be same length.")
 
@@ -83,28 +80,24 @@ def _get_beta_hat_bayes(
     use_quick_integration=False,
     estimate_var=False,
 ):
-    """Get posterior estimate of beta parameter (and optionally its variance) in Bayesian CRM.
+    """Estimates the beta parameter using Bayesian inference.
 
-    :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
-    :type F: func
-    :param intercept: the second parameter to F, the intercept
-    :type intercept: float
-    :param codified_doses_given: doses given to patients on codified scale, i.e. each a valid first parameter to F
-    :type codified_doses_given: list
-    :param toxs: observed toxicity events. Use 1 if toxicity observed, else 0. Congruent to codified_doses_given.
-    :type toxs: list
-    :param beta_pdf: PDF of beta's prior distribution
-    :type beta_pdf: func
-    :param use_quick_integration: True to use a faster but slightly less accurate estimate of the integrals;
-                                  False to use a slower but more accurate method.
-    :type use_quick_integration: bool
-    :param estimate_var: True to estimate beta variance. False by default for speed.
-    :type estimate_var: bool
-    :return: a 2-tuple, (posterior mean, posterior variance)
-    :rtype: tuple
+    Args:
+        F (callable): The link function.
+        intercept (float): The intercept parameter.
+        codified_doses_given (list[float]): The codified dose levels given.
+        toxs (list[int]): The observed toxicity events.
+        beta_pdf (callable): The PDF of the prior distribution for beta.
+        use_quick_integration (bool, optional): If `True`, uses a faster but
+            less accurate integration method. Defaults to `False`.
+        estimate_var (bool, optional): If `True`, estimates the variance of
+            beta. Defaults to `False`.
 
+    Returns:
+        tuple[float, float | None]: A tuple containing the posterior mean and
+            variance of beta. The variance is `None` if `estimate_var` is
+            `False`.
     """
-
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
         n = int(
@@ -172,24 +165,19 @@ def _get_beta_hat_bayes(
 
 
 def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=False):
-    """Get maximum likelihood estimate of beta parameter (and optionally its variance) in MLE CRM.
-    :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
-    :type F: func
-    :param intercept: the second parameter to F, the intercept
-    :type intercept: float
-    :param codified_doses_given: doses given to patients on codified scale, i.e. each a valid first parameter to F
-    :type codified_doses_given: list
-    :param toxs: observed toxicity events. Use 1 if toxicity observed, else 0. Congruent to codified_doses_given.
-    :type toxs: list
-    :param beta_pdf: PDF of beta's prior distribution
-    :type beta_pdf: func
-    :param use_quick_integration: True to use a faster but slightly less accurate estimate of the integrals;
-                                  False to use a slower but more accurate method.
-    :type use_quick_integration: bool
-    :param estimate_var: True to estimate beta variance. False by default for speed.
-    :type estimate_var: bool
-    :return: a 2-tuple, (posterior mean, posterior variance)
-    :rtype: tuple
+    """Estimates the beta parameter using maximum likelihood estimation (MLE).
+
+    Args:
+        F (callable): The link function.
+        intercept (float): The intercept parameter.
+        codified_doses_given (list[float]): The codified dose levels given.
+        toxs (list[int]): The observed toxicity events.
+        estimate_var (bool, optional): If `True`, estimates the variance of
+            beta. Defaults to `False`.
+
+    Returns:
+        tuple[float, float | None]: A tuple containing the MLE and variance
+            of beta. The variance is `None` if `estimate_var` is `False`.
     """
     if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
         msg = (
@@ -225,8 +213,17 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
 
 
 def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=200):
-    """
-    Perform parametric bootstrap to estimate the variance of beta_hat.
+    """Estimates the variance of the beta MLE using parametric bootstrap.
+
+    Args:
+        F (callable): The link function.
+        intercept (float): The intercept parameter.
+        beta_hat (float): The MLE of beta.
+        codified_doses_given (list[float]): The codified dose levels given.
+        B (int, optional): The number of bootstrap samples. Defaults to 200.
+
+    Returns:
+        float: The estimated variance of beta_hat.
     """
     beta_hats_boot = []
     for _ in range(B):
@@ -245,21 +242,18 @@ def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=
 
 
 def _estimate_prob_tox_from_param(F, intercept, beta_hat, dose_labels):
-    """Estimate the probability of toxicity at doses by plugging in an estimate for beta.
+    """Estimates the probability of toxicity by plugging in a beta estimate.
 
-    :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
-    :type F: func
-    :param intercept: the second parameter to F, the intercept
-    :type intercept: float
-    :param beta_hat: the third parameter to F, estimate for beta, be it posterior- or maximum-likelihood-
-    :type beta_hat: float
-    :param dose_labels: dose-labels (often derived by backwards substitution) for which to estimate associated toxicity
-    :type dose_labels: list
-    :return: estimates of Pr(Tox) at each dose
-    :rtype: list
+    Args:
+        F (callable): The link function.
+        intercept (float): The intercept parameter.
+        beta_hat (float): The estimate for beta.
+        dose_labels (list[float]): The dose labels for which to estimate
+            the probability of toxicity.
 
+    Returns:
+        list[float]: A list of estimated probabilities of toxicity.
     """
-
     post_tox = [F(x, a0=intercept, beta=beta_hat) for x in dose_labels]
     return post_tox
 
@@ -273,28 +267,22 @@ def _get_post_tox_bayes(
     beta_pdf,
     use_quick_integration=False,
 ):
-    """Calculate the posterior probability of toxicity at doses using the Bayesian integral
+    """Calculates the posterior probability of toxicity using Bayesian integration.
 
-    :param F: link function like logistic or empiric, taking params (dose_label, intercept, slope), returns probability
-    :type F: func
-    :param intercept: the second parameter to F, the intercept
-    :type intercept: float
-    :param dose_labels: dose-labels (often derived by backwards substitution) for which to estimate associated toxicity
-    :type dose_labels: list
-    :param codified_doses_given: doses given to patients on codified scale, i.e. each a valid first parameter to F
-    :type codified_doses_given: list
-    :param toxs: observed toxicity events. Use 1 if toxicity observed, else 0. Congruent to codified_doses_given.
-    :type toxs: list
-    :param beta_pdf: PDF of beta's prior distribution
-    :type beta_pdf: func
-    :param use_quick_integration: True to use a faster but slightly less accurate estimate of the integrals;
-                                  False to use a slower but more accurate method.
-    :type use_quick_integration: bool
-    :return: estimates of Pr(Tox) at each dose
-    :rtype: list
+    Args:
+        F (callable): The link function.
+        intercept (float): The intercept parameter.
+        dose_labels (list[float]): The dose labels for which to estimate
+            the probability of toxicity.
+        codified_doses_given (list[float]): The codified dose levels given.
+        toxs (list[int]): The observed toxicity events.
+        beta_pdf (callable): The PDF of the prior distribution for beta.
+        use_quick_integration (bool, optional): If `True`, uses a faster but
+            less accurate integration method. Defaults to `False`.
 
+    Returns:
+        list[float]: A list of posterior probabilities of toxicity.
     """
-
     post_tox = []
     if use_quick_integration:
         # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
@@ -352,43 +340,42 @@ def crm(
     mle_var_method="hessian",
     bootstrap_samples=200,
 ):
-    """Run CRM calculation on observed dosages and toxicities.
-    Parameters
-    ----------
-    prior : list
-        Prior probabilities of toxicity at each dose, from least toxic to most.
-    target : float
-        Target toxicity rate.
-    toxicities : list
-        Observed toxicity events. Use ``1`` if toxicity observed, else ``0``.
-    dose_levels : list
-        Given 1-based dose levels. Same length as ``toxicities``.
-    intercept : float
-        Intercept parameter, only used with the logistic method.
-    F_func : Callable
-        Link function to use (e.g., :func:`logistic`).
-    inverse_F : Callable
-        Inverse link function.
-    beta_dist : scipy.stats.rv_continuous
-        Prior distribution for the beta parameter.
-    method : str
-        One of ``"bayes"`` or ``"mle"``.
-    use_quick_integration : bool
-        If ``True`` use a faster approximate integral.
-    estimate_var : bool
-        If ``True`` estimate the posterior variance of beta.
-    plugin_mean : bool
-        If ``True`` plug the beta estimate into the link function.
-    mle_var_method : str
-        One of ``"hessian"`` or ``"bootstrap"``.
-    bootstrap_samples : int
-        Number of bootstrap samples to use if ``mle_var_method="bootstrap"``.
-    Returns
-    -------
-    tuple
-        ``(recommended_dose_index, beta_hat, beta_var, prob_tox)``.
-    I omitted Ken's parameters:
-    n=length(level), dosename=NULL, include=1:n, pid=1:n, conf.level=0.9, model.detail=TRUE, patient.detail=TRUE
+    """Performs a Continual Reassessment Method (CRM) calculation.
+
+    Args:
+        prior (list[float]): A list of prior probabilities of toxicity for
+            each dose level.
+        target (float): The target toxicity rate.
+        toxicities (list[int]): A list of observed toxicity events (1 for
+            toxicity, 0 for no toxicity).
+        dose_levels (list[int]): A list of the 1-based dose levels given to
+            patients.
+        intercept (float, optional): The intercept parameter, used with the
+            logistic method. Defaults to 3.
+        F_func (callable, optional): The link function to use. Defaults to
+            `clintrials.core.math.logistic`.
+        inverse_F (callable, optional): The inverse link function. Defaults
+            to `clintrials.core.math.inverse_logistic`.
+        beta_dist (scipy.stats.rv_continuous, optional): The prior
+            distribution for the beta parameter. Defaults to a normal
+            distribution.
+        method (str, optional): The estimation method, either "bayes" or
+            "mle". Defaults to "bayes".
+        use_quick_integration (bool, optional): If `True`, uses a faster,
+            approximate integration method. Defaults to `False`.
+        estimate_var (bool, optional): If `True`, estimates the posterior
+            variance of beta. Defaults to `False`.
+        plugin_mean (bool, optional): If `True`, plugs the beta estimate into
+            the link function. Defaults to `True`.
+        mle_var_method (str, optional): The method for estimating the MLE
+            variance, either "hessian" or "bootstrap". Defaults to "hessian".
+        bootstrap_samples (int, optional): The number of bootstrap samples to
+            use if `mle_var_method` is "bootstrap". Defaults to 200.
+
+    Returns:
+        tuple: A tuple containing the recommended dose index, the beta
+            estimate, the beta variance, and the posterior probabilities of
+            toxicity.
     """
     if len(dose_levels) != len(toxicities):
         raise ValueError("toxicities and dose_levels should be same length.")
@@ -455,28 +442,26 @@ def crm(
 
 
 class CRM(DoseFindingTrial):
-    """This is an object-oriented attempt at the CRM method.
+    """An object-oriented implementation of the Continual Reassessment Method (CRM).
 
-    e.g. general usage
-
-    >>> prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
-    >>> tox_target = 0.35
-    >>> first_dose = 3
-    >>> trial_size = 30
-    >>> trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)
-    >>> trial.next_dose()
-    3
-    >>> trial.update([(3,0), (3,0), (3,0)])
-    4
-    >>> trial.size(), trial.max_size()
-    (3, 30)
-    >>> trial.update([(4,0), (4,1), (4,1)])
-    4
-    >>> trial.update([(4,0), (4,1), (4,1)])
-    3
-    >>> trial.has_more()
-    True
-
+    Examples:
+        >>> prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
+        >>> tox_target = 0.35
+        >>> first_dose = 3
+        >>> trial_size = 30
+        >>> trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)
+        >>> trial.next_dose()
+        3
+        >>> trial.update([(3,0), (3,0), (3,0)])
+        4
+        >>> trial.size(), trial.max_size()
+        (3, 30)
+        >>> trial.update([(4,0), (4,1), (4,1)])
+        4
+        >>> trial.update([(4,0), (4,1), (4,1)])
+        3
+        >>> trial.has_more()
+        True
     """
 
     def __init__(
@@ -503,74 +488,63 @@ class CRM(DoseFindingTrial):
         mle_var_method="hessian",
         bootstrap_samples=200,
     ):
+        """Initializes a CRM trial object.
+
+        Args:
+            prior (list[float]): A list of prior probabilities of toxicity for
+                each dose level.
+            target (float): The target toxicity rate.
+            first_dose (int): The starting dose level (1-based).
+            max_size (int): The maximum number of patients in the trial.
+            F_func (callable, optional): The link function to use.
+                Defaults to `clintrials.core.math.empiric`.
+            inverse_F (callable, optional): The inverse link function.
+                Defaults to `clintrials.core.math.inverse_empiric`.
+            beta_prior (scipy.stats.rv_continuous, optional): The prior
+                distribution for the beta parameter. Defaults to a normal
+                distribution.
+            method (str, optional): The estimation method, either "bayes" or
+                "mle". Defaults to "bayes".
+            use_quick_integration (bool, optional): If `True`, uses a faster,
+                approximate integration method. Defaults to `False`.
+            estimate_var (bool, optional): If `True`, estimates the posterior
+                variance of beta. Defaults to `True`.
+            avoid_skipping_untried_escalation (bool, optional): If `True`,
+                avoids skipping untried doses when escalating. Defaults to
+                `False`.
+            avoid_skipping_untried_deescalation (bool, optional): If `True`,
+                avoids skipping untried doses when de-escalating. Defaults to
+                `False`.
+            lowest_dose_too_toxic_hurdle (float, optional): The toxicity
+                hurdle for the lowest dose. If the posterior probability that
+                the toxicity of the lowest dose exceeds this hurdle is
+                greater than `lowest_dose_too_toxic_certainty`, the trial is
+                stopped. Both must be positive for the test to be invoked.
+                Defaults to 0.0.
+            lowest_dose_too_toxic_certainty (float, optional): The certainty
+                for the lowest dose toxicity hurdle. See
+                `lowest_dose_too_toxic_hurdle`. Defaults to 0.0.
+            coherency_threshold (float, optional): If positive, prevents
+                escalation if the observed toxicity rate at the current dose
+                exceeds this value. Defaults to 0.0.
+            principle_escalation_func (callable, optional): An optional
+                function that takes the trial cases and returns the next dose
+                to be given, or `None` to use the CRM method. This allows
+                for custom escalation strategies. Defaults to `None`.
+            termination_func (callable, optional): An optional function that
+                takes the trial instance and returns `True` if the trial
+                should terminate. Defaults to `None`.
+            plugin_mean (bool, optional): If `True`, plugs the beta estimate
+                into the link function. Defaults to `True`.
+            intercept (float, optional): The intercept parameter, used with
+                the logistic method. Defaults to 3.
+            mle_var_method (str, optional): The method for estimating the
+                MLE variance, either "hessian" or "bootstrap". Defaults to
+                "hessian".
+            bootstrap_samples (int, optional): The number of bootstrap
+                samples to use if `mle_var_method` is "bootstrap". Defaults
+                to 200.
         """
-
-        Params:
-        :param prior: list of prior probabilities of toxicity, from least toxic to most.
-        :type prior: list
-        :param target: target toxicity rate
-        :type target: float
-        :param first_dose: starting dose level, 1-based. I.e. first_dose=3 means the middle dose of 5.
-        :type first_dose: int
-        :param F_func: the link function for CRM method, e.g. logistic
-        :type F_func: func
-        :param inverse_F: the inverse link function for CRM method, e.g. inverse_logistic
-        :type inverse_F: func
-        :param beta_prior: prior distibution for beta parameter
-        :type beta_prior: scipy.stats.rv_continuous
-        :param max_size: maximum number of patients to use in trial
-        :type max_size: int
-        :param method: one of "bayes" or "mle"
-        :type method: str
-        :param use_quick_integration: numerical integration is slow. Set this to False to use the most accurate (& slow)
-                                method; False to use a quick but approximate method.
-                                In simulations, fast and approximate often suffices.
-                                In trial scenarios, use slow and accurate!
-        :type use_quick_integration: bool
-        :param estimate_var: True to estimate the posterior variance of beta
-        :type estimate_var: bool
-        :param avoid_skipping_untried_escalation: True to avoid skipping untried doses in escalation
-        :type avoid_skipping_untried_escalation: bool
-        :param avoid_skipping_untried_deescalation: True to avoid skipping untried doses in de-escalation
-        :type avoid_skipping_untried_deescalation: bool
-        :param lowest_dose_too_toxic_hurdle: used with lowest_dose_too_toxic_certainty to facilitate stopping the trial
-                    when the rate of estimated toxicity at the lowest dose is too high. Trial stops if:
-                        Prob( Prob(Tox at d1) > lowest_dose_too_toxic_hurdle | X) > lowest_dose_too_toxic_certainty
-                    Both must be positive for test to be invoked.
-        :type lowest_dose_too_toxic_hurdle: float
-        :param lowest_dose_too_toxic_certainty: see above
-        :type lowest_dose_too_toxic_certainty: float
-        :param coherency_threshold: if positive, the design is prevented from escalating when the observed toxicity rate
-                                    at a dose exceeds this value. For instance, you might not want to escalate if the
-                                    observed toxicity rate exceeds the target rate, because that would be 'incoherent'
-                                    to the objectives of the trial.
-        :type coherency_threshold: float
-        :param principle_escalation_func: an optional function that takes cases (i.e., a list of
-                            (1-based dose-level, boolean DLT dummies) like [(1,0), (2,0), (3,1)] )
-                and returns either a) the next dose to be given, or b) None, to signify that principle escalation does
-                not apply and that the general CRM method should be used.
-                This function lets users specify their desired escalation that will take priority over the CRM strategy.
-                For example, some users like to specify an initial escalation strategy that escalates until it
-                observes the first toxicity. This function allows that behaviour in a flexible way.
-                The principle_escalation_func is checked at every update so, if you use it, be mindful that it yields
-                to the CRM model when you want it to by returning None.
-        :type principle_escalation_func: func
-        :param termination_func: an optional function that takes this trial instance as a sole parameter and returns
-                True if trial should terminate, else False. The function is invoked when trial is asked whether it has
-                more. This function gives trials a general facility to terminate early if certain conditions are met.
-        :type termination_func: func
-        :param plugin_mean: True to estimate toxicity curve by plugging beta estimate (posterior mean or mle) into func;
-                        False to estimate using full Bayesian integral (only applies when method="bayes")
-        :type plugin_mean: bool
-        :param intercept: the second parameter to F, the intercept. Only pertinent under logistic method.
-        :type intercept: float
-        :param mle_var_method: One of ``"hessian"`` or ``"bootstrap"``.
-        :type mle_var_method: str
-        :param bootstrap_samples: Number of bootstrap samples to use if ``mle_var_method="bootstrap"``.
-        :type bootstrap_samples: int
-
-        """
-
         DoseFindingTrial.__init__(
             self, first_dose=first_dose, num_doses=len(prior), max_size=max_size
         )
@@ -610,7 +584,6 @@ class CRM(DoseFindingTrial):
         self.post_tox = self.prior
 
     def _DoseFindingTrial__calculate_next_dose(self):
-
         if self.principle_escalation_func:
             cases = zip(self._doses, self._toxicities)
             proposed_dose = self.principle_escalation_func(cases)
@@ -693,6 +666,11 @@ class CRM(DoseFindingTrial):
         return proposed_dose
 
     def prob_tox(self):
+        """Gets the posterior probabilities of toxicity for each dose level.
+
+        Returns:
+            list[float]: A list of posterior probabilities of toxicity.
+        """
         return list(self.post_tox)
 
     def _prob_tox_exceeds_quadrature(self, tox_cutoff, deg=40):
@@ -728,6 +706,19 @@ class CRM(DoseFindingTrial):
         return np.array(out)
 
     def prob_tox_exceeds(self, tox_cutoff, backend="quadrature", n=10**6):
+        """Calculates the posterior probability that toxicity exceeds a cutoff.
+
+        Args:
+            tox_cutoff (float): The toxicity cutoff.
+            backend (str, optional): The calculation backend, either
+                "quadrature" or "laplace". Defaults to "quadrature".
+            n (int, optional): The number of samples for the "laplace"
+                backend. Defaults to 10**6.
+
+        Returns:
+            numpy.ndarray: An array of posterior probabilities for each
+                dose level.
+        """
         if backend == "quadrature":
             return self._prob_tox_exceeds_quadrature(tox_cutoff)
         if backend == "laplace":
@@ -753,7 +744,11 @@ class CRM(DoseFindingTrial):
         raise ValueError("Unknown backend")
 
     def has_more(self):
-        """Is the trial ongoing?"""
+        """Checks if the trial is ongoing.
+
+        Returns:
+            bool: `True` if the trial is ongoing, `False` otherwise.
+        """
         if not DoseFindingTrial.has_more(self):
             return False
         if self.termination_func:
@@ -762,28 +757,29 @@ class CRM(DoseFindingTrial):
             return True
 
     def optimal_decision(self, prob_tox):
-        """Get the optimal dose choice for a given dose-toxicity curve.
+        """Gets the optimal dose choice for a given dose-toxicity curve.
 
-        Ken Cheung (2014) noted that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own
-        specific tolerances by invoking the dose decision on the complete (and
-        unknowable) toxicity curve.
+        Args:
+            prob_tox (list[float]): A list of toxicity probabilities for each
+                dose level.
 
-        :param prob_tox: collection of toxicity probabilities
-        :type prob_tox: list
-        :return: the optimal (1-based) dose decision
-        :rtype: int
-
+        Returns:
+            int: The optimal 1-based dose level.
         """
-
         return np.argmin(np.abs(prob_tox - self.target)) + 1
 
     def get_tox_prob_quantile(self, p):
-        """Get the quantiles of the probabilities of toxicity at each dose using normal approximation.
-        :param p: probability, i.e. 0.05 means 5th quantile, i.e. 95% of values are greater
-        :type p: float
-        :return: the quantiles of the probabilities of toxicity at each dose
-        :rtype: list
+        """Gets the quantiles of the toxicity probabilities for each dose.
+
+        This method uses a normal approximation.
+
+        Args:
+            p (float): The quantile to calculate (e.g., 0.05 for the 5th
+                percentile).
+
+        Returns:
+            list[float]: A list of toxicity probability quantiles for each
+                dose level.
         """
         norm_crit = norm.ppf(p)
         beta_est = self.beta_hat - norm_crit * np.sqrt(self.beta_var)
@@ -795,16 +791,17 @@ class CRM(DoseFindingTrial):
         return p
 
     def plot_toxicity_probabilities(self, chart_title=None, use_ggplot=False):
-        """Plot prior and posterior dose-toxicity curves.
+        """Plots the prior and posterior dose-toxicity curves.
 
-        :param chart_title: optional chart title. Default is fairly verbose
-        :type chart_title: str
-        :param use_ggplot: True to use ggplot, else matplotlib
-        :type use_ggplot: bool
-        :return: plot of toxicity curves
+        Args:
+            chart_title (str, optional): The title for the chart.
+                Defaults to a descriptive title.
+            use_ggplot (bool, optional): If `True`, uses ggplot for plotting.
+                Otherwise, uses matplotlib. Defaults to `False`.
 
+        Returns:
+            A plot object.
         """
-
         if not chart_title:
             chart_title = "Prior (dashed) and posterior (solid) dose-toxicity curves"
             chart_title = chart_title + "\n"
@@ -879,12 +876,14 @@ class CRM(DoseFindingTrial):
 
 
 def crm_dtp_detail(trial):
-    """Performs the CRM-specific extra reporting when calculating DTPs
-    :param trial: instance of CRM
-    :return: OrderedDict
+    """Gets CRM-specific details for DTP reporting.
 
+    Args:
+        trial (CRM): An instance of the CRM class.
+
+    Returns:
+        collections.OrderedDict: A dictionary with CRM-specific details.
     """
-
     to_return = OrderedDict()
 
     if trial.beta_hat is not None:

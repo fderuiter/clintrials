@@ -18,8 +18,6 @@ from scipy.integrate import quad
 from scipy.stats import beta, norm
 
 from clintrials.core.math import empiric, inverse_empiric
-
-# from clintrials.util import correlated_binary_outcomes_from_uniforms
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 
@@ -27,21 +25,19 @@ _min_theta, _max_theta = -10, 10
 
 
 def _wt_lik(cases, skeleton, theta, F=empiric, a0=0):
-    """Calculate the compound likelihood for many dose & efficacy pairs in Wages & Tait dose-finding method.
+    """Calculates the compound likelihood for the Wages & Tait method.
 
-    Params:
-    cases, list of 3-tuples, (dose, toxicity, efficacy), where dose is 1-based index of dose level received,
-                                toxicity is 1 for toxic event, 0 for tolerance event
-                                and efficacy is 1 for efficacious outcome, 0 for alternative.
-    skeleton, list of prior efficacy probabilities
-    theta, the third parameter to F, the slope
-    F, a link function like logistic or empiric that takes params x, intercept, slope and returns a probability
-    a0, the second parameter to F, the intercept
+    Args:
+        cases (list[tuple[int, int, int]]): A list of cases, where each
+            case is a tuple of (dose, toxicity, efficacy).
+        skeleton (list[float]): A list of prior efficacy probabilities.
+        theta (float): The slope parameter.
+        F (callable, optional): The link function. Defaults to `empiric`.
+        a0 (float, optional): The intercept parameter. Defaults to 0.
 
-    Returns a probability.
-
+    Returns:
+        float: The compound likelihood.
     """
-
     l = 1
     for dose, tox, eff in cases:
         p = F(skeleton[dose - 1], a0=a0, beta=theta)
@@ -57,37 +53,30 @@ def _wt_get_theta_hat(
     use_quick_integration=False,
     estimate_var=False,
 ):
-    """Get posterior estimates of theta hat (and optionally, variance) in Wages & Tait dose-finding method.
+    """Estimates the theta parameter for the Wages & Tait method.
 
-    See Wages, N.A. & Tait, C. - Seamless Phase I/II Adaptive Design For Oncology Trials
-                of Molecularly Targeted Agents, Journal of Biopharmaceutical Statistics
+    Args:
+        cases (list[tuple[int, int, int]]): A list of cases.
+        skeletons (list[list[float]]): A list of efficacy skeletons.
+        theta_prior (scipy.stats.rv_continuous): The prior distribution for
+            theta.
+        F (callable, optional): The link function. Defaults to `empiric`.
+        use_quick_integration (bool, optional): If `True`, uses a faster but
+            less accurate integration method. Defaults to `False`.
+        estimate_var (bool, optional): If `True`, estimates the posterior
+            variance of theta. Defaults to `False`.
 
-    :param cases: list of 3-tuples, (dose, toxicity, efficacy), where dose is 1-based index of dose level received,
-                                toxicity is 1 for toxic event, 0 for tolerance event
-                                and efficacy is 1 for efficacious outcome, 0 for alternative.
-    :type cases: list
-    :param skeletons: 2-d matrix of skeletons, i.e. list of lists, one prior efficacy scenario per row
-    :type skeletons: list
-    :param theta_prior: prior distibution for theta parameter, assumes interface like scipy.stats.rv_continuous
-    :type theta_prior: scipy.stats.rv_continuous
-    :param F: a link function like logistic or empiric that takes params x, intercept, slope and returns a probability
-    :type F: func
-    :param use_quick_integration: True to use a faster but slightly less accurate estimate of the integrals;
-                                  False to use a slower but more accurate method.
-    :type use_quick_integration: bool
-    :param estimate_var: True to estimate the posterior variance of theta
-    :type estimate_var: bool
-    :return: 3-tuple, vectors for (posterior means, posterior variances, posterior model probabilities)
-    :rtype: tuple
-
+    Returns:
+        list[tuple[float, float | None, float]]: A list of tuples, where each
+            tuple contains the posterior mean of theta, its variance (or
+            `None`), and the model probability.
     """
-
     theta_hats = []
     for skeleton in skeletons:
         if use_quick_integration:
             n = int(
                 100 * max(np.log(len(cases) + 1) / 2, 1)
-            )  # My own rule of thumb for num points needed
+            )
             z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
             denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
             num_y = z * denom_y
@@ -133,35 +122,26 @@ def _wt_get_theta_hat(
 def _get_post_eff_bayes(
     cases, skeleton, dose_labels, theta_prior, F=empiric, use_quick_integration=False
 ):
-    """Calculate the posterior probability of efficacy at doses using the Bayesian integral
+    """Calculates the posterior probability of efficacy using Bayesian integration.
 
-    :param cases: list of 3-tuples, (dose, toxicity, efficacy), where dose is 1-based index of dose level received,
-                                toxicity is 1 for toxic event, 0 for tolerance event
-                                and efficacy is 1 for efficacious outcome, 0 for alternative.
-    :type cases: list
-    :param skeleton: list of prior efficacy probabilities
-    :type skeleton: list
-    :param dose_labels: dose-labels (often derived by backwards substitution) for which to estimate associated toxicity
-    :type dose_labels: list
-    :param theta_prior: prior distibution for theta parameter, assumes interface like scipy.stats.rv_continuous
-    :type theta_prior: scipy.stats.rv_continuous
-    :param F: a link function like logistic or empiric that takes params x, intercept, slope and returns a probability
-    :type F: func
-    :param use_quick_integration: True to use a faster but slightly less accurate estimate of the integrals;
-                                  False to use a slower but more accurate method.
-    :type use_quick_integration: bool
-    :return: estimates of Pr(Eff) at each dose
-    :rtype: list
+    Args:
+        cases (list[tuple[int, int, int]]): A list of cases.
+        skeleton (list[float]): A list of prior efficacy probabilities.
+        dose_labels (list[float]): The dose labels.
+        theta_prior (scipy.stats.rv_continuous): The prior for theta.
+        F (callable, optional): The link function. Defaults to `empiric`.
+        use_quick_integration (bool, optional): If `True`, uses a faster
+            integration method. Defaults to `False`.
 
+    Returns:
+        numpy.ndarray: An array of posterior probabilities of efficacy.
     """
-
     post_eff = []
     intercept = 0
     if use_quick_integration:
-        # This method uses simple trapezium quadrature. It is quite accurate and pretty fast.
         n = int(
             100 * max(np.log(len(cases) + 1) / 2, 1)
-        )  # My own rule of thumb for num points needed
+        )
         z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
         denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
         denom = trapezoid(denom_y, z, dz)
@@ -170,7 +150,6 @@ def _get_post_eff_bayes(
             num = trapezoid(num_y, z, dz)
             post_eff.append(num / denom)
     else:
-        # This method uses numpy's adaptive quadrature method. Superior accuracy but quite slow
         denom = quad(
             lambda t: theta_prior.pdf(t) * _wt_lik(cases, skeleton, t, F),
             -np.inf,
@@ -190,50 +169,8 @@ def _get_post_eff_bayes(
 
 
 class WagesTait(EfficacyToxicityDoseFindingTrial):
-    """This is an object-oriented implementation of Wages & Tait adaptive phase I/II design for oncology MTAs.
-
-    See Wages, N.A. & Tait, C. - Seamless Phase I/II Adaptive Design For Oncology Trials
-                    of Molecularly Targeted Agents, to appear in Journal of Biopharmaceutical Statistics
-
-    e.g. general usage
-    >>> trial_size = 30
-    >>> first_dose = 3
-    >>> tox_target = 0.35
-    >>> tox_limit = 0.40
-    >>> eff_limit = 0.45
-    >>> stage_1_size = 0  # Else initial dose choices will be random; not good for testing!
-    >>> skeletons = [
-    ...                 [.6, .5, .3, .2],
-    ...                 [.5, .6, .5, .3],
-    ...                 [.3, .5, .6, .5],
-    ...                 [.2, .3, .5, .6],
-    ...                 [.3, .5, .6, .6],
-    ...                 [.5, .6, .6, .6],
-    ...                 [.6, .6, .6, .6]
-    ...             ]
-    >>> prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
-    >>> trial = WagesTait(skeletons, prior_tox_probs, tox_target, tox_limit, eff_limit, first_dose, trial_size,
-    ...                     stage_1_size)
-    >>> trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
-    3
-    >>> trial.has_more()
-    True
-    >>> trial.size(), trial.max_size()
-    (3, 30)
-    >>> trial.admissable_set()
-    [1, 2, 3]
-    >>> trial.update([(3, 1, 1), (3, 1, 1), (3, 0, 0)])
-    2
-    >>> trial.next_dose()
-    2
-    >>> trial.admissable_set()
-    [1, 2]
-    >>> trial.most_likely_model_index
-    2
-
-    Posterior toxicity and efficacy probabilities are obtained by integrating
-    over the uncertainty in the model parameters.
-
+    """An object-oriented implementation of the Wages & Tait adaptive Phase I/II
+    design for oncology trials of molecularly targeted agents.
     """
 
     def __init__(
@@ -256,53 +193,37 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         use_quick_integration=False,
         estimate_var=False,
     ):
+        """Initializes a WagesTait trial object.
+
+        Args:
+            skeletons (list[list[float]]): A list of efficacy skeletons.
+            prior_tox_probs (list[float]): A list of prior toxicity
+                probabilities.
+            tox_target (float): The target toxicity rate.
+            tox_limit (float): The maximum acceptable toxicity probability.
+            eff_limit (float): The minimum acceptable efficacy probability.
+            first_dose (int): The starting dose level (1-based).
+            max_size (int): The maximum number of patients in the trial.
+            randomisation_stage_size (int): The number of patients to randomize
+                in the first stage.
+            F_func (callable, optional): The link function. Defaults to `empiric`.
+            inverse_F (callable, optional): The inverse link function. Defaults
+                to `inverse_empiric`.
+            theta_prior (scipy.stats.rv_continuous, optional): The prior for
+                theta. Defaults to a normal distribution.
+            beta_prior (scipy.stats.rv_continuous, optional): The prior for beta.
+                Defaults to a normal distribution.
+            excess_toxicity_alpha (float, optional): The significance level for
+                the excess toxicity test. Defaults to 0.025.
+            deficient_efficacy_alpha (float, optional): The significance level
+                for the deficient efficacy test. Defaults to 0.025.
+            model_prior_weights (list[float], optional): The prior weights for
+                each model. Defaults to uniform weights.
+            use_quick_integration (bool, optional): If `True`, uses a faster
+                integration method. Defaults to `False`.
+            estimate_var (bool, optional): If `True`, estimates the posterior
+                variance of beta and theta. Defaults to `False`.
         """
-
-        Params:
-        :param skeletons: 2-d matrix of skeletons, i.e. list of lists, one prior efficacy scenario per row
-        :type skeletons: list
-        :param prior_tox_probs: list of prior probabilities of toxicity, from least toxic to most.
-        :type prior_tox_probs: list
-        :param tox_target: target toxicity rate
-        :type tox_target: float
-        :param tox_limit: the maximum acceptable probability of toxicity
-        :type tox_limit: float
-        :param eff_limit: the minimium acceptable probability of efficacy
-        :type eff_limit: float
-        :param first_dose: starting dose level, 1-based. I.e. intcpt=3 means the middle dose of 5.
-        :type first_dose: int
-        :param max_size: maximum number of patients to use
-        :type max_size: int
-        :param randomisation_stage_size: number of patients to randomise in first stage of trial
-        :type randomisation_stage_size: int
-        :param F_func: the link function for CRM-like methods, e.g. empiric
-        :type F_func: func
-        :param inverse_F: the inverse link function for CRM-like methods method, e.g. inverse_empiric
-        :type inverse_F: func
-        :param theta_prior: prior distibution for theta parameter, the single parameter in the efficacy models
-        :type theta_prior: scipy.stats.rv_continuous
-        :param beta_prior: prior distibution for beta parameter, the single parameter in the toxicity CRM model
-        :type beta_prior: scipy.stats.rv_continuous
-        :param excess_toxicity_alpha: significance to use when testing that lowest dose exceeds toxicity limit
-        :type excess_toxicity_alpha: float
-        :param deficient_efficacy_alpha: significance to use when testing that optimal dose has efficacy less than
-        efficacy limit
-        :type deficient_efficacy_alpha: float
-        :param model_prior_weights: list of prior probabilities that each model is correct. None to use uniform weights
-        :type model_prior_weights: list
-        :param use_quick_integration: numerical integration is slow. Set this to False to use the most accurate (& slow)
-                                method; False to use a quick but approximate method.
-                                In simulations, fast and approximate often suffices.
-                                In trial scenarios, use slow and accurate!
-        :type use_quick_integration: bool
-        :param estimate_var: True to estimate the posterior variance of beta and theta
-        :type estimate_var: bool
-
-        Posterior toxicity and efficacy probabilities are always calculated via
-        Bayesian integration.
-
-        """
-
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
         )
@@ -336,7 +257,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.use_quick_integration = use_quick_integration
         self.estimate_var = estimate_var
 
-        # Reset
         self.most_likely_model_index = np.random.choice(
             np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
@@ -350,9 +270,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             )
             self.randomise_at_start = True
         else:
-            # _next_dose is set in this case by parent class
             self.randomise_at_start = False
-        # CRM uses Bayesian integration for toxicity probabilities
         self.crm = CRM(
             prior=prior_tox_probs,
             target=tox_target,
@@ -370,43 +288,49 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.theta_hats = np.zeros(self.K)
 
     def dose_toxicity_lower_bound(self, dose_level, alpha=0.025):
-        """Get lower bound of toxicity probability at a dose-level using the Clopper-Pearson aka Beta aka exact method.
+        """Gets the lower bound of the toxicity probability for a dose level.
 
-        Params:
-        dose-level, 1-based index of dose level
-        alpha, significance level, i.e. {100*alpha}% of probabilities will be lower than the returned value
+        This method uses the Clopper-Pearson (exact) method.
 
-        Returns: a probability
+        Args:
+            dose_level (int): The 1-based dose level.
+            alpha (float, optional): The significance level. Defaults to 0.025.
 
+        Returns:
+            float: The lower bound of the toxicity probability.
         """
         if 0 < dose_level <= len(self.post_tox_probs):
             n = self.treated_at_dose(dose_level)
             x = self.toxicities_at_dose(dose_level)
             if n > 0:
                 return beta(x, n - x + 1).ppf(alpha)
-        # Default
         return 0
 
     def dose_efficacy_upper_bound(self, dose_level, alpha=0.025):
-        """Get upper bound of efficacy probability at a dose-level using the Clopper-Pearson aka Beta aka exact method.
+        """Gets the upper bound of the efficacy probability for a dose level.
 
-        Params:
-        dose-level, 1-based index of dose level
-        alpha, significance level, i.e. {100*alpha}% of probabilities will be greater than the returned value
+        This method uses the Clopper-Pearson (exact) method.
 
-        Returns: a probability
+        Args:
+            dose_level (int): The 1-based dose level.
+            alpha (float, optional): The significance level. Defaults to 0.025.
 
+        Returns:
+            float: The upper bound of the efficacy probability.
         """
         if 0 < dose_level <= len(self.post_eff_probs):
             n = self.treated_at_dose(dose_level)
             x = self.efficacies_at_dose(dose_level)
             if n > 0:
                 return beta(x + 1, n - x).ppf(1 - alpha)
-        # Default
         return 1
 
     def model_theta_hat(self):
-        """Return theta hat for the model with the highest posterior likelihood, i.e. the current model."""
+        """Gets the theta estimate for the most likely model.
+
+        Returns:
+            float: The theta estimate.
+        """
         return self.theta_hats[self.most_likely_model_index]
 
     def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self):
@@ -417,7 +341,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.crm.reset()
         self.crm.update(toxicity_cases)
 
-        # Update parameters for efficacy estimates
         integrals = _wt_get_theta_hat(
             cases,
             self.skeletons,
@@ -432,7 +355,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.w = w / sum(w)
         most_likely_model_index = np.argmax(w)
         self.most_likely_model_index = most_likely_model_index
-        # Posterior toxicity probabilities from CRM via Bayesian integration
         self.post_tox_probs = np.array(self.crm.prob_tox())
         a0 = 0
         theta0 = self.theta_prior.mean()
@@ -448,7 +370,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             use_quick_integration=self.use_quick_integration,
         )
 
-        # Update combined model
         if self.size() < self.randomisation_stage_size:
             self._next_dose = self._randomise_next_dose(
                 self.post_tox_probs, self.post_eff_probs
@@ -458,7 +379,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 self.post_tox_probs, self.post_eff_probs
             )
 
-        # Stop if lower bound of probability at lowest dose exceeds tox_limit:
         if (
             self.dose_toxicity_lower_bound(1, self.excess_toxicity_alpha)
             > self.tox_limit
@@ -466,7 +386,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             self._status = -3
             self._next_dose = -1
             self._admissable_set = []
-        # Stop if upper bound of efficacy at optimum dose is less than eff_limit
         if self.size() >= self.randomisation_stage_size:
             if (
                 self.dose_efficacy_upper_bound(
@@ -481,7 +400,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         return self._next_dose
 
     def _EfficacyToxicityDoseFindingTrial__reset(self):
-        """Opportunity to run implementation-specific reset operations."""
         self.most_likely_model_index = sample(
             np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
@@ -502,21 +420,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
     def optimal_decision(self, prob_tox, prob_eff):
-        """Get the optimal dose choice for a given dose-toxicity curve.
-
-        .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own specific tolerances by
-        invoking the dose decicion on the complete (and unknowable) toxicity and efficacy curves.
-
-        :param prob_tox: collection of toxicity probabilities
-        :type prob_tox: list
-        :param prob_tox: collection of efficacy probabilities
-        :type prob_tox: list
-        :return: the optimal (1-based) dose decision
-        :rtype: int
-
-        """
-
         admiss = prob_tox <= self.tox_limit
         if sum(admiss) > 0:
             wt_obd = np.nanargmax(np.where(admiss, prob_eff, np.nan)) + 1
@@ -524,11 +427,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             wt_obd = -1
         return wt_obd
 
-    # Private interface
     def _randomise_next_dose(self, tox_probs, eff_probs):
         acceptable_doses = tox_probs <= self.tox_limit
         if sum(acceptable_doses) > 0:
-            # There are acceptable doses
             prob_randomise = []
             for acc, eff in zip(acceptable_doses, eff_probs):
                 if acc:
@@ -544,7 +445,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             ]
             return np.random.choice(range(1, self.I + 1), p=prob_randomise)
         else:
-            # No acceptable doses, stop trial
             self._status = -1
             self._admissable_set = []
             return -1
@@ -552,7 +452,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
     def _maximise_next_dose(self, tox_probs, eff_probs):
         acceptable_doses = tox_probs <= self.tox_limit
         if sum(acceptable_doses) > 0:
-            # There are acceptable doses
             self._status = 1
             self._admissable_set = [
                 i
@@ -561,7 +460,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             ]
             return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1
         else:
-            # No acceptable doses, stop trial
             self._status = -1
             self._admissable_set = []
             return -1

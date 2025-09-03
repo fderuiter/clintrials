@@ -8,26 +8,20 @@ import numpy as np
 
 
 def inverse_logit(x):
-    """Return the inverse logit of ``x``.
+    """Calculates the inverse logit of a number.
 
-    The inverse logit is ``1 / (1 + exp(-x))``.
+    The inverse logit is defined as 1 / (1 + exp(-x)).
 
-    Parameters
-    ----------
-    x : float
-        Input value.
+    Args:
+        x (float): The number to apply the inverse logit function to.
 
-    Returns
-    -------
-    float
-        Result of the inverse logit.
+    Returns:
+        float: The result of the inverse logit function.
 
-    Examples
-    --------
-    >>> inverse_logit(0)
-    0.5
+    Examples:
+        >>> inverse_logit(0)
+        0.5
     """
-
     return 1 / (1 + np.exp(-x))
 
 
@@ -35,23 +29,24 @@ def inverse_logit(x):
 # They are written in pairs and all use the same call signature.
 # They take their lead from the same in the dfcrm R-package.
 def empiric(x, a0=None, beta=0):
-    """Get the empiric function value:
+    """Calculates the empiric function value.
 
-    :math:`x^{e^\\beta}`
+    The formula is: x^(e^beta)
 
-    :param x: x-variable
-    :type x: float
-    :param a0: intercept parameter. This param is ignored here but exists to match similar call signatures.
-    :type a0: float
-    :param beta: slope parameter
-    :type beta: float
-    :return: Empiric function value
-    :rtype: float
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. This parameter is ignored
+            but exists to match the call signature of other link functions.
+            Defaults to None.
+        beta (float, optional): The slope parameter. Defaults to 0.
 
-    >>> import math
-    >>> empiric(0.5, beta=math.log(2))
-    0.25
+    Returns:
+        float: The empiric function value.
 
+    Examples:
+        >>> import math
+        >>> empiric(0.5, beta=math.log(2))
+        0.25
     """
 
     beta = np.clip(beta, -10, 10)
@@ -59,117 +54,136 @@ def empiric(x, a0=None, beta=0):
 
 
 def inverse_empiric(x, a0=0, beta=0):
-    """Get the inverse empiric function value:
+    """Calculates the inverse empiric function value.
 
-    :math:`x^{e^{-\\beta}}`
+    This function is the inverse of `empiric`. The formula is: x^(e^(-beta))
 
-    .. note:: this function is the inverse of :func:`clintrials.core.math.empiric`.
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. This parameter is ignored
+            but exists to match the call signature of other link functions.
+            Defaults to 0.
+        beta (float, optional): The slope parameter. Defaults to 0.
 
-    :param x: x-variable
-    :type x: float
-    :param a0: intercept parameter. This param is ignored here but exists to match similar call signatures.
-    :type a0: float
-    :param beta: slope parameter
-    :type beta: float
-    :return: Inverse empiric function value
-    :rtype: float
+    Returns:
+        float: The inverse empiric function value.
 
-    >>> import math
-    >>> inverse_empiric(0.25, beta=math.log(2))
-    0.5
-
+    Examples:
+        >>> import math
+        >>> inverse_empiric(0.25, beta=math.log(2))
+        0.5
     """
-
     return x ** np.exp(-beta)
 
 
 def logistic(x, a0=0, beta=0):
-    """Get the logistic function value:
+    """Calculates the logistic function value.
 
-    :math:`\\frac{1}{1 + e^{-a_0 - e^\\beta x}}`
+    The formula is: 1 / (1 + e^(-a0 - e^beta * x))
 
-    :param x: x-variable
-    :type x: float
-    :param a0: intercept parameter.
-    :type a0: float
-    :param beta: slope parameter
-    :type beta: float
-    :return: Logistic function value
-    :rtype: float
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. Defaults to 0.
+        beta (float, optional): The slope parameter. Defaults to 0.
 
-    >>> logistic(0.25, -1, 1)
-    0.42057106852688747
+    Returns:
+        float: The logistic function value.
 
+    Examples:
+        >>> logistic(0.25, -1, 1)
+        0.42057106852688747
     """
-
     beta = np.clip(beta, -10, 10)
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 
 def inverse_logistic(x, a0=0, beta=0):
-    """Get the inverse logistic function value:
+    """Calculates the inverse logistic function value.
 
-    :math:`\\frac{\\log(\\frac{x}{1-x}) - a_0}{e^\\beta}`
+    This function is the inverse of `logistic`.
+    The formula is: (log(x / (1 - x)) - a0) / e^beta
 
-    .. note:: this function is the inverse of :func:`clintrials.core.math.logistic`.
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. Defaults to 0.
+        beta (float, optional): The slope parameter. Defaults to 0.
 
-    :param x: x-variable
-    :type x: float
-    :param a0: intercept parameter.
-    :type a0: float
-    :param beta: slope parameter
-    :type beta: float
-    :return: Inverse logistic function value
-    :rtype: float
+    Returns:
+        float: The inverse logistic function value.
 
-    >>> round(inverse_logistic(0.42057106852688747, -1, 1), 2)
-    0.25
-
+    Examples:
+        >>> round(inverse_logistic(0.42057106852688747, -1, 1), 2)
+        0.25
     """
-
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 
 
 def hyperbolic_tan(x, a0=0, beta=0):
+    """Calculates the hyperbolic tangent function.
+
+    The formula is: ((tanh(x) + 1) / 2) ** exp(beta)
+
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. This parameter is ignored
+            but exists to match the call signature of other link functions.
+            Defaults to 0.
+        beta (float, optional): The slope parameter. Defaults to 0.
+
+    Returns:
+        float: The result of the hyperbolic tangent function.
+    """
     return ((np.tanh(x) + 1) / 2) ** np.exp(beta)
 
 
 def inverse_hyperbolic_tan(x, a0=0, beta=0):
+    """Calculates the inverse hyperbolic tangent function.
+
+    This function is the inverse of `hyperbolic_tan`.
+
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. This parameter is ignored
+            but exists to match the call signature of other link functions.
+            Defaults to 0.
+        beta (float, optional): The slope parameter. Defaults to 0.
+
+    Returns:
+        float: The result of the inverse hyperbolic tangent function.
+    """
     return np.arctanh(2 * x ** np.exp(-beta) - 1)
 
 
 def logit1(x, a0=3, beta=0):
-    """Get the 1-parameter logistic function value:
+    """Calculates the 1-parameter logistic function value.
 
-    :math:`\\frac{e^{3+\\alpha x}}{1 + e^{3+\\alpha x}}`
+    This is a logistic function, typically used with a single parameter `beta`,
+    and a fixed intercept `a0`. The formula is:
+    1 / (1 + exp(-a0 - exp(beta) * x))
 
-    where :math:`\\alpha = e^{\\beta}`.
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. Defaults to 3.
+        beta (float, optional): The slope parameter. Defaults to 0.
 
-    :param x: x-variable
-    :type x: float
-    :param a0: intercept parameter.
-    :type a0: float
-    :param beta: slope parameter
-    :type beta: float
-    :return: Logistic function value
-    :rtype: float
+    Returns:
+        float: The logistic function value.
     """
     beta = np.clip(beta, -10, 10)
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 
 def inverse_logit1(x, a0=3, beta=0):
-    """Get the inverse 1-parameter logistic function value.
+    """Calculates the inverse 1-parameter logistic function value.
 
-    .. note:: this function is the inverse of :func:`clintrials.core.math.logit1`.
+    This function is the inverse of `logit1`.
 
-    :param x: x-variable
-    :type x: float
-    :param a0: intercept parameter.
-    :type a0: float
-    :param beta: slope parameter
-    :type beta: float
-    :return: Inverse logistic function value
-    :rtype: float
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. Defaults to 3.
+        beta (float, optional): The slope parameter. Defaults to 0.
+
+    Returns:
+        float: The inverse logistic function value.
     """
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
