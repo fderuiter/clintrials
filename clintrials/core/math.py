@@ -115,6 +115,7 @@ def inverse_logistic(x, a0=0, beta=0):
         >>> round(inverse_logistic(0.42057106852688747, -1, 1), 2)
         0.25
     """
+    beta = np.clip(beta, -10, 10)
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 
 
@@ -186,4 +187,5 @@ def inverse_logit1(x, a0=3, beta=0):
     Returns:
         float: The inverse logistic function value.
     """
+    beta = np.clip(beta, -10, 10)
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
