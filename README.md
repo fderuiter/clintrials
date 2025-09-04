@@ -1,103 +1,43 @@
-# clintrials #
+# clintrials
 
-## README ##
+clintrials is a library of clinical trial designs and methods in Python. This library is intended to facilitate research and is provided "as-is".
 
-clintrials is a library of clinical trial designs and methods in Python.
-This library is intended to facilitate research.
-It is provided "as-is" and the author accepts absolutely no responsibility whatsoever for the correctness or integrity of the calculations.
+## Description
 
+This library implements some designs used in clinical trials. It has implementations of O'Quigley's CRM design, Thall & Cook's EffTox design, and Wages & Tait's efficacy+toxicity design. There is also an implementation of the BEBOP trial design for the simultaneous study of bivariate binary outcomes (like efficacy and toxicity) in the presence of predictive variables, both continuous and binary. A win-ratio simulation module estimates the power of hierarchical composite endpoints.
 
-### What does clintrials do? ###
+## Installation
 
-* This library implements some designs used in clinical trials.
-* It has implementations of O'Quigley's CRM design, Thall & Cook's EffTox design, and Wages & Tait's efficacy+toxicity design.
-* There is also an implementation of my very own BEBOP trial design for the simultaneous study of bivariate binary outcomes (like efficacy and toxicity) in the presence of predictive variables, both continuous and binary.
-* A win-ratio simulation module estimates the power of hierarchical composite endpoints.
-* There is a bias towards phase I and II trial designs because that is my research area.
-* I expect to add more designs in the future.
-* It is written in pure Python, intentionally. This library would be quicker if it was written in C++ or Java but it would not be as portable or readable.
-* Some of the code is fairly mature but the repo itself is young and in flux.
-* This project now requires Python 3.9 or newer.
+There are two ways to install clintrials.
 
-Why Python?
-----
-No biostatisticians use Python, they use R / Stata / SAS, so why is this in Python?
-Well, Python is used in lots of other sciences because it is rich and pleasant to work with.
-Python is object-orientated, which is important when you are writing a bunch of classes that do a similar job in fundamentally different ways, like clinical trial designs, say.
-It is nice to program in Python.
-I think it is sadly underused in clinical trials.
-Python also offers lots of extras and the parallel capabilities of IPython are having a positive impact on my work.
+### Using pip
 
-If you have never used Python, I recommend you install Anaconda, a distribution of Python aimed at academics and researchers that includes the tools we need, switch to the tutorial directory of clintrials and then fire up jupyter notebook.
-
-### Dependencies ###
-
-* numpy, scipy, pandas & statsmodels - all of these are installed by Anaconda so I highly recommend that.
-Install Anaconda from https://www.continuum.io/downloads
-* Some features also require matplotlib and ggplot. matplotlib also comes with Anaconda but ggplot will require a separate install.
-If you need ggplot, be nice to yourself and use pip:
- `pip install ggplot`
-
-
-### How do I get set up? ###
-
-There are two ways.
-The first method uses pip and the Python package index.
-The extras like the tutorials are not provided.
-The second clones this repo using git.
-Tutorials are provided in the `docs/tutorials` directory.
-The one complication is getting the clinitrials package on your path.
-
-#### Using Poetry to get just the clintrials code
-Poetry automatically creates a virtual environment and installs the project
-dependencies for you. If you do not have Poetry installed, run:
+To install the latest stable version from PyPI, run:
 
 ```bash
-pip install poetry
+pip install clintrials
 ```
 
-Then install the project and drop into the environment with:
+### From source
+
+To install the latest development version from the git repository, first clone the repository:
+
+```bash
+git clone https://github.com/brockk/clintrials.git
+cd clintrials
+```
+
+Then, install the project and its dependencies using Poetry:
 
 ```bash
 poetry install
-poetry shell
 ```
 
-The package will be on your path inside the Poetry shell. If you would like the
-tutorial notebooks as well, use...
-
-#### Using git to clone this repo, including tutorial notebooks
-
-Navigate in terminal or DOS to a directory where you want the code and run
-
-`git clone https://github.com/brockk/clintrials.git`
-
-`cd clintrials`
-
-You need to put clintrials on your path. 
-An easy way to do this is to edit the PYTHONPATH environment variable.
-To do this in Mac or Linux, run 
- 
-`export PYTHONPATH=$PYTHONPATH:$(pwd)`
- 
-Or, in Windows run
- 
-`set PYTHONPATH=%PYTHONPATH%;%CD%`
-
-Then, load a jupyter notebook session for the tutorials using:
-
-`jupyter notebook --notebook-dir=docs/tutorials`
-
-A browser window should appear and you should see the tutorials.
-Tutorials related to the _Implementing the EffTox Dose-Finding Design in the Matchpoint Trial_ publication
-are in the `matchpoint` directory.
-
+## Usage
 
 ### Interactive Dashboard
 
-This project includes an interactive web-based dashboard for visualizing simulation results.
-To run the dashboard, make sure you have installed the project dependencies with Poetry, as described above.
-Then, run the following command:
+This project includes an interactive web-based dashboard for visualizing simulation results. To run the dashboard, make sure you have installed the project dependencies with Poetry, as described above. Then, run the following command:
 
 ```bash
 poetry run dashboard
@@ -105,52 +45,16 @@ poetry run dashboard
 
 This will start a local web server and open the dashboard in your browser.
 
-The dashboard supports tailored visualizations for different trial designs.
-Use the sidebar to select the appropriate trial design (e.g., CRM, EffTox, Win Ratio).
-For CRM and EffTox, upload your simulation results in JSON format to explore them
-interactively. The Win Ratio option lets you configure parameters and run simulations
-directly in the browser.
+The dashboard supports tailored visualizations for different trial designs. Use the sidebar to select the appropriate trial design (e.g., CRM, EffTox, Win Ratio). For CRM and EffTox, upload your simulation results in JSON format to explore them interactively. The Win Ratio option lets you configure parameters and run simulations directly in the browser.
 
+### Tutorials
 
-### Documentation
+Tutorials are provided in the `docs/tutorials` directory. You can run them using Jupyter notebooks.
 
-The documentation is hosted on GitHub Pages and can be found at:
+## Contributing
 
-<https://fderuiter.github.io/clintrials/>
+Contributions are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for more details on how to get involved.
 
-### Contributing
+## License
 
-Contributions are welcome! Please see the [contributing guide](docs/contributing.md) for more details on how to get involved.
-
-### Contact ###
-The repo owner is Kristian Brock, @brockk.
-Feel free to get in contact through GitHub.
-
-### Development ###
-Install development requirements and run the style checks using pre-commit:
-
-```bash
-pip install -e .[dev]
-pre-commit install
-pre-commit run --all-files
-```
-
-Run the test suite with:
-
-```bash
-pytest -q
-```
-
-### Building the documentation
-
-Install the optional docs dependencies and run Sphinx:
-
-```bash
-pip install -e .[docs]
-make -C docs html
-```
-
-Documentation is deployed to GitHub Pages by the
-workflow `.github/workflows/docs.yml` when changes are pushed to the
-`main` branch. Ensure that the GitHub environment permits deployments
-from `main`.
+This project is licensed under the terms of the MIT license. See the [LICENSE](LICENSE) file for more details.

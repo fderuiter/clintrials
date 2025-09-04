@@ -16,6 +16,8 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 
+packages = [{include = "clintrials", from = "src"}]
+
 [tool.poetry.dependencies]
 python = ">=3.9"
 ggplot = ">=0.6.5"
@@ -81,7 +83,7 @@ ignore = [
     "F841",
     "E713",
 ]
-exclude = ["clintrials/phase2/bebop/peps2v1.py", "docs/tutorials/*.ipynb"]
+exclude = ["src/clintrials/phase2/bebop/peps2v1.py", "docs/tutorials/*.ipynb"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
