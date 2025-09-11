@@ -1,18 +1,11 @@
+"""
+Brock & Yap's novel seamless phase I/II efficacy/toxicity design, fusing
+elements of Wages & Tait's design with elements of Thall & Cook's EffTox
+design.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
-
-
-""" Brock & Yap's novel seamless phase I/II efficacy/toxicity design, fusing elements of Wages & Tait's design with
-elements of Thall & Cook's EffTox design.
-
-See:
-Wages, N.A. & Tait, C. - Seamless Phase I/II Adaptive Design For Oncology Trials
-                    of Molecularly Targeted Agents, to appear in Journal of Biopharmaceutical Statistics
-Thall, P.F. and Cook, J.D. (2004). Dose-Finding Based on Efficacy-Toxicity Trade-Offs, Biometrics, 60: 684-693.
-Cook, J.D. Efficacy-Toxicity trade-offs based on L^p norms, Technical Report UTMDABTR-003-06, April 2006
-Berry, Carlin, Lee and Mueller. Bayesian Adaptive Methods for Clinical Trials, Chapman & Hall / CRC Press
-
-"""
 
 
 from random import sample
@@ -108,6 +101,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                 `False`.
             mc_sample_size (int, optional): The number of samples to use in Monte
                 Carlo estimation methods. Defaults to 10**5.
+
+        Raises:
+            ValueError: If the dimensions of the inputs are inconsistent.
         """
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
@@ -116,7 +112,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape
         if self.I != len(prior_tox_probs):
-            ValueError("prior_tox_probs should have %s items." % self.I)
+            raise ValueError("prior_tox_probs should have %s items." % self.I)
         self.prior_tox_probs = prior_tox_probs
         self.tox_target = tox_target
         self.tox_limit = tox_limit
@@ -131,9 +127,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.eff_certainty = eff_certainty
         if model_prior_weights is not None:
             if self.K != len(model_prior_weights):
-                ValueError("model_prior_weights should have %s items." % self.K)
+                raise ValueError("model_prior_weights should have %s items." % self.K)
             if sum(model_prior_weights) == 0:
-                ValueError("model_prior_weights cannot sum to zero.")
+                raise ValueError("model_prior_weights cannot sum to zero.")
             self.model_prior_weights = model_prior_weights / sum(model_prior_weights)
         else:
             self.model_prior_weights = np.ones(self.K) / self.K

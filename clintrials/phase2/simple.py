@@ -1,7 +1,10 @@
+"""
+Implementations of simple phase II clinical trial designs.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-""" Implementations of simple phase II clinical trial designs. Long, complicated designs belong in own modules. """
 
 from collections import OrderedDict
 from itertools import product

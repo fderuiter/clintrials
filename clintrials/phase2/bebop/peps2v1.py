@@ -66,7 +66,9 @@ def pi_e(disease_status, mutation_status, beta0=0, beta1=0, beta2=0):
     return 1 / (1 + np.exp(-z))
 
 
-def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2, psi):
+def pi_ab(
+    disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2, psi
+):
     """Calculates the likelihood of a joint efficacy-toxicity outcome.
 
     Args:

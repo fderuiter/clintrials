@@ -1,3 +1,7 @@
+"""
+Functions for running and analyzing clinical trial simulations.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 

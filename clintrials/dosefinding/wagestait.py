@@ -1,13 +1,10 @@
+"""
+An implementation of Wages & Tait's adaptive Bayesian design for dose-finding
+in clinical trials.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
-
-""" An implementation of Wages & Tait's adaptive Bayesian design for dose-finding in clinical trials.
-
-See:
-Wages, N.A. and Tait, C. (2015). Seamless Phase I/II Adaptive Design For Oncology Trials of Molecularly Targeted Agents,
-        Journal of Biopharmiceutical Statistics (preprint)
-
-"""
 
 
 from random import sample
@@ -223,6 +220,10 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 integration method. Defaults to `False`.
             estimate_var (bool, optional): If `True`, estimates the posterior
                 variance of beta and theta. Defaults to `False`.
+
+        Raises:
+            ValueError: If the dimensions of the inputs are inconsistent, or
+                if `tox_target` is greater than `tox_limit`.
         """
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
@@ -231,9 +232,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape
         if self.I != len(prior_tox_probs):
-            ValueError("prior_tox_probs should have %s items." % self.I)
+            raise ValueError("prior_tox_probs should have %s items." % self.I)
         if tox_target > tox_limit:
-            ValueError(
+            raise ValueError(
                 "tox_target is greater than tox_limit. That does not sound clever."
             )
         self.prior_tox_probs = np.array(prior_tox_probs)
@@ -248,9 +249,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.deficient_efficacy_alpha = deficient_efficacy_alpha
         if model_prior_weights is not None:
             if self.K != len(model_prior_weights):
-                ValueError("model_prior_weights should have %s items." % self.K)
+                raise ValueError("model_prior_weights should have %s items." % self.K)
             if sum(model_prior_weights) == 0:
-                ValueError("model_prior_weights cannot sum to zero.")
+                raise ValueError("model_prior_weights cannot sum to zero.")
             self.model_prior_weights = model_prior_weights / sum(model_prior_weights)
         else:
             self.model_prior_weights = np.ones(self.K) / self.K

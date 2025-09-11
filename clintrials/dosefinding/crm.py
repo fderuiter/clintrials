@@ -1,3 +1,7 @@
+"""
+Continual Reassessment Method (CRM) for dose-finding clinical trials.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 

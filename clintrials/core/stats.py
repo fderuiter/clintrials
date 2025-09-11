@@ -1,7 +1,9 @@
+"""
+Classes and methods to perform general useful statistical routines.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
-
-""" Classes and methods to perform general useful statistical routines. """
 
 
 import logging

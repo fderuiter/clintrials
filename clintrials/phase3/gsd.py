@@ -69,6 +69,11 @@ class GroupSequentialDesign:
             timing (List[float], optional): A list of information fractions for
                 each look. If `None`, assumes equally spaced looks. Defaults to
                 `None`.
+
+        Raises:
+            ValueError: If `alpha` is not between 0 and 1, `k` is not a
+                positive integer, or `timing` is not a strictly increasing
+                sequence of length `k` ending in 1.0.
         """
         if not 0 < alpha < 1:
             raise ValueError("alpha must be between 0 and 1.")
@@ -150,6 +155,9 @@ class GroupSequentialDesign:
                 - 'rejection_prob': The overall probability of rejecting the null.
                 - 'stopping_dist': The distribution of stopping times.
                 - 'expected_info': The expected information at trial conclusion.
+
+        Raises:
+            ValueError: If `n_sims` is not a positive integer.
         """
         if n_sims <= 0:
             raise ValueError("Number of simulations must be positive.")

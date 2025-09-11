@@ -745,6 +745,14 @@ class ParameterSpace:
         return np.prod(self.dimensions())
 
     def __getitem__(self, key):
+        """Gets the values for a given parameter.
+
+        Args:
+            key (str): The name of the parameter.
+
+        Returns:
+            list: The list of values for the parameter.
+        """
         return self.vals_map[key]
 
 

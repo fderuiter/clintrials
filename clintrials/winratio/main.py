@@ -25,7 +25,8 @@ def run_simulation(
     p_y3_B: float,
     significance_level: float = 0.05,
 ):
-    """Runs a Monte Carlo simulation to estimate win-ratio power.
+    """
+    Run a Monte Carlo simulation to estimate win-ratio power.
 
     Args:
         num_subjects_A (int): The number of subjects in Group A.

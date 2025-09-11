@@ -1,3 +1,7 @@
+"""
+Classes and functions for modelling recruitment to clinical trials.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
@@ -6,8 +10,6 @@ import abc
 import copy
 
 import numpy as np
-
-""" Classes and functions for modelling recruitment to clinical trials. """
 
 
 class RecruitmentStream(metaclass=abc.ABCMeta):
@@ -106,6 +108,10 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             interpolate (bool, optional): Whether to linearly interpolate
                 between vertices (`True`) or use stepped transitions (`False`).
                 Defaults to `True`.
+
+        Raises:
+            ValueError: If `initial_intensity` is negative, or if any of the
+                intensities in `vertices` are negative.
         """
         if initial_intensity < 0:
             raise ValueError("initial_intensity cannot be negative.")

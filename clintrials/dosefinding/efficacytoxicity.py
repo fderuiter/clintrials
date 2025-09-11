@@ -1,3 +1,7 @@
+"""
+Base classes and utilities for efficacy-toxicity dose-finding trials.
+"""
+
 __author__ = "brockk"
 
 
@@ -30,6 +34,9 @@ class EfficacyToxicityDoseFindingTrial(metaclass=abc.ABCMeta):
             first_dose (int): The starting dose level (1-based).
             num_doses (int): The total number of dose levels.
             max_size (int): The maximum number of patients in the trial.
+
+        Raises:
+            ValueError: If `first_dose` is greater than `num_doses`.
         """
         if first_dose > num_doses:
             raise ValueError("First dose must be no greater than number of doses.")
@@ -384,6 +391,11 @@ def _simulate_trial(
 
     Returns:
         collections.OrderedDict: A dictionary containing the simulation report.
+
+    Raises:
+        ValueError: If the lengths of `true_efficacies`, `true_toxicities`,
+            and the number of doses in the design do not match, or if
+            `tolerances` has incorrect dimensions.
     """
     correlated_outcomes = tox_eff_odds_ratio < 1.0 or tox_eff_odds_ratio > 1.0
 

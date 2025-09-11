@@ -1,14 +1,11 @@
+"""
+An implementation of Thall & Cook's EffTox design for dose-finding in
+clinical trials.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-""" An implementation of Thall & Cook's EffTox design for dose-finding in clinical trials.
-
-See:
-Thall, P.F. and Cook, J.D. (2004). Dose-Finding Based on Efficacy-Toxicity Trade-Offs, Biometrics, 60: 684-693.
-Cook, J.D. Efficacy-Toxicity trade-offs based on L^p norms, Technical Report UTMDABTR-003-06, April 2006
-Berry, Carlin, Lee and Mueller. Bayesian Adaptive Methods for Clinical Trials, Chapman & Hall / CRC Press
-
-"""
 
 import logging
 from collections import OrderedDict
@@ -307,6 +304,10 @@ class LpNormCurve:
                 point.
             hinge_prob_tox (float): The probability of toxicity at the hinge
                 point.
+
+        Raises:
+            ValueError: If the hinge point probabilities are not within the
+                bounds defined by the other parameters.
         """
         if hinge_prob_tox >= maximum_tolerable_toxicity:
             raise ValueError(
@@ -488,6 +489,9 @@ class InverseQuadraticCurve:
         Args:
             points (list[tuple[float, float]]): A list of (probability of
                 efficacy, probability of toxicity) points.
+
+        Raises:
+            ValueError: If the points do not fit an ABC curve well.
         """
         x = np.array([z for z, _ in points])
         y = np.array([z for _, z in points])
@@ -499,7 +503,7 @@ class InverseQuadraticCurve:
         f = lambda x: a + b / x + c / x**2
         # Check f is not a terrible fit
         if sum(np.abs(f(x) - y)) > 0.00001:
-            ValueError("%s do not fit an ABC curve well" % points)
+            raise ValueError("%s do not fit an ABC curve well" % points)
         self.f = f
         self.a, self.b, self.c = a, b, c
 
@@ -648,6 +652,9 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 Monte Carlo integration. Defaults to 10**5.
             epsilon (float, optional): A small number to define the
                 integration range. Defaults to 1e-6.
+
+        Raises:
+            ValueError: If `theta_priors` does not have 6 items.
         """
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(real_doses), max_size
