@@ -26,16 +26,43 @@ import numpy
 
 
 def pi_e(x, theta):
+    """Calculates the probability of efficacy.
+
+    Args:
+        x: A patient vector.
+        theta: The parameter vector.
+
+    Returns:
+        The probability of efficacy.
+    """
     z = theta[:, 0] + theta[:, 1] * x[2] + theta[:, 2] * x[3] + theta[:, 3] * x[4]
     return 1 / (1 + numpy.exp(-z))
 
 
 def pi_t(x, theta):
+    """Calculates the probability of toxicity.
+
+    Args:
+        x: A patient vector.
+        theta: The parameter vector.
+
+    Returns:
+        The probability of toxicity.
+    """
     z = theta[:, 4]
     return 1 / (1 + numpy.exp(-z))
 
 
 def pi_ab(x, theta):
+    """Calculates the joint probability of efficacy and toxicity.
+
+    Args:
+        x: A patient vector.
+        theta: The parameter vector.
+
+    Returns:
+        The joint probability of the observed efficacy and toxicity.
+    """
     b = x[0]  # had efficacy
     a = x[1]  # had_toxicity
     psi = theta[:, 5]

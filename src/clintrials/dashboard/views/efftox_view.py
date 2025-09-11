@@ -9,6 +9,11 @@ from clintrials.utils import ParameterSpace
 
 
 def render(sims):
+    """Renders the EffTox simulation results view.
+
+    Args:
+        sims: A list of simulation results.
+    """
     st.header("EffTox Simulation Results")
 
     # Example parameter space for EffTox

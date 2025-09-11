@@ -12,33 +12,30 @@ from clintrials.utils import atomic_to_json, iterable_to_json
 
 
 class BayesianTimeToEvent:
-    """An object-oriented implementation of a simple adaptive Bayesian design for time-to-event endpoints using a
-    model assuming exponentially distributed event times and inverse-gamma prior beliefs on median survival time.
+    """A Bayesian design for time-to-event endpoints.
 
-    .. note:: See Thall, P.F., Wooten, L.H., & Tannir, N.M. (2005) - *Monitoring Event Times in Early Phase Clinical
-                Trials: Some Practical Issues* for full information.
+    This class implements a simple adaptive Bayesian design for time-to-event
+    endpoints, assuming exponentially distributed event times and an
+    inverse-gamma prior on the median survival time.
 
-    This class satisfies the interface for a time-to-event trial in the clintrials package, i.e. it supports methods:
+    Note:
+        See Thall, P.F., Wooten, L.H., & Tannir, N.M. (2005) - *Monitoring
+        Event Times in Early Phase Clinical Trials: Some Practical Issues*
+        for more information.
 
-    - event_times()
-    - recruitment_times()
-    - update(cases)
-    - test(time, kwargs)
-
-    .. note:: the event times are time-deltas *relative to the recruitment times*. E.g. recruitment at t=1
-                and event at t=2 means the event took place at absolute time t=3. Using deltas gets around
-                the silly scenario where events might occur before recruitment.
-
+    Attributes:
+        alpha_prior: The alpha parameter of the inverse-gamma prior.
+        beta_prior: The beta parameter of the inverse-gamma prior.
     """
 
     def __init__(self, alpha_prior, beta_prior):
-        """Create an instance.
+        """Initializes the BayesianTimeToEvent trial.
 
-        :param alpha_prior: first parameter in beta distribution for prior beliefs on median time-to-event
-        :type alpha_prior: float
-        :param beta_prior: second parameter in beta distribution for prior beliefs on median time-to-event
-        :type beta_prior: float
-
+        Args:
+            alpha_prior: The alpha parameter for the prior on the median
+                time-to-event.
+            beta_prior: The beta parameter for the prior on the median
+                time-to-event.
         """
 
         self.alpha_prior = alpha_prior
@@ -47,33 +44,29 @@ class BayesianTimeToEvent:
         self._recruitment_times = []
 
     def event_times(self):
-        """Get list of the times at which events occurred.
+        """Gets the list of event times.
 
-        :return: list of event times in the order they were provided
-        :rtype: list
-
+        Returns:
+            A list of event times, in the order they were provided.
         """
 
         return self._times_to_event
 
     def recruitment_times(self):
-        """Get list of the times at which patients were recruited.
+        """Gets the list of recruitment times.
 
-        :return: list of recruitment times in the order they were provided
-        :rtype: list
-
+        Returns:
+            A list of recruitment times, in the order they were provided.
         """
 
         return self._recruitment_times
 
     def update(self, cases):
-        """Update the trial with new patient cases.
+        """Updates the trial with new patient cases.
 
-        :param cases: list of cases expressed as 2-tuples, (event_time, recruitment_time)
-        :type cases: list
-        :return: Nothing
-        :rtype: None
-
+        Args:
+            cases: A list of cases, where each case is a tuple of
+                (event_time, recruitment_time).
         """
 
         for event_time, recruitment_time in cases:
@@ -81,19 +74,22 @@ class BayesianTimeToEvent:
             self._recruitment_times.append(recruitment_time)
 
     def test(self, time, cutoff, probability, less_than=True):
-        """Test posterior belief that median time-to-event parameter is less than or greater than some boundary value.
+        """Tests the posterior belief about the median time-to-event.
 
-        :param time: test at this time
-        :type time: float
-        :param cutoff: test median time against this critical value
-        :type cutoff: float
-        :param probability: require at least this degree of posterior certainty to declare significance
-        :type probability: float
-        :param less_than: True, to test parameter is less than cut-off, a-posteriori. False to test greater than
-        :type less_than: bool
-        :return: JSON-able dict object reporting test output
-        :rtype: dict
+        This method tests whether the median time-to-event is less than or
+        greater than a certain cutoff value, with a given degree of
+        posterior certainty.
 
+        Args:
+            time: The time at which to perform the test.
+            cutoff: The critical value to test the median time against.
+            probability: The required degree of posterior certainty to
+                declare significance.
+            less_than: If True, tests if the parameter is less than the
+                cutoff; otherwise, tests if it is greater than the cutoff.
+
+        Returns:
+            A JSON-able dictionary containing the test report.
         """
 
         event_time = np.array(self._times_to_event)
@@ -162,11 +158,34 @@ def matrix_cohort_analysis(
     final_analysis_time_delta,
     recruitment_stream,
 ):
-    """Simulate TTE outcomes in the National Lung Matrix trial.
+    """Simulates time-to-event outcomes for a matrix cohort analysis.
 
-    .. note:: See Thall, P.F., Wooten, L.H., & Tannir, N.M. (2005) - *Monitoring Event Times in Early Phase Clinical
-            Trials: Some Practical Issues* for full information.
+    Note:
+        See Thall, P.F., Wooten, L.H., & Tannir, N.M. (2005) - *Monitoring
+        Event Times in Early Phase Clinical Trials: Some Practical Issues*
+        for more information.
 
+    Args:
+        n_simulations: The number of simulations to run.
+        n_patients: The number of patients in the trial.
+        true_median: The true median time-to-event.
+        alpha_prior: The alpha parameter for the prior on the median
+            time-to-event.
+        beta_prior: The beta parameter for the prior on the median
+            time-to-event.
+        lower_cutoff: The lower cutoff for the interim analysis.
+        upper_cutoff: The upper cutoff for the final analysis.
+        interim_certainty: The required certainty for the interim analysis.
+        final_certainty: The required certainty for the final analysis.
+        interim_analysis_after_patients: A list of patient numbers after
+            which to perform an interim analysis.
+        interim_analysis_time_delta: The time delta for the interim analysis.
+        final_analysis_time_delta: The time delta for the final analysis.
+        recruitment_stream: The recruitment stream to use.
+
+    Returns:
+        A list of simulation reports, or a single report if `n_simulations`
+        is 1.
     """
 
     reports = []

@@ -17,10 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 def to_1d_list_gen(x):
-    """Generator function to reduce lists of lists of arbitrary depth (and scalars) to single depth-1 list.
+    """Reduces lists of lists of arbitrary depth to a single depth-1 list.
 
-    .. note:: this function is recursive.
+    Note:
+        This function is recursive.
 
+    Args:
+        x: A scalar, list, or list of lists.
+
+    Yields:
+        An element of the flattened list.
     """
 
     if isinstance(x, list):
@@ -31,26 +37,39 @@ def to_1d_list_gen(x):
 
 
 def to_1d_list(x):
-    """Reshape scalars, lists and lists of lists of arbitrary depth as a single flat list, i.e. list of depth 1.
+    """Reshapes scalars, lists, and lists of lists to a single flat list.
 
-    .. note:: this function basically offloads all its work to a generator function because **we like yield**!
+    Note:
+        This function uses a generator function to flatten the list.
 
-    E.g.
+    Args:
+        x: A scalar, list, or list of lists.
 
-    >>> to_1d_list(0)
-    [0]
-    >>> to_1d_list([1])
-    [1]
-    >>> to_1d_list([[1,2],3,[4,5]])
-    [1, 2, 3, 4, 5]
-    >>> to_1d_list([[1,2],3,[4,5,[6,[7,8,[9]]]]])
-    [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    Returns:
+        A flattened list.
 
+    Examples:
+        >>> to_1d_list(0)
+        [0]
+        >>> to_1d_list([1])
+        [1]
+        >>> to_1d_list([[1,2],3,[4,5]])
+        [1, 2, 3, 4, 5]
+        >>> to_1d_list([[1,2],3,[4,5,[6,[7,8,[9]]]]])
+        [1, 2, 3, 4, 5, 6, 7, 8, 9]
     """
     return list(to_1d_list_gen(x))
 
 
 def get_logger(name: str = __name__) -> logging.Logger:
+    """Gets a logger instance.
+
+    Args:
+        name: The name of the logger.
+
+    Returns:
+        A logger instance.
+    """
     return logging.getLogger(name)
 
 
@@ -65,6 +84,14 @@ def _open_json_url(url):
 
 
 def fetch_json_from_files(file_pattern):
+    """Fetches and combines JSON data from multiple files.
+
+    Args:
+        file_pattern: A file pattern (e.g., "data/*.json") to match files.
+
+    Returns:
+        A list containing the combined JSON data from all matched files.
+    """
     files = glob.glob(file_pattern)
     sims = []
     for f in files:
@@ -76,13 +103,15 @@ def fetch_json_from_files(file_pattern):
 
 
 def filter_list_of_dicts(list_of_dicts, filter_dict):
-    """Filter a list of dictionaries.
+    """Filters a list of dictionaries based on a filter dictionary.
 
-    :param list_of_dicts: list of dictionaries
-    :type list_of_dicts: list
-    :param filter_dict: map of item -> value pairs that forms the filter. Exact matches are retained.
-    :type filter_dict: dict
+    Args:
+        list_of_dicts: A list of dictionaries to filter.
+        filter_dict: A dictionary of key-value pairs to filter by.
+            Only exact matches are retained.
 
+    Returns:
+        A new list of dictionaries containing only the filtered items.
     """
     for key, val in filter_dict.items():
         # In JSON, tuples are masked as lists. In this filter, we treat them as equivalent:
@@ -96,19 +125,18 @@ def filter_list_of_dicts(list_of_dicts, filter_dict):
 
 
 def map_reduce_files(files, map_func, reduce_func):
-    """
-    Invoke map_func on each file in sim_files and reduce results using reduce_func.
+    """Applies a map-reduce pattern to a list of files.
 
-    :param files: list of files that contain simulations
-    :type files: list
-    :param map_func:function to create summary content for object x
-    :type map_func: function
-    :param reduce_func: function to reduce summary content of objects x & y
-    :type reduce_func: function
+    Args:
+        files: A list of files to process.
+        map_func: A function to apply to each file.
+        reduce_func: A function to reduce the results of the map function.
 
-    :returns: ?
-    :rtype: ?
+    Returns:
+        The result of the map-reduce operation.
 
+    Raises:
+        TypeError: If the list of files is empty.
     """
     if len(files):
         x = map(map_func, files)
@@ -118,12 +146,20 @@ def map_reduce_files(files, map_func, reduce_func):
 
 
 def invoke_map_reduce_on_list(a_list, function_map):
-    """Invokes map/reduce pattern for many items on a list.
-    Functions are specified as "item name" -> (map_func, reduce_func) pairs in function_map.
-    In each iteration, map_func is invoked on sims, and then reduce_func is invoked on result.
-    As usual, map_func takes iterable as single argument and reduce_func takes x and y as args.
+    """Invokes a map-reduce pattern for many items on a list.
 
-    Returns a dict with keys function_map.keys() and values the result of reduce_func
+    Functions are specified as "item name" -> (map_func, reduce_func) pairs
+    in function_map. In each iteration, map_func is invoked on sims, and then
+    reduce_func is invoked on the result.
+
+    Args:
+        a_list: The list to process.
+        function_map: A dictionary where keys are item names and values are
+            tuples of (map_func, reduce_func).
+
+    Returns:
+        An ordered dictionary with keys from function_map and values as the
+        result of the reduce function.
     """
 
     response = OrderedDict()
@@ -136,15 +172,14 @@ def invoke_map_reduce_on_list(a_list, function_map):
 
 
 def reduce_maps_by_summing(x, y):
-    """Reduces maps x and y by adding the value of every item in x to matching value in y.
+    """Reduces two maps by summing the values of matching keys.
 
-    :param x: first map
-    :type x: dict
-    :param y: second map
-    :type y: dict
-    :returns: map of summed values
-    :rtype: dict
+    Args:
+        x: The first map (dictionary).
+        y: The second map (dictionary).
 
+    Returns:
+        A new dictionary with the summed values.
     """
 
     response = OrderedDict()
@@ -154,15 +189,14 @@ def reduce_maps_by_summing(x, y):
 
 
 def multiindex_dataframe_from_tuple_map(x, labels):
-    """Create pandas.DataFrame from map of param-tuple -> value
+    """Creates a pandas DataFrame with a MultiIndex from a map.
 
-    :param x: map of parameter-tuple -> value pairs
-    :type x: dict
-    :param labels: list of item labels
-    :type labels: list
-    :returns: DataFrame object
-    :rtype: pandas.DataFrame
+    Args:
+        x: A map of parameter-tuple -> value pairs.
+        labels: A list of labels for the MultiIndex.
 
+    Returns:
+        A pandas DataFrame with a MultiIndex.
     """
     import pandas as pd
 
@@ -172,29 +206,30 @@ def multiindex_dataframe_from_tuple_map(x, labels):
 
 
 def fullname(o):
-    """Get the fully-qualified class name of an object
+    """Gets the fully-qualified class name of an object.
 
-    :param o: object of any kind
-    :type o: object
-    :return: fully-qualified class name
-    :rtype: string
+    Args:
+        o: An object of any kind.
 
+    Returns:
+        The fully-qualified class name of the object.
     """
 
     return o.__module__ + "." + o.__class__.__name__
 
 
 def atomic_to_json(obj):
-    """Wrapper to ensure the smallest object is in a JSON-friendly form.
+    """Converts an object to a JSON-friendly format.
 
-    .. note:: This function exists because numpy types raise errors when you try to JSON save them. Don't believe me?
-                Try ``json.dumps(np.int(1))`` and get something about 1 not being serializable.
+    Note:
+        This function is particularly useful for converting numpy types that
+        are not directly serializable to JSON.
 
-    :param obj: Object to convert to JSON-able form
-    :type obj: object
-    :return: obj, or its scalar equivalent if obj is a numpy generic type
-    :rtype: object
+    Args:
+        obj: The object to convert.
 
+    Returns:
+        The object in a JSON-serializable format.
     """
 
     if isinstance(obj, np.generic):
@@ -204,13 +239,13 @@ def atomic_to_json(obj):
 
 
 def iterable_to_json(obj):
-    """Returns a list of JSON-friendly representations of the objects in a collection.
+    """Converts an iterable of objects to a JSON-friendly list.
 
-    :param obj: JSON-ise each element of this collection
-    :type obj: iterable
-    :return: congruent list of JSON-able objects
-    :rtype: list
+    Args:
+        obj: An iterable of objects to convert.
 
+    Returns:
+        A list of JSON-serializable objects.
     """
     if isinstance(obj, Iterable):
         return [atomic_to_json(x) for x in obj]
@@ -219,15 +254,14 @@ def iterable_to_json(obj):
 
 
 def row_to_json(row, **kwargs):
-    """Turn a pandas.Series to a JSON object
+    """Converts a pandas Series to a JSON object.
 
-    :param row: a row to turn to JSON-able dict
-    :type row: pandas.Series
-    :param kwargs: map of keyword args to pass to json.loads
-    :type kwargs: dict
-    :return: a JSON-friendly dict representation of row
-    :rtype: dict
+    Args:
+        row: The pandas Series to convert.
+        **kwargs: Keyword arguments to pass to `json.loads`.
 
+    Returns:
+        A JSON-friendly dictionary representation of the row.
     """
 
     try:
@@ -331,24 +365,23 @@ def df_to_json(
     do_column_summaries=True,
     do_row_summaries=True,
 ):
-    """Serialize a pandas.DataFrame to an object that may be written as JSON.
+    """Serializes a pandas DataFrame to a JSON-able object.
 
-    .. note:: pandas.DataFrame provides its own JSON serialization method but I don't like it.
+    Note:
+        pandas.DataFrame provides its own JSON serialization method, but this
+        function provides a custom format.
 
-    :param df: DataFrame to serialise to JSON-able form.
-    :type df: pandas.DataFrame
-    :param do_value_counts: True to calculate value counts for each column
-    :type do_value_counts: bool
-    :param definitely_do_value_counts: If there is no aggregation possible (i.e. all elements are unique), aggregation
-                                        will be suppressed. Use True to override this suppression.
-    :type definitely_do_value_counts: bool
-    :param do_column_summaries: True to calculate summary statistics for each column
-    :type do_column_summaries: bool
-    :param do_row_summaries: True to calculate summary statistics for each row
-    :type do_row_summaries: bool
-    :return: A JSON-able representation of df
-    :rtype: dict
+    Args:
+        df: The DataFrame to serialize.
+        do_value_counts: Whether to calculate value counts for each column.
+        definitely_do_value_counts: If True, forces value count aggregation
+            even if all elements are unique.
+        do_column_summaries: Whether to calculate summary statistics for
+            each column.
+        do_row_summaries: Whether to calculate summary statistics for each row.
 
+    Returns:
+        A JSON-able dictionary representation of the DataFrame.
     """
     doc = _serialize_table_structure(df)
 
@@ -365,17 +398,16 @@ def df_to_json(
 
 
 def levenshtein(s1, s2):
-    """How 'far' is string s1 from s2? Calculate the Levenshtein distance between two strings.
+    """Calculates the Levenshtein distance between two strings.
 
-    See http://en.wikipedia.org/wiki/Levenshtein_distance
+    See http://en.wikipedia.org/wiki/Levenshtein_distance for more details.
 
-    :param s1: first string
-    :type s1: string
-    :param s2: second string
-    :type s2: string
-    :return: the Levenshtein distance
-    :rtype: int
+    Args:
+        s1: The first string.
+        s2: The second string.
 
+    Returns:
+        The Levenshtein distance between the two strings.
     """
     if len(s1) < len(s2):
         return levenshtein(s2, s1)
@@ -401,17 +433,17 @@ def levenshtein(s1, s2):
 
 
 def levenshtein_index(s1, s2):
-    """Returns similarity score for strings s1 and s2 between 0 and 1 by dividing levenshtein score by greatest length.
+    """Calculates a similarity score between two strings (0 to 1).
 
-    This method uses :func:`clintrials.util.levenshtein`.
+    This method uses the Levenshtein distance and normalizes it by the
+    length of the longer string.
 
-    :param s1: first string
-    :type s1: string
-    :param s2: second string
-    :type s2: string
-    :return: Similarity index between 0 and 1
-    :rtype: float
+    Args:
+        s1: The first string.
+        s2: The second string.
 
+    Returns:
+        A similarity index between 0.0 and 1.0.
     """
 
     l = levenshtein(s1, s2)
@@ -423,15 +455,17 @@ def levenshtein_index(s1, s2):
 
 
 def support_match(a, b):
-    """Percentage score showing % of elements of a in b and b in a.
+    """Calculates a percentage score of the overlap between two collections.
 
-    :param a: collection 1
-    :type a: iterable
-    :param b: collection 2
-    :type b: iterable
-    :return: Match score from 0.0 to 1.0
-    :rtype: float
+    The score represents the proportion of elements in `a` that are also in
+    `b`, plus the proportion of elements in `b` that are also in `a`.
 
+    Args:
+        a: The first collection.
+        b: The second collection.
+
+    Returns:
+        A match score between 0.0 and 1.0.
     """
 
     try:
@@ -474,25 +508,24 @@ def _correlated_binary_outcomes_solve2(mui, muj, psi):
 
 
 def correlated_binary_outcomes(num_pairs, u, psi, seed=None):
-    """Randomly sample correlated binary digits, copying the method from R-package ranBin2.
+    """Randomly samples correlated binary outcomes.
 
-    :param num_pairs: number of pairs
-    :type num_pairs: int
-    :param u: 2-item list/tuple of event probabilities
-    :type u: list or tuple
-    :param psi: odds ratio of the binary outcomes
-    :type psi: float
-    :param seed: optional seed for reproducible randomness
-    :type seed: int
-    :return: ndarray of paired binary digits, 2 columns and num_pairs rows
-    :rtype: numpy.ndarray
+    This method is based on the R package `ranBin2`.
 
-    .. note:: The Bonett article at http://psych.colorado.edu/~willcutt/pdfs/Bonett_2007.pdf
-                details Yule's method (1912) for estimating correlation from odds ratio and vice-versa.
-                If the two proportions in u are close, r = (sqrt(OR) - 1) / (sqrt(OR) + 1), and
-                OR = ((1+r) / (1-r))**2
-                provide decent approximations.
+    Note:
+        For details on estimating correlation from odds ratio and vice-versa,
+        see Yule's method (1912), as described in the Bonett article at
+        http://psych.colorado.edu/~willcutt/pdfs/Bonett_2007.pdf
 
+    Args:
+        num_pairs: The number of pairs to sample.
+        u: A 2-item list or tuple of event probabilities.
+        psi: The odds ratio of the binary outcomes.
+        seed: An optional seed for reproducible randomness.
+
+    Returns:
+        A numpy.ndarray of paired binary digits, with 2 columns and
+        `num_pairs` rows.
     """
     if seed:
         np.random.seed(seed)
@@ -507,23 +540,26 @@ def correlated_binary_outcomes(num_pairs, u, psi, seed=None):
 
 
 def correlated_binary_outcomes_from_uniforms(unifs, u, psi):
-    """Create correlated binary outcomes from observed n*3 array of uniforms, tweaking method from R-package ranBin2.
+    """Creates correlated binary outcomes from a given array of uniforms.
 
-    :param unifs: array of shape (n, 3) of uniforms between 0 and 1
-    :type unifs: numpy.ndarray
-    :param u: 2-item list/tuple of event probabilities
-    :type u: list or tuple
-    :param psi: odds ratio of the binary outcomes
-    :type psi: float
-    :return: ndarray of paired binary digits, 2 columns and num_pairs rows
-    :rtype: numpy.ndarray
+    This method is a tweaked version of the method from the R package
+    `ranBin2`.
 
-    .. note:: The Bonett article at http://psych.colorado.edu/~willcutt/pdfs/Bonett_2007.pdf
-                details Yule's method (1912) for estimating correlation from odds ratio and vice-versa.
-                If the two proportions in u are close, r = (sqrt(OR) - 1) / (sqrt(OR) + 1), and
-                OR = ((1+r) / (1-r))**2
-                provide decent approximations.
+    Note:
+        For details on estimating correlation from odds ratio and vice-versa,
+        see Yule's method (1912), as described in the Bonett article at
+        http://psych.colorado.edu/~willcutt/pdfs/Bonett_2007.pdf
 
+    Args:
+        unifs: A numpy.ndarray of shape (n, 3) of uniforms between 0 and 1.
+        u: A 2-item list or tuple of event probabilities.
+        psi: The odds ratio of the binary outcomes.
+
+    Returns:
+        A numpy.ndarray of paired binary digits, with 2 columns and n rows.
+
+    Raises:
+        ValueError: If `unifs` is not an n*3 array.
     """
 
     if unifs.ndim == 2 and unifs.shape[1] == 3:
@@ -559,39 +595,25 @@ def get_proportion_confint_report(
     do_jeffrey=False,
     do_binom_test=False,
 ):
-    """Get confidence intervals of proportion num_successes / num_trials using different methods in JSON-friendly form.
-    :param num_successes: number of successes
-    :type num_successes: int
-    :param num_trials: number of trials or attempts
-    :type num_trials: int
-    :param alpha: significance used in statistical inferences
-    :type alpha: float
-    :param do_normal: True to get a confidence interval using the normal approximation method
-    :type do_normal: bool
-    :param do_agresti_coull: True to get a confidence interval using the Agresti-Coull method
-    :type do_agresti_coull: bool
-    :param do_beta: True to get a confidence interval using the beta method
-    :type do_beta: bool
-    :param do_wilson: True to get a confidence interval using the Wilson method
-    :type do_wilson: bool
-    :param do_jeffrey: True to get a confidence interval using the Jeffrey method
-    :type do_jeffrey: bool
-    :param do_binom_test: True to get a confidence interval using the binomial test method
-    :type do_binom_test: bool
-    :return: JSON-able dict report
-    :rtype: dict
-    Why do I use normal, agresti_coull and wilson by default?
-    1) Normal, because it is the widely-used but flawed option.
-    2) AgrestiCoull & Wilson, because Lawrence D. Brown, T. Tony Cai and Anirban DasGupta in their paper
-        `Interval Estimation for a Binomial Proportion` say 'we recommend the Wilson interval for small n and the
-        interval suggested in Agresti and Coull for larger n'
-    Call to proportion_confint allows methods:
-    - `normal` : asymptotic normal approximation
-    - `agresti_coull` : Agresti-Coull interval
-    - `beta` : Clopper-Pearson interval based on Beta distribution
-    - `wilson` : Wilson Score interval
-    - `jeffrey` : Jeffrey's Bayesian Interval
-    - `binom_test`
+    """Gets confidence intervals for a binomial proportion.
+
+    This function provides a report of confidence intervals calculated using
+    various methods from `statsmodels`.
+
+    Args:
+        num_successes: The number of successes.
+        num_trials: The total number of trials.
+        alpha: The significance level (e.g., 0.05 for a 95% CI).
+        do_normal: Whether to include the normal approximation interval.
+        do_agresti_coull: Whether to include the Agresti-Coull interval.
+        do_beta: Whether to include the Clopper-Pearson interval (beta).
+        do_wilson: Whether to include the Wilson score interval.
+        do_jeffrey: Whether to include Jeffrey's Bayesian interval.
+        do_binom_test: Whether to include the binomial test interval.
+
+    Returns:
+        An ordered dictionary containing the reports for each calculated
+        confidence interval.
     """
 
     from statsmodels.stats.proportion import proportion_confint
@@ -621,22 +643,23 @@ def get_proportion_confint_report(
 def cross_tab(
     col_row_pairs, cols=None, rows=None, to_json=False, do_value_counts=False
 ):
-    """Cross-tabulate counts of data pairs.
+    """Cross-tabulates counts of data pairs.
 
-    :param col_row_pairs: list of 2-tuples, (col item, row item), e.g.
-                            [('1', 'Related'), ('2', 'Unrelated'), ('2', 'Related')]
-    :type col_row_pairs: list
-    :param cols: list of col-headers. Distinct items will be used if omitted.
-    :type cols: list
-    :param rows: list of row-headers. Distinct items will be used if omitted and rows will be sorted by row-wise totals.
-    :type rows: list
-    :param to_json: True to return JSON-able object; False to get a pandas.DataFrame
-    :type to_json: bool
-    :param do_value_counts: True to return value counts
-    :type do_value_counts: bool
-    :return: pivottable-style cross tabulation
-    :rtype: dict of pandas.DataFrame
+    Args:
+        col_row_pairs: A list of 2-tuples, where each tuple is
+            (column_item, row_item).
+        cols: A list of column headers. If omitted, distinct items from
+            `col_row_pairs` will be used.
+        rows: A list of row headers. If omitted, distinct items from
+            `col_row_pairs` will be used, and rows will be sorted by
+            row-wise totals.
+        to_json: If True, returns a JSON-able object; otherwise, returns a
+            pandas DataFrame.
+        do_value_counts: If True, includes value counts in the JSON output.
 
+    Returns:
+        A cross-tabulation in the form of a pandas DataFrame or a
+        JSON-able dictionary.
     """
 
     col_data, row_data = zip(*col_row_pairs)
@@ -665,17 +688,15 @@ def cross_tab(
 
 
 class Memoize:
-    """Class to transparently cache function results by their runtime args
+    """A class to cache function results based on their arguments.
 
-    E.g.
-
-    >>> f = lambda x: x**3
-    >>> f = Memoize(f)
-    >>> f(2.0) # Result is calculated and cached
-    8.0
-    >>> f(2.0) # Result is fetched from cache
-    8.0
-
+    Examples:
+        >>> f = lambda x: x**3
+        >>> f = Memoize(f)
+        >>> f(2.0)  # Result is calculated and cached
+        8.0
+        >>> f(2.0)  # Result is fetched from cache
+        8.0
     """
 
     def __init__(self, f):
@@ -689,31 +710,30 @@ class Memoize:
 
 
 class ParameterSpace:
-    """Class to handle combinations of parameters (i.e. a parameter space) in simulations."""
+    """A class to handle combinations of parameters in simulations."""
 
     def __init__(self):
         self.vals_map = OrderedDict()
 
     def add(self, label, values):
-        """Add a variable and a list of all values the variable may take.
+        """Adds a parameter and its possible values.
 
-        :param label: variable label or name
-        :type label: str
-        :param values: list of values that variable may take
-        :type values: list
-
+        Args:
+            label: The name of the parameter.
+            values: A list of possible values for the parameter.
         """
 
         self.vals_map[label] = values
 
     def sample(self, label):
-        """Randomly fetch a value for variable with label.
+        """Randomly samples a value for a given parameter.
 
-        :param label: variable label or name
-        :type label: str
-        :return: randomly-sampled value
-        :rtype: object
+        Args:
+            label: The name of the parameter to sample.
 
+        Returns:
+            A randomly sampled value for the parameter, or None if the
+            parameter does not exist.
         """
 
         if label in self.vals_map:
@@ -723,11 +743,10 @@ class ParameterSpace:
             return None
 
     def sample_all(self):
-        """Randomly sample a value for each variable, returned as a map from label to value.
+        """Randomly samples a value for each parameter.
 
-        :return: a randomly sampled set of parameter values
-        :rtype: dict
-
+        Returns:
+            A dictionary mapping each parameter to a randomly sampled value.
         """
 
         sampled = {}
@@ -736,45 +755,43 @@ class ParameterSpace:
         return sampled
 
     def get_cyclical_iterator(self, limit=-1):
-        """Get iterator to **deterministically** cycle the possible parameter perumtations, optionally forever.
+        """Gets an iterator to cycle through all parameter permutations.
 
-        :param limit: -1 to iterate cyclically forever, else maximum number of elements to iterate through.
-        :type limit: int
-        :return: an iterable object
-        :rtype: iterable
+        Args:
+            limit: The maximum number of permutations to iterate through. If -1,
+                the iterator will cycle forever.
 
+        Returns:
+            An iterable object that yields parameter permutations.
         """
 
         return _ParameterSpaceIter(self, limit)
 
     def keys(self):
-        """Get parameter space keys, i.e. the variable names
+        """Gets the names of all parameters in the space.
 
-        :return: Collection of keys
-        :rtype: iterable
-
+        Returns:
+            An iterable of parameter names.
         """
 
         return self.vals_map.keys()
 
     def dimensions(self):
-        """Get the numbers of values per dimension.
+        """Gets the number of values for each parameter.
 
-        E.g. a param-space of two values for A and three values for B would return [2, 3]
-
-        :return: Array of number of values per dimension
-        :rtype: numpy.array
-
+        Returns:
+            A numpy array containing the number of values for each parameter.
         """
 
         return np.array([len(y) for x, y in self.vals_map.items()])
 
     def size(self):
-        """Get the size of this parameter space, i.e. the product of the dimension sizes.
+        """Gets the total size of the parameter space.
 
-        :return: Size of parameter space.
-        :rtype: int
+        The size is the product of the number of values for each parameter.
 
+        Returns:
+            The size of the parameter space.
         """
 
         return np.prod(self.dimensions())

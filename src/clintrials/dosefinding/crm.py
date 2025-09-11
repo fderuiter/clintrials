@@ -455,28 +455,26 @@ def crm(
 
 
 class CRM(DoseFindingTrial):
-    """This is an object-oriented attempt at the CRM method.
+    """An object-oriented implementation of the Continual Reassessment Method.
 
-    e.g. general usage
-
-    >>> prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
-    >>> tox_target = 0.35
-    >>> first_dose = 3
-    >>> trial_size = 30
-    >>> trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)
-    >>> trial.next_dose()
-    3
-    >>> trial.update([(3,0), (3,0), (3,0)])
-    4
-    >>> trial.size(), trial.max_size()
-    (3, 30)
-    >>> trial.update([(4,0), (4,1), (4,1)])
-    4
-    >>> trial.update([(4,0), (4,1), (4,1)])
-    3
-    >>> trial.has_more()
-    True
-
+    Examples:
+        >>> prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
+        >>> tox_target = 0.35
+        >>> first_dose = 3
+        >>> trial_size = 30
+        >>> trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)
+        >>> trial.next_dose()
+        3
+        >>> trial.update([(3,0), (3,0), (3,0)])
+        4
+        >>> trial.size(), trial.max_size()
+        (3, 30)
+        >>> trial.update([(4,0), (4,1), (4,1)])
+        4
+        >>> trial.update([(4,0), (4,1), (4,1)])
+        3
+        >>> trial.has_more()
+        True
     """
 
     def __init__(
@@ -503,74 +501,41 @@ class CRM(DoseFindingTrial):
         mle_var_method="hessian",
         bootstrap_samples=200,
     ):
+        """Initializes the CRM trial.
+
+        Args:
+            prior: A list of prior probabilities of toxicity for each dose.
+            target: The target toxicity rate.
+            first_dose: The starting dose level (1-based).
+            max_size: The maximum number of patients in the trial.
+            F_func: The link function to use (e.g., `logistic`).
+            inverse_F: The inverse link function.
+            beta_prior: The prior distribution for the beta parameter.
+            method: The estimation method, either "bayes" or "mle".
+            use_quick_integration: If True, use a faster approximate integral.
+            estimate_var: If True, estimate the posterior variance of beta.
+            avoid_skipping_untried_escalation: If True, avoid skipping untried
+                doses during escalation.
+            avoid_skipping_untried_deescalation: If True, avoid skipping
+                untried doses during de-escalation.
+            lowest_dose_too_toxic_hurdle: The toxicity hurdle for the lowest
+                dose.
+            lowest_dose_too_toxic_certainty: The certainty required to stop
+                the trial due to toxicity at the lowest dose.
+            coherency_threshold: If positive, prevents escalation if the
+                observed toxicity rate at a dose exceeds this value.
+            principle_escalation_func: An optional function for custom
+                escalation logic.
+            termination_func: An optional function for custom trial
+                termination logic.
+            plugin_mean: If True, use the beta estimate in the link function;
+                otherwise, use the full Bayesian integral.
+            intercept: The intercept parameter for the link function.
+            mle_var_method: The method for estimating variance in MLE,
+                either "hessian" or "bootstrap".
+            bootstrap_samples: The number of bootstrap samples to use for
+                variance estimation.
         """
-
-        Params:
-        :param prior: list of prior probabilities of toxicity, from least toxic to most.
-        :type prior: list
-        :param target: target toxicity rate
-        :type target: float
-        :param first_dose: starting dose level, 1-based. I.e. first_dose=3 means the middle dose of 5.
-        :type first_dose: int
-        :param F_func: the link function for CRM method, e.g. logistic
-        :type F_func: func
-        :param inverse_F: the inverse link function for CRM method, e.g. inverse_logistic
-        :type inverse_F: func
-        :param beta_prior: prior distibution for beta parameter
-        :type beta_prior: scipy.stats.rv_continuous
-        :param max_size: maximum number of patients to use in trial
-        :type max_size: int
-        :param method: one of "bayes" or "mle"
-        :type method: str
-        :param use_quick_integration: numerical integration is slow. Set this to False to use the most accurate (& slow)
-                                method; False to use a quick but approximate method.
-                                In simulations, fast and approximate often suffices.
-                                In trial scenarios, use slow and accurate!
-        :type use_quick_integration: bool
-        :param estimate_var: True to estimate the posterior variance of beta
-        :type estimate_var: bool
-        :param avoid_skipping_untried_escalation: True to avoid skipping untried doses in escalation
-        :type avoid_skipping_untried_escalation: bool
-        :param avoid_skipping_untried_deescalation: True to avoid skipping untried doses in de-escalation
-        :type avoid_skipping_untried_deescalation: bool
-        :param lowest_dose_too_toxic_hurdle: used with lowest_dose_too_toxic_certainty to facilitate stopping the trial
-                    when the rate of estimated toxicity at the lowest dose is too high. Trial stops if:
-                        Prob( Prob(Tox at d1) > lowest_dose_too_toxic_hurdle | X) > lowest_dose_too_toxic_certainty
-                    Both must be positive for test to be invoked.
-        :type lowest_dose_too_toxic_hurdle: float
-        :param lowest_dose_too_toxic_certainty: see above
-        :type lowest_dose_too_toxic_certainty: float
-        :param coherency_threshold: if positive, the design is prevented from escalating when the observed toxicity rate
-                                    at a dose exceeds this value. For instance, you might not want to escalate if the
-                                    observed toxicity rate exceeds the target rate, because that would be 'incoherent'
-                                    to the objectives of the trial.
-        :type coherency_threshold: float
-        :param principle_escalation_func: an optional function that takes cases (i.e., a list of
-                            (1-based dose-level, boolean DLT dummies) like [(1,0), (2,0), (3,1)] )
-                and returns either a) the next dose to be given, or b) None, to signify that principle escalation does
-                not apply and that the general CRM method should be used.
-                This function lets users specify their desired escalation that will take priority over the CRM strategy.
-                For example, some users like to specify an initial escalation strategy that escalates until it
-                observes the first toxicity. This function allows that behaviour in a flexible way.
-                The principle_escalation_func is checked at every update so, if you use it, be mindful that it yields
-                to the CRM model when you want it to by returning None.
-        :type principle_escalation_func: func
-        :param termination_func: an optional function that takes this trial instance as a sole parameter and returns
-                True if trial should terminate, else False. The function is invoked when trial is asked whether it has
-                more. This function gives trials a general facility to terminate early if certain conditions are met.
-        :type termination_func: func
-        :param plugin_mean: True to estimate toxicity curve by plugging beta estimate (posterior mean or mle) into func;
-                        False to estimate using full Bayesian integral (only applies when method="bayes")
-        :type plugin_mean: bool
-        :param intercept: the second parameter to F, the intercept. Only pertinent under logistic method.
-        :type intercept: float
-        :param mle_var_method: One of ``"hessian"`` or ``"bootstrap"``.
-        :type mle_var_method: str
-        :param bootstrap_samples: Number of bootstrap samples to use if ``mle_var_method="bootstrap"``.
-        :type bootstrap_samples: int
-
-        """
-
         DoseFindingTrial.__init__(
             self, first_dose=first_dose, num_doses=len(prior), max_size=max_size
         )
@@ -693,6 +658,11 @@ class CRM(DoseFindingTrial):
         return proposed_dose
 
     def prob_tox(self):
+        """Gets the posterior probability of toxicity for each dose.
+
+        Returns:
+            A list of posterior probabilities of toxicity.
+        """
         return list(self.post_tox)
 
     def _prob_tox_exceeds_quadrature(self, tox_cutoff, deg=40):
@@ -728,6 +698,21 @@ class CRM(DoseFindingTrial):
         return np.array(out)
 
     def prob_tox_exceeds(self, tox_cutoff, backend="quadrature", n=10**6):
+        """Calculates the posterior probability that toxicity exceeds a cutoff.
+
+        Args:
+            tox_cutoff: The toxicity cutoff.
+            backend: The calculation backend, either "quadrature" or "laplace".
+            n: The number of samples to use for the "laplace" backend.
+
+        Returns:
+            A numpy array of posterior probabilities.
+
+        Raises:
+            ValueError: If an unknown backend is specified.
+            Exception: If the "laplace" backend is used without variance
+                estimation.
+        """
         if backend == "quadrature":
             return self._prob_tox_exceeds_quadrature(tox_cutoff)
         if backend == "laplace":
@@ -753,7 +738,11 @@ class CRM(DoseFindingTrial):
         raise ValueError("Unknown backend")
 
     def has_more(self):
-        """Is the trial ongoing?"""
+        """Checks if the trial is ongoing.
+
+        Returns:
+            True if the trial is ongoing, False otherwise.
+        """
         if not DoseFindingTrial.has_more(self):
             return False
         if self.termination_func:
@@ -762,28 +751,31 @@ class CRM(DoseFindingTrial):
             return True
 
     def optimal_decision(self, prob_tox):
-        """Get the optimal dose choice for a given dose-toxicity curve.
+        """Gets the optimal dose choice for a given dose-toxicity curve.
 
-        Ken Cheung (2014) noted that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own
-        specific tolerances by invoking the dose decision on the complete (and
-        unknowable) toxicity curve.
+        This method determines the optimal dose based on a given toxicity
+        curve, as described by Ken Cheung (2014).
 
-        :param prob_tox: collection of toxicity probabilities
-        :type prob_tox: list
-        :return: the optimal (1-based) dose decision
-        :rtype: int
+        Args:
+            prob_tox: A list of toxicity probabilities for each dose.
 
+        Returns:
+            The optimal dose level (1-based).
         """
 
         return np.argmin(np.abs(prob_tox - self.target)) + 1
 
     def get_tox_prob_quantile(self, p):
-        """Get the quantiles of the probabilities of toxicity at each dose using normal approximation.
-        :param p: probability, i.e. 0.05 means 5th quantile, i.e. 95% of values are greater
-        :type p: float
-        :return: the quantiles of the probabilities of toxicity at each dose
-        :rtype: list
+        """Gets the quantiles of the toxicity probabilities for each dose.
+
+        This method uses a normal approximation to calculate the quantiles.
+
+        Args:
+            p: The probability for the quantile (e.g., 0.05 for the 5th
+                percentile).
+
+        Returns:
+            A list of toxicity probability quantiles for each dose.
         """
         norm_crit = norm.ppf(p)
         beta_est = self.beta_hat - norm_crit * np.sqrt(self.beta_var)
@@ -795,14 +787,15 @@ class CRM(DoseFindingTrial):
         return p
 
     def plot_toxicity_probabilities(self, chart_title=None, use_ggplot=False):
-        """Plot prior and posterior dose-toxicity curves.
+        """Plots the prior and posterior dose-toxicity curves.
 
-        :param chart_title: optional chart title. Default is fairly verbose
-        :type chart_title: str
-        :param use_ggplot: True to use ggplot, else matplotlib
-        :type use_ggplot: bool
-        :return: plot of toxicity curves
+        Args:
+            chart_title: An optional title for the chart.
+            use_ggplot: If True, use ggplot for plotting; otherwise, use
+                matplotlib.
 
+        Returns:
+            A plot object if `use_ggplot` is True, otherwise None.
         """
 
         if not chart_title:
@@ -879,10 +872,13 @@ class CRM(DoseFindingTrial):
 
 
 def crm_dtp_detail(trial):
-    """Performs the CRM-specific extra reporting when calculating DTPs
-    :param trial: instance of CRM
-    :return: OrderedDict
+    """Performs CRM-specific extra reporting for DTP calculations.
 
+    Args:
+        trial: An instance of the CRM class.
+
+    Returns:
+        An ordered dictionary with CRM-specific details.
     """
 
     to_return = OrderedDict()

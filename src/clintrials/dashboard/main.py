@@ -6,6 +6,7 @@ from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
 
 
 def main():
+    """Renders the main dashboard page."""
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Select Trial Design")

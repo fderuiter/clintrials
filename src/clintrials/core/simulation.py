@@ -23,25 +23,22 @@ logger = logging.getLogger(__name__)
 
 
 def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
-    """Run simulations using a delegate function.
+    """Runs simulations using a delegate function.
 
-    :param sim_func: Delegate function to be called to yield single simulation.
-    :type sim_func: func
-    :param n1: Number of batches
-    :type n1: int
-    :param n2: Number of iterations per batch
-    :type n2: int
-    :param out_file: Location of file for incremental saving after completion of each batch.
-    :type out_file: str
-    :param kwargs: key-word args for sim_func
-    :type kwargs: dict
+    Note:
+        - A total of `n1 * n2` simulations are performed.
+        - `sim_func` is expected to return a JSON-able object.
+        - If `out_file` is provided, the results are saved after each batch.
 
-    .. note::
+    Args:
+        sim_func: The delegate function to call for each simulation.
+        n1: The number of batches.
+        n2: The number of iterations per batch.
+        out_file: The location of the file for incremental saving.
+        **kwargs: Keyword arguments to pass to `sim_func`.
 
-        - n1 * n2 simualtions are performed, in all.
-        - sim_func is expected to return a JSON-able object
-        - file is saved after each of n1 iterations, where applicable.
-
+    Returns:
+        A list of simulation results.
     """
 
     sims = []
@@ -59,25 +56,24 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
 
 
 def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
-    """Run simulations using a function and a ParameterSpace.
+    """Runs simulations over a parameter space.
 
-    :param sim_func: function to be called to yield single simulation. Parameters are provided via ps as unpacked kwargs
-    :type sim_func: func
-    :param ps: Parameter space to explore via simulation
-    :type ps: clintrials.utils.ParameterSpace
-    :param n1: Number of batches
-    :type n1: int
-    :param n2: Number of iterations per batch
-    :type n2: int
-    :param out_file: Location of file for incremental saving after completion of each batch.
-    :type out_file: str
+    Note:
+        - A total of `n1 * n2` simulations are performed.
+        - `sim_func` is expected to return a JSON-able object.
+        - If `out_file` is provided, the results are saved after each batch.
 
-    .. note::
+    Args:
+        sim_func: The function to call for each simulation. Parameters are
+            provided via `ps` as unpacked keyword arguments.
+        ps: The parameter space to explore.
+        n1: The number of batches.
+        n2: The number of iterations per batch. If not provided, it defaults
+            to the size of the parameter space.
+        out_file: The location of the file for incremental saving.
 
-        - n1 * n2 simualtions are performed, in all.
-        - sim_func is expected to return a JSON-able object
-        - file is saved after each of n1 iterations, where applicable.
-
+    Returns:
+        A list of simulation results.
     """
 
     if not n2 or n2 <= 0:
@@ -99,6 +95,11 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
 
 
 def go_fetch_json_sims(file_pattern):
+    """Fetches JSON simulations from files.
+
+    .. deprecated:: 0.1.4
+        Use :func:`clintrials.utils.fetch_json_from_files` instead.
+    """
     warnings.warn(
         "go_fetch_json_sims is deprecated; use fetch_json_from_files instead",
         DeprecationWarning,
@@ -107,6 +108,11 @@ def go_fetch_json_sims(file_pattern):
 
 
 def filter_sims(sims, filter_dict):
+    """Filters a list of simulations.
+
+    .. deprecated:: 0.1.4
+        Use :func:`clintrials.utils.filter_list_of_dicts` instead.
+    """
     warnings.warn(
         "filter_sims is deprecated; use filter_list_of_dicts instead",
         DeprecationWarning,
@@ -115,26 +121,23 @@ def filter_sims(sims, filter_dict):
 
 
 def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
-    """Extract and summarise a list of simulations.
+    """Extracts and summarizes a list of simulations.
 
-    Method partitions simulations into subsets that used the same set of parameters, and then invokes
-    a collection of summary functions on each subset.
+    This method partitions simulations into subsets based on the parameter
+    space, and then applies a collection of summary functions to each subset.
 
-    The return type is a pandas DataFrame by default, but can be switched to a tuple of lists
-    for backward compatibility.
+    Args:
+        sims: A list of simulations (likely in JSON format).
+        ps: The parameter space used to filter the simulations.
+        func_map: A map of item names to functions that take a list of sims
+            and a parameter map, and return a summary statistic.
+        var_map: A map from variable names in the simulation JSON to argument
+            names in the parameter space.
+        return_type: The desired return type. Can be 'dataframe' (default)
+            or 'tuple'.
 
-    :param sims: list of simulations (probably in JSON format)
-    :type sims: list
-    :param ps: ParameterSpace that will explain how to filter simulations
-    :type ps: ParameterSpace
-    :param var_map: map from variable name in simulation JSON to arg name in ParameterSpace
-    :type var_map: dict
-    :param func_map: map from item name to function that takes list of sims and parameter map as args and returns
-                        a summary statistic or object.
-    :type func_map: dict
-    :param return_type: 'dataframe' to get a pandas.DataFrame; 'tuple' to get a tuple of lists.
-    :type return_type: str
-
+    Returns:
+        A pandas DataFrame or a tuple of lists containing the summarized data.
     """
 
     if var_map is None:
@@ -179,7 +182,11 @@ def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
 
 
 def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
-    """Summarise a list of simulations. (DEPRECATED)"""
+    """Summarizes a list of simulations.
+
+    .. deprecated:: 0.1.4
+        Use :func:`extract_sim_data` instead.
+    """
     import warnings
 
     warnings.warn(
@@ -192,6 +199,11 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
 
 # Map-Reduce methods for summarising sims in memory-efficient ways
 def invoke_map_reduce_function_map(sims, function_map):
+    """Invokes a map-reduce pattern on a list of simulations.
+
+    .. deprecated:: 0.1.4
+        Use :func:`clintrials.utils.invoke_map_reduce_on_list` instead.
+    """
     warnings.warn(
         "invoke_map_reduce_function_map is deprecated; use invoke_map_reduce_on_list instead",
         DeprecationWarning,
@@ -204,19 +216,19 @@ def invoke_map_reduce_function_map(sims, function_map):
 # simulation workflow to remain in this module rather than being moved to a
 # more general utility module.
 def partition_and_aggregate(sims, ps, function_map):
-    """Function partitions simulations into subsets that used the same set of parameters,
-    and then invokes a collection of map/reduce function pairs on each subset.
+    """Partitions and aggregates simulations.
 
-    :param sims: list of simulations (probably in JSON format)
-    :type sims: list
-    :param ps: ParameterSpace that will explain how to filter simulations
-    :type ps: ParameterSpace
-    :param function_map: map of item -> (map_func, reduce_func) pairs
-    :type function_map: dict
+    This function partitions simulations into subsets based on the parameter
+    space, and then applies a collection of map-reduce function pairs to each
+    subset.
 
-    :returns: map of parameter combination to reduced object
-    :rtype: dict
+    Args:
+        sims: A list of simulations (likely in JSON format).
+        ps: The parameter space used to filter the simulations.
+        function_map: A map of item names to (map_func, reduce_func) pairs.
 
+    Returns:
+        A map of parameter combinations to the reduced object.
     """
 
     var_names = ps.keys()
@@ -235,18 +247,19 @@ def partition_and_aggregate(sims, ps, function_map):
 
 
 def fetch_partition_and_aggregate(f, ps, function_map, verbose=False):
-    """Function loads JSON sims in file f and then hands off to partition_and_aggregate.
+    """Fetches, partitions, and aggregates simulations from a file.
 
-    :param f: file location
-    :type f: str
-    :param ps: ParameterSpace that will explain how to filter simulations
-    :type ps: ParameterSpace
-    :param function_map: map of item -> (map_func, reduce_func) pairs
-    :type function_map: dict
+    This function loads JSON simulations from a file and then passes them
+    to `partition_and_aggregate`.
 
-    :returns: map of parameter combination to reduced object
-    :rtype: dict
+    Args:
+        f: The location of the file.
+        ps: The parameter space used to filter the simulations.
+        function_map: A map of item names to (map_func, reduce_func) pairs.
+        verbose: If True, logs the number of simulations fetched.
 
+    Returns:
+        A map of parameter combinations to the reduced object.
     """
 
     sims = _open_json_local(f)
@@ -256,7 +269,15 @@ def fetch_partition_and_aggregate(f, ps, function_map, verbose=False):
 
 
 def reduce_product_of_two_files_by_summing(x, y):
-    """Reduce the summaries of two files by summing."""
+    """Reduces the summaries of two files by summing their values.
+
+    Args:
+        x: The first summary dictionary.
+        y: The second summary dictionary.
+
+    Returns:
+        A new dictionary with the summed values.
+    """
     response = OrderedDict()
     for k in x.keys():
         response[k] = reduce_maps_by_summing(x[k], y[k])

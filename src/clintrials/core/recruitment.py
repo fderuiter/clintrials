@@ -11,163 +11,110 @@ import numpy as np
 
 
 class RecruitmentStream(metaclass=abc.ABCMeta):
+    """Abstract base class for recruitment streams."""
 
     @abc.abstractmethod
     def reset(self):
-        """Reset the recruitment stream to start anew.
-
-        :return: None
-        :rtype: None
-
-        """
+        """Resets the recruitment stream to its initial state."""
         pass
 
     @abc.abstractmethod
     def next(self):
-        """Get the time that the next patient is recruited.
+        """Gets the recruitment time of the next patient.
 
-        :return: The time that the next patient is recruited.
-        :rtype: float
-
+        Returns:
+            The recruitment time of the next patient.
         """
         pass
 
 
 class ConstantRecruitmentStream(RecruitmentStream):
-    """Recruitment stream where the intrapatient wait is constant.
+    """A recruitment stream with a constant wait time between patients.
 
-    This is the simplest recruitment stream case. A patient arrives every delta units of time.
+    In this simple case, a patient arrives every `delta` units of time.
 
-    E.g.
-
-    >>> s = ConstantRecruitmentStream(2.5)
-    >>> s.next()
-    2.5
-    >>> s.next()
-    5.0
-    >>> s.next()
-    7.5
-    >>> s.reset()
-    >>> s.next()
-    2.5
-
-
+    Examples:
+        >>> s = ConstantRecruitmentStream(2.5)
+        >>> s.next()
+        2.5
+        >>> s.next()
+        5.0
+        >>> s.next()
+        7.5
+        >>> s.reset()
+        >>> s.next()
+        2.5
     """
 
     def __init__(self, intrapatient_gap):
-        """Create instance
+        """Initializes the ConstantRecruitmentStream.
 
-        :param intrapatient_gap: the gap between recruitment times, aka delta.
-        :type intrapatient_gap: float
-
+        Args:
+            intrapatient_gap: The time gap between patient recruitments.
         """
-
         self.delta = intrapatient_gap
         self.cursor = 0
 
     def reset(self):
-        """Reset the recruitment stream to start anew.
-
-        :return: None
-        :rtype: None
-
-        """
-
+        """Resets the recruitment stream to its initial state."""
         self.cursor = 0
 
     def next(self):
-        """Get the time that the next patient is recruited.
+        """Gets the recruitment time of the next patient.
 
-        :return: The time that the next patient is recruited.
-        :rtype: float
-
+        Returns:
+            The recruitment time of the next patient.
         """
         self.cursor += self.delta
         return self.cursor
 
 
 class QuadrilateralRecruitmentStream(RecruitmentStream):
-    """Recruitment stream that allows recruitment potential to vary as a function of time using vertices.
-    Between two vertices, recruitment potential is represented by areas of quadrilaterals. Recruitment potential
-    may change linearly using interpolation, or instantananeously using steps. In the former case, the quadrilaterals
-    are trapeziums; in the latter, rectangles.
+    """A recruitment stream where recruitment intensity varies over time.
 
-    I started by calling this class DampenedRecruitmentStream because recruitment typically opens at something
-    like 50% potency where half recruitment centres are open and then increases linearly to 100% after about a year.
-    However, I settled on the name QuadrilateralRecruitmentStream because of the important role quadrilaterals play in
-    calculating the cumulative recruitment mass between two times.
+    Recruitment intensity is defined by a series of vertices, and can change
+    linearly (interpolation) or instantaneously (steps) between them.
 
-    Let's do an example. Imagine a hypothetical trial that will recruit using several recruitment centres. When all
-    recruitment centres are open, the trial expects to recruit a patient every four days, thus the intrapatient gap
-    is 4.0. The trial will open with initial recruitment potential of 50% (i.e. half of the recruiting sites are open).
-    Recruitment potential is expected to reach 100% after 20 days, linearly increasing from 50% to 100% over the first
-    20 days, i.e. recruitment centres will be continually opened at a constant rate. The first patient will be recruited
-    at time t where t satisfies the integral equation
+    Examples:
+        >>> s1 = QuadrilateralRecruitmentStream(4.0, 0.5, [(20, 1.0)], interpolate=True)
+        >>> s1.next()
+        6.8328157299974768
+        >>> s1.next()
+        12.2490309931942
+        >>> s1.next()
+        16.878177829171548
+        >>> s1.next()
+        21.0
+        >>> s1.next()
+        25.0
 
-    :math:`\\int_0^t 0.5 + \\frac{1.0 - 0.5}{20 - 0}s  ds = \\int_0^t 0.5 + \\frac{s}{40} ds
-    = \\frac{t}{2} + \\frac{t^2}{80} = 4`
-
-    i.e. solving the quadratic
-
-    :math:`t = \\frac{-\\frac{1}{2} + \\sqrt{\\frac{1}{2}^2 - 4 \\times \\frac{1}{80} \\times -4}}{\\frac{2}{80}}
-    = 6.83282`
-
-    , and so on. The root of the quadratic yielded by :math:`-b - \\sqrt{b^2-4ac}` is ignored because it makes no sense.
-
-    E.g.
-
-    >>> s1 = QuadrilateralRecruitmentStream(4.0, 0.5, [(20, 1.0)], interpolate=True)
-    >>> s1.next()
-    6.8328157299974768
-    >>> s1.next()
-    12.2490309931942
-    >>> s1.next()
-    16.878177829171548
-    >>> s1.next()
-    21.0
-    >>> s1.next()
-    25.0
-
-    Now, let's consider the same scenario again, with stepped transition rather than interpolated transition. In this
-    scenario, a patient is recruited after each 4 / 0.5 = 8 days for times from 0 to 20 when recruitment potential is
-    at 50%. After time=20, a patient is recruited after every 4 days because recruitment potential is at 100%. For the
-    patient that straddles the time t=20, the time to recruit is 4 days at 50% potential plus 2 days at 100% = 4 days,
-    as required.
-
-    E.g.
-
-    >>> s2 = QuadrilateralRecruitmentStream(4.0, 0.5, [(20, 1.0)], interpolate=False)
-    >>> s2.next()
-    8.0
-    >>> s2.next()
-    16.0
-    >>> s2.next()
-    22.0
-    >>> s2.next()
-    26.0
-
+        >>> s2 = QuadrilateralRecruitmentStream(4.0, 0.5, [(20, 1.0)], interpolate=False)
+        >>> s2.next()
+        8.0
+        >>> s2.next()
+        16.0
+        >>> s2.next()
+        22.0
+        >>> s2.next()
+        26.0
     """
 
     def __init__(self, intrapatient_gap, initial_intensity, vertices, interpolate=True):
-        """Create instance
+        """Initializes the QuadrilateralRecruitmentStream.
 
-        :param intrapatient_gap: time to recruit one patient at 100% recruitment intensity, i.e. the gap between
-                                    recruitment times when recruitment is at 100% intensity.
-        :type intrapatient_gap: float
-        :param initial_intensity: recruitment commences at this % of total power.
-                                    E.g. if it takes 2 days to recruit a patient at full recruitment power,
-                                            at intensity 0.1 it will take 20 days to recruit a patient.
-                                    Must be non-negative.
-        :type initial_intensity: float
-        :param vertices: list of additional vertices as (time t, intensity r) tuples, where recruitment power is r% at t
-                        Recruitment intensity is linearly extrapolated between vertex times, including the origin, t=0.
-                        .. note::
-                        - intensity can dampen (e.g. intensity=50%) or amplify (e.g. intensity=150%) average recruitment;
-                        - intensity should not be negative.
-        :type vertices: list of (float, float) tuples
-        :param interpolate: True to linearly interpolate between vertices; False to use steps.
-        :type interpolate: bool
+        Args:
+            intrapatient_gap: The time to recruit one patient at 100%
+                recruitment intensity.
+            initial_intensity: The initial recruitment intensity as a
+                percentage of total power. Must be non-negative.
+            vertices: A list of (time, intensity) tuples representing
+                additional vertices.
+            interpolate: If True, linearly interpolate between vertices;
+                otherwise, use steps.
 
+        Raises:
+            ValueError: If `initial_intensity` or any intensity in `vertices`
+                is negative.
         """
         if initial_intensity < 0:
             raise ValueError("initial_intensity cannot be negative.")

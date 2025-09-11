@@ -1,3 +1,5 @@
+"""Phase II clinical trial designs."""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 

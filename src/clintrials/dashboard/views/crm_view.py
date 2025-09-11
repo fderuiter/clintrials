@@ -9,6 +9,11 @@ from clintrials.utils import ParameterSpace
 
 
 def render(sims):
+    """Renders the CRM simulation results view.
+
+    Args:
+        sims: A list of simulation results.
+    """
     st.header("CRM Simulation Results")
 
     # For this proof-of-concept, we'll make some assumptions about the data.

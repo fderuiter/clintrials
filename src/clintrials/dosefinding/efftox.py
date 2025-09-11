@@ -23,9 +23,16 @@ from clintrials.utils import atomic_to_json, iterable_to_json
 
 
 def scale_doses(real_doses):
-    """
-    :param real_doses:
-    :return:
+    """Scales doses according to Thall & Cook's method.
+
+    The codified dose scale is calculated as:
+    `x = ln(d) - mean(ln(d))`
+
+    Args:
+        real_doses: A list or array of the actual dose amounts.
+
+    Returns:
+        A numpy array of the scaled doses.
     """
 
     return np.log(real_doses) - np.mean(np.log(real_doses))
@@ -89,34 +96,25 @@ def _L_n(D, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi):
 def efftox_get_posterior_probs(
     cases, priors, scaled_doses, tox_cutoff, eff_cutoff, n=10**5, epsilon=1e-6
 ):
-    """Get the posterior probabilities after having observed cumulative data D in an EffTox trial.
+    """Gets posterior probabilities for an EffTox trial.
 
-    Note: This function evaluates the posterior integrals using Monte Carlo integration. Thall & Cook
-    use the method of Monahan & Genz. I imagine that is quicker and more accurate but it is also
-    more difficult to program, so I have skipped it. It remains a medium-term aim, however, because
-    this method is slow.
+    This function evaluates the posterior integrals using Monte Carlo
+    integration.
 
-    Params:
-    cases, list of 3-tuples, (dose, toxicity, efficacy), where dose is the given (1-based) dose level,
-                    toxicity = 1 for a toxicity event; 0 for a tolerance event,
-                    efficacy = 1 for an efficacy event; 0 for a non-efficacy event.
-    priors, list of prior distributions corresponding to mu_T, beta_T, mu_E, beta1_E, beta2_E, psi respectively
-            Each prior object should support obj.ppf(x) and obj.pdf(x)
-    scaled_doses, ordered list of all possible doses where each dose is on Thall & Cook's codified scale (see below),
-    tox_cutoff, the desired maximum toxicity
-    eff_cutoff, the desired minimum efficacy
-    n, number of random points to use in Monte Carlo integration.
-    epsilon, a small number to define the integration range via the ppf of the priors.
+    Args:
+        cases: A list of 3-tuples, where each tuple is (dose, toxicity,
+            efficacy).
+        priors: A list of 6 prior distributions for the model parameters.
+        scaled_doses: A list of the scaled doses.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        eff_cutoff: The minimum acceptable efficacy probability.
+        n: The number of points for Monte Carlo integration.
+        epsilon: A small number to define the integration range.
 
     Returns:
-    nested lists of posterior probabilities, [ Prob(Toxicity, Prob(Efficacy), Prob(Toxicity less than cutoff),
-                Prob(Efficacy greater than cutoff)], for each dose in doses,
-            i.e. returned obj is of length len(doses) and each interior list of length 4.
-
-    Note: Thall & Cook's codified dose scale is thus:
-    If doses 10mg, 20mg and 25mg are given so that d = [10, 20, 25], then the codified doses, x, are
-    x = ln(d) - mean(ln(dose)) = [-0.5365, 0.1567, 0.3798]
-
+        A tuple containing:
+        - A list of posterior probabilities for each dose.
+        - A `ProbabilityDensitySample` object.
     """
     if len(priors) != 6:
         raise ValueError("priors should have 6 items.")
@@ -168,34 +166,23 @@ def efftox_get_posterior_probs(
 
 
 def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5, epsilon=1e-6):
-    """Get the posterior parameter estimates after having observed cumulative data D in an EffTox trial.
+    """Gets posterior parameter estimates for an EffTox trial.
 
-    Note: This function evaluates the posterior integrals using Monte Carlo integration. Thall & Cook
-    use the method of Monahan & Genz. I imagine that is quicker and more accurate but it is also
-    more difficult to program, so I have skipped it. It remains a medium-term aim, however, because
-    this method is slow.
+    This function evaluates the posterior integrals using Monte Carlo
+    integration.
 
-    Params:
-    cases, list of 3-tuples, (dose, toxicity, efficacy), where dose is the given (1-based) dose level,
-                    toxicity = 1 for a toxicity event; 0 for a tolerance event,
-                    efficacy = 1 for an efficacy event; 0 for a non-efficacy event.
-    priors, list of prior distributions corresponding to mu_T, beta_T, mu_E, beta1_E, beta2_E, psi respectively
-            Each prior object should support obj.ppf(x) and obj.pdf(x)
-    scaled_doses, ordered list of all possible doses where each dose is on Thall & Cook's codified scale (see below),
-    tox_cutoff, the desired maximum toxicity
-    eff_cutoff, the desired minimum efficacy
-    n, number of random points to use in Monte Carlo integration.
-    epsilon, a small number to define the integration range via the ppf of the priors.
+    Args:
+        cases: A list of 3-tuples, where each tuple is (dose, toxicity,
+            efficacy).
+        priors: A list of 6 prior distributions for the model parameters.
+        scaled_doses: A list of the scaled doses.
+        n: The number of points for Monte Carlo integration.
+        epsilon: A small number to define the integration range.
 
     Returns:
-    list of posterior parameters as tuples, [ (mu_T, beta_T, mu_E, beta_T_1, beta_T_2, psi) ], and that's it for now.
-            i.e. returned obj is of length 1 and first interior tuple is of length 6.
-            More objects might be added to the outer list eventually.
-
-    Note: Thall & Cook's codified dose scale is thus:
-    If doses 10mg, 20mg and 25mg are given so that d = [10, 20, 25], then the codified doses, x, are
-    x = ln(d) - mean(ln(dose)) = [-0.5365, 0.1567, 0.3798]
-
+        A tuple containing:
+        - A list of posterior parameter estimates.
+        - A `ProbabilityDensitySample` object.
     """
 
     if len(priors) != 6:
@@ -248,20 +235,14 @@ def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5, epsilon=1e
 
 # Desirability metrics
 class LpNormCurve:
-    """Fit an indifference contour using three points and an L-p norm.
+    """A class for fitting an indifference contour using an L-p norm.
 
-    The three points are:
-    * efficacy when toxicity is impossible;
-    * toxicity when efficacy is guaranteed;
-    * an equallty desirable hinge point (hinge_eff, hinge_tox) in (0,1)^2
+    This class fits an indifference contour using three points:
+    - Efficacy when toxicity is impossible.
+    - Toxicity when efficacy is guaranteed.
+    - An equally desirable hinge point in (0, 1)^2.
 
-    The official EffTox software has used L^p Norms in the trade-off analysis since approximately version 2.
-    This is the current method as at Aug 2014.
-
-    For more information, consult the Cook (2006) paper and the Bayesian methods book for more information.
-    The hinge point is the equally attractive point of the three that is not on the x- or y-axis.
-    The p-parameter in the L-p norm is initialised by setting r = 1 as per p.119 in Berry et al
-
+    For more information, see Cook (2006) and Berry et al.
     """
 
     def __init__(
@@ -271,13 +252,19 @@ class LpNormCurve:
         hinge_prob_eff,
         hinge_prob_tox,
     ):
-        """
-        Params:
-        minimum_tolerable_efficacy, pi_E^*, the tolerable efficacy when toxicity is impossible
-        maximum_tolerable_toxicity, pi_T^*, the tolerable toxicity when efficacy is guaranteed
-        hinge_prob_eff, probability of efficacy at the hinge point
-        hinge_prob_tox, probability of toxicity at the hinge point
+        """Initializes the LpNormCurve.
 
+        Args:
+            minimum_tolerable_efficacy: The tolerable efficacy when toxicity
+                is impossible.
+            maximum_tolerable_toxicity: The tolerable toxicity when efficacy
+                is guaranteed.
+            hinge_prob_eff: The probability of efficacy at the hinge point.
+            hinge_prob_tox: The probability of toxicity at the hinge point.
+
+        Raises:
+            ValueError: If the hinge point probabilities are not within the
+                tolerable bounds.
         """
 
         if hinge_prob_tox >= maximum_tolerable_toxicity:
@@ -304,6 +291,15 @@ class LpNormCurve:
         ]
 
     def __call__(self, prob_eff, prob_tox):
+        """Calculates the utility of an efficacy-toxicity pair.
+
+        Args:
+            prob_eff: The probability of efficacy.
+            prob_tox: The probability of toxicity.
+
+        Returns:
+            The utility of the efficacy-toxicity pair.
+        """
         x = prob_eff
         y = prob_tox
         if np.all(0 < x) and np.all(x < 1) and np.all(0 < y) and np.all(y < 1):
@@ -317,7 +313,20 @@ class LpNormCurve:
             return response
 
     def solve(self, prob_eff=None, prob_tox=None, delta=0):
-        """Specify exactly one of prob_eff or prob_tox and this will return the other, for given delta"""
+        """Solves for one probability given the other and a utility delta.
+
+        Args:
+            prob_eff: The probability of efficacy.
+            prob_tox: The probability of toxicity.
+            delta: The utility delta.
+
+        Returns:
+            The value of the unknown probability.
+
+        Raises:
+            Exception: If both or neither of `prob_eff` and `prob_tox` are
+                specified.
+        """
 
         if prob_eff is None and prob_tox is None:
             raise Exception("Specify prob_eff or prob_tox")
@@ -342,14 +351,14 @@ class LpNormCurve:
             return b * y_l
 
     def get_tox(self, eff, util=0.0):
-        """Get equivalent toxicity probability for given efficacy probability and utility value.
-        :param eff: efficacy probability
-        :type eff: float
-        :param util: utility value, defaults to zerp for neutral utility
-        :type util: float
-        :return: toxicity probability
-        :rtype: float
+        """Gets the equivalent toxicity probability for a given efficacy.
 
+        Args:
+            eff: The efficacy probability.
+            util: The utility value.
+
+        Returns:
+            The equivalent toxicity probability.
         """
 
         p = self.p
@@ -370,28 +379,22 @@ class LpNormCurve:
         title="EffTox utility contours",
         custom_points_label="priors",
     ):
-        """
-        :param use_ggplot: True to use ggplot, False to use matplotlib
-        :type use_ggplot: bool
-        :param prob_eff: optional
-        :type prob_eff: list
-        :param prob_tox:
-        :type prob_tox: list
-        :param n: number of points per line
-        :type n: int
-        :param util_lower: lowest utility value to plot contour for
-        :type util_lower: float
-        :param util_upper: lowest utility value to plot contour for
-        :type util_upper: float
-        :param util_delta: plot contours for each increment in utility
-        :type util_delta: float
-        :param title: chart title
-        :type title: str
-        :param custom_points_label: label for points provided via prob_eff and prob_tox
-        :type custom_points_label: str
+        """Plots the utility contours.
 
-        :return: plot of efficacy-toxicity contours
+        Args:
+            use_ggplot: If True, use ggplot for plotting.
+            prob_eff: Optional list of efficacy probabilities to plot.
+            prob_tox: Optional list of toxicity probabilities to plot.
+            n: The number of points per line.
+            util_lower: The lower bound for the utility contours.
+            util_upper: The upper bound for the utility contours.
+            util_delta: The increment for the utility contours.
+            title: The title of the plot.
+            custom_points_label: The label for the custom points.
 
+        Returns:
+            A plot object if `use_ggplot` is False, otherwise raises
+            NotImplementedError.
         """
 
         eff_vals = np.linspace(0, 1, n)
@@ -436,23 +439,23 @@ class LpNormCurve:
 
 
 class InverseQuadraticCurve:
-    """Fit an indifference contour of the type, y = a + b/x + c/x^2 where y = Prob(Tox) and x = Prob(Eff).
+    """A class for fitting an inverse quadratic indifference contour.
 
-    The official EffTox software has used L^p Norms in the trade-off analysis since approximately version 2.
-    This is the current method as at Aug 2014.
+    This class fits an indifference contour of the form
+    `y = a + b/x + c/x^2`, where `y` is the probability of toxicity and `x`
+    is the probability of efficacy.
 
-    The official EffTox software used inverse quadratics in the trade-off analysis from inception until
-    approximately version 2. The method was ditched in favour of using L^p norms.
-    This is the current method as at Aug 2014.
-
-    For more information, consult the original EffTox paper (2004), the Cook update (2006) and the Bayesian book.
-
+    Note:
+        This method was used in early versions of the EffTox software but has
+        since been replaced by L-p norms.
     """
 
     def __init__(self, points):
-        """
-        Params:
-        Points, list of points in (prob_eff, prob_tox) tuple pairs.
+        """Initializes the InverseQuadraticCurve.
+
+        Args:
+            points: A list of (probability of efficacy, probability of
+                toxicity) tuples.
         """
 
         x = np.array([z for z, _ in points])
@@ -470,6 +473,15 @@ class InverseQuadraticCurve:
         self.a, self.b, self.c = a, b, c
 
     def __call__(self, prob_eff, prob_tox):
+        """Calculates the utility of an efficacy-toxicity pair.
+
+        Args:
+            prob_eff: The probability of efficacy.
+            prob_tox: The probability of toxicity.
+
+        Returns:
+            The utility of the efficacy-toxicity pair.
+        """
         x = prob_eff
         y = prob_tox
         if 0 < x < 1 and 0 < y < 1:
@@ -488,7 +500,21 @@ class InverseQuadraticCurve:
             return np.nan
 
     def solve(self, prob_eff=None, prob_tox=None, delta=0):
-        """Specify exactly one of prob_eff or prob_tox and this will return the other, for given delta"""
+        """Solves for one probability given the other and a utility delta.
+
+        Args:
+            prob_eff: The probability of efficacy.
+            prob_tox: The probability of toxicity.
+            delta: The utility delta.
+
+        Returns:
+            The value of the unknown probability.
+
+        Raises:
+            NotImplementedError: If `delta` is not 0.
+            Exception: If both or neither of `prob_eff` and `prob_tox` are
+                specified.
+        """
         if delta != 0:
             raise NotImplementedError("Only contours for delta=0 are supported.")
 
@@ -542,24 +568,10 @@ class InverseQuadraticCurve:
         util_delta=0.2,
         title="EffTox utility contours",
     ):
-        """
-        :param use_ggplot: True to use ggplot, False to use matplotlib
-        :type use_ggplot: bool
-        :param prior_eff_probs: optional
-        :type prior_eff_probs: list
-        :param prior_tox_probs:
-        :type prior_tox_probs: list
-        :param n: number of points per line
-        :type n: int
-        :param util_lower: lowest utility value to plot contour for
-        :type util_lower: float
-        :param util_upper: lowest utility value to plot contour for
-        :type util_upper: float
-        :param util_delta: plot contours for each increment in utility
-        :type util_delta: float
+        """Plots the utility contours.
 
-        :return: plot of efficacy-toxicity contours
-
+        Raises:
+            NotImplementedError: This method is not implemented.
         """
 
         raise NotImplementedError()
@@ -573,46 +585,46 @@ ABC_Curve = InverseQuadraticCurve
 
 
 class EffTox(EfficacyToxicityDoseFindingTrial):
-    """This is an object-oriented implementation of Thall & Cook's EffTox trial design.
+    """An object-oriented implementation of Thall & Cook's EffTox trial design.
 
-    See Thall, P.F. & Cook, J.D. (2004) - Dose-Finding Based on Efficacy-Toxicity Trade-Offs
+    See Thall, P.F. & Cook, J.D. (2004) - Dose-Finding Based on
+    Efficacy-Toxicity Trade-Offs.
 
-    e.g. general usage
-    >>> real_doses = [7.5, 15, 30, 45]
-    >>> tox_cutoff = 0.40
-    >>> eff_cutoff = 0.45
-    >>> tox_certainty = 0.05
-    >>> eff_certainty = 0.05
-    >>> mu_t_mean, mu_t_sd = -5.4317, 2.7643
-    >>> beta_t_mean, beta_t_sd = 3.1761, 2.7703
-    >>> mu_e_mean, mu_e_sd = -0.8442, 1.9786
-    >>> beta_e_1_mean, beta_e_1_sd = 1.9857, 1.9820
-    >>> beta_e_2_mean, beta_e_2_sd = 0, 0.2
-    >>> psi_mean, psi_sd = 0, 1
-    >>> from scipy.stats import norm
-    >>> # The following parameter values are for illustration only.
-    >>> # Users should provide their own priors based on their specific trial.
-    >>> theta_priors = [
-    ...                   norm(loc=mu_t_mean, scale=mu_t_sd),
-    ...                   norm(loc=beta_t_mean, scale=beta_t_sd),
-    ...                   norm(loc=mu_e_mean, scale=mu_e_sd),
-    ...                   norm(loc=beta_e_1_mean, scale=beta_e_1_sd),
-    ...                   norm(loc=beta_e_2_mean, scale=beta_e_2_sd),
-    ...                   norm(loc=psi_mean, scale=psi_sd),
-    ...                 ]
-    >>> hinge_points = [(0.4, 0), (1, 0.7), (0.5, 0.4)]
-    >>> metric = LpNormCurve(hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1])
-    >>> trial = EffTox(real_doses, theta_priors, tox_cutoff, eff_cutoff, tox_certainty, eff_certainty, metric,
-    ...                max_size=30, first_dose=3)
-    >>> trial.next_dose()
-    3
-    >>> trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
-    3
-    >>> trial.has_more()
-    True
-    >>> trial.size(), trial.max_size()
-    (3, 30)
-
+    Examples:
+        >>> real_doses = [7.5, 15, 30, 45]
+        >>> tox_cutoff = 0.40
+        >>> eff_cutoff = 0.45
+        >>> tox_certainty = 0.05
+        >>> eff_certainty = 0.05
+        >>> mu_t_mean, mu_t_sd = -5.4317, 2.7643
+        >>> beta_t_mean, beta_t_sd = 3.1761, 2.7703
+        >>> mu_e_mean, mu_e_sd = -0.8442, 1.9786
+        >>> beta_e_1_mean, beta_e_1_sd = 1.9857, 1.9820
+        >>> beta_e_2_mean, beta_e_2_sd = 0, 0.2
+        >>> psi_mean, psi_sd = 0, 1
+        >>> from scipy.stats import norm
+        >>> # The following parameter values are for illustration only.
+        >>> # Users should provide their own priors based on their specific trial.
+        >>> theta_priors = [
+        ...                   norm(loc=mu_t_mean, scale=mu_t_sd),
+        ...                   norm(loc=beta_t_mean, scale=beta_t_sd),
+        ...                   norm(loc=mu_e_mean, scale=mu_e_sd),
+        ...                   norm(loc=beta_e_1_mean, scale=beta_e_1_sd),
+        ...                   norm(loc=beta_e_2_mean, scale=beta_e_2_sd),
+        ...                   norm(loc=psi_mean, scale=psi_sd),
+        ...                 ]
+        >>> hinge_points = [(0.4, 0), (1, 0.7), (0.5, 0.4)]
+        >>> metric = LpNormCurve(hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1])
+        >>> trial = EffTox(real_doses, theta_priors, tox_cutoff, eff_cutoff, tox_certainty, eff_certainty, metric,
+        ...                max_size=30, first_dose=3)
+        >>> trial.next_dose()
+        3
+        >>> trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
+        3
+        >>> trial.has_more()
+        True
+        >>> trial.size(), trial.max_size()
+        (3, 30)
     """
 
     def __init__(
@@ -631,54 +643,29 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         num_integral_steps=10**5,
         epsilon=1e-6,
     ):
-        """
+        """Initializes the EffTox trial.
 
-        Params:
-        :param real_doses: list of actual doses. E.g. for 10mg and 25mg, use [10, 25].
-        :type real_doses: list
-        :param theta_priors: list of prior distributions corresponding to mu_T, beta_T, mu_E, beta1_E, beta2_E, psi
-                                respectively. Each prior object should support obj.ppf(x) and obj.pdf(x)
-        :type theta_priors: list
-        :param tox_cutoff: the maximum acceptable probability of toxicity
-        :type tox_cutoff: float
-        :param eff_cutoff: the minimium acceptable probability of efficacy
-        :type eff_cutoff: float
-        :param tox_certainty: the posterior certainty required that toxicity is less than cutoff
-        :type tox_certainty: float
-        :param eff_certainty: the posterior certainty required that efficacy is greater than than cutoff
-        :type eff_certainty: float
-        :param metric: instance of LpNormCurve or InverseQuadraticCurve, used to calculate utility
-                        of efficacy/toxicity probability pairs.
-        :type metric: LpNormCurve
-        :param max_size: maximum number of patients to use
-        :type max_size: int
-        :param first_dose: starting dose level, 1-based. I.e. intcpt=3 means the middle dose of 5.
-        :type first_dose: int
-        :param avoid_skipping_untried_escalation: True to avoid skipping untried doses in escalation
-        :type avoid_skipping_untried_escalation: bool
-        :param avoid_skipping_untried_deescalation: True to avoid skipping untried doses in de-escalation
-        :type avoid_skipping_untried_deescalation: bool
-        :param num_integral_steps: number of points to use in Monte Carlo integration.
-        :type num_integral_steps: int
-        :param epsilon: a small number to define the integration range via the ppf of the priors.
-        :type epsilon: float
-
-        Note: dose_allocation_mode has been suppressed. Remove once I know it is not needed. KB
-        # Instances have a dose_allocation_mode property that is set according to this schedule:
-        # 0, when no dose has been chosen
-        # 1, when optimal dose is selected from non-trivial admissable set (this is normal operation)
-        # 2, when next untried dose is selected to avoid skipping doses
-        # 2.5, when dose is maintained because ideal dose would require skipping and intervening dose is inadmissable
-        # 3, when admissable set is empty so lowest untried dose above starting dose that is probably tolerable is
-        #     selected
-        # 4, when admissable set is empty and there is no untested dose above first dose to try
-        # 5, when admissable set is empty and all doses were probably too toxic
-        # 6, when admissable set is not-empty but trial stops because 1) ideal dose requires skipping; 2) next
-        #     -best dose is inadmissable; and 3) current dose is inadmissable. I question the validity of this
-        #     scenario because avoiding stopping was possible. However, I am trying to faithfully reproduce
-        #     the MD Anderson software so this scenario is programmed in. That may change. If you want to avoid
-        #     this outcome, allow dose skipping.
-
+        Args:
+            real_doses: A list of the actual dose amounts.
+            theta_priors: A list of 6 prior distributions for the model
+                parameters.
+            tox_cutoff: The maximum acceptable probability of toxicity.
+            eff_cutoff: The minimum acceptable probability of efficacy.
+            tox_certainty: The posterior certainty required that toxicity is
+                less than the cutoff.
+            eff_certainty: The posterior certainty required that efficacy is
+                greater than the cutoff.
+            metric: An instance of `LpNormCurve` or `InverseQuadraticCurve`
+                for calculating utility.
+            max_size: The maximum number of patients in the trial.
+            first_dose: The starting dose level (1-based).
+            avoid_skipping_untried_escalation: If True, avoid skipping untried
+                doses during escalation.
+            avoid_skipping_untried_deescalation: If True, avoid skipping
+                untried doses during de-escalation.
+            num_integral_steps: The number of points for Monte Carlo
+                integration.
+            epsilon: A small number to define the integration range.
         """
 
         EfficacyToxicityDoseFindingTrial.__init__(
@@ -802,19 +789,11 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
     def tabulate(self):
-        # import pandas as pd
-        # tab_data = OrderedDict()
-        # treated_at_dose = [self.treated_at_dose(d) for d in self.dose_levels()]
-        # eff_at_dose = [self.efficacies_at_dose(d) for d in self.dose_levels()]
-        # tox_at_dose = [self.toxicities_at_dose(d) for d in self.dose_levels()]
-        # tab_data['Dose'] = self.dose_levels()
-        # tab_data['N'] = treated_at_dose
-        # tab_data['Efficacies'] = eff_at_dose
-        # tab_data['Toxicities'] = tox_at_dose
-        # df = pd.DataFrame(tab_data)
-        # df['EffRate'] = np.where(df.N > 0, df.Efficacies / df.N, np.nan)
-        # df['ToxRate'] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
+        """Creates a summary table of the trial results.
 
+        Returns:
+            A pandas DataFrame summarizing the trial results.
+        """
         df = EfficacyToxicityDoseFindingTrial.tabulate(self)
 
         df["P(Eff)"] = self.prob_eff
@@ -827,7 +806,14 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return df
 
     def posterior_params(self, n=None):
-        """Get posterior parameter estimates"""
+        """Gets the posterior parameter estimates.
+
+        Args:
+            n: The number of points for Monte Carlo integration.
+
+        Returns:
+            A list of posterior parameter estimates.
+        """
         if n is None:
             n = self.num_integral_steps
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
@@ -837,19 +823,14 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return post_params
 
     def optimal_decision(self, prob_tox, prob_eff):
-        """Get the optimal dose choice for a given dose-toxicity curve.
+        """Gets the optimal dose choice for a given dose-toxicity curve.
 
-        .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own specific tolerances by
-        invoking the dose decicion on the complete (and unknowable) toxicity and efficacy curves.
+        Args:
+            prob_tox: A collection of toxicity probabilities.
+            prob_eff: A collection of efficacy probabilities.
 
-        :param prob_tox: collection of toxicity probabilities
-        :type prob_tox: list
-        :param prob_tox: collection of efficacy probabilities
-        :type prob_tox: list
-        :return: the optimal (1-based) dose decision
-        :rtype: int
-
+        Returns:
+            The optimal dose level (1-based).
         """
 
         admiss, u, u_star, obd, u_cushion = solve_metrizable_efftox_scenario(
@@ -858,6 +839,11 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return obd
 
     def scaled_doses(self):
+        """Gets the scaled doses.
+
+        Returns:
+            A numpy array of the scaled doses.
+        """
         return self._scaled_doses
 
     def _post_density_plot(
@@ -898,18 +884,15 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         )
 
     def plot_posterior_tox_prob_density(self, include_doses=None, boot_samps=1000):
-        """Plot the posterior densities of the dose probabilities of toxicity.
+        """Plots the posterior densities of the toxicity probabilities.
 
-        .. note:: this method uses ggplot so that must be available on your system.
-        Why ggplot and not matplotlib? Because I also use R so I prefer the commonality of ggplot.
-        The length of time this method takes will be linked to number of points in last call to update().
-        It is relatively slow so don't go nuts.
+        Args:
+            include_doses: A list of dose levels to include. If None, all
+                doses are included.
+            boot_samps: The number of bootstrap samples to use.
 
-        :param include_doses: optional, list of dose levels to include, e.g. [1,2]. Default is None for all doses.
-        :type include_doses: list
-        :return: ggplot device
-        :rtype: ggplot
-
+        Returns:
+            A ggplot object.
         """
 
         def get_prob_tox(x, samp):
@@ -925,18 +908,15 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         )
 
     def plot_posterior_eff_prob_density(self, include_doses=None, boot_samps=1000):
-        """Plot the posterior densities of the dose probabilities of efficacy.
+        """Plots the posterior densities of the efficacy probabilities.
 
-        .. note:: this method uses ggplot so that must be available on your system.
-        Why ggplot and not matplotlib? Because I also use R so I prefer the commonality of ggplot.
-        The length of time this method takes will be linked to number of points in last call to update().
-        It is relatively slow so don't go nuts.
+        Args:
+            include_doses: A list of dose levels to include. If None, all
+                doses are included.
+            boot_samps: The number of bootstrap samples to use.
 
-        :param include_doses: optional, list of dose levels to include, e.g. [1,2]. Default is None for all doses.
-        :type include_doses: list
-        :return: ggplot device
-        :rtype: ggplot
-
+        Returns:
+            A ggplot object.
         """
 
         def get_prob_eff(x, samp):
@@ -952,18 +932,15 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         )
 
     def plot_posterior_utility_density(self, include_doses=None, boot_samps=1000):
-        """Plot the posterior densities of the dose utilities.
+        """Plots the posterior densities of the dose utilities.
 
-        .. note:: this method uses ggplot so that must be available on your system.
-        Why ggplot and not matplotlib? Because I also use R so I prefer the commonality of ggplot.
-        The length of time this method takes will be linked to number of points in last call to update().
-        It is relatively slow so don't go nuts.
+        Args:
+            include_doses: A list of dose levels to include. If None, all
+                doses are included.
+            boot_samps: The number of bootstrap samples to use.
 
-        :param include_doses: optional, list of dose levels to include, e.g. [1,2]. Default is None for all doses.
-        :type include_doses: list
-        :return: ggplot device
-        :rtype: ggplot
-
+        Returns:
+            A ggplot object.
         """
 
         def get_utility(x, samp):
@@ -981,15 +958,15 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         )
 
     def prob_superior_utility(self, dl1, dl2):
-        """Returns the probability that the utility of dose-level 1 (dl1) exceeds that of dose-level 2 (dl2)
+        """Calculates the probability that one dose has superior utility over another.
 
-        :param dl1: 1-based dose-level of dose 1
-        :type dl1: int
-        :param dl2: 1-based dose-level of dose 2
-        :type dl2: int
-        :return: probability that utility of dose-level 1 exceeds that of dose-level 2
-        :rtype: float
+        Args:
+            dl1: The first dose level (1-based).
+            dl2: The second dose level (1-based).
 
+        Returns:
+            The probability that the utility of `dl1` is greater than the
+            utility of `dl2`.
         """
 
         if dl1 == dl2:
@@ -1012,6 +989,12 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return np.sum(p * (u1 > u2))
 
     def utility_superiority_matrix(self):
+        """Calculates the utility superiority matrix.
+
+        Returns:
+            A matrix where the element at (i, j) is the probability that
+            dose i has superior utility over dose j.
+        """
         superiority_mat = np.zeros((4, 4))
         superiority_mat[:] = np.nan
         for i in range(1, self.num_doses + 1):
@@ -1025,30 +1008,26 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 def solve_metrizable_efftox_scenario(
     prob_tox, prob_eff, metric, tox_cutoff, eff_cutoff
 ):
-    """Solve a metrizable efficacy-toxicity dose-finding scenario.
+    """Solves a metrizable efficacy-toxicity dose-finding scenario.
 
+    A dose is conformative if its probability of toxicity is less than a
+    cutoff and its probability of efficacy is greater than a cutoff. The
+    optimal dose is the dose with the highest utility in the conformative set.
 
-    Metrizable means that the priority of doses can be calculated using a metric.
-    A dose is conformative if it has probability of toxicity less than some cutoff; and
-    probability of efficacy greater than some cutoff.
-    The OBD is the dose with the highest utility in the conformative set. The OBD does not
-    necessarily have a positive utility.
+    Args:
+        prob_tox: An iterable of toxicity probabilities for each dose.
+        prob_eff: An iterable of efficacy probabilities for each dose.
+        metric: A metric function to calculate utility.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        eff_cutoff: The minimum acceptable efficacy probability.
 
-    This function returns, as a 5-tuple, (an array of bools representing whether each dose is conformative, the array
-    of utlities, the utility of the optimal dose, the 1-based OBD level, and the utility distance from the OBD to the
-    next most preferable dose in the conformative set where there are several conformative doses)
-
-    :param prob_tox: Probabilities of toxicity at each dose
-    :type prob_tox: iterable
-    :param prob_eff: Probabilities of efficacy at each dose
-    :type prob_eff: iterable
-    :param metric: Metric to score
-    :type metric: class like clintrials.dosefinding.efftox.LpNormCurve or func(prob_eff, prob_tox) returning float
-    :param tox_cutoff: maximum acceptable toxicity probability
-    :type tox_cutoff: float
-    :param eff_cutoff: minimum acceptable efficacy probability
-    :type eff_cutoff: float
-
+    Returns:
+        A 5-tuple containing:
+        - A boolean array indicating if each dose is conformative.
+        - An array of utilities for each dose.
+        - The utility of the optimal dose.
+        - The optimal dose level (1-based).
+        - The utility distance to the next best dose.
     """
     if len(prob_tox) != len(prob_eff):
         raise Exception(
@@ -1095,6 +1074,18 @@ def solve_metrizable_efftox_scenario(
 
 
 def get_obd(tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff):
+    """Gets the optimal biologically-active dose (OBD).
+
+    Args:
+        tox_curve: A list of toxicity probabilities for each dose.
+        eff_curve: A list of efficacy probabilities for each dose.
+        metric: A metric function to calculate utility.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        eff_cutoff: The minimum acceptable efficacy probability.
+
+    Returns:
+        The optimal dose level (1-based).
+    """
     X = solve_metrizable_efftox_scenario(
         tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff
     )
@@ -1103,6 +1094,18 @@ def get_obd(tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff):
 
 
 def get_conformative_doses(tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff):
+    """Gets the set of conformative doses.
+
+    Args:
+        tox_curve: A list of toxicity probabilities for each dose.
+        eff_curve: A list of efficacy probabilities for each dose.
+        metric: A metric function to calculate utility.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        eff_cutoff: The minimum acceptable efficacy probability.
+
+    Returns:
+        A list of booleans indicating if each dose is conformative.
+    """
     X = solve_metrizable_efftox_scenario(
         tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff
     )
@@ -1111,6 +1114,18 @@ def get_conformative_doses(tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff)
 
 
 def get_util(tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff):
+    """Gets the utility of each dose.
+
+    Args:
+        tox_curve: A list of toxicity probabilities for each dose.
+        eff_curve: A list of efficacy probabilities for each dose.
+        metric: A metric function to calculate utility.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        eff_cutoff: The minimum acceptable efficacy probability.
+
+    Returns:
+        A numpy array of utilities for each dose.
+    """
     X = solve_metrizable_efftox_scenario(
         tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff
     )
@@ -1121,6 +1136,21 @@ def get_util(tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff):
 def classify_problem(
     delta, prob_tox, prob_eff, metric, tox_cutoff, eff_cutoff, text_label=True
 ):
+    """Classifies the dose-finding problem as "Stop", "Optimal", or "Desirable".
+
+    Args:
+        delta: The utility delta for classification.
+        prob_tox: An iterable of toxicity probabilities for each dose.
+        prob_eff: An iterable of efficacy probabilities for each dose.
+        metric: A metric function to calculate utility.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        eff_cutoff: The minimum acceptable efficacy probability.
+        text_label: If True, returns a text label; otherwise, returns an
+            integer code.
+
+    Returns:
+        The classification of the problem.
+    """
     X = solve_metrizable_efftox_scenario(
         prob_tox, prob_eff, metric, tox_cutoff, eff_cutoff
     )
@@ -1144,10 +1174,34 @@ def classify_problem(
 
 
 def get_problem_class(delta, tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff):
+    """Gets the classification of the dose-finding problem.
+
+    Args:
+        delta: The utility delta for classification.
+        tox_curve: A list of toxicity probabilities for each dose.
+        eff_curve: A list of efficacy probabilities for each dose.
+        metric: A metric function to calculate utility.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        eff_cutoff: The minimum acceptable efficacy probability.
+
+    Returns:
+        The classification of the problem.
+    """
     return classify_problem(delta, tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff)
 
 
 def classify_tox_class(prob_tox, tox_cutoff, text_label=True):
+    """Classifies the toxicity profile as "Tolerable", "Toxic", or "Mixed".
+
+    Args:
+        prob_tox: An iterable of toxicity probabilities for each dose.
+        tox_cutoff: The maximum acceptable toxicity probability.
+        text_label: If True, returns a text label; otherwise, returns an
+            integer code.
+
+    Returns:
+        The classification of the toxicity profile.
+    """
     prob_tox = np.array(prob_tox)
     if sum(prob_tox < tox_cutoff) == len(prob_tox):
         if text_label:
@@ -1167,11 +1221,31 @@ def classify_tox_class(prob_tox, tox_cutoff, text_label=True):
 
 
 def get_tox_class(tox_curve, tox_cutoff):
+    """Gets the classification of the toxicity profile.
+
+    Args:
+        tox_curve: A list of toxicity probabilities for each dose.
+        tox_cutoff: The maximum acceptable toxicity probability.
+
+    Returns:
+        The classification of the toxicity profile.
+    """
     prob_tox = tox_curve
     return classify_tox_class(prob_tox, tox_cutoff)
 
 
 def classify_eff_class(prob_eff, eff_cutoff, text_label=True):
+    """Classifies the efficacy profile as "Monotonic", "Unimodal", "Plateau", or "Weird".
+
+    Args:
+        prob_eff: An iterable of efficacy probabilities for each dose.
+        eff_cutoff: The minimum acceptable efficacy probability.
+        text_label: If True, returns a text label; otherwise, returns an
+            integer code.
+
+    Returns:
+        The classification of the efficacy profile.
+    """
     prob_eff = np.array(prob_eff)
     max_eff = np.max(prob_eff)
     if np.all([prob_eff[i] > prob_eff[i - 1] for i in range(1, len(prob_eff))]):
@@ -1197,15 +1271,27 @@ def classify_eff_class(prob_eff, eff_cutoff, text_label=True):
 
 
 def get_eff_class(eff_curve, eff_cutoff):
+    """Gets the classification of the efficacy profile.
+
+    Args:
+        eff_curve: A list of efficacy probabilities for each dose.
+        eff_cutoff: The minimum acceptable efficacy probability.
+
+    Returns:
+        The classification of the efficacy profile.
+    """
     prob_eff = eff_curve
     return classify_eff_class(prob_eff, eff_cutoff)
 
 
 def efftox_dtp_detail(trial):
-    """Performs the EffTox-specific extra reporting when calculating DTPs
-    :param trial: instance of EffTox
-    :return: OrderedDict
+    """Performs EffTox-specific extra reporting for DTP calculations.
 
+    Args:
+        trial: An instance of the EffTox class.
+
+    Returns:
+        An ordered dictionary with EffTox-specific details.
     """
 
     to_return = OrderedDict()

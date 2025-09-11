@@ -28,52 +28,40 @@ from clintrials.dosefinding.wagestait import _get_post_eff_bayes, _wt_get_theta_
 
 
 class WATU(EfficacyToxicityDoseFindingTrial):
-    """Brock & Yap's fusion of Wages & Tait's phase I/II design with Thall & Cook's EffTox utility contours.
+    """A seamless Phase I/II design combining Wages & Tait with EffTox.
 
-    See Wages, N.A. & Tait, C. - Seamless Phase I/II Adaptive Design For Oncology Trials
-                    of Molecularly Targeted Agents, to appear in Journal of Biopharmaceutical Statistics
-        Thall, P.F. and Cook, J.D. (2004). Dose-Finding Based on Efficacy-Toxicity Trade-Offs, Biometrics, 60: 684-693.
-        Cook, J.D. Efficacy-Toxicity trade-offs based on L^p norms, Technical Report UTMDABTR-003-06, April 2006
+    This class implements a fusion of Wages & Tait's Phase I/II design with
+    Thall & Cook's EffTox utility contours.
 
-    e.g. general usage
-    >>> trial_size = 30
-    >>> first_dose = 3
-    >>> tox_target = 0.35
-    >>> tox_limit = 0.40
-    >>> eff_limit = 0.45
-    >>> stage_one_size = 0  # Else initial dose choices will be random; not good for testing!
-    >>> skeletons = [
-    ...                 [.6, .5, .3, .2],
-    ...                 [.5, .6, .5, .3],
-    ...                 [.3, .5, .6, .5],
-    ...                 [.2, .3, .5, .6],
-    ...                 [.3, .5, .6, .6],
-    ...                 [.5, .6, .6, .6],
-    ...                 [.6, .6, .6, .6]
-    ...             ]
-    >>> prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
-    >>> from clintrials.dosefinding.efftox import LpNormCurve
-    >>> hinge_points = [(0.4, 0), (1, 0.7), (0.5, 0.4)]
-    >>> metric = LpNormCurve(hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1])
-    >>> trial = BrockYapEfficacyToxicityDoseFindingTrial(skeletons, prior_tox_probs, tox_target, tox_limit,
-    ...                                                  eff_limit, metric, first_dose, trial_size, stage_one_size)
-    >>> trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
-    3
-    >>> trial.has_more()
-    True
-    >>> trial.size(), trial.max_size()
-    (3, 30)
-    >>> trial.admissable_set()
-    [1, 2, 3]
-    >>> trial.update([(3, 1, 1), (3, 1, 1), (3, 0, 0)])
-    2
-    >>> trial.next_dose()
-    2
-    >>> trial.admissable_set()
-    [1, 2]
-    >>> trial.most_likely_model_index
-    2
-
+    Examples:
+        >>> trial_size = 30
+        >>> first_dose = 3
+        >>> tox_target = 0.35
+        >>> tox_limit = 0.40
+        >>> eff_limit = 0.45
+        >>> stage_one_size = 0
+        >>> skeletons = [
+        ...     [.6, .5, .3, .2],
+        ...     [.5, .6, .5, .3],
+        ...     [.3, .5, .6, .5],
+        ...     [.2, .3, .5, .6],
+        ...     [.3, .5, .6, .6],
+        ...     [.5, .6, .6, .6],
+        ...     [.6, .6, .6, .6]
+        ... ]
+        >>> prior_tox_probs = [0.025, 0.05, 0.1, 0.25]
+        >>> from clintrials.dosefinding.efftox import LpNormCurve
+        >>> hinge_points = [(0.4, 0), (1, 0.7), (0.5, 0.4)]
+        >>> metric = LpNormCurve(
+        ...     hinge_points[0][0], hinge_points[1][1],
+        ...     hinge_points[2][0], hinge_points[2][1]
+        ... )
+        >>> trial = WATU(
+        ...     skeletons, prior_tox_probs, tox_target, tox_limit,
+        ...     eff_limit, metric, first_dose, trial_size, stage_one_size
+        ... )
+        >>> trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
+        3
     """
 
     def __init__(
@@ -103,63 +91,37 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         plugin_mean=False,
         mc_sample_size=10**5,
     ):
-        """
+        """Initializes the WATU trial.
 
-        :param skeletons: 2-d matrix of skeletons, i.e. list of lists, one prior efficacy scenario per row
-        :type skeletons: list
-        :param prior_tox_probs: list of prior probabilities of toxicity, from least toxic to most.
-        :type prior_tox_probs: list
-        :param tox_target: target toxicity rate
-        :type tox_target: float
-        :param tox_limit: the maximum acceptable probability of toxicity
-        :type tox_limit: float
-        :param eff_limit: the minimium acceptable probability of efficacy
-        :type eff_limit: float
-        :param metric: instance of LpNormCurve or InverseQuadraticCurve, used to calculate utility
-                        of efficacy/toxicity probability pairs.
-        :type metric: clintrials.dosefinding.efftox.LpNormCurve
-        :param first_dose: starting dose level, 1-based. I.e. intcpt=3 means the middle dose of 5.
-        :type first_dose: int
-        :param max_size: maximum number of patients to use
-        :type max_size: int
-        :param stage_one_size: size of the first stage of the trial, where dose is set by a latent CRM model only,
-                        i.e. only toxicity monitoring is performed with no attempt to monitor efficacy. 0 by default
-        :type stage_one_size: int
-        :param F_func: the link function for CRM-like methods, e.g. empiric
-        :type F_func: func
-        :param inverse_F: the inverse link function for CRM-like methods method, e.g. inverse_empiric
-        :type inverse_F: func
-        :param theta_prior: prior distibution for theta parameter, the single parameter in the efficacy models
-        :type theta_prior: scipy.stats.rv_continuous
-        :param beta_prior: prior distibution for beta parameter, the single parameter in the toxicity CRM model
-        :type beta_prior: scipy.stats.rv_continuous
-        :param tox_certainty: the posterior certainty required that toxicity is less than cutoff
-        :type tox_certainty: float
-        :param model_prior_weights: list of prior probabilities that each model is correct. None to use uniform weights
-        :type model_prior_weights: list
-        :param use_quick_integration: numerical integration is slow. Set this to False to use the most accurate (& slow)
-                                method; False to use a quick but approximate method.
-                                In simulations, fast and approximate often suffices.
-                                In trial scenarios, use slow and accurate!
-        :type use_quick_integration: bool
-        :param estimate_var: True to estimate the posterior variance of beta and theta
-        :type estimate_var: bool
-        :param avoid_skipping_untried_escalation_stage_1: True to avoid skipping untried doses in escalation in stage 1
-        :type avoid_skipping_untried_escalation_stage_1: bool
-        :param avoid_skipping_untried_deescalation_stage_1: True to avoid skipping untried doses in de-escalation in
-        stage 1
-        :type avoid_skipping_untried_deescalation_stage_1: bool
-        :param avoid_skipping_untried_escalation_stage_2: True to avoid skipping untried doses in escalation in stage 2
-        :type avoid_skipping_untried_escalation_stage_2: bool
-        :param avoid_skipping_untried_deescalation_stage_2: True to avoid skipping untried doses in de-escalation in
-        stage 2
-        :type avoid_skipping_untried_deescalation_stage_2: bool
-        :param plugin_mean: True to estimate event curves by plugging parameter estimate into function;
-                            False to estimate using full Bayesian integral (default).
-        :type plugin_mean: bool
-        :param mc_sample_size: The number of samples to use in Monte Carlo estimation methods.
-        :type mc_sample_size: int
-
+        Args:
+            skeletons: A 2D list of prior efficacy scenarios.
+            prior_tox_probs: A list of prior toxicity probabilities.
+            tox_target: The target toxicity rate.
+            tox_limit: The maximum acceptable toxicity probability.
+            eff_limit: The minimum acceptable efficacy probability.
+            metric: An instance of `LpNormCurve` or `InverseQuadraticCurve`.
+            first_dose: The starting dose level (1-based).
+            max_size: The maximum number of patients in the trial.
+            stage_one_size: The size of the first stage of the trial.
+            F_func: The link function for the efficacy model.
+            inverse_F: The inverse link function for the efficacy model.
+            theta_prior: The prior distribution for the efficacy parameter.
+            beta_prior: The prior distribution for the toxicity parameter.
+            tox_certainty: The posterior certainty for toxicity constraints.
+            eff_certainty: The posterior certainty for efficacy constraints.
+            model_prior_weights: Prior probabilities for each efficacy model.
+            use_quick_integration: If True, use a faster approximate integral.
+            estimate_var: If True, estimate the posterior variance.
+            avoid_skipping_untried_escalation_stage_1: If True, avoid
+                skipping doses during escalation in stage 1.
+            avoid_skipping_untried_deescalation_stage_1: If True, avoid
+                skipping doses during de-escalation in stage 1.
+            avoid_skipping_untried_escalation_stage_2: If True, avoid
+                skipping doses during escalation in stage 2.
+            avoid_skipping_untried_deescalation_stage_2: If True, avoid
+                skipping doses during de-escalation in stage 2.
+            plugin_mean: If True, use the plugin mean for estimation.
+            mc_sample_size: The number of samples for Monte Carlo estimation.
         """
 
         EfficacyToxicityDoseFindingTrial.__init__(
@@ -238,11 +200,21 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.dose_allocation_mode = 0
 
     def model_theta_hat(self):
-        """Return theta hat for the model with the highest posterior likelihood, i.e. the current model."""
+        """Gets the theta estimate for the most likely model.
+
+        Returns:
+            The theta estimate for the model with the highest posterior
+            likelihood.
+        """
         return self.theta_hats[self.most_likely_model_index]
 
     def model_theta_var(self):
-        """Return theta var for the model with the highest posterior likelihood, i.e. the current model."""
+        """Gets the theta variance for the most likely model.
+
+        Returns:
+            The theta variance for the model with the highest posterior
+            likelihood.
+        """
         return self.theta_vars[self.most_likely_model_index]
 
     def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self):
@@ -315,22 +287,22 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.crm.reset()
 
     def has_more(self):
+        """Checks if the trial is ongoing.
+
+        Returns:
+            True if the trial is ongoing, False otherwise.
+        """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
     def optimal_decision(self, prob_tox, prob_eff):
-        """Get the optimal dose choice for a given dose-toxicity curve.
+        """Gets the optimal dose choice for given toxicity and efficacy curves.
 
-        .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own specific tolerances by
-        invoking the dose decicion on the complete (and unknowable) toxicity and efficacy curves.
+        Args:
+            prob_tox: A collection of toxicity probabilities.
+            prob_eff: A collection of efficacy probabilities.
 
-        :param prob_tox: collection of toxicity probabilities
-        :type prob_tox: list
-        :param prob_tox: collection of efficacy probabilities
-        :type prob_tox: list
-        :return: the optimal (1-based) dose decision
-        :rtype: int
-
+        Returns:
+            The optimal dose level (1-based).
         """
 
         admiss, u, u_star, obd, u_cushtion = solve_metrizable_efftox_scenario(
@@ -339,19 +311,16 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         return obd
 
     def prob_eff_exceeds(self, eff_cutoff):
-        """
-        Calculates the probability that the efficacy at each dose level exceeds a given cutoff.
-        This is done by calculating the posterior probability P(p_eff > eff_cutoff) for each dose.
-        It uses the assumption that the posterior distribution of the efficacy parameter theta
-        is approximately normal.
-        The link function is p_eff = skeleton ** theta.
-        p_eff > eff_cutoff  <=> skeleton ** theta > eff_cutoff
-        Since skeleton is a probability (0, 1), log(skeleton) is negative.
-        theta * log(skeleton) > log(eff_cutoff)
-        theta < log(eff_cutoff) / log(skeleton)
-        :param eff_cutoff:
-        :type eff_cutoff: float
-        :return:
+        """Calculates the probability that efficacy exceeds a cutoff.
+
+        This method calculates the posterior probability P(p_eff > eff_cutoff)
+        for each dose, assuming a normal posterior distribution for theta.
+
+        Args:
+            eff_cutoff: The efficacy cutoff.
+
+        Returns:
+            A numpy array of posterior probabilities.
         """
 
         skeleton = np.array(self.skeletons[self.most_likely_model_index])
@@ -387,11 +356,31 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         return probs
 
     def prob_acc_eff(self, threshold=None):
+        """Calculates the probability of acceptable efficacy.
+
+        Args:
+            threshold: The efficacy threshold. If None, `self.eff_limit`
+                is used.
+
+        Returns:
+            A numpy array of probabilities.
+        """
         if threshold is None:
             threshold = self.eff_limit
         return self.prob_eff_exceeds(threshold)
 
     def prob_acc_tox(self, threshold=None, **kwargs):
+        """Calculates the probability of acceptable toxicity.
+
+        Args:
+            threshold: The toxicity threshold. If None, `self.tox_limit`
+                is used.
+            **kwargs: Additional keyword arguments for the toxicity
+                calculation.
+
+        Returns:
+            A numpy array of probabilities.
+        """
         if threshold is None:
             threshold = self.tox_limit
         return 1 - self.crm.prob_tox_exceeds(threshold, **kwargs)

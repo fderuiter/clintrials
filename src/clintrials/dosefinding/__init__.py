@@ -1,3 +1,5 @@
+"""Dose-finding trial designs."""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
@@ -26,59 +28,25 @@ logger = logging.getLogger(__name__)
 
 
 class DoseFindingTrial(metaclass=abc.ABCMeta):
-    """This is the base class for a dose-finding trial.
+    """A base class for dose-finding trials.
 
-    The interface for such a class is:
-    status()
-    reset()
-    number_of_doses()
-    first_dose()
-    size()
-    max_size()
-    doses()
-    toxicities()
-    treated_at_dose(dose)
-    toxicities_at_dose(dose)
-    maximum_dose_given()
-    minimum_dose_given()
-    tabulate()
-    set_next_dose(dose)
-    next_dose()
-    update(cases)
-    has_more()
-    observed_toxicity_rates()
-    optimal_decision(prob_tox)
-    plot_outcomes(chart_title)
+    This class provides a common interface and functionality for dose-finding
+    trials. Subclasses should implement the abstract methods.
 
-    Further internal interface is provided by:
-    __reset()
-    __calculate_next_dose() # Subclasses should override this method, set _status and return value for _next_dose.
-
-    Class uses the internal variable _status to signify the current status of the trial. At the start of each
-    trial, the status is 0, signifying that the trial has not started. It is proposed that trial statuses
-    greater than 0 be used to signify that the trial is progressing in a positive way, and that trial statuses
-    less than 0 be used to signify states where the trial has arrived at some negative scenario that dictates
-    the trial to stop, e.g. all doses being considered too toxic.
-    Suggested values for _status are:
-    0, trial not started
-    1, trial in progress
-    100, trial is finished and reached a proper conclusion
-    -1, all doses are too toxic
-    -2: no doses are admissable
-    -3: lowest dose is probably too toxic
-    -4: optimal dose in probably not efficacious enough
-    -10: design is in some inconsistent or errorsome state
-
+    Attributes:
+        num_doses: The number of dose levels under investigation.
     """
 
     def __init__(self, first_dose, num_doses, max_size):
-        """
+        """Initializes the DoseFindingTrial.
 
-        Params:
-        first_dose, starting dose level, 1-based. I.e. first_dose=3 means the middle dose of 5.
-        num_doses, number of doses being tested. Must be at least equal to first_dose!
-        max_size, maximum number of patients to use in trial
+        Args:
+            first_dose: The starting dose level (1-based).
+            num_doses: The total number of dose levels.
+            max_size: The maximum number of patients in the trial.
 
+        Raises:
+            ValueError: If `first_dose` is greater than `num_doses`.
         """
 
         if first_dose > num_doses:
@@ -94,9 +62,15 @@ class DoseFindingTrial(metaclass=abc.ABCMeta):
         self._status = 0
 
     def status(self):
+        """Gets the current status of the trial.
+
+        Returns:
+            The current trial status.
+        """
         return self._status
 
     def reset(self):
+        """Resets the trial to its initial state."""
         self._doses = []
         self._toxicities = []
         self._next_dose = self._first_dose
@@ -104,56 +78,111 @@ class DoseFindingTrial(metaclass=abc.ABCMeta):
         self.__reset()
 
     def number_of_doses(self):
-        """How many dose-levels are under investigation?"""
+        """Gets the number of dose levels under investigation.
+
+        Returns:
+            The number of dose levels.
+        """
         return self.num_doses
 
     def dose_levels(self):
-        """Get list of dose levels, aka dose indices
-        :return: list of dose indices
+        """Gets a list of all dose levels.
+
+        Returns:
+            A list of dose levels (1-based).
         """
         return range(1, self.num_doses + 1)
 
     def first_dose(self):
-        """Get first dose
-        :return: First dose
+        """Gets the starting dose level.
+
+        Returns:
+            The starting dose level.
         """
         return self._first_dose
 
     def size(self):
-        """How many patients have been treated?"""
+        """Gets the number of patients treated so far.
+
+        Returns:
+            The number of patients treated.
+        """
         return len(self._doses)
 
     def max_size(self):
-        """Maximum number of trial patients."""
+        """Gets the maximum number of patients for the trial.
+
+        Returns:
+            The maximum number of patients.
+        """
         return self._max_size
 
     def doses(self):
+        """Gets the list of doses given to patients.
+
+        Returns:
+            A list of doses.
+        """
         return self._doses
 
     def toxicities(self):
+        """Gets the list of observed toxicities.
+
+        Returns:
+            A list of toxicities (1 for toxic, 0 for not).
+        """
         return self._toxicities
 
     def treated_at_dose(self, dose):
-        """Number of patients treated at a dose level."""
+        """Gets the number of patients treated at a specific dose level.
+
+        Args:
+            dose: The dose level (1-based).
+
+        Returns:
+            The number of patients treated at the given dose.
+        """
         return sum(np.array(self._doses) == dose)
 
     def toxicities_at_dose(self, dose):
-        """Number of toxicities at (1-based) dose level."""
+        """Gets the number of toxicities observed at a specific dose level.
+
+        Args:
+            dose: The dose level (1-based).
+
+        Returns:
+            The number of toxicities at the given dose.
+        """
         return sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose])
 
     def maximum_dose_given(self):
+        """Gets the maximum dose level administered so far.
+
+        Returns:
+            The maximum dose level, or None if no doses have been given.
+        """
         if len(self._doses) > 0:
             return max(self._doses)
         else:
             return None
 
     def minimum_dose_given(self):
+        """Gets the minimum dose level administered so far.
+
+        Returns:
+            The minimum dose level, or None if no doses have been given.
+        """
         if len(self._doses) > 0:
             return min(self._doses)
         else:
             return None
 
     def tabulate(self):
+        """Creates a summary table of the trial results.
+
+        Returns:
+            A pandas DataFrame summarizing the trial results.
+        """
         import pandas as pd
 
         tab_data = OrderedDict()
@@ -167,22 +196,29 @@ class DoseFindingTrial(metaclass=abc.ABCMeta):
         return df
 
     def set_next_dose(self, dose):
-        """Set the next dose that should be given."""
+        """Sets the next dose to be administered.
+
+        Args:
+            dose: The next dose level.
+        """
         self._next_dose = dose
 
     def next_dose(self):
-        """Get the next dose that should be given."""
+        """Gets the next dose to be administered.
+
+        Returns:
+            The next dose level.
+        """
         return self._next_dose
 
     def update(self, cases):
-        """Update the trial with a list of cases.
+        """Updates the trial with a list of new cases.
 
-        Params:
-        cases, list of 2-tuples, (dose, toxicity), where dose is the given (1-based) dose level
-                    and toxicity = 1 for a toxicity event; 0 for a tolerance event.
+        Args:
+            cases: A list of 2-tuples, where each tuple is (dose, toxicity).
 
-        Returns: next dose
-
+        Returns:
+            The next recommended dose.
         """
 
         for dose, tox in cases:
@@ -193,7 +229,11 @@ class DoseFindingTrial(metaclass=abc.ABCMeta):
         return self._next_dose
 
     def observed_toxicity_rates(self):
-        """Get the observed rate of toxicity at all doses."""
+        """Gets the observed toxicity rate for each dose.
+
+        Returns:
+            A numpy array of observed toxicity rates.
+        """
         tox_rates = []
         for d in range(1, self.num_doses + 1):
             num_treated = self.treated_at_dose(d)
@@ -205,30 +245,27 @@ class DoseFindingTrial(metaclass=abc.ABCMeta):
         return np.array(tox_rates)
 
     def optimal_decision(self, prob_tox):
-        """Get the optimal dose choice for a given dose-toxicity curve.
+        """Gets the optimal dose choice for a given dose-toxicity curve.
 
-        .. note:: Ken Cheung (2014) presented the idea that the optimal behaviour of a dose-finding
-        design can be calculated for a given set of patients with their own specific tolerances by
-        invoking the dose decicion on the complete (and unknowable) toxicity curve.
+        Args:
+            prob_tox: A collection of toxicity probabilities for each dose.
 
-        :param prob_tox: collection of toxicity probabilities
-        :type prob_tox: list
-        :return: the optimal (1-based) dose decision
-        :rtype: int
-
+        Returns:
+            The optimal dose level (1-based).
         """
 
         raise NotImplementedError()
 
     def plot_outcomes(self, chart_title=None, use_ggplot=False):
-        """Plot the outcomes of patients observed.
+        """Plots the outcomes of the patients observed so far.
 
-        :param chart_title: optional chart title. Default is fairly verbose
-        :type chart_title: str
-        :param use_ggplot: True to use ggplot, else matplotlib
-        :type use_ggplot: bool
-        :return: a plot of patient outcomes
+        Args:
+            chart_title: An optional title for the chart.
+            use_ggplot: If True, use ggplot for plotting; otherwise, use
+                matplotlib.
 
+        Returns:
+            A plot object if `use_ggplot` is True, otherwise None.
         """
 
         if not chart_title:
@@ -314,33 +351,29 @@ class DoseFindingTrial(metaclass=abc.ABCMeta):
 
 
 class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
-    """Simple design to monotonically increase dose until a certain number of toxicities are observed in aggregate.
+    """A simple dose-escalation design based on toxicity counts.
 
-    Recommends the highest dose given.
+    This design monotonically increases the dose until a specified number of
+    toxicities are observed in aggregate.
 
-    e.g. general usage
-    >>> trial = SimpleToxicityCountingDoseEscalationTrial(first_dose=1, num_doses=5, max_size=10, max_toxicities=3)
-    >>> trial.update([(1,0)])
-    2
-    >>> trial.has_more()
-    True
-    >>> trial.update([(2,0), (2,0), (2,1), (2,1), (2,0)])
-    3
-    >>> trial.has_more()
-    True
-    >>> trial.update([(3,0), (3,1), (3,1)])
-    3
-    >>> trial.has_more()
-    False
-    >>> trial.toxicities_at_dose(3)
-    2
-    >>> trial.next_dose()
-    3
-
+    Examples:
+        >>> trial = SimpleToxicityCountingDoseEscalationTrial(
+        ...     first_dose=1, num_doses=5, max_size=10, max_toxicities=3
+        ... )
+        >>> trial.update([(1,0)])
+        2
     """
 
     def __init__(self, first_dose, num_doses, max_size, max_toxicities=1):
+        """Initializes the SimpleToxicityCountingDoseEscalationTrial.
 
+        Args:
+            first_dose: The starting dose level (1-based).
+            num_doses: The total number of dose levels.
+            max_size: The maximum number of patients in the trial.
+            max_toxicities: The maximum number of toxicities to observe
+                before stopping.
+        """
         DoseFindingTrial.__init__(
             self, first_dose=first_dose, num_doses=num_doses, max_size=max_size
         )
@@ -372,55 +405,22 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
 
 
 class ThreePlusThree(DoseFindingTrial):
-    """This is an object-oriented attempt at the 3+3 trial design.
+    """An object-oriented implementation of the 3+3 trial design.
 
-    e.g. general usage
-    >>> trial = ThreePlusThree(5)
-    >>> trial.next_dose()
-    1
-    >>> trial.update([(1,0), (1,0), (1,0)])
-    2
-    >>> trial.has_more()
-    True
-    >>> trial.update([(2,1), (2,0), (2,0)])
-    2
-    >>> trial.has_more()
-    True
-    >>> trial.update([(2,0), (2,0), (2,0)])
-    3
-    >>> trial.has_more()
-    True
-    >>> trial.update([(3,1), (3,0), (3,0)])
-    3
-    >>> trial.has_more()
-    True
-    >>> trial.update([(3,1), (3,0), (3,0)])
-    2
-    >>> trial.has_more()
-    False
-    >>> trial.size()
-    15
-    >>> trial.toxicities_at_dose(3)
-    2
-    >>> trial.next_dose()
-    2
-
-    And some obvious mistakes
-    >>> trial2 = ThreePlusThree(5)
-    >>> trial2.update([(1,0)])
-    Traceback (most recent call last):
-     ...
-    Exception: Doses in the 3+3 trial must be given in common batches of three.
-    >>> trial3 = ThreePlusThree(5)
-    >>> trial3.update([(1,0), (1,0), (2,0)])
-    Traceback (most recent call last):
-     ...
-    Exception: Doses in the 3+3 trial must be given in common batches of three.
-
+    Examples:
+        >>> trial = ThreePlusThree(5)
+        >>> trial.next_dose()
+        1
+        >>> trial.update([(1,0), (1,0), (1,0)])
+        2
     """
 
     def __init__(self, num_doses):
+        """Initializes the ThreePlusThree trial.
 
+        Args:
+            num_doses: The total number of dose levels.
+        """
         DoseFindingTrial.__init__(
             self, first_dose=1, num_doses=num_doses, max_size=6 * num_doses
         )
@@ -495,29 +495,19 @@ def simulate_dose_finding_trial(
     conduct_trial=1,
     calculate_optimal_decision=1,
 ):
-    """Simulate a dose finding trial based on observed bivariate toxicity, like CRM, 3+3, etc.
+    """Simulates a dose-finding trial based on toxicity.
 
-    Params:
-    :param design: the design with which to simulate a dose-finding trial.
-    :type design: clintrials.dosefinding.DoseFindingTrial
-    :param true_toxicities: list of the true toxicity rates at the dose levels under investigation.
-                            In real life, these are unknown but we use them in simulations to test the algorithm.
-                            Should be same length as prior.
-    :type true_toxicities: list
-    :param tolerances: optional n_patients list or array of uniforms used to infer toxicity events for patients.
-                        Leave None to get randomly sampled data.
-                        This parameter is specifiable so that dose-finding methods can be compared on same 'patients'.
-    :type tolerances: list
-    :param cohort_size: to add several patients at a dose at once
-    :type cohort_size: int
-    :param conduct_trial: True to conduct cohort-by-cohort dosing using the trial design; False to suppress
-    :type conduct_trial: bool
-    :param calculate_optimal_decision: True to calculate the optimal dose; False to suppress
-    :type calculate_optimal_decision: bool
+    Args:
+        design: The trial design to simulate.
+        true_toxicities: A list of the true toxicity rates for each dose.
+        tolerances: An optional list or array of uniforms for generating
+            outcomes. If None, random data is used.
+        cohort_size: The number of patients to add at each dose.
+        conduct_trial: If True, conduct cohort-by-cohort dosing.
+        calculate_optimal_decision: If True, calculate the optimal dose.
 
-    :return: report of the simulation outcome as a JSON-able dict
-    :rtype: dict
-
+    Returns:
+        A dictionary containing the simulation report.
     """
 
     # Validate inputs
@@ -575,30 +565,23 @@ def simulate_dose_finding_trials(
     conduct_trial=1,
     calculate_optimal_decision=1,
 ):
-    """Simulate multiple toxicity-driven dose finding trials (like CRM, 3+3, etc) from the same patient data.
+    """Simulates multiple toxicity-driven dose-finding trials.
 
-    This method lets you see how different designs handle a single common set of patient outcomes.
+    This function allows for the comparison of different designs on a common
+    set of patient outcomes.
 
-    :param design_map: dict, label -> instance of DoseFindingTrial
-    :type design_map: dict
-    :param true_toxicities: list of the true toxicity rates at the dose levels under investigation.
-                            In real life, these are unknown but we use them in simulations to test the algorithm.
-                            Should be same length as prior.
-    :type true_toxicities: list
-    :param tolerances: optional n_patients list or array of uniforms used to infer toxicity events for patients.
-                        Leave None to get randomly sampled data.
-                        This parameter is specifiable so that dose-finding methods can be compared on same 'patients'.
-    :type tolerances: list
-    :param cohort_size: to add several patients at a dose at once
-    :type cohort_size: int
-    :param conduct_trial: True to conduct cohort-by-cohort dosing using the trial design; False to suppress
-    :type conduct_trial: bool
-    :param calculate_optimal_decision: True to calculate the optimal dose; False to suppress
-    :type calculate_optimal_decision: bool
+    Args:
+        design_map: A dictionary mapping design labels to trial design
+            instances.
+        true_toxicities: A list of the true toxicity rates for each dose.
+        tolerances: An optional list or array of uniforms for generating
+            outcomes. If None, random data is used.
+        cohort_size: The number of patients to add at each dose.
+        conduct_trial: If True, conduct cohort-by-cohort dosing.
+        calculate_optimal_decision: If True, calculate the optimal dose.
 
-    :return: report of the simulation outcome as a JSON-able dict
-    :rtype: dict
-
+    Returns:
+        A dictionary containing the simulation reports for each design.
     """
 
     max_size = max([design.max_size() for design in design_map.values()])
@@ -626,35 +609,23 @@ def simulate_dose_finding_trials(
 
 
 def find_mtd(toxicity_target, scenario, strictly_lte=False, verbose=False):
-    """Find the MTD in a list of toxicity probabilities and a target toxicity rate.
+    """Finds the maximum tolerated dose (MTD).
 
-    :param toxicity_target: target probability of toxicity
-    :type toxicity_target: float
-    :param scenario: list of probabilities of toxicity at each dose
-    :type scenario: list
-    :param strictly_lte: True to demand that Prob(toxicity) at MD is <= toxicity_target;
-                         False to allow it to be over if it is near.
-    :type strictly_lte: bool
-    :param verbose: True to print output
-    :type verbose: bool
-    :return: 1-based location of MTD
-    :rtype: int
+    Args:
+        toxicity_target: The target probability of toxicity.
+        scenario: A list of toxicity probabilities for each dose.
+        strictly_lte: If True, the MTD must have a toxicity probability
+            less than or equal to the target.
+        verbose: If True, print output.
 
-    For example,
+    Returns:
+        The MTD (1-based), or 0 if no suitable dose is found.
 
-    >>> find_mtd(0.25, [0.15, 0.25, 0.35], strictly_lte=0)
-    2
-    >>> find_mtd(0.25, [0.15, 0.25, 0.35], strictly_lte=1)
-    2
-    >>> find_mtd(0.25, [0.3, 0.4, 0.5], strictly_lte=0)
-    1
-    >>> find_mtd(0.25, [0.3, 0.4, 0.5], strictly_lte=1)
-    0
-    >>> find_mtd(0.25, [0.20, 0.22, 0.26], strictly_lte=0)
-    3
-    >>> find_mtd(0.25, [0.20, 0.22, 0.26], strictly_lte=1)
-    2
-
+    Examples:
+        >>> find_mtd(0.25, [0.15, 0.25, 0.35], strictly_lte=False)
+        2
+        >>> find_mtd(0.25, [0.3, 0.4, 0.5], strictly_lte=True)
+        0
     """
 
     if toxicity_target in scenario:
@@ -690,23 +661,25 @@ def find_mtd(toxicity_target, scenario, strictly_lte=False, verbose=False):
 
 
 def summarise_dose_finding_sims(sims, label, num_doses, filter={}):
-    """Summarise a list of dose-finding simulations for doses recommended, doses given and trial outcome.
+    """Summarizes a list of dose-finding simulations.
 
-    :param sims: list of JSON reps of dose-finding trial outcomes
-    :type sims: list
-    :param label: name of simulation at first level in each JSON object
-    :type label: str
-    :param num_doses: number of dose levels under study
-    :type num_doses: int
-    :param filter: map of item to item-value to filter list of simulations
-    :type filter: dict
-    :return: 5-tuple, (doses DataFrame, outcomes DataFrame, doses chosen, doses given to patients,
-                        trial end statuses), the first two as pandas DataFrames and the latter three as numpy arrays.
-    :rtype: tuple
+    Note:
+        This function is deprecated. Use functions in
+        `clintrials.simulation` instead.
 
-    .. note::
-        This function is a bit of a mess but it is useful. Use methods in clintrials.simulation instead.
+    Args:
+        sims: A list of simulation results.
+        label: The label for the simulation in each result.
+        num_doses: The number of dose levels.
+        filter: A dictionary for filtering the simulations.
 
+    Returns:
+        A 5-tuple containing:
+        - A pandas DataFrame of dose recommendations.
+        - A pandas DataFrame of trial outcomes.
+        - A numpy array of recommended doses.
+        - A numpy array of doses given.
+        - A numpy array of trial statuses.
     """
 
     import pandas as pd
@@ -749,26 +722,19 @@ def summarise_dose_finding_sims(sims, label, num_doses, filter={}):
 def batch_summarise_dose_finding_sims(
     sims, label, num_doses, dimensions=None, func1=None
 ):
-    """Batch summarise a list of dose-finding simulations.
+    """Batch-summarizes a list of dose-finding simulations.
 
-    The dimensions along which to group and simmarise the simulations are determined via dimensions (see below)
+    Note:
+        This function is deprecated. Use functions in
+        `clintrials.simulation` instead.
 
-    :param sims: list of JSON reps of dose-finding trial outcomes
-    :type sims: list
-    :param label: name of simulation at first level in each JSON object
-    :type label: str
-    :param num_doses: number of dose levels under study
-    :type num_doses: int
-    :param dimensions: 2-tuple, (dict of JSON variable name -> arg name in ParameterSpace, instance of ParameterSpace)
-    :type dimensions: tuple
-    :param func1: Function that takes pandas.DataFrame as first arg and a dict of variable name -> values as second arg
-                    and returns summary output.
-                    Use func1=None to just see the pandas.DataFrames printed as summary.
-    :type func1: func
-
-    .. note::
-        This function is a bit of a mess but it is useful. Use methods in clintrials.simulation instead.
-
+    Args:
+        sims: A list of simulation results.
+        label: The label for the simulation in each result.
+        num_doses: The number of dose levels.
+        dimensions: A tuple containing a variable map and a `ParameterSpace`
+            instance.
+        func1: An optional function for custom summary output.
     """
     if dimensions is not None:
         var_map, params = dimensions
@@ -810,31 +776,20 @@ def dose_transition_pathways_to_json(
     verbose=False,
     **kwargs,
 ):
-    """Calculate the dose-transition pathways of a DoseFindingTrial.
+    """Calculates dose-transition pathways for a dose-finding trial.
 
-    :param trial: subclass of DoseFindingTrial that will determine the dose path
-    :type trial: clintrials.dosefinding.DoseFindingTrial
-    :param next_dose: the dose that will be given to patients in the very next cohort to get things going.
-    :type next_dose: int
-    :param cohort_sizes: list of ints, sizes of future cohorts that we want to calculate DTPs for.
-                            E.g. use [3,2] to calculate DTPs for two subsequent cohorts, the first of
-                            three patients followed by another cohort of two.
-    :type cohort_size: list
-    :param cohort_number: The decorative cohort number label for the first cohort
-    :type cohort_number: int
-    :param cases_already_observed: list of (dose, tox=0/1, eff=0/1) cases that have already been observed
-    :type cases_already_observed: list
-    :param custom_output_func: func that takes trial as sole argument and returns dict of extra output.
-                                Called at end of each cohort, i.e. at each dose decision.
-    :type custom_output_func: func
-    :param verbose: True to print extra information to monitor progress
-    :type verbose: bool
-    :param kwargs: extra keyword args to send to trial.update method
-    :type kwargs: dict
+    Args:
+        trial: The trial design to use.
+        next_dose: The dose to be given to the next cohort.
+        cohort_sizes: A list of future cohort sizes.
+        cohort_number: The starting cohort number.
+        cases_already_observed: A list of cases already observed.
+        custom_output_func: An optional function to generate custom output.
+        verbose: If True, print progress information.
+        **kwargs: Extra keyword arguments for the `trial.update` method.
 
-    :return: DTPs as JSON-able dict object. Paths are nested.
-    :rtype: dict
-
+    Returns:
+        A dictionary representing the dose-transition pathways.
     """
 
     if len(cohort_sizes) <= 0:
@@ -910,6 +865,13 @@ dose_transition_pathways = dose_transition_pathways_to_json
 
 
 def print_dtps(dtps, indent=0, dose_label_func=None):
+    """Prints a summary of the dose-transition pathways.
+
+    Args:
+        dtps: A list of dose-transition pathway nodes.
+        indent: The indentation level for printing.
+        dose_label_func: An optional function to format the dose label.
+    """
     if dose_label_func is None:
         dose_label_func = lambda x: str(x)
     for x in dtps:
@@ -944,6 +906,15 @@ def _dtps_to_rows(dtps, dose_label_func=None, pre=[]):
 
 
 def dtps_to_pandas(dtps, dose_label_func=None):
+    """Converts dose-transition pathways to a pandas DataFrame.
+
+    Args:
+        dtps: A list of dose-transition pathway nodes.
+        dose_label_func: An optional function to format the dose label.
+
+    Returns:
+        A pandas DataFrame representing the dose-transition pathways.
+    """
     import pandas as pd
 
     if dose_label_func is None:

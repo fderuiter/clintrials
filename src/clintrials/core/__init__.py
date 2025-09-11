@@ -1,1 +1,1 @@
-# This file marks the `core` directory as a Python package.
+"""Core modules for clinical trial simulations."""

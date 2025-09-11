@@ -22,43 +22,30 @@ def bayesian_2stage_dich_design(
     prior_b=1,
     labels=["StopAtInterim", "StopAtFinal", "GoAtFinal"],
 ):
-    """Calculate the outcome probabilities for a two-stage Bayesian trial of a dichotomous variable.
+    """Calculates outcome probabilities for a two-stage Bayesian design.
 
-    We test the hypotheses H0: theta<p0 vs H1: theta>p1, stopping at interim if Prob(theta < p0 | data) > p,
-     stopping at final analysis if Prob(theta < p0 | data) > q, otherwise concluding that theta > p1.
+    This function tests the hypotheses H0: theta < p0 vs H1: theta > p1.
 
-    .. note:: this is Prof Lucinda Billingham's dichotomous design used in the National Lung Matrix trial.
+    Args:
+        theta: The true efficacy probability.
+        p0: The lower bound probability for the null hypothesis.
+        p1: The upper bound probability for the alternative hypothesis.
+        N0: The number of participants at the interim stage.
+        N1: The number of participants at the final stage.
+        p: The certainty required to reject H0 at the interim stage.
+        q: The certainty required to accept H1 at the final stage.
+        prior_a: The alpha parameter for the Beta prior distribution.
+        prior_b: The beta parameter for the Beta prior distribution.
+        labels: Labels for the outcomes.
 
-    :param theta: the true efficacy
-    :type theta: float
-    :param p0: hypothesised lower bound probability
-    :type p0: float
-    :param p1: hypothesised upper bound probability
-    :type p1: float
-    :param N0: number of participants at interim stage
-    :type N0: int
-    :param N1: number of participants at final stage
-    :type N1: int
-    :param p: certainty needed to reject H0 at end of interim stage
-    :type p: float
-    :param q: certainty needed to accept H1 at end of final stage
-    :type q: float
-    :param prior_a: first parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_a: float
-    :param prior_b: second parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_b: float
-    :param labels: labels for the cases of stopping at interim, stopping at final, and approving at final analysis.
-    :type labels: list
-    :return: dict, mapping outcome label to probability
-    :rtype: dict
+    Returns:
+        A dictionary mapping outcome labels to their probabilities.
 
-    e.g.
-
-    >>> res = bayesian_2stage_dich_design(0.35, 0.2, 0.4, 15, 30, 0.8, 0.6)
-    >>> res == {'GoAtFinal': 0.21978663862560768, 'StopAtFinal': 0.76603457678233555,
-    ...         'StopAtInterim': 0.014178784592056803}
-    True
-
+    Examples:
+        >>> res = bayesian_2stage_dich_design(0.35, 0.2, 0.4, 15, 30, 0.8, 0.6)
+        >>> res == {'GoAtFinal': 0.21978663862560768, 'StopAtFinal': 0.76603457678233555,
+        ...         'StopAtInterim': 0.014178784592056803}
+        True
     """
 
     a, b = prior_a, prior_b
@@ -87,38 +74,25 @@ def bayesian_2stage_dich_design_df(
     prior_b=1,
     labels=["StopAtInterim", "StopAtFinal", "GoAtFinal"],
 ):
-    """Calculate the outcome probabilities for a two-stage Bayesian trial of a dichotomous variable.
+    """Calculates outcome probabilities for a two-stage Bayesian design.
 
-    We test the hypotheses H0: theta<p0 vs H1: theta>p1, stopping at interim if Prob(theta < p0 | data) > p,
-     stopping at final analysis if Prob(theta < p0 | data) > q, otherwise concluding that theta > p1.
+    This function is similar to `bayesian_2stage_dich_design` but returns
+    a pandas DataFrame with more detailed information.
 
-    .. note:: this is Prof Lucinda Billingham's dichotomous design used in the National Lung Matrix trial.
+    Args:
+        theta: The true efficacy probability.
+        p0: The lower bound probability for the null hypothesis.
+        p1: The upper bound probability for the alternative hypothesis.
+        N0: The number of participants at the interim stage.
+        N1: The number of participants at the final stage.
+        p: The certainty required to reject H0 at the interim stage.
+        q: The certainty required to accept H1 at the final stage.
+        prior_a: The alpha parameter for the Beta prior distribution.
+        prior_b: The beta parameter for the Beta prior distribution.
+        labels: Labels for the outcomes.
 
-    :param theta: the true efficacy
-    :type theta: float
-    :param p0: hypothesised lower bound probability
-    :type p0: float
-    :param p1: hypothesised upper bound probability
-    :type p1: float
-    :param N0: number of participants at interim stage
-    :type N0: int
-    :param N1: number of participants at final stage
-    :type N1: int
-    :param p: certainty needed to reject H0 at end of interim stage
-    :type p: float
-    :param q: certainty needed to accept H1 at end of final stage
-    :type q: float
-    :param prior_a: first parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_a: float
-    :param prior_b: second parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_b: float
-    :param labels: labels for the cases of stopping at interim, stopping at final, and approving at final analysis.
-    :type labels: list
-    :return: dict, mapping outcome label to probability
-    :rtype: dict
-
-    See bayesian_2stage_dich_design
-
+    Returns:
+        A pandas DataFrame with detailed results.
     """
 
     a, b = prior_a, prior_b
@@ -149,25 +123,21 @@ def bayesian_2stage_dich_design_df(
 
 
 def chisqu_two_arm_comparison(p0, p1, n, alpha):
-    """Test that p1 exceeds p0 with n patients per arm using the chi-squared distribution.
+    """Performs a chi-squared test for two proportions.
 
-    :param p0: first proportion
-    :type p0: float
-    :param p1: second proportion
-    :type p1: float
-    :param n: n patients per arm
-    :type n: int
-    :param alpha: significance
-    :type alpha: float
-    :param to_pandas: True to get results as pandas.DataFrame else dict
-    :type to_pandas: bool
-    :return: tuple -- (probability of rejecting, probability of not-rejecting)
+    Args:
+        p0: The first proportion.
+        p1: The second proportion.
+        n: The number of patients per arm.
+        alpha: The significance level.
 
-    E.g.
+    Returns:
+        A tuple containing the probability of rejecting the null hypothesis
+        and the probability of not rejecting it.
 
-    >>> chisqu_two_arm_comparison(0.3, 0.5, 20, 0.05)
-    (0.34534530091794574, 0.65465469908205098)
-
+    Examples:
+        >>> chisqu_two_arm_comparison(0.3, 0.5, 20, 0.05)
+        (0.34534530091794574, 0.65465469908205098)
     """
 
     n0, n1 = zip(*list(product(range(n + 1), range(n + 1))))

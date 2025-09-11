@@ -1,3 +1,5 @@
+"""A library of clinical trial designs and methods."""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 

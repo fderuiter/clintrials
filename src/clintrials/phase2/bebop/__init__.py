@@ -35,41 +35,18 @@ from clintrials.core.stats import ProbabilityDensitySample
 
 
 class BeBOP:
-    """ """
+    """A class for the BeBOP trial design."""
 
     def __init__(self, theta_priors, efficacy_model, toxicity_model, joint_model):
-        """
+        """Initializes the BeBOP trial.
 
-        Params:
-        :param theta_priors: list of prior distributions for elements of parameter vector, theta.
-                        Each prior object should support obj.ppf(x) and obj.pdf(x) like classes in scipy
-        :param efficacy_model: func with signature x, theta; where x is a case vector and theta a 2d array of
-          parameter values, the first column containing values for the first parameter, the second column the
-          second parameter, etc, so that each row in theta is a single parameter set. Function should return probability
-          of efficacy of case x under each parameter set (i.e. each row of theta) so that a 1*len(theta) array should
-          be returned.
-        :param toxicity_model: func with signature x, theta; where x is a case vector and theta a 2d array of
-          parameter values, the first column containing values for the first parameter, the second column the
-          second parameter, etc, so that each row in theta is a single parameter set. Function should return probability
-          of toxicity of case x under each parameter set (i.e. each row of theta) so that a 1*len(theta) array should
-          be returned.
-        :param joint_model: func with signature x, theta; where x is a case vector and theta a 2d array of
-          parameter values, the first column containing values for the first parameter, the second column the
-          second parameter, etc, so that each row in theta is a single parameter set. Function should return the joint
-          probability of efficacy and toxicity of case x under each parameter set (i.e. each row of theta) so that
-          a 1*len(theta) array should be returned. Generally this method would use efficacy_model and toxicity_model.
-          For non-associated events, for instance, the simple product of efficacy_model(x, theta) and
-          toxicity_model(x, theta) would do the job. For associated events, more complexity is required.
-
-        In case vector x, the element x[0] should be boolean efficacy variable, with 1 showing efficacy occurred.
-        In case vector x, the element x[1] should be boolean toxicity variable, with 1 showing toxicity occurred.
-
-        See clintrials.phase2.bebop.peps2v2 for a working trio of efficacy_model, toxicity_model and joint_model that
-        allow for associated efficacy and toxicity events.
-
-        Note: efficacy_model, toxicity_model and joint_model should be vectorised to work with one case and many
-        parameter sets (rather than just many cases and one parameter set) for quick integration using Monte Carlo.
-
+        Args:
+            theta_priors: A list of prior distributions for the model
+                parameters.
+            efficacy_model: A function to calculate the probability of efficacy.
+            toxicity_model: A function to calculate the probability of toxicity.
+            joint_model: A function to calculate the joint probability of
+                efficacy and toxicity.
         """
 
         self.priors = theta_priors
@@ -80,6 +57,7 @@ class BeBOP:
         self.reset()
 
     def reset(self):
+        """Resets the trial to its initial state."""
         self.cases = []
         self._pds = None
 
@@ -91,15 +69,38 @@ class BeBOP:
             return numpy.ones(len(theta))
 
     def size(self):
+        """Gets the number of patients treated so far.
+
+        Returns:
+            The number of patients treated.
+        """
         return len(self.cases)
 
     def efficacies(self):
+        """Gets the efficacy outcome for each patient.
+
+        Returns:
+            A list of efficacy outcomes.
+        """
         return [case[0] for case in self.cases]
 
     def toxicities(self):
+        """Gets the toxicity outcome for each patient.
+
+        Returns:
+            A list of toxicity outcomes.
+        """
         return [case[1] for case in self.cases]
 
     def get_case_elements(self, i):
+        """Gets the i-th element for each case.
+
+        Args:
+            i: The index of the element to get.
+
+        Returns:
+            A list of the i-th elements.
+        """
         return [case[i] for case in self.cases]
 
     def update(self, cases, n=10**6, epsilon=0.00001, **kwargs):
@@ -171,6 +172,19 @@ class BeBOP:
     def predict(
         self, cases, eff_cutoff, tox_cutoff, to_pandas=False, estimate_ci=False
     ):
+        """Makes predictions for a given set of cases.
+
+        Args:
+            cases: A list of case vectors.
+            eff_cutoff: The efficacy cutoff.
+            tox_cutoff: The toxicity cutoff.
+            to_pandas: If True, returns a pandas DataFrame.
+            estimate_ci: If True, includes confidence intervals in the
+                output.
+
+        Returns:
+            A list of predictions or a pandas DataFrame.
+        """
         if self._pds is not None:
             pds = self._pds
             samp = pds._samp
@@ -206,6 +220,11 @@ class BeBOP:
             return None
 
     def get_posterior_param_means(self):
+        """Gets the posterior means of the model parameters.
+
+        Returns:
+            A numpy array of the posterior means.
+        """
         if self._pds:
             return numpy.apply_along_axis(
                 lambda x: self._pds.expectation(x), 0, self._pds._samp
@@ -214,10 +233,15 @@ class BeBOP:
             return []
 
     def theta_estimate(self, i, alpha=0.05):
-        """Get posterior confidence interval and mean estimate of element i in parameter vector.
+        """Gets the posterior confidence interval and mean for a parameter.
 
-        Returns (lower, mean, upper)
+        Args:
+            i: The index of the parameter.
+            alpha: The significance level for the confidence interval.
 
+        Returns:
+            A tuple containing the lower bound, mean, and upper bound of the
+            parameter estimate.
         """
 
         if j < len(self.priors):
