@@ -1,40 +1,11 @@
 # clintrials
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Documentation Status](https://fderuiter.github.io/clintrials/badge.svg)](https://fderuiter.github.io/clintrials)
+
 `clintrials` is a Python library for designing and simulating clinical trials. It provides implementations of various trial designs, with a focus on early-phase oncology trials.
 
-## Features
-
-*   **Dose-Finding Designs:**
-    *   Continual Reassessment Method (CRM)
-    *   Efficacy-Toxicity (EffTox) design by Thall & Cook
-    *   Efficacy-Toxicity design by Wages & Tait
-    *   BEBOP design for bivariate binary outcomes with predictive variables
-*   **Phase II Designs:**
-    *   Two-stage Bayesian design for dichotomous endpoints
-    *   Chi-squared test for two-arm comparison
-*   **Phase III Designs:**
-    *   Group Sequential Designs (GSDs) with Pocock and O'Brien-Fleming-like spending functions
-*   **Simulation Tools:**
-    *   Tools for simulating patient recruitment and trial outcomes
-    *   Parameter space exploration for simulation studies
-*   **Interactive Dashboard:**
-    *   A web-based dashboard for visualizing simulation results.
-
-## Project Structure
-
-The repository is organized as follows:
-
-*   `clintrials/`: The main Python package containing the library's source code.
-    *   `core/`: Core components like math functions, simulation tools, and statistical utilities.
-    *   `dosefinding/`: Implementations of various dose-finding trial designs.
-    *   `phase2/`: Implementations of Phase II trial designs.
-    *   `phase3/`: Implementations of Phase III trial designs.
-    *   `winratio/`: Tools for win-ratio analysis.
-    *   `dashboard/`: The source code for the interactive web dashboard.
-*   `docs/`: Documentation files, including tutorials and user guides.
-*   `tests/`: Unit tests for the library.
-
-## Installation
+## Getting Started
 
 To get started with `clintrials`, you can install it using Poetry. If you don't have Poetry installed, you can install it with pip:
 
@@ -53,8 +24,6 @@ This will create a virtual environment with all the necessary packages. To activ
 ```bash
 poetry shell
 ```
-
-## Usage
 
 Here is a simple example of how to use the `CRM` class to simulate a dose-finding trial:
 
@@ -82,6 +51,38 @@ trial.update([(3, 0), (3, 0), (3, 0)])
 next_dose = trial.next_dose()
 print(f"Next dose after update: {next_dose}")
 ```
+
+## Features
+
+*   **Dose-Finding Designs:**
+    *   **Continual Reassessment Method (CRM):** A Bayesian design for dose-finding based on toxicity.
+    *   **Efficacy-Toxicity (EffTox) by Thall & Cook:** A design that models both efficacy and toxicity to find the optimal dose.
+    *   **Efficacy-Toxicity by Wages & Tait:** An adaptive Bayesian design for seamless Phase I/II trials.
+    *   **BEBOP (Bayesian Evaluation of Bivariate Binary Outcomes with Predictive variables):** A design for trials with two binary outcomes and predictive covariates.
+*   **Phase II Designs:**
+    *   **Two-Stage Bayesian Design:** A design for single-arm trials with a dichotomous endpoint.
+    *   **Chi-Squared Test:** For comparing two arms with binary outcomes.
+*   **Phase III Designs:**
+    *   **Group Sequential Designs (GSDs):** With Pocock and O'Brien-Fleming-like spending functions for interim analyses.
+*   **Simulation Tools:**
+    *   **Patient Recruitment:** Simulate patient arrival times with constant or time-varying intensity.
+    *   **Parameter Space Exploration:** Tools for running simulations over a grid of parameters.
+*   **Interactive Dashboard:**
+    *   A web-based dashboard built with Streamlit for visualizing simulation results.
+
+## Project Structure
+
+The repository is organized as follows:
+
+*   `clintrials/`: The main Python package.
+    *   `core/`: Core components like math functions, numerical integration routines, patient recruitment models, simulation tools, statistical utilities, and time-to-event models.
+    *   `dosefinding/`: Implementations of various dose-finding trial designs, including CRM, EffTox, and Wages & Tait.
+    *   `phase2/`: Implementations of Phase II trial designs, including a two-stage Bayesian design and the BEBOP design.
+    *   `phase3/`: Implementations of Phase III trial designs, including Group Sequential Designs.
+    *   `winratio/`: Tools for win-ratio analysis.
+    *   `dashboard/`: The source code for the interactive web dashboard.
+*   `docs/`: Documentation files, including tutorials and API reference.
+*   `tests/`: Unit tests for the library.
 
 ## Interactive Dashboard
 

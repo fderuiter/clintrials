@@ -1,3 +1,7 @@
+"""
+Numerical integration routines for Bayesian models.
+"""
+
 import warnings
 
 import numpy as np

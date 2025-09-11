@@ -1,7 +1,10 @@
+"""
+Time-to-event trial designs.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-""" Time-to-event trial designs """
 
 from collections import OrderedDict
 

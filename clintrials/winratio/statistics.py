@@ -7,7 +7,8 @@ from scipy.stats import norm
 
 
 def calculate_confidence_intervals(wr: float, wins: int, losses: int):
-    """Calculates the 95% confidence intervals for the win ratio.
+    """
+    Calculate the 95% confidence intervals for the win ratio.
 
     Args:
         wr (float): The win ratio.
@@ -32,7 +33,8 @@ def calculate_confidence_intervals(wr: float, wins: int, losses: int):
 
 
 def calculate_p_value(wr: float, wins: int, losses: int) -> float:
-    """Calculates the p-value for the observed win ratio.
+    """
+    Calculate the p-value for the observed win ratio.
 
     Args:
         wr (float): The win ratio.
@@ -49,7 +51,8 @@ def calculate_p_value(wr: float, wins: int, losses: int) -> float:
 
 
 def calculate_win_ratio(wins: int, losses: int) -> float:
-    """Calculates the win ratio.
+    """
+    Calculate the win ratio.
 
     Args:
         wins (int): The number of wins.

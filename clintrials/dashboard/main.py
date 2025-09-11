@@ -1,3 +1,7 @@
+"""
+Main entry point for the Streamlit dashboard.
+"""
+
 import json
 
 import streamlit as st

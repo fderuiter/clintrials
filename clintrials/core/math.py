@@ -1,8 +1,9 @@
+"""
+Common, useful functions in the statistics and mathematics of clinical trials.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
-
-
-""" Common, useful functions in the statistics and mathematics of clinical trials. """
 
 import numpy as np
 
@@ -133,6 +134,10 @@ def hyperbolic_tan(x, a0=0, beta=0):
 
     Returns:
         float: The result of the hyperbolic tangent function.
+
+    Examples:
+        >>> hyperbolic_tan(0.5, beta=1)
+        0.559...
     """
     return ((np.tanh(x) + 1) / 2) ** np.exp(beta)
 
@@ -151,6 +156,10 @@ def inverse_hyperbolic_tan(x, a0=0, beta=0):
 
     Returns:
         float: The result of the inverse hyperbolic tangent function.
+
+    Examples:
+        >>> inverse_hyperbolic_tan(0.559..., beta=1)
+        0.5
     """
     return np.arctanh(2 * x ** np.exp(-beta) - 1)
 
@@ -169,6 +178,10 @@ def logit1(x, a0=3, beta=0):
 
     Returns:
         float: The logistic function value.
+
+    Examples:
+        >>> logit1(0.5, beta=1)
+        0.972...
     """
     beta = np.clip(beta, -10, 10)
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
@@ -186,6 +199,10 @@ def inverse_logit1(x, a0=3, beta=0):
 
     Returns:
         float: The inverse logistic function value.
+
+    Examples:
+        >>> inverse_logit1(0.972..., beta=1)
+        0.5
     """
     beta = np.clip(beta, -10, 10)
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
