@@ -15,22 +15,24 @@ def generate_data(
     p_y3_A: float,
     p_y3_B: float,
 ):
-    """Generate data for treatment (A) and control (B) groups.
+    """
+    Generate data for treatment (A) and control (B) groups.
 
     Each subject has three binary outcomes (y1, y2, y3).
 
     Args:
-        num_subjects_A: Number of subjects in Group A.
-        num_subjects_B: Number of subjects in Group B.
-        p_y1_A: Probability of outcome ``y1`` equals 1 for Group A.
-        p_y1_B: Probability of outcome ``y1`` equals 1 for Group B.
-        p_y2_A: Probability of outcome ``y2`` equals 1 for Group A.
-        p_y2_B: Probability of outcome ``y2`` equals 1 for Group B.
-        p_y3_A: Probability of outcome ``y3`` equals 1 for Group A.
-        p_y3_B: Probability of outcome ``y3`` equals 1 for Group B.
+        num_subjects_A (int): Number of subjects in Group A.
+        num_subjects_B (int): Number of subjects in Group B.
+        p_y1_A (float): Probability of outcome ``y1`` equals 1 for Group A.
+        p_y1_B (float): Probability of outcome ``y1`` equals 1 for Group B.
+        p_y2_A (float): Probability of outcome ``y2`` equals 1 for Group A.
+        p_y2_B (float): Probability of outcome ``y2`` equals 1 for Group B.
+        p_y3_A (float): Probability of outcome ``y3`` equals 1 for Group A.
+        p_y3_B (float): Probability of outcome ``y3`` equals 1 for Group B.
 
     Returns:
-        Two arrays representing the subjects in Groups A and B respectively.
+        tuple[numpy.ndarray, numpy.ndarray]: Two arrays representing the
+            subjects in Groups A and B respectively.
     """
     group_A = np.vstack(
         [

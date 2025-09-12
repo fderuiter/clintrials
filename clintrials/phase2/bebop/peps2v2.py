@@ -1,43 +1,69 @@
+"""
+Probability models for the BeBOP model used in PePS2 trial.
+
+In PePS2, the patient vector is x and D is a list of x instances, where:
+- x[0] is efficacy event
+- x[1] is toxicity event
+- x[2] is pre-treated group membership dummy
+- x[3] is low PD-L1 group membership dummy
+- x[4] is middle PD-L1 group membership dummy
+
+The parameter vector is theta:
+- theta[0] is efficacy model intercept
+- theta[1] is efficacy model pre-treated group coeff
+- theta[2] is efficacy model low PD-L1 group coeff
+- theta[3] is efficacy model middle PD-L1 group coeff
+- theta[4] is toxicity model intercept
+- theta[5] is association param
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-
-""" Probability models for the BeBOP model used in PePS2 trial.
-
-In PePS2, the patient vector is x and D is a list of x instances, where:
-
-x[0] is efficacy event
-x[1] is toxicity event
-x[2] is pre-treated group membership dummy
-x[3] is low PD-L1 group membership dummy
-x[4] is middle PD-L1 group membership dummy
-
-The parameter vector is theta:
-theta[0] is efficacy model intercept
-theta[1] is efficacy model pre-treated group coeff
-theta[2] is efficacy model low PD-L1 group coeff
-theta[3] is efficacy model middle PD-L1 group coeff
-theta[4] is toxicity model intercept
-theta[5] is association param
-
-"""
 
 import numpy
 
 
 def pi_e(x, theta):
+    """Calculates the probability of efficacy.
+
+    Args:
+        x (numpy.ndarray): A patient data vector.
+        theta (numpy.ndarray): A 2D array of model parameters.
+
+    Returns:
+        numpy.ndarray: An array of efficacy probabilities.
+    """
     z = theta[:, 0] + theta[:, 1] * x[2] + theta[:, 2] * x[3] + theta[:, 3] * x[4]
     return 1 / (1 + numpy.exp(-z))
 
 
 def pi_t(x, theta):
+    """Calculates the probability of toxicity.
+
+    Args:
+        x (numpy.ndarray): A patient data vector.
+        theta (numpy.ndarray): A 2D array of model parameters.
+
+    Returns:
+        numpy.ndarray: An array of toxicity probabilities.
+    """
     z = theta[:, 4]
     return 1 / (1 + numpy.exp(-z))
 
 
 def pi_ab(x, theta):
-    b = x[0]  # had efficacy
-    a = x[1]  # had_toxicity
+    """Calculates the joint probability of efficacy and toxicity.
+
+    Args:
+        x (numpy.ndarray): A patient data vector.
+        theta (numpy.ndarray): A 2D array of model parameters.
+
+    Returns:
+        numpy.ndarray: An array of joint probabilities.
+    """
+    b = x[0]
+    a = x[1]
     psi = theta[:, 5]
     pe = pi_e(x, theta)
     pt = pi_t(x, theta)

@@ -8,14 +8,18 @@ from .compare import compare_subjects
 
 
 def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
-    """Compare every treatment subject with every control subject.
+    """
+    Compare every treatment subject with every control subject.
 
     Args:
-        treatment_group: 2D array of subjects in the treatment group.
-        control_group: 2D array of subjects in the control group.
+        treatment_group (numpy.ndarray): 2D array of subjects in the
+            treatment group.
+        control_group (numpy.ndarray): 2D array of subjects in the control
+            group.
 
     Returns:
-        Counts of wins, losses and ties for the treatment group.
+        dict[str, int]: Counts of wins, losses and ties for the treatment
+            group.
     """
     results = {"wins": 0, "losses": 0, "ties": 0}
     for treatment_subj in treatment_group:

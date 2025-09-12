@@ -1,7 +1,10 @@
+"""
+Implementations of simple phase II clinical trial designs.
+"""
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-""" Implementations of simple phase II clinical trial designs. Long, complicated designs belong in own modules. """
 
 from collections import OrderedDict
 from itertools import product
@@ -22,45 +25,36 @@ def bayesian_2stage_dich_design(
     prior_b=1,
     labels=["StopAtInterim", "StopAtFinal", "GoAtFinal"],
 ):
-    """Calculate the outcome probabilities for a two-stage Bayesian trial of a dichotomous variable.
+    """Calculates outcome probabilities for a two-stage Bayesian trial.
 
-    We test the hypotheses H0: theta<p0 vs H1: theta>p1, stopping at interim if Prob(theta < p0 | data) > p,
-     stopping at final analysis if Prob(theta < p0 | data) > q, otherwise concluding that theta > p1.
+    This function calculates the probabilities of stopping at the interim
+    analysis, stopping at the final analysis, or declaring success at the
+    final analysis for a two-stage Bayesian design with a dichotomous
+    endpoint.
 
-    .. note:: this is Prof Lucinda Billingham's dichotomous design used in the National Lung Matrix trial.
+    Args:
+        theta (float): The true efficacy rate.
+        p0 (float): The lower bound for the efficacy rate (null hypothesis).
+        p1 (float): The upper bound for the efficacy rate (alternative
+            hypothesis).
+        N0 (int): The number of patients in the first stage.
+        N1 (int): The total number of patients in both stages.
+        p (float): The posterior probability threshold for stopping at the
+            interim analysis.
+        q (float): The posterior probability threshold for declaring success
+            at the final analysis.
+        prior_a (float, optional): The alpha parameter of the beta prior
+            distribution for theta. Defaults to 1.
+        prior_b (float, optional): The beta parameter of the beta prior
+            distribution for theta. Defaults to 1.
+        labels (list[str], optional): The labels for the three possible
+            outcomes. Defaults to ["StopAtInterim", "StopAtFinal",
+            "GoAtFinal"].
 
-    :param theta: the true efficacy
-    :type theta: float
-    :param p0: hypothesised lower bound probability
-    :type p0: float
-    :param p1: hypothesised upper bound probability
-    :type p1: float
-    :param N0: number of participants at interim stage
-    :type N0: int
-    :param N1: number of participants at final stage
-    :type N1: int
-    :param p: certainty needed to reject H0 at end of interim stage
-    :type p: float
-    :param q: certainty needed to accept H1 at end of final stage
-    :type q: float
-    :param prior_a: first parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_a: float
-    :param prior_b: second parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_b: float
-    :param labels: labels for the cases of stopping at interim, stopping at final, and approving at final analysis.
-    :type labels: list
-    :return: dict, mapping outcome label to probability
-    :rtype: dict
-
-    e.g.
-
-    >>> res = bayesian_2stage_dich_design(0.35, 0.2, 0.4, 15, 30, 0.8, 0.6)
-    >>> res == {'GoAtFinal': 0.21978663862560768, 'StopAtFinal': 0.76603457678233555,
-    ...         'StopAtInterim': 0.014178784592056803}
-    True
-
+    Returns:
+        dict: A dictionary mapping the outcome labels to their
+            probabilities.
     """
-
     a, b = prior_a, prior_b
     n0, n1 = zip(*product(range(N0 + 1), range(N1 - N0 + 1)))
     n0, n1 = np.array(n0), np.array(n1)
@@ -87,40 +81,35 @@ def bayesian_2stage_dich_design_df(
     prior_b=1,
     labels=["StopAtInterim", "StopAtFinal", "GoAtFinal"],
 ):
-    """Calculate the outcome probabilities for a two-stage Bayesian trial of a dichotomous variable.
+    """Calculates outcome probabilities and returns a DataFrame.
 
-    We test the hypotheses H0: theta<p0 vs H1: theta>p1, stopping at interim if Prob(theta < p0 | data) > p,
-     stopping at final analysis if Prob(theta < p0 | data) > q, otherwise concluding that theta > p1.
+    This function is similar to `bayesian_2stage_dich_design`, but it
+    returns a pandas DataFrame with detailed information about each possible
+    outcome.
 
-    .. note:: this is Prof Lucinda Billingham's dichotomous design used in the National Lung Matrix trial.
+    Args:
+        theta (float): The true efficacy rate.
+        p0 (float): The lower bound for the efficacy rate (null hypothesis).
+        p1 (float): The upper bound for the efficacy rate (alternative
+            hypothesis).
+        N0 (int): The number of patients in the first stage.
+        N1 (int): The total number of patients in both stages.
+        p (float): The posterior probability threshold for stopping at the
+            interim analysis.
+        q (float): The posterior probability threshold for declaring success
+            at the final analysis.
+        prior_a (float, optional): The alpha parameter of the beta prior
+            distribution for theta. Defaults to 1.
+        prior_b (float, optional): The beta parameter of the beta prior
+            distribution for theta. Defaults to 1.
+        labels (list[str], optional): The labels for the three possible
+            outcomes. Defaults to ["StopAtInterim", "StopAtFinal",
+            "GoAtFinal"].
 
-    :param theta: the true efficacy
-    :type theta: float
-    :param p0: hypothesised lower bound probability
-    :type p0: float
-    :param p1: hypothesised upper bound probability
-    :type p1: float
-    :param N0: number of participants at interim stage
-    :type N0: int
-    :param N1: number of participants at final stage
-    :type N1: int
-    :param p: certainty needed to reject H0 at end of interim stage
-    :type p: float
-    :param q: certainty needed to accept H1 at end of final stage
-    :type q: float
-    :param prior_a: first parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_a: float
-    :param prior_b: second parameter to Beta distribution to describe prior beliefs about theta
-    :type prior_b: float
-    :param labels: labels for the cases of stopping at interim, stopping at final, and approving at final analysis.
-    :type labels: list
-    :return: dict, mapping outcome label to probability
-    :rtype: dict
-
-    See bayesian_2stage_dich_design
-
+    Returns:
+        pandas.DataFrame: A DataFrame with detailed information about each
+            possible outcome.
     """
-
     a, b = prior_a, prior_b
     n0, n1 = zip(*product(range(N0 + 1), range(N1 - N0 + 1)))
     n0, n1 = np.array(n0), np.array(n1)
@@ -149,27 +138,22 @@ def bayesian_2stage_dich_design_df(
 
 
 def chisqu_two_arm_comparison(p0, p1, n, alpha):
-    """Test that p1 exceeds p0 with n patients per arm using the chi-squared distribution.
+    """Performs a chi-squared test for a two-arm comparison.
 
-    :param p0: first proportion
-    :type p0: float
-    :param p1: second proportion
-    :type p1: float
-    :param n: n patients per arm
-    :type n: int
-    :param alpha: significance
-    :type alpha: float
-    :param to_pandas: True to get results as pandas.DataFrame else dict
-    :type to_pandas: bool
-    :return: tuple -- (probability of rejecting, probability of not-rejecting)
+    This function calculates the power of a chi-squared test to detect a
+    difference between two proportions.
 
-    E.g.
+    Args:
+        p0 (float): The proportion in the first arm.
+        p1 (float): The proportion in the second arm.
+        n (int): The number of patients per arm.
+        alpha (float): The significance level.
 
-    >>> chisqu_two_arm_comparison(0.3, 0.5, 20, 0.05)
-    (0.34534530091794574, 0.65465469908205098)
-
+    Returns:
+        tuple[float, float]: A tuple containing the probability of
+            rejecting the null hypothesis and the probability of not
+            rejecting it.
     """
-
     n0, n1 = zip(*list(product(range(n + 1), range(n + 1))))
     n0 = np.array(n0)
     n1 = np.array(n1)

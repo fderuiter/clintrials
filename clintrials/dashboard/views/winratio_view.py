@@ -1,3 +1,7 @@
+"""
+Renders the Win Ratio simulation view in the Streamlit dashboard.
+"""
+
 import streamlit as st
 
 from clintrials.winratio import run_simulation

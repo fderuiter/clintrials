@@ -1,3 +1,7 @@
+"""
+Renders the CRM simulation results view in the Streamlit dashboard.
+"""
+
 import json
 
 import pandas as pd
@@ -9,6 +13,14 @@ from clintrials.utils import ParameterSpace
 
 
 def render(sims):
+    """Renders the CRM simulation results view.
+
+    This function displays the results of CRM simulations, including a
+    summary table and a plot of dose recommendation probabilities.
+
+    Args:
+        sims (list[dict]): A list of simulation results.
+    """
     st.header("CRM Simulation Results")
 
     # For this proof-of-concept, we'll make some assumptions about the data.

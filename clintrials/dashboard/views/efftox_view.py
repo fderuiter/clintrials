@@ -1,3 +1,7 @@
+"""
+Renders the EffTox simulation results view in the Streamlit dashboard.
+"""
+
 import json
 
 import pandas as pd
@@ -9,6 +13,15 @@ from clintrials.utils import ParameterSpace
 
 
 def render(sims):
+    """Renders the EffTox simulation results view.
+
+    This function displays the results of EffTox simulations, including a
+    summary table and plots of dose recommendation and acceptability
+    probabilities.
+
+    Args:
+        sims (list[dict]): A list of simulation results.
+    """
     st.header("EffTox Simulation Results")
 
     # Example parameter space for EffTox

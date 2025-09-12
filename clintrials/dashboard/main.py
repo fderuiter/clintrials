@@ -1,3 +1,7 @@
+"""
+Main entry point for the Streamlit dashboard.
+"""
+
 import json
 
 import streamlit as st
@@ -6,6 +10,13 @@ from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
 
 
 def main():
+    """Sets up the Streamlit dashboard and renders the appropriate view.
+
+    This function creates the main layout of the dashboard, including the
+    sidebar for selecting the trial design and uploading simulation results.
+    It then calls the appropriate render function based on the user's
+    selection.
+    """
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Select Trial Design")
