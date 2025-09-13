@@ -639,6 +639,8 @@ def cross_tab(
         return df_n
 
 
+from functools import partial
+
 class Memoize:
     """A class to cache function results."""
 
@@ -663,6 +665,10 @@ class Memoize:
         if not args in self.memo:
             self.memo[args] = self.f(*args)
         return self.memo[args]
+
+    def __get__(self, instance, owner):
+        """Support instance methods."""
+        return partial(self, instance)
 
 
 class ParameterSpace:
