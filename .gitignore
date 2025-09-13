@@ -8,3 +8,7 @@ poetry.lock
 docs/_build/
 
 .hypothesis/
+
+# Coverage files
+.coverage
+coverage.txt
