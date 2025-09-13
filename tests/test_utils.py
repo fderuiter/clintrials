@@ -8,6 +8,11 @@ from clintrials.utils import (
     map_reduce_files,
     multiindex_dataframe_from_tuple_map,
     reduce_maps_by_summing,
+    to_1d_list,
+    levenshtein,
+    levenshtein_index,
+    support_match,
+    Memoize,
 )
 
 
@@ -81,3 +86,47 @@ def test_multiindex_dataframe_from_tuple_map():
     df = multiindex_dataframe_from_tuple_map(x, labels)
     assert isinstance(df, pd.DataFrame)
     assert df.shape == (4, 1)
+
+def test_to_1d_list():
+    assert to_1d_list(1) == [1]
+    assert to_1d_list([1, 2, 3]) == [1, 2, 3]
+    assert to_1d_list([1, [2, 3]]) == [1, 2, 3]
+    assert to_1d_list([1, [2, [3]]]) == [1, 2, 3]
+
+def test_levenshtein():
+    assert levenshtein("kitten", "sitting") == 3
+    assert levenshtein("saturday", "sunday") == 3
+    assert levenshtein("", "abc") == 3
+    assert levenshtein("abc", "") == 3
+    assert levenshtein("abc", "abc") == 0
+
+def test_levenshtein_index():
+    assert levenshtein_index("kitten", "sitting") == 1 - 3/7
+    assert levenshtein_index("saturday", "sunday") == 1 - 3/8
+    assert levenshtein_index("", "abc") == 0.0
+    assert levenshtein_index("abc", "abc") == 1.0
+
+def test_support_match():
+    assert support_match([1, 2, 3], [1, 2, 4]) == 4/6
+    assert support_match([1, 2, 3], [4, 5, 6]) == 0
+    assert support_match([1, 2, 3], [1, 2, 3]) == 1.0
+    assert support_match([], []) == 0.0
+
+def test_memoize():
+
+    class MyClass:
+        def __init__(self):
+            self.call_count = 0
+
+        @Memoize
+        def my_method(self, x):
+            self.call_count += 1
+            return x * 2
+
+    c = MyClass()
+    assert c.my_method(2) == 4
+    assert c.call_count == 1
+    assert c.my_method(2) == 4
+    assert c.call_count == 1
+    assert c.my_method(3) == 6
+    assert c.call_count == 2
