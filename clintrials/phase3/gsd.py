@@ -95,8 +95,8 @@ class GroupSequentialDesign:
         self.efficacy_boundaries = self._compute_efficacy_boundaries()
 
     def _compute_efficacy_boundaries(self) -> List[float]:
-        """
-        Computes the efficacy boundaries for the design.
+        """Computes the efficacy boundaries for the design.
+
         This is done by finding the boundary u_i at each look i such that
         P(Z_1 < u_1, ..., Z_i < u_i) = 1 - alpha_i, where alpha_i is the
         cumulative alpha spent at look i.

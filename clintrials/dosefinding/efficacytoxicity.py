@@ -216,7 +216,11 @@ class EfficacyToxicityDoseFindingTrial(metaclass=abc.ABCMeta):
         return df
 
     def set_next_dose(self, dose):
-        """Sets the next dose to be administered."""
+        """Sets the next dose to be administered.
+
+        Args:
+            dose (int): The next dose level.
+        """
         self._next_dose = dose
 
     def next_dose(self):
