@@ -763,6 +763,11 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.utility = []
 
     def has_more(self):
+        """Checks if the trial is ongoing.
+
+        Returns:
+            bool: `True` if the trial is ongoing, `False` otherwise.
+        """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
     def tabulate(self):
