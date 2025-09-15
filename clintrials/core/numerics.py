@@ -95,6 +95,6 @@ def integrate_posterior_1d(
             }
             return (val, diag) if return_diagnostics else val
 
-        lo -= expand_factor * width
-        hi += expand_factor * width
+        lo -= expand_factor * width / 2
+        hi += expand_factor * width / 2
         expansions += 1
