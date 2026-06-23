@@ -7,6 +7,9 @@ import json
 import pandas as pd
 import streamlit as st
 
+if not hasattr(st, "fragment"):
+    st.fragment = lambda func: func
+
 from clintrials.core.simulation import summarise_sims
 from clintrials.utils import ParameterSpace
 

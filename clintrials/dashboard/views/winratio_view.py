@@ -4,6 +4,9 @@ Renders the Win Ratio simulation view in the Streamlit dashboard.
 
 import streamlit as st
 
+if not hasattr(st, "fragment"):
+    st.fragment = lambda func: func
+
 from clintrials.winratio import run_simulation
 
 
