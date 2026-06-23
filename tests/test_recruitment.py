@@ -188,3 +188,27 @@ def test_invert_negative_discriminant_raises_typeerror():
     s = QuadrilateralRecruitmentStream(1.0, 1.0, [])
     with pytest.raises(TypeError):
         s._invert(0, 1, 1, 0, 1)
+
+
+def test_constant_recruitment_stream_invalid_gap_raises_error():
+    with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
+        ConstantRecruitmentStream(0)
+    with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
+        ConstantRecruitmentStream(-1)
+
+
+def test_quadrilateral_recruitment_stream_invalid_gap_raises_error():
+    with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
+        QuadrilateralRecruitmentStream(0, 1, [])
+    with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
+        QuadrilateralRecruitmentStream(-1, 1, [])
+
+
+def test_quadrilateral_recruitment_stream_negative_initial_intensity_raises_error():
+    with pytest.raises(ValueError, match="initial_intensity must be non-negative"):
+        QuadrilateralRecruitmentStream(1, -0.1, [])
+
+
+def test_quadrilateral_recruitment_stream_zero_initial_intensity_is_allowed():
+    # This should not raise an error
+    QuadrilateralRecruitmentStream(1, 0, [])
