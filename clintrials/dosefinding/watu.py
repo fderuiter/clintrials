@@ -323,7 +323,13 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         return obd
 
     def prob_eff_exceeds(
-        self, eff_cutoff, backend="analytic", n=10**6, epsabs=1.49e-8, epsrel=1.49e-8
+        self,
+        eff_cutoff,
+        backend="analytic",
+        n=None,
+        epsabs=1.49e-8,
+        epsrel=1.49e-8,
+        **kwargs,
     ):
         """Calculates the probability that efficacy exceeds a cutoff.
 
@@ -332,15 +338,31 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             backend (str, optional): The calculation backend, either
                 "analytic", "quadrature", or "mc". Defaults to "analytic".
             n (int, optional): The number of samples for the "mc" backend.
-                Defaults to 10**6.
+                If `None`, it is resolved from `kwargs` or trial defaults.
+                Defaults to `None`.
             epsabs (float, optional): Absolute tolerance for "quadrature"
                 backend. Defaults to 1.49e-8.
             epsrel (float, optional): Relative tolerance for "quadrature"
                 backend. Defaults to 1.49e-8.
+            **kwargs: Additional arguments for the dose calculation, including
+                `mc_samples_stage1`, `mc_samples_stage2` or `n` to override
+                the Monte Carlo sample size. All sample sizes will be clamped
+                to a minimum of 1000.
 
         Returns:
             numpy.ndarray: An array of probabilities for each dose level.
         """
+        if n is None:
+            if self.size() < self.stage_one_size:
+                n = kwargs.get(
+                    "mc_samples_stage1", kwargs.get("n", self.mc_samples_stage1)
+                )
+            else:
+                n = kwargs.get(
+                    "mc_samples_stage2", kwargs.get("n", self.mc_samples_stage2)
+                )
+
+        n = max(n, 1000)
         skeleton = np.array(self.skeletons[self.most_likely_model_index])
         probs = np.zeros_like(skeleton, dtype=float)
 
@@ -427,19 +449,23 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         return probs
 
-    def prob_acc_eff(self, threshold=None):
+    def prob_acc_eff(self, threshold=None, **kwargs):
         """Calculates the probability of acceptable efficacy.
 
         Args:
             threshold (float, optional): The efficacy threshold. Defaults to
                 `self.eff_limit`.
+            **kwargs: Additional arguments for the dose calculation, including
+                `mc_samples_stage1`, `mc_samples_stage2` or `n` to override
+                the Monte Carlo sample size. All sample sizes will be clamped
+                to a minimum of 1000.
 
         Returns:
             numpy.ndarray: An array of probabilities for each dose level.
         """
         if threshold is None:
             threshold = self.eff_limit
-        return self.prob_eff_exceeds(threshold)
+        return self.prob_eff_exceeds(threshold, **kwargs)
 
     def prob_acc_tox(self, threshold=None, **kwargs):
         """Calculates the probability of acceptable toxicity.
@@ -447,14 +473,34 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         Args:
             threshold (float, optional): The toxicity threshold. Defaults to
                 `self.tox_limit`.
-            **kwargs: Additional arguments for `crm.prob_tox_exceeds`.
+            **kwargs: Additional arguments for the dose calculation, including
+                `mc_samples_stage1`, `mc_samples_stage2` or `n` to override
+                the Monte Carlo sample size. All sample sizes will be clamped
+                to a minimum of 1000.
 
         Returns:
             numpy.ndarray: An array of probabilities for each dose level.
         """
         if threshold is None:
             threshold = self.tox_limit
-        return 1 - self.crm.prob_tox_exceeds(threshold, **kwargs)
+
+        # Resolve n
+        n = kwargs.get("n")
+        if n is None:
+            if self.size() < self.stage_one_size:
+                n = kwargs.get("mc_samples_stage1", self.mc_samples_stage1)
+            else:
+                n = kwargs.get("mc_samples_stage2", self.mc_samples_stage2)
+        n = max(n, 1000)
+
+        # Separate n and mc_samples_stageX from other kwargs to avoid passing
+        # them to crm.prob_tox_exceeds which doesn't support them.
+        crm_kwargs = kwargs.copy()
+        crm_kwargs.pop("mc_samples_stage1", None)
+        crm_kwargs.pop("mc_samples_stage2", None)
+        crm_kwargs["n"] = n
+
+        return 1 - self.crm.prob_tox_exceeds(threshold, **crm_kwargs)
 
     def _stage_one_next_dose(self, **kwargs):
         """Determines the next dose for stage 1 of the trial.
@@ -467,10 +513,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         Returns:
             int: The next recommended dose level.
         """
-        n = kwargs.get("mc_samples_stage1", kwargs.get("n", self.mc_samples_stage1))
-        n = max(n, 1000)
-        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=n)
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=n)
+        prob_unacc_tox = 1 - self.prob_acc_tox(self.tox_limit, **kwargs)
+        prob_unacc_eff = 1 - self.prob_acc_eff(self.eff_limit, **kwargs)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))
@@ -524,10 +568,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         Returns:
             int: The next recommended dose level.
         """
-        n = kwargs.get("mc_samples_stage2", kwargs.get("n", self.mc_samples_stage2))
-        n = max(n, 1000)
-        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=n)
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=n)
+        prob_unacc_tox = 1 - self.prob_acc_tox(self.tox_limit, **kwargs)
+        prob_unacc_eff = 1 - self.prob_acc_eff(self.eff_limit, **kwargs)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))
