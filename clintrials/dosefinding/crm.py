@@ -180,27 +180,38 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
             of beta. The variance is `None` if `estimate_var` is `False`.
     """
     if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
-        msg = (
-            "Need heterogeneity in toxic events (i.e. toxic and non-toxic outcomes must be observed) for MLE to "
-            "exist. See Cheung p.23."
-        )
         logging.warning(
             "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist."
         )
         return np.nan, None
 
     f = lambda beta: -1 * _compound_toxicity_likelihood(
-        F, intercept, beta, codified_doses_given, toxs, log=True
+        F, intercept, beta[0], codified_doses_given, toxs, log=True
     )
-    res = minimize(f, x0=0, method="BFGS")
+    res = minimize(f, x0=np.array([0.0]), method="BFGS")
     var = None
-    if estimate_var:
-        if res.success:
-            var = res.hess_inv[0, 0]
-        else:
-            logging.warning("Minimization failed; cannot estimate variance.")
+    if res.success:
+        beta_hat = res.x[0]
+        if estimate_var:
+            # Numerical Hessian with step-size control for observed information
+            eps = np.finfo(float).eps
+            h = (eps ** (1 / 4)) * max(abs(beta_hat), 1.0)
+            f_mid = res.fun
+            f_plus = f(np.array([beta_hat + h]))
+            f_minus = f(np.array([beta_hat - h]))
+            hessian = (f_plus - 2 * f_mid + f_minus) / (h**2)
 
-    return res.x[0], var
+            if hessian > 0:
+                var = 1.0 / hessian
+            else:
+                logging.warning(
+                    "Numerical Hessian is not positive; falling back to BFGS estimate."
+                )
+                var = res.hess_inv[0, 0]
+        return beta_hat, var
+    else:
+        logging.warning("Minimization failed; cannot estimate beta_hat.")
+        return np.nan, None
 
 
 def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=200):
@@ -214,7 +225,8 @@ def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=
         B (int, optional): The number of bootstrap samples. Defaults to 200.
 
     Returns:
-        float: The estimated variance of beta_hat.
+        float: The estimated variance of beta_hat. Returns `np.nan` if no
+            valid bootstrap samples are obtained.
     """
     beta_hats_boot = []
     for _ in range(B):
@@ -226,6 +238,15 @@ def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=
         )
         if not np.isnan(beta_hat_boot):
             beta_hats_boot.append(beta_hat_boot)
+
+    if len(beta_hats_boot) == 0:
+        logging.warning("No valid bootstrap samples obtained.")
+        return np.nan
+
+    if len(beta_hats_boot) < B / 2:
+        logging.warning(
+            "More than half of bootstrap samples failed to produce an MLE."
+        )
 
     return np.var(beta_hats_boot)
 
@@ -359,7 +380,8 @@ def crm(
     Returns:
         tuple: A tuple containing the recommended dose index, the beta
             estimate, the beta variance, and the posterior probabilities of
-            toxicity.
+            toxicity. If `estimate_var` is `True`, the beta standard error
+            is also appended as a fifth element.
     """
     if len(dose_levels) != len(toxicities):
         raise ValueError("toxicities and dose_levels should be same length.")
@@ -420,7 +442,12 @@ def crm(
 
     abs_distance_from_target = [abs(x - target) for x in post_tox]
     dose = np.argmin(abs_distance_from_target) + 1
-    return dose, beta_hat, var, post_tox
+
+    if estimate_var:
+        se = np.sqrt(var) if var is not None else None
+        return dose, beta_hat, var, post_tox, se
+    else:
+        return dose, beta_hat, var, post_tox
 
 
 class CRM(DoseFindingTrial):
@@ -558,10 +585,12 @@ class CRM(DoseFindingTrial):
                 )
             self.estimate_var = True
         self.beta_hat, self.beta_var = beta_prior.mean(), beta_prior.var()
+        self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = list(self.prior)
 
     def _DoseFindingTrial__reset(self):
         self.beta_hat, self.beta_var = self.beta_prior.mean(), self.beta_prior.var()
+        self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = self.prior
 
     def _DoseFindingTrial__calculate_next_dose(self):
@@ -574,7 +603,7 @@ class CRM(DoseFindingTrial):
         current_dose = self.next_dose()
         max_dose_given = self.maximum_dose_given()
         min_dose_given = self.minimum_dose_given()
-        proposed_dose, beta_hat, beta_var, post_tox = crm(
+        crm_res = crm(
             prior=self.prior,
             target=self.target,
             toxicities=self._toxicities,
@@ -590,9 +619,14 @@ class CRM(DoseFindingTrial):
             mle_var_method=self.mle_var_method,
             bootstrap_samples=self.bootstrap_samples,
         )
-        self.beta_hat = beta_hat
-        self.beta_var = beta_var
-        self.post_tox = post_tox
+        proposed_dose = crm_res[0]
+        self.beta_hat = crm_res[1]
+        self.beta_var = crm_res[2]
+        self.post_tox = crm_res[3]
+        if self.estimate_var:
+            self.beta_se = crm_res[4]
+        else:
+            self.beta_se = None
 
         if self.lowest_dose_too_toxic_hurdle and self.lowest_dose_too_toxic_certainty:
             labels = [
@@ -851,6 +885,8 @@ def crm_dtp_detail(trial):
         to_return["BetaHat"] = atomic_to_json(trial.beta_hat)
     if trial.beta_var is not None:
         to_return["BetaVar"] = atomic_to_json(trial.beta_var)
+    if hasattr(trial, "beta_se") and trial.beta_se is not None:
+        to_return["BetaSE"] = atomic_to_json(trial.beta_se)
 
     if trial.prob_tox() is not None:
         to_return["ProbTox"] = iterable_to_json(trial.prob_tox())

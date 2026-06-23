@@ -15,7 +15,7 @@ from clintrials.core.math import (
     logistic,
     logit1,
 )
-from clintrials.dosefinding.crm import CRM
+from clintrials.dosefinding.crm import CRM, crm
 
 
 def setup_func():
@@ -327,6 +327,40 @@ class TestCRMMLEVariance:
         trial_bootstrap.update(list(zip(self.doses, self.tox)))
 
         assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.3)
+        assert hasattr(trial_hessian, "beta_se")
+        assert hasattr(trial_bootstrap, "beta_se")
+        assert np.isclose(trial_hessian.beta_se, np.sqrt(trial_hessian.beta_var))
+        assert np.isclose(trial_bootstrap.beta_se, np.sqrt(trial_bootstrap.beta_var))
+
+    def test_crm_function_se_return(self):
+        # Test that crm() returns 5 elements when estimate_var=True
+        res = crm(
+            self.prior,
+            self.target,
+            self.tox,
+            self.doses,
+            F_func=self.F_func,
+            inverse_F=self.inverse_F,
+            method="mle",
+            estimate_var=True,
+            mle_var_method="hessian",
+        )
+        assert len(res) == 5
+        dose, beta_hat, var, post_tox, se = res
+        assert np.isclose(se, np.sqrt(var))
+
+        # Test that crm() returns 4 elements when estimate_var=False
+        res_no_var = crm(
+            self.prior,
+            self.target,
+            self.tox,
+            self.doses,
+            F_func=self.F_func,
+            inverse_F=self.inverse_F,
+            method="mle",
+            estimate_var=False,
+        )
+        assert len(res_no_var) == 4
 
 
 def test_CRM_class_with_bcrm_fixtures():
