@@ -35,41 +35,17 @@ from clintrials.core.stats import ProbabilityDensitySample
 
 
 class BeBOP:
-    """ """
+    """BeBOP: Bayesian design with Bivariate Outcomes and Predictive variables."""
 
     def __init__(self, theta_priors, efficacy_model, toxicity_model, joint_model):
-        """
+        """Initializes a BeBOP model.
 
-        Params:
-        :param theta_priors: list of prior distributions for elements of parameter vector, theta.
-                        Each prior object should support obj.ppf(x) and obj.pdf(x) like classes in scipy
-        :param efficacy_model: func with signature x, theta; where x is a case vector and theta a 2d array of
-          parameter values, the first column containing values for the first parameter, the second column the
-          second parameter, etc, so that each row in theta is a single parameter set. Function should return probability
-          of efficacy of case x under each parameter set (i.e. each row of theta) so that a 1*len(theta) array should
-          be returned.
-        :param toxicity_model: func with signature x, theta; where x is a case vector and theta a 2d array of
-          parameter values, the first column containing values for the first parameter, the second column the
-          second parameter, etc, so that each row in theta is a single parameter set. Function should return probability
-          of toxicity of case x under each parameter set (i.e. each row of theta) so that a 1*len(theta) array should
-          be returned.
-        :param joint_model: func with signature x, theta; where x is a case vector and theta a 2d array of
-          parameter values, the first column containing values for the first parameter, the second column the
-          second parameter, etc, so that each row in theta is a single parameter set. Function should return the joint
-          probability of efficacy and toxicity of case x under each parameter set (i.e. each row of theta) so that
-          a 1*len(theta) array should be returned. Generally this method would use efficacy_model and toxicity_model.
-          For non-associated events, for instance, the simple product of efficacy_model(x, theta) and
-          toxicity_model(x, theta) would do the job. For associated events, more complexity is required.
-
-        In case vector x, the element x[0] should be boolean efficacy variable, with 1 showing efficacy occurred.
-        In case vector x, the element x[1] should be boolean toxicity variable, with 1 showing toxicity occurred.
-
-        See clintrials.phase2.bebop.peps2v2 for a working trio of efficacy_model, toxicity_model and joint_model that
-        allow for associated efficacy and toxicity events.
-
-        Note: efficacy_model, toxicity_model and joint_model should be vectorised to work with one case and many
-        parameter sets (rather than just many cases and one parameter set) for quick integration using Monte Carlo.
-
+        Args:
+            theta_priors (list): List of prior distributions for elements of parameter vector, theta.
+                Each prior object should support obj.ppf(x) and obj.pdf(x).
+            efficacy_model (callable): Function with signature x, theta. Returns probability of efficacy.
+            toxicity_model (callable): Function with signature x, theta. Returns probability of toxicity.
+            joint_model (callable): Function with signature x, theta. Returns joint probability.
         """
 
         self.priors = theta_priors
@@ -80,6 +56,7 @@ class BeBOP:
         self.reset()
 
     def reset(self):
+        """Resets the model state."""
         self.cases = []
         self._pds = None
 
@@ -91,15 +68,38 @@ class BeBOP:
             return numpy.ones(len(theta))
 
     def size(self):
+        """Returns the number of observed cases.
+
+        Returns:
+            int: Number of cases.
+        """
         return len(self.cases)
 
     def efficacies(self):
+        """Returns a list of efficacy outcomes for all observed cases.
+
+        Returns:
+            list: Efficacy outcomes.
+        """
         return [case[0] for case in self.cases]
 
     def toxicities(self):
+        """Returns a list of toxicity outcomes for all observed cases.
+
+        Returns:
+            list: Toxicity outcomes.
+        """
         return [case[1] for case in self.cases]
 
     def get_case_elements(self, i):
+        """Returns a list of the i-th element of all observed cases.
+
+        Args:
+            i (int): The index of the element.
+
+        Returns:
+            list: The i-th elements.
+        """
         return [case[i] for case in self.cases]
 
     def update(self, cases, n=10**6, epsilon=0.00001, **kwargs):
@@ -110,21 +110,15 @@ class BeBOP:
         posterior. The posterior is stored as a `ProbabilityDensitySample`
         object in `self._pds`.
 
-        :param cases: A list of case vectors. Each vector represents a patient
-                      and should contain the outcome variables followed by the
-                      predictor variables, as expected by the efficacy, toxicity,
-                      and joint probability models.
-        :type cases: list[list]
-        :param n: The number of samples to use for the Monte Carlo integration.
-                  A larger number will produce more accurate estimates but will
-                  be slower.
-        :type n: int
-        :param epsilon: A small value used to determine the integration limits
-                        by taking the `epsilon` and `1-epsilon` quantiles of
-                        the prior distributions. This defines a hyperrectangle
-                        from which to sample.
-        :type epsilon: float
-        :param kwargs: Not used.
+        Args:
+            cases (list[list]): A list of case vectors. Each vector represents a patient
+                and should contain the outcome variables followed by the
+                predictor variables.
+            n (int, optional): The number of samples to use for the Monte Carlo integration.
+                Defaults to 10**6.
+            epsilon (float, optional): A small value used to determine the integration limits.
+                Defaults to 0.00001.
+            **kwargs: Not used.
         """
         self.cases.extend(cases)
         limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in self.priors]
@@ -171,6 +165,18 @@ class BeBOP:
     def predict(
         self, cases, eff_cutoff, tox_cutoff, to_pandas=False, estimate_ci=False
     ):
+        """Predicts the probability of efficacy and toxicity for given cases.
+
+        Args:
+            cases (list): A list of cases to predict.
+            eff_cutoff (float): The minimum acceptable efficacy probability.
+            tox_cutoff (float): The maximum acceptable toxicity probability.
+            to_pandas (bool, optional): If True, return results as a pandas DataFrame. Defaults to False.
+            estimate_ci (bool, optional): If True, calculate lower and upper confidence intervals. Defaults to False.
+
+        Returns:
+            list or pandas.DataFrame: The predictions.
+        """
         if self._pds is not None:
             pds = self._pds
             samp = pds._samp
@@ -206,6 +212,11 @@ class BeBOP:
             return None
 
     def get_posterior_param_means(self):
+        """Returns the posterior means of the model parameters.
+
+        Returns:
+            list: Posterior means of parameters.
+        """
         if self._pds:
             return numpy.apply_along_axis(
                 lambda x: self._pds.expectation(x), 0, self._pds._samp
@@ -216,8 +227,12 @@ class BeBOP:
     def theta_estimate(self, i, alpha=0.05):
         """Get posterior confidence interval and mean estimate of element i in parameter vector.
 
-        Returns (lower, mean, upper)
+        Args:
+            i (int): Index of the parameter.
+            alpha (float, optional): The significance level. Defaults to 0.05.
 
+        Returns:
+            numpy.ndarray: Array containing lower bound, mean estimate, and upper bound.
         """
 
         if j < len(self.priors):

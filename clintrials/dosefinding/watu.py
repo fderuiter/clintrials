@@ -262,9 +262,23 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.crm.reset()
 
     def has_more(self):
+        """Checks if the trial is ongoing.
+
+        Returns:
+            bool: `True` if the trial is ongoing, `False` otherwise.
+        """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
     def optimal_decision(self, prob_tox, prob_eff):
+        """Determines the optimal biological dose.
+
+        Args:
+            prob_tox (numpy.ndarray): The probability of toxicity for each dose.
+            prob_eff (numpy.ndarray): The probability of efficacy for each dose.
+
+        Returns:
+            int: The optimal biological dose.
+        """
         admiss, u, u_star, obd, u_cushtion = solve_metrizable_efftox_scenario(
             prob_tox, prob_eff, self.metric, self.tox_limit, self.eff_limit
         )
