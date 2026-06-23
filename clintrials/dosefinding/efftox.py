@@ -12,6 +12,7 @@ from collections import OrderedDict
 
 import numpy as np
 from scipy.optimize import brentq
+from scipy.stats import norm
 
 from clintrials.core.math import inverse_logit
 from clintrials.core.stats import ProbabilityDensitySample
@@ -29,6 +30,72 @@ def scale_doses(real_doses):
         numpy.ndarray: The scaled doses.
     """
     return np.log(real_doses) - np.mean(np.log(real_doses))
+
+
+def efftox_priors_from_skeleton(real_doses, prior_tox_probs, prior_eff_probs):
+    """Elicits principled EffTox priors from a dose-response skeleton.
+
+    This function fits the EffTox link functions to the provided prior
+    probabilities using least squares on the logit scale.
+
+    Args:
+        real_doses (list[float]): The actual dose amounts.
+        prior_tox_probs (list[float]): Prior toxicity probabilities at each dose.
+        prior_eff_probs (list[float]): Prior efficacy probabilities at each dose.
+
+    Returns:
+        list[scipy.stats.norm]: A list of 6 normal distributions for the
+            parameters (mu_T, beta_T, mu_E, beta1_E, beta2_E, psi).
+    """
+
+    def logit(p):
+        p = np.clip(p, 1e-7, 1 - 1e-7)
+        return np.log(p / (1 - p))
+
+    scaled_x = scale_doses(real_doses)
+
+    # Toxicity: logit(pi_T) = mu_T + beta_T * x
+    logit_tox = logit(np.array(prior_tox_probs))
+    beta_T_mean, mu_T_mean = np.polyfit(scaled_x, logit_tox, 1)
+
+    # Efficacy: logit(pi_E) = mu_E + beta1_E * x + beta2_E * x^2
+    logit_eff = logit(np.array(prior_eff_probs))
+    beta2_E_mean, beta1_E_mean, mu_E_mean = np.polyfit(scaled_x, logit_eff, 2)
+
+    # Principled default SDs:
+    # Intercepts and linear slopes: 2.0
+    # Quadratic term: 0.2 (usually smaller as it's for curvature)
+    # Association parameter psi: mean 0, SD 1.0
+    priors = [
+        norm(loc=mu_T_mean, scale=2.0),
+        norm(loc=beta_T_mean, scale=2.0),
+        norm(loc=mu_E_mean, scale=2.0),
+        norm(loc=beta1_E_mean, scale=2.0),
+        norm(loc=beta2_E_mean, scale=0.2),
+        norm(loc=0.0, scale=1.0),
+    ]
+    return priors
+
+
+def validate_efftox_priors(priors, scaled_doses):
+    """Validates that the EffTox priors imply sensible dose-response shapes.
+
+    Args:
+        priors (list): A list of 6 prior distributions.
+        scaled_doses (list[float]): The scaled dose levels.
+
+    Raises:
+        ValueError: If the priors imply non-sensible dose-response shapes.
+    """
+    from clintrials.validation import validate_expected_length
+
+    validate_expected_length(priors, 6, "priors")
+
+    beta_T = priors[1].mean()
+
+    # Check if toxicity is non-decreasing
+    if beta_T < 0:
+        raise ValueError("Toxicity prior slope (beta_T) should be non-negative.")
 
 
 def _eta_T(scaled_dose, mu, beta):
@@ -583,14 +650,16 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     def __init__(
         self,
         real_doses,
-        theta_priors,
-        tox_cutoff,
-        eff_cutoff,
-        tox_certainty,
-        eff_certainty,
-        metric,
-        max_size,
+        theta_priors=None,
+        tox_cutoff=None,
+        eff_cutoff=None,
+        tox_certainty=None,
+        eff_certainty=None,
+        metric=None,
+        max_size=None,
         first_dose=1,
+        prior_tox_probs=None,
+        prior_eff_probs=None,
         avoid_skipping_untried_escalation=True,
         avoid_skipping_untried_deescalation=True,
         num_integral_steps=10**5,
@@ -600,8 +669,15 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 
         Args:
             real_doses (list[float]): A list of the actual dose amounts.
-            theta_priors (list): A list of 6 prior distributions for the
-                model parameters.
+            theta_priors (list, optional): A list of 6 prior distributions
+                for the model parameters. If `None`, principled priors are
+                elicited from `prior_tox_probs` and `prior_eff_probs`.
+            prior_tox_probs (list[float], optional): Prior toxicity
+                probabilities at each dose level. Used for elicitation if
+                `theta_priors` is `None`.
+            prior_eff_probs (list[float], optional): Prior efficacy
+                probabilities at each dose level. Used for elicitation if
+                `theta_priors` is `None`.
             tox_cutoff (float): The maximum acceptable probability of
                 toxicity.
             eff_cutoff (float): The minimum acceptable probability of
@@ -627,17 +703,26 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 integration range. Defaults to 1e-6.
 
         Raises:
-            ValueError: If `theta_priors` does not have 6 items.
+            ValueError: If required parameters are missing or if priors are
+                invalid.
         """
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(real_doses), max_size
         )
 
-        from clintrials.validation import validate_expected_length
-        validate_expected_length(theta_priors, 6, "theta_priors")
+        if theta_priors is None:
+            if prior_tox_probs is None or prior_eff_probs is None:
+                raise ValueError(
+                    "Either theta_priors or both prior_tox_probs and prior_eff_probs must be provided."
+                )
+            theta_priors = efftox_priors_from_skeleton(
+                real_doses, prior_tox_probs, prior_eff_probs
+            )
+
+        validate_efftox_priors(theta_priors, scale_doses(real_doses))
 
         self.real_doses = real_doses
-        self._scaled_doses = np.log(real_doses) - np.mean(np.log(real_doses))
+        self._scaled_doses = scale_doses(real_doses)
         self.priors = theta_priors
         self.tox_cutoff = tox_cutoff
         self.eff_cutoff = eff_cutoff
@@ -1131,4 +1216,6 @@ __all__ = [
     "InverseQuadraticCurve",
     "efftox_dtp_detail",
     "solve_metrizable_efftox_scenario",
+    "efftox_priors_from_skeleton",
+    "validate_efftox_priors",
 ]
