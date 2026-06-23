@@ -5,7 +5,6 @@ Renders the CRM simulation results view in the Streamlit dashboard.
 import json
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
 from clintrials.core.simulation import summarise_sims
@@ -57,30 +56,9 @@ def render(sims):
 
         if not summary_df.empty and "recommended_dose_prob" in summary_df.columns:
             st.subheader("Dose Recommendation Probability")
+            import clintrials.visualization as viz
 
-            # The 'recommended_dose_prob' column contains dictionaries. We need to expand it into a DataFrame.
-            rec_dose_df = summary_df["recommended_dose_prob"].apply(pd.Series).fillna(0)
-
-            # We need to melt the DataFrame to plot it with plotly express
-            rec_dose_df_melted = rec_dose_df.reset_index().melt(
-                id_vars=[col for col in rec_dose_df.index.names],
-                var_name="Dose Level",
-                value_name="Probability",
-            )
-
-            # Create an interactive bar chart
-            fig = px.bar(
-                rec_dose_df_melted,
-                x="true_tox",
-                y="Probability",
-                color="Dose Level",
-                barmode="group",
-                labels={
-                    "true_tox": "True Toxicity Scenario",
-                    "Probability": "Recommendation Probability",
-                },
-                title="Dose Recommendation Probabilities by Scenario",
-            )
+            fig = viz.plot_crm_simulation_recommendation(summary_df)
             st.plotly_chart(fig)
 
         else:

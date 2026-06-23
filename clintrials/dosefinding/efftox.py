@@ -418,8 +418,7 @@ class LpNormCurve:
         """Plots the utility contours.
 
         Args:
-            use_ggplot (bool, optional): If `True`, uses ggplot. Defaults to
-                `False`.
+            use_ggplot (bool, optional): Ignored. Included for backwards compatibility.
             prob_eff (list[float], optional): A list of efficacy
                 probabilities to plot as points. Defaults to `None`.
             prob_tox (list[float], optional): A list of toxicity
@@ -439,45 +438,19 @@ class LpNormCurve:
         Returns:
             A plot object.
         """
-        eff_vals = np.linspace(0, 1, n)
-        util_vals = np.linspace(
-            util_lower, util_upper, ((util_upper - util_lower) / util_delta) + 1
+        import clintrials.visualization as viz
+
+        return viz.plot_efftox_utility_contours(
+            self,
+            prob_eff=prob_eff,
+            prob_tox=prob_tox,
+            n=n,
+            util_lower=util_lower,
+            util_upper=util_upper,
+            util_delta=util_delta,
+            title=title,
+            custom_points_label=custom_points_label,
         )
-
-        if use_ggplot:
-            raise NotImplementedError()
-        else:
-            import matplotlib.pyplot as plt
-
-            # Plot general contours
-            for u in util_vals:
-                tox_vals = [self.get_tox(eff=x, util=u) for x in eff_vals]
-                plt.plot(eff_vals, tox_vals, "-", c="k", lw=0.5)
-
-            # Add neutral utility contour
-            tox_vals = [self.get_tox(eff=x, util=0) for x in eff_vals]
-            plt.plot(eff_vals, tox_vals, "-", c="k", lw=2, label="neutral utility")
-
-            # Add hinge points
-            hinge_prob_eff, hinge_prob_tox = zip(*self.hinge_points)
-            plt.plot(hinge_prob_eff, hinge_prob_tox, "ro", ms=10, label="hinge points")
-
-            # Add custom points
-            if prob_eff is not None and prob_tox is not None:
-                plt.plot(prob_eff, prob_tox, "b^", ms=10, label=custom_points_label)
-
-            # Plot size
-            plt.ylim(0, 1)
-            plt.xlim(0, 1)
-            plt.xlabel("Prob(Efficacy)")
-            plt.ylabel("Prob(Toxicity)")
-            plt.title(title)
-            plt.legend()
-
-            # Return
-            p = plt.gcf()
-            phi = (np.sqrt(5) + 1) / 2.0
-            p.set_size_inches(12, 12 / phi)
 
 
 class InverseQuadraticCurve:
@@ -823,8 +796,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     def _post_density_plot(
         self, func=None, x_name="", plot_title="", include_doses=None, boot_samps=1000
     ):
-        import pandas as pd
-        from ggplot import aes, geom_density, ggplot, ggtitle
+        import clintrials.visualization as viz
 
         if include_doses is None:
             include_doses = range(1, self.num_doses + 1)
@@ -838,22 +810,13 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         if func is None:
             func = my_func
 
-        x_boot = []
-        dose_indices = []
-        samp = self.pds._samp
-        p = self.pds._probs
-        p /= p.sum()
-        for i, x in enumerate(self.scaled_doses()):
-            dose_index = i + 1
-            if dose_index in include_doses:
-                x = func(x, samp)
-                x_boot.extend(np.random.choice(x, size=boot_samps, replace=True, p=p))
-                dose_indices.extend(np.repeat(dose_index, boot_samps))
-        df = pd.DataFrame({x_name: x_boot, "Dose": dose_indices})
-        return (
-            ggplot(aes(x=x_name, fill="Dose"), data=df)
-            + geom_density(alpha=0.6)
-            + ggtitle(plot_title)
+        return viz.plot_efftox_density(
+            data_func=func,
+            trial=self,
+            x_name=x_name,
+            plot_title=plot_title,
+            include_doses=include_doses,
+            boot_samps=boot_samps,
         )
 
     def plot_posterior_tox_prob_density(self, include_doses=None, boot_samps=1000):
@@ -866,7 +829,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 Defaults to 1000.
 
         Returns:
-            A ggplot object.
+            A plot object.
         """
 
         def get_prob_tox(x, samp):
@@ -891,7 +854,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 Defaults to 1000.
 
         Returns:
-            A ggplot object.
+            A plot object.
         """
 
         def get_prob_eff(x, samp):
@@ -916,7 +879,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 Defaults to 1000.
 
         Returns:
-            A ggplot object.
+            A plot object.
         """
 
         def get_utility(x, samp):

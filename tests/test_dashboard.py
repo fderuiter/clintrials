@@ -97,10 +97,14 @@ def test_main_dispatches_to_winratio(fake_streamlit, fake_plotly, monkeypatch):
     main.efftox_view.render.assert_not_called()
 
 
-def test_crm_render_creates_plot(fake_streamlit, fake_plotly, monkeypatch):
+def test_crm_render_creates_plot(fake_streamlit, monkeypatch):
     crm_view = reload_module("clintrials.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
-    monkeypatch.setattr(crm_view, "px", fake_plotly)
+
+    import clintrials.visualization as viz
+
+    bar_mock = MagicMock(return_value="bar_fig")
+    monkeypatch.setattr(viz, "plot_crm_simulation_recommendation", bar_mock)
 
     class DummyPS:
         def __init__(self, config):
@@ -121,14 +125,20 @@ def test_crm_render_creates_plot(fake_streamlit, fake_plotly, monkeypatch):
     sims = [{"recommended_dose": 1}, {"recommended_dose": 2}]
     crm_view.render(sims)
     summarise.assert_called_once()
-    assert fake_plotly.bar.called
+    assert bar_mock.called
     fake_streamlit.plotly_chart.assert_called_once_with("bar_fig")
 
 
-def test_efftox_render_creates_plots(fake_streamlit, fake_plotly, monkeypatch):
+def test_efftox_render_creates_plots(fake_streamlit, monkeypatch):
     efftox_view = reload_module("clintrials.dashboard.views.efftox_view")
     monkeypatch.setattr(efftox_view, "st", fake_streamlit)
-    monkeypatch.setattr(efftox_view, "px", fake_plotly)
+
+    import clintrials.visualization as viz
+
+    bar_mock = MagicMock(return_value="bar_fig")
+    line_mock = MagicMock(return_value="line_fig")
+    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+    monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
     class DummyPS:
         def __init__(self, config):
@@ -154,12 +164,12 @@ def test_efftox_render_creates_plots(fake_streamlit, fake_plotly, monkeypatch):
     sims = [{"recommended_dose": 1, "prob_accept_tox": 0.6, "prob_accept_eff": 0.7}]
     efftox_view.render(sims)
     summarise.assert_called_once()
-    assert fake_plotly.bar.called
-    assert fake_plotly.line.called
+    assert bar_mock.called
+    assert line_mock.called
     assert fake_streamlit.plotly_chart.call_count == 2
 
 
-def test_crm_render_warning_branch(fake_streamlit, fake_plotly, monkeypatch):
+def test_crm_render_warning_branch(fake_streamlit, monkeypatch):
     crm_view = reload_module("clintrials.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
 

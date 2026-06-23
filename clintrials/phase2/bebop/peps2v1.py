@@ -533,7 +533,7 @@ def simulate_peps2_trial_batch(
         prob_toxes=prob_toxes,
         efftox_ors=efftox_ors,
     )
-    
+
     return run_sims(
         sim_func=_single_peps2_trial,
         n1=num_batches,

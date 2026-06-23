@@ -5,7 +5,6 @@ Renders the EffTox simulation results view in the Streamlit dashboard.
 import json
 
 import pandas as pd
-import plotly.express as px
 import streamlit as st
 
 from clintrials.core.simulation import summarise_sims
@@ -69,22 +68,9 @@ def render(sims):
             # Dose Recommendation Probability
             if "recommended_dose_prob" in summary_df.columns:
                 st.subheader("Dose Recommendation Probability")
-                rec_dose_df = (
-                    summary_df["recommended_dose_prob"].apply(pd.Series).fillna(0)
-                )
-                rec_dose_df_melted = rec_dose_df.reset_index().melt(
-                    id_vars=[col for col in rec_dose_df.index.names],
-                    var_name="Dose Level",
-                    value_name="Probability",
-                )
-                fig_rec = px.bar(
-                    rec_dose_df_melted,
-                    x=["true_prob_tox", "true_prob_eff"],
-                    y="Probability",
-                    color="Dose Level",
-                    barmode="group",
-                    title="Dose Recommendation Probabilities",
-                )
+                import clintrials.visualization as viz
+
+                fig_rec = viz.plot_efftox_simulation_recommendation(summary_df)
                 st.plotly_chart(fig_rec)
 
             # Acceptability Probabilities
@@ -93,21 +79,9 @@ def render(sims):
                 and "prob_accept_eff" in summary_df.columns
             ):
                 st.subheader("Acceptability Probabilities")
-                accept_df = summary_df[
-                    ["prob_accept_tox", "prob_accept_eff"]
-                ].reset_index()
-                accept_df_melted = accept_df.melt(
-                    id_vars=["true_prob_tox", "true_prob_eff"],
-                    var_name="Probability Type",
-                    value_name="Probability",
-                )
-                fig_accept = px.line(
-                    accept_df_melted,
-                    x="true_prob_tox",  # This might need to be more clever
-                    y="Probability",
-                    color="Probability Type",
-                    title="Probability of Acceptable Efficacy and Toxicity",
-                )
+                import clintrials.visualization as viz
+
+                fig_accept = viz.plot_efftox_simulation_acceptability(summary_df)
                 st.plotly_chart(fig_accept)
 
         else:
