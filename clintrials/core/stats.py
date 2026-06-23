@@ -15,6 +15,82 @@ from scipy.optimize import fsolve
 from scipy.stats import chi2, gaussian_kde, norm
 
 
+def correlation_ci(
+    r=None, n=None, samples=None, weights=None, alpha=0.05, method="fisher"
+):
+    """Calculates a confidence interval for the correlation coefficient.
+
+    Args:
+        r (float, optional): The sample correlation coefficient. Required if
+            method is 'fisher'.
+        n (int, optional): The sample size. Required if method is 'fisher'.
+        samples (list or numpy.ndarray, optional): Posterior samples of the
+            correlation coefficient. Required if method is 'bayes'.
+        weights (list or numpy.ndarray, optional): Weights for the samples,
+            useful for importance sampling. Defaults to None.
+        alpha (float, optional): The significance level for the confidence
+            interval. Defaults to 0.05.
+        method (str, optional): The method to use for calculating the
+            confidence interval ('fisher' or 'bayes'). Defaults to 'fisher'.
+
+    Returns:
+        numpy.ndarray: An array containing the lower bound, mean/point
+            estimate, and upper bound of the correlation coefficient.
+
+    Raises:
+        ValueError: If required arguments for the chosen method are missing,
+            if n < 4 for the 'fisher' method, or if r is not in [-1, 1].
+    """
+    if method == "fisher":
+        if r is None or n is None:
+            raise ValueError("r and n are required for method='fisher'")
+        if n < 4:
+            raise ValueError("n must be at least 4 for Fisher z-transform")
+        if not (-1 <= r <= 1):
+            raise ValueError("r must be between -1 and 1")
+
+        if r == 1.0:
+            return np.array([1.0, 1.0, 1.0])
+        if r == -1.0:
+            return np.array([-1.0, -1.0, -1.0])
+
+        z = np.arctanh(r)
+        se = 1 / np.sqrt(n - 3)
+        z_crit = norm.ppf(1 - alpha / 2)
+        z_low = z - z_crit * se
+        z_high = z + z_crit * se
+        return np.array([np.tanh(z_low), r, np.tanh(z_high)])
+
+    elif method == "bayes":
+        if samples is None:
+            raise ValueError("samples are required for method='bayes'")
+        samples = np.array(samples)
+        if weights is None:
+            return np.array(
+                [
+                    np.quantile(samples, alpha / 2),
+                    np.mean(samples),
+                    np.quantile(samples, 1 - alpha / 2),
+                ]
+            )
+        else:
+            weights = np.array(weights)
+            # Normalize weights
+            w = weights / np.sum(weights)
+            # Weighted mean
+            mean = np.sum(samples * w)
+            # Weighted quantiles
+            sorter = np.argsort(samples)
+            samples = samples[sorter]
+            w = w[sorter]
+            cumulative_w = np.cumsum(w)
+            low = np.interp(alpha / 2, cumulative_w, samples)
+            high = np.interp(1 - alpha / 2, cumulative_w, samples)
+            return np.array([low, mean, high])
+    else:
+        raise ValueError("method must be either 'fisher' or 'bayes'")
+
+
 def bootstrap(x):
     """Creates a bootstrap sample from a list of observations.
 
