@@ -21,6 +21,7 @@ from itertools import product
 import numpy as np
 import pandas as pd
 
+from clintrials.core.simulation import run_sims
 from clintrials.core.stats import ProbabilityDensitySample, chi_squ_test, or_test
 from clintrials.utils import (
     atomic_to_json,
@@ -522,47 +523,31 @@ def simulate_peps2_trial_batch(
             Defaults to `None`.
 
     Returns:
-        collections.OrderedDict: A dictionary containing the simulation
-            parameters and results.
+        dict: A dictionary containing the simulation parameters and results.
     """
-    sims = []
-    sims_object = {}
-    for i in range(num_batches):
-        these_sims = simulate_peps2_trial(
-            model,
-            num_patients=num_patients,
-            prob_pretreated=prob_pretreated,
-            prob_biomarker=prob_biomarker,
-            prob_effes=prob_effes,
-            prob_toxes=prob_toxes,
-            efftox_ors=efftox_ors,
-            num_sims=num_sims_per_batch,
-            log_every=0,
-        )
-        sims = sims + these_sims
-        logger.info("Ran batch %s %s", i, datetime.datetime.now())
-
-        sims_object = OrderedDict()
-        sims_object["Parameters"] = peps2_parameters_report(
-            num_patients=num_patients,
-            prob_pretreated=prob_pretreated,
-            prob_biomarker=prob_biomarker,
-            prob_effes=prob_effes,
-            prob_toxes=prob_toxes,
-            efftox_ors=efftox_ors,
-        )
-        sims_object["Simulations"] = sims
-
-        if out_file:
-            try:
-                json.dump(sims_object, open(out_file, "w"))
-            except:
-                import sys
-
-                e = sys.exc_info()[0]
-                logging.error(e.message)
-
-    return sims_object
+    metadata = peps2_parameters_report(
+        num_patients=num_patients,
+        prob_pretreated=prob_pretreated,
+        prob_biomarker=prob_biomarker,
+        prob_effes=prob_effes,
+        prob_toxes=prob_toxes,
+        efftox_ors=efftox_ors,
+    )
+    
+    return run_sims(
+        sim_func=_single_peps2_trial,
+        n1=num_batches,
+        n2=num_sims_per_batch,
+        out_file=out_file,
+        metadata=metadata,
+        model=model,
+        num_patients=num_patients,
+        prob_pretreated=prob_pretreated,
+        prob_biomarker=prob_biomarker,
+        prob_effes=prob_effes,
+        prob_toxes=prob_toxes,
+        efftox_ors=efftox_ors,
+    )
 
 
 def get_corr(x):
@@ -644,6 +629,75 @@ def peps2_parameters_report(
     return parameters
 
 
+def _single_peps2_trial(
+    model,
+    num_patients,
+    prob_pretreated,
+    prob_biomarker,
+    prob_effes,
+    prob_toxes,
+    efftox_ors,
+):
+    sim_output = OrderedDict()
+
+    x, n = simulate_peps2_patients(
+        num_patients,
+        prob_pretreated,
+        prob_biomarker,
+        zip(prob_effes, prob_toxes, efftox_ors),
+    )
+    sim_output["PreTreated"] = [int(y) for y in x[:, 0]]
+    sim_output["PD-L1+"] = [int(y) for y in x[:, 1]]
+    sim_output["Efficacy"] = [int(y) for y in x[:, 2]]
+    sim_output["Toxicity"] = [int(y) for y in x[:, 3]]
+    df = pd.DataFrame(x, columns=["PreTreated", "Mutated", "Eff", "Tox"])
+    df["One"] = 1
+    grouped = df.groupby(["PreTreated", "Mutated"])
+    sub_df = grouped["One"].agg(np.sum)
+    num_pats = [
+        sub_df.get((0, 0), default=0),
+        sub_df.get((0, 1), default=0),
+        sub_df.get((1, 0), default=0),
+        sub_df.get((1, 1), default=0),
+    ]
+    sim_output["GroupSizes"] = num_pats
+    sub_df = grouped["Eff"].agg(np.sum)
+    num_effs = [
+        int(sub_df.get((0, 0), default=0)),
+        int(sub_df.get((0, 1), default=0)),
+        int(sub_df.get((1, 0), default=0)),
+        int(sub_df.get((1, 1), default=0)),
+    ]
+    sim_output["GroupEfficacies"] = num_effs
+    sub_df = grouped["Tox"].agg(np.sum)
+    num_toxs = [
+        int(sub_df.get((0, 0), default=0)),
+        int(sub_df.get((0, 1), default=0)),
+        int(sub_df.get((1, 0), default=0)),
+        int(sub_df.get((1, 1), default=0)),
+    ]
+    sim_output["GroupToxicities"] = num_toxs
+
+    model.reset()
+    model.update(x)
+    bebop_output = OrderedDict()
+    bebop_output["ProbEff"] = iterable_to_json(np.round(model.prob_eff, 4))
+    bebop_output["ProbTox"] = iterable_to_json(np.round(model.prob_tox, 4))
+    bebop_output["ProbAccEff"] = iterable_to_json(np.round(model.prob_acc_eff, 4))
+    bebop_output["ProbAccTox"] = iterable_to_json(np.round(model.prob_acc_tox, 4))
+
+    bebop_output["Efficacy OR for Pretreated"] = iterable_to_json(
+        np.round(model.efficacy_effect(1), 4)
+    )
+    bebop_output["Efficacy OR for PD-L1 +vs-"] = iterable_to_json(
+        np.round(model.efficacy_effect(2), 4)
+    )
+
+    sim_output["BeBOP"] = bebop_output
+
+    return sim_output
+
+
 def simulate_peps2_trial(
     model,
     num_patients,
@@ -672,72 +726,19 @@ def simulate_peps2_trial(
     Returns:
         list: A list of simulation output dictionaries.
     """
-    sims = []
-    for i in range(num_sims):
-
-        if log_every > 0 and i % log_every == 0:
-            logger.debug("Iteration %s %s", i, datetime.datetime.now())
-
-        sim_output = OrderedDict()
-
-        x, n = simulate_peps2_patients(
-            num_patients,
-            prob_pretreated,
-            prob_biomarker,
-            zip(prob_effes, prob_toxes, efftox_ors),
-        )
-        sim_output["PreTreated"] = [int(y) for y in x[:, 0]]
-        sim_output["PD-L1+"] = [int(y) for y in x[:, 1]]
-        sim_output["Efficacy"] = [int(y) for y in x[:, 2]]
-        sim_output["Toxicity"] = [int(y) for y in x[:, 3]]
-        df = pd.DataFrame(x, columns=["PreTreated", "Mutated", "Eff", "Tox"])
-        df["One"] = 1
-        grouped = df.groupby(["PreTreated", "Mutated"])
-        sub_df = grouped["One"].agg(np.sum)
-        num_pats = [
-            sub_df.get((0, 0), default=0),
-            sub_df.get((0, 1), default=0),
-            sub_df.get((1, 0), default=0),
-            sub_df.get((1, 1), default=0),
-        ]
-        sim_output["GroupSizes"] = num_pats
-        sub_df = grouped["Eff"].agg(np.sum)
-        num_effs = [
-            int(sub_df.get((0, 0), default=0)),
-            int(sub_df.get((0, 1), default=0)),
-            int(sub_df.get((1, 0), default=0)),
-            int(sub_df.get((1, 1), default=0)),
-        ]
-        sim_output["GroupEfficacies"] = num_effs
-        sub_df = grouped["Tox"].agg(np.sum)
-        num_toxs = [
-            int(sub_df.get((0, 0), default=0)),
-            int(sub_df.get((0, 1), default=0)),
-            int(sub_df.get((1, 0), default=0)),
-            int(sub_df.get((1, 1), default=0)),
-        ]
-        sim_output["GroupToxicities"] = num_toxs
-
-        model.reset()
-        model.update(x)
-        bebop_output = OrderedDict()
-        bebop_output["ProbEff"] = iterable_to_json(np.round(model.prob_eff, 4))
-        bebop_output["ProbTox"] = iterable_to_json(np.round(model.prob_tox, 4))
-        bebop_output["ProbAccEff"] = iterable_to_json(np.round(model.prob_acc_eff, 4))
-        bebop_output["ProbAccTox"] = iterable_to_json(np.round(model.prob_acc_tox, 4))
-
-        bebop_output["Efficacy OR for Pretreated"] = iterable_to_json(
-            np.round(model.efficacy_effect(1), 4)
-        )
-        bebop_output["Efficacy OR for PD-L1 +vs-"] = iterable_to_json(
-            np.round(model.efficacy_effect(2), 4)
-        )
-
-        sim_output["BeBOP"] = bebop_output
-
-        sims.append(sim_output)
-
-    return sims
+    return run_sims(
+        sim_func=_single_peps2_trial,
+        n1=1,
+        n2=num_sims,
+        out_file=None,
+        model=model,
+        num_patients=num_patients,
+        prob_pretreated=prob_pretreated,
+        prob_biomarker=prob_biomarker,
+        prob_effes=prob_effes,
+        prob_toxes=prob_toxes,
+        efftox_ors=efftox_ors,
+    )
 
 
 def splice_sims(in_files_pattern, out_file=None):
