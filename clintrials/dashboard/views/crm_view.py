@@ -12,6 +12,7 @@ from clintrials.core.simulation import summarise_sims
 from clintrials.utils import ParameterSpace
 
 
+@st.fragment
 def render(sims):
     """Renders the CRM simulation results view.
 
