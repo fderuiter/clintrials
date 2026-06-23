@@ -31,7 +31,7 @@ __all__ = ["peps2v1", "peps2v2"]
 import numpy
 import pandas as pd
 
-from clintrials.core.stats import ProbabilityDensitySample
+from clintrials.core.stats import ProbabilityDensitySample, correlation_ci
 
 
 class BeBOP:
@@ -235,7 +235,7 @@ class BeBOP:
             numpy.ndarray: Array containing lower bound, mean estimate, and upper bound.
         """
 
-        if j < len(self.priors):
+        if i < len(self.priors):
             mu = self._pds.expectation(self._pds._samp[:, i])
             return numpy.array(
                 [
@@ -247,45 +247,26 @@ class BeBOP:
         else:
             return (0, 0, 0)
 
+    def correlation_effect(self, alpha=0.05):
+        """Gets the confidence interval and mean estimate for the correlation
+        between efficacy and toxicity.
 
-#     def efficacy_effect(self, j, alpha=0.05):
-#         """ Get confidence interval and mean estimate of the effect on efficacy, expressed as odds-ratios.
+        Args:
+            alpha (float, optional): The significance level for the confidence
+                interval. Defaults to 0.05.
 
-#         Use:
-#         - j=0, to get treatment effect of the intercept variable
-#         - j=1, to get treatment effect of the pre-treated status variable
-#         - j=2, to get treatment effect of the mutation status variable
+        Returns:
+            numpy.ndarray: An array containing the lower bound, mean, and
+                upper bound of the correlation.
+        """
+        psi_samples = self._pds._samp[:, 5]
+        correlation_samples = (numpy.exp(psi_samples) - 1) / (
+            numpy.exp(psi_samples) + 1
+        )
 
-#         """
-
-#         if j==0:
-#             expected_log_or = self._pds.expectation(self._pds._samp[:,1])
-#             return np.exp([self._pds.quantile(1, alpha/2), expected_log_or, self._pds.quantile(1, 1-alpha/2)])
-#         elif j==1:
-#             expected_log_or = self._pds.expectation(self._pds._samp[:,2])
-#             return np.exp([self._pds.quantile(2, alpha/2), expected_log_or, self._pds.quantile(2, 1-alpha/2)])
-#         elif j==2:
-#             expected_log_or = self._pds.expectation(self._pds._samp[:,3])
-#             return np.exp([self._pds.quantile(3, alpha/2), expected_log_or, self._pds.quantile(3, 1-alpha/2)])
-#         else:
-#             return (0,0,0)
-
-#     def toxicity_effect(self, j=0, alpha=0.05):
-#         """ Get confidence interval and mean estimate of the effect on toxicity, expressed as odds-ratios.
-
-#         Use:
-#         - j=0, to get effect on toxicity of the intercept variable
-
-#         """
-
-#         if j==0:
-#             expected_log_or = self._pds.expectation(self._pds._samp[:,0])
-#             return np.exp([self._pds.quantile(0, alpha/2), expected_log_or, self._pds.quantile(0, 1-alpha/2)])
-#         else:
-#             return (0,0,0)
-
-#     def correlation_effect(self, alpha=0.05):
-#         """ Get confidence interval and mean estimate of the correlation between efficacy and toxicity. """
-#         expected_psi = self._pds.expectation(self._pds._samp[:,4])
-#         psi_levels = np.array([self._pds.quantile(4, alpha/2), expected_psi, self._pds.quantile(4, 1-alpha/2)])
-#         return (np.exp(psi_levels) - 1) / (np.exp(psi_levels) + 1)
+        return correlation_ci(
+            samples=correlation_samples,
+            weights=self._pds._probs,
+            alpha=alpha,
+            method="bayes",
+        )

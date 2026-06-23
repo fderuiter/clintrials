@@ -8,6 +8,7 @@ from clintrials.core.stats import (
     beta_like_normal,
     bootstrap,
     chi_squ_test,
+    correlation_ci,
     or_test,
 )
 
@@ -150,3 +151,90 @@ def test_prob_density_sample_quantile_vector(prob_density_sample):
     vector = prob_density_sample._samp[:, 0]
     q = prob_density_sample.quantile_vector(vector, 0.5)
     assert np.isclose(q, 0.5562926340774739)
+
+
+def test_correlation_ci_fisher():
+    """
+    Test correlation_ci with method='fisher'.
+    """
+    # Example from a textbook: r = 0.7, n = 50, alpha = 0.05
+    # z = arctanh(0.7) = 0.8673
+    # se = 1 / sqrt(50 - 3) = 0.14586
+    # z_crit = 1.96
+    # z_ci = [0.8673 - 1.96 * 0.14586, 0.8673 + 1.96 * 0.14586]
+    # z_ci = [0.5814, 1.1532]
+    # r_ci = [tanh(0.5814), tanh(1.1532)] = [0.5236, 0.8190]
+
+    r = 0.7
+    n = 50
+    result = correlation_ci(r=r, n=n, method="fisher")
+
+    expected_low = np.tanh(np.arctanh(r) - 1.959963984540054 * (1 / np.sqrt(n - 3)))
+    expected_high = np.tanh(np.arctanh(r) + 1.959963984540054 * (1 / np.sqrt(n - 3)))
+
+    assert np.isclose(result[0], expected_low)
+    assert np.isclose(result[1], r)
+    assert np.isclose(result[2], expected_high)
+
+    # Edge case r=1
+    result_1 = correlation_ci(r=1.0, n=50, method="fisher")
+    assert np.all(result_1 == 1.0)
+
+    # Edge case r=-1
+    result_neg_1 = correlation_ci(r=-1.0, n=50, method="fisher")
+    assert np.all(result_neg_1 == -1.0)
+
+    # Validation
+    with pytest.raises(ValueError):
+        correlation_ci(r=0.5, n=3, method="fisher")
+    with pytest.raises(ValueError):
+        correlation_ci(r=1.1, n=50, method="fisher")
+
+
+def test_correlation_ci_bayes():
+    """
+    Test correlation_ci with method='bayes'.
+    """
+    samples = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    result = correlation_ci(samples=samples, alpha=0.1, method="bayes")
+
+    # alpha/2 = 0.05, 1 - alpha/2 = 0.95
+    # np.quantile defaults to linear interpolation
+    expected_low = np.quantile(samples, 0.05)
+    expected_high = np.quantile(samples, 0.95)
+    expected_mean = np.mean(samples)
+
+    assert np.isclose(result[0], expected_low)
+    assert np.isclose(result[1], expected_mean)
+    assert np.isclose(result[2], expected_high)
+
+
+def test_correlation_ci_bayes_weighted():
+    """
+    Test correlation_ci with method='bayes' and weights.
+    """
+    samples = np.array([0.1, 0.9])
+    weights = np.array([0.9, 0.1])
+    # Weighted mean: 0.1 * 0.9 + 0.9 * 0.1 = 0.09 + 0.09 = 0.18
+    # Cumulative weights: [0.9, 1.0]
+    # alpha=0.5 => alpha/2 = 0.25, 1 - alpha/2 = 0.75
+    # 0.25 is before 0.9, so low = 0.1 (interp will handle it)
+    # 0.75 is before 0.9, so high = 0.1
+
+    result = correlation_ci(
+        samples=samples, weights=weights, alpha=0.5, method="bayes"
+    )
+
+    assert np.isclose(result[1], 0.18)
+    assert np.isclose(result[0], 0.1)
+    assert np.isclose(result[2], 0.1)
+
+    # More complex weighted case
+    samples = np.array([0.1, 0.5, 0.9])
+    weights = np.array([1, 1, 1])
+    result = correlation_ci(
+        samples=samples, weights=weights, alpha=0.05, method="bayes"
+    )
+    unweighted = correlation_ci(samples=samples, alpha=0.05, method="bayes")
+    # np.quantile and np.interp might differ slightly in how they handle discrete values
+    assert np.isclose(result[1], unweighted[1])

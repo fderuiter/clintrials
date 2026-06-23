@@ -22,7 +22,12 @@ import numpy as np
 import pandas as pd
 
 from clintrials.core.simulation import run_sims
-from clintrials.core.stats import ProbabilityDensitySample, chi_squ_test, or_test
+from clintrials.core.stats import (
+    ProbabilityDensitySample,
+    chi_squ_test,
+    correlation_ci,
+    or_test,
+)
 from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes,
@@ -429,15 +434,14 @@ class PePS2BeBOP:
             numpy.ndarray: An array containing the lower bound, mean, and
                 upper bound of the correlation.
         """
-        expected_psi = self._pds.expectation(self._pds._samp[:, 4])
-        psi_levels = np.array(
-            [
-                self._pds.quantile(4, alpha / 2),
-                expected_psi,
-                self._pds.quantile(4, 1 - alpha / 2),
-            ]
+        psi_samples = self._pds._samp[:, 4]
+        correlation_samples = (np.exp(psi_samples) - 1) / (np.exp(psi_samples) + 1)
+        return correlation_ci(
+            samples=correlation_samples,
+            weights=self._pds._probs,
+            alpha=alpha,
+            method="bayes",
         )
-        return (np.exp(psi_levels) - 1) / (np.exp(psi_levels) + 1)
 
     def _update(self, post_probs):
         prob_tox, prob_eff, prob_acc_tox, prob_acc_eff = zip(*post_probs)
