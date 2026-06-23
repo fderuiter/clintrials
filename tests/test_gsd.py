@@ -100,3 +100,54 @@ def test_gsd_with_invalid_alpha():
         GroupSequentialDesign(k=4, alpha=0)
     with pytest.raises(ValueError):
         GroupSequentialDesign(k=4, alpha=1)
+
+
+def test_spending_function_obrien_fleming_zero():
+    assert spending_function_obrien_fleming(0.0, 0.05) == 0.0
+
+
+def test_gsd_update_and_report():
+    design = GroupSequentialDesign(k=3, alpha=0.025)
+
+    assert design.has_more() is True
+
+    # Update first stage
+    design.update(z_score=1.0)
+    assert design._stage == 1
+    assert design._stopped is False
+    assert design._rejected is False
+    assert design.has_more() is True
+
+    # Update second stage, trigger rejection
+    bound_stage_2 = design.efficacy_boundaries[1]
+    design.update(z_score=bound_stage_2 + 0.1, info=0.6)
+    assert design._stage == 2
+    assert design._stopped is True
+    assert design._rejected is True
+    assert design.has_more() is False
+
+    # Update again when already stopped (should do nothing)
+    design.update(z_score=5.0)
+    assert design._stage == 2
+
+    report = design.report()
+    assert report["Stage"] == 2
+    assert report["Stopped"] is True
+    assert report["Rejected"] is True
+    assert len(report["ZScores"]) == 2
+    assert len(report["Information"]) == 2
+
+    # Test update till max stages without rejection
+    design2 = GroupSequentialDesign(k=2, alpha=0.025)
+    design2.update(z_score=0.0)
+    assert design2.has_more() is True
+    design2.update(z_score=0.0)
+    assert design2.has_more() is False
+    assert design2._stopped is True
+    assert design2._rejected is False
+
+
+def test_gsd_simulate_invalid_sims():
+    design = GroupSequentialDesign(k=3)
+    with pytest.raises(ValueError, match="Number of simulations must be positive"):
+        design.simulate(0)
