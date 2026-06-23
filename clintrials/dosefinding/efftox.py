@@ -11,7 +11,7 @@ import logging
 from collections import OrderedDict
 
 import numpy as np
-from scipy.optimize import brentq
+from scipy.optimize import brentq, fsolve
 
 from clintrials.core.math import inverse_logit
 from clintrials.core.stats import ProbabilityDensitySample
@@ -344,48 +344,78 @@ class LpNormCurve:
         """
         x = prob_eff
         y = prob_tox
-        if np.all(0 < x) and np.all(x < 1) and np.all(0 < y) and np.all(y < 1):
+        if np.all(0 <= x) and np.all(x <= 1) and np.all(0 <= y) and np.all(y <= 1):
             a = (1 - x) / (1 - self.minimum_tolerable_efficacy)
             b = y / self.maximum_tolerable_toxicity
             r_to_the_p = a**self.p + b**self.p
             return 1 - r_to_the_p ** (1.0 / self.p)
         else:
+            if np.isscalar(x) and np.isscalar(y):
+                return np.nan
             response = np.zeros_like(x, dtype=float)
-            response *= np.nan
+            response[:] = np.nan
             return response
 
-    def solve(self, prob_eff=None, prob_tox=None, delta=0):
+    def solve(
+        self, delta, *, prob_eff=None, prob_tox=None, bounds=(0, 1), tol=1e-6, maxiter=100
+    ):
         """Solves for one probability given the other and a utility delta.
 
         Args:
+            delta (float): The utility delta.
             prob_eff (float, optional): The probability of efficacy.
             prob_tox (float, optional): The probability of toxicity.
-            delta (float, optional): The utility delta. Defaults to 0.
+            bounds (tuple, optional): The bounds for the solved probability.
+                Defaults to (0, 1).
+            tol (float, optional): The tolerance for the solution. Defaults
+                to 1e-6.
+            maxiter (int, optional): The maximum number of iterations.
+                Defaults to 100.
 
         Returns:
             float: The solved probability.
+
+        Raises:
+            ValueError: If exactly one of `prob_eff` or `prob_tox` is not
+                specified, or if the utility delta is infeasible.
         """
-        if prob_eff is None and prob_tox is None:
-            raise Exception("Specify prob_eff or prob_tox")
-        if prob_eff is not None and prob_tox is not None:
-            raise Exception("Specify just one of prob_eff and prob_tox")
+        if (prob_eff is None and prob_tox is None) or (
+            prob_eff is not None and prob_tox is not None
+        ):
+            raise ValueError("Specify exactly one of prob_eff and prob_tox")
 
         x, y = prob_eff, prob_tox
         x_l, y_l = self.minimum_tolerable_efficacy, self.maximum_tolerable_toxicity
+
+        if delta > 1:
+            raise ValueError(f"Utility delta {delta} is infeasible (cannot exceed 1).")
+
         scaled_delta = (1 - delta) ** self.p
         if x is None:
-            # Solve for x
+            # Solve for x (prob_eff)
             b = y / y_l
-            a = (scaled_delta - b**self.p) ** (1 / self.p)
-            return 1 - (1 - x_l) * a
+            inner = scaled_delta - b**self.p
+            if inner < 0:
+                raise ValueError(
+                    f"Utility delta {delta} is infeasible for prob_tox={y}"
+                )
+            a = inner ** (1 / self.p)
+            res = 1 - (1 - x_l) * a
         else:
-            # Solve for y
+            # Solve for y (prob_tox)
             a = (1 - x) / (1 - x_l)
             b_term = scaled_delta - a**self.p
-            if b_term <= 0:
-                return complex(np.nan, np.nan)
+            if b_term < 0:
+                raise ValueError(
+                    f"Utility delta {delta} is infeasible for prob_eff={x}"
+                )
             b = b_term ** (1 / self.p)
-            return b * y_l
+            res = b * y_l
+
+        if res < bounds[0] or res > bounds[1]:
+            raise ValueError(f"Solved probability {res} is outside of bounds {bounds}")
+
+        return res
 
     def get_tox(self, eff, util=0.0):
         """Gets the equivalent toxicity probability for a given efficacy and utility.
@@ -498,7 +528,14 @@ class InverseQuadraticCurve:
             def intersection_expression(x, m, f):
                 return m * (x - 1) - f(x)
 
-            x_00 = brentq(intersection_expression, 0.0001, 1, args=(gradient, self.f))
+            # Try to find a root for the intersection. We use fsolve with x as a
+            # starting point because the root-finding interval can be tricky.
+            x_00 = fsolve(intersection_expression, x, args=(gradient, self.f))[0]
+
+            # Ensure x_00 is within reasonable bounds
+            if x_00 <= 0 or x_00 >= 1:
+                return np.nan
+
             y_00 = self.f(x_00)
             d1 = np.sqrt((x_00 - 1) ** 2 + y_00**2)
             d2 = np.sqrt((x - 1) ** 2 + y**2)
@@ -507,52 +544,92 @@ class InverseQuadraticCurve:
         else:
             return np.nan
 
-    def solve(self, prob_eff=None, prob_tox=None, delta=0):
+    def solve(
+        self, delta, *, prob_eff=None, prob_tox=None, bounds=(0, 1), tol=1e-6, maxiter=100
+    ):
         """Solves for one probability given the other and a utility delta.
 
         Args:
+            delta (float): The utility delta.
             prob_eff (float, optional): The probability of efficacy.
             prob_tox (float, optional): The probability of toxicity.
-            delta (float, optional): The utility delta. Defaults to 0.
+            bounds (tuple, optional): The bounds for the solved probability.
+                Defaults to (0, 1).
+            tol (float, optional): The tolerance for the solution. Defaults
+                to 1e-6.
+            maxiter (int, optional): The maximum number of iterations.
+                Defaults to 100.
 
         Returns:
             float: The solved probability.
-        """
-        if delta != 0:
-            raise NotImplementedError("Only contours for delta=0 are supported.")
 
-        if prob_eff is None and prob_tox is None:
-            raise Exception("Specify prob_eff or prob_tox")
-        if prob_eff is not None and prob_tox is not None:
-            raise Exception("Specify just one of prob_eff and prob_tox")
+        Raises:
+            ValueError: If exactly one of `prob_eff` or `prob_tox` is not
+                specified, or if the utility delta is infeasible.
+        """
+        if (prob_eff is None and prob_tox is None) or (
+            prob_eff is not None and prob_tox is not None
+        ):
+            raise ValueError("Specify exactly one of prob_eff and prob_tox")
+
+        if delta <= -1:
+            raise ValueError(f"Utility delta {delta} must be > -1")
 
         if prob_eff is not None:
-            return self.f(prob_eff)
+            # Analytical solution based on U = d1/d2 - 1
+            # d2 = d1 / (1 + delta)
+            # x = 1 + (x_00 - 1) / (1 + delta)
+            # x_00 = 1 + (prob_eff - 1) * (1 + delta)
+            x_00 = 1 + (prob_eff - 1) * (1 + delta)
+            if x_00 <= 0 or x_00 >= 1:
+                raise ValueError(
+                    f"Utility delta {delta} is infeasible for prob_eff={prob_eff}"
+                )
+            y_00 = self.f(x_00)
+            res = y_00 / (1 + delta)
         else:
-            A = prob_tox - self.a
+            # y = y_00 / (1 + delta) => y_00 = y * (1 + delta)
+            y_00 = prob_tox * (1 + delta)
+            # Solve f(x_00) = y_00 for x_00
+            # a + b/x_00 + c/x_00^2 = y_00
+            # (y_00 - a)x_00^2 - b*x_00 - c = 0
+            A = y_00 - self.a
             B = -self.b
             C = -self.c
 
             if A == 0:
                 if B == 0:
-                    return np.nan
-                else:
-                    x = -C / B
-                    return x if 0 < x < 1 else np.nan
-
-            discriminant = B**2 - 4 * A * C
-            if discriminant < 0:
-                return np.nan
-
-            x1 = (-B + np.sqrt(discriminant)) / (2 * A)
-            x2 = (-B - np.sqrt(discriminant)) / (2 * A)
-
-            if 0 < x1 < 1:
-                return x1
-            elif 0 < x2 < 1:
-                return x2
+                    raise ValueError(
+                        f"Utility delta {delta} is infeasible for prob_tox={prob_tox}"
+                    )
+                x_00 = -C / B
             else:
-                return np.nan
+                discriminant = B**2 - 4 * A * C
+                if discriminant < 0:
+                    raise ValueError(
+                        f"Utility delta {delta} is infeasible for prob_tox={prob_tox}"
+                    )
+
+                sqrt_disc = np.sqrt(discriminant)
+                x1 = (-B + sqrt_disc) / (2 * A)
+                x2 = (-B - sqrt_disc) / (2 * A)
+
+                # Pick the root in (0, 1)
+                if 0 < x1 < 1:
+                    x_00 = x1
+                elif 0 < x2 < 1:
+                    x_00 = x2
+                else:
+                    raise ValueError(
+                        f"Utility delta {delta} is infeasible for prob_tox={prob_tox}"
+                    )
+
+            res = 1 + (x_00 - 1) / (1 + delta)
+
+        if res < bounds[0] - 1e-10 or res > bounds[1] + 1e-10:
+            raise ValueError(f"Solved probability {res} is outside of bounds {bounds}")
+
+        return np.clip(res, bounds[0], bounds[1])
 
     def plot_contours(
         self,
