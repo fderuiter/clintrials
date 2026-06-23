@@ -42,6 +42,28 @@ def _wt_lik(cases, skeleton, theta, F=empiric, a0=0):
     return l
 
 
+def _wt_log_lik(cases, skeleton, theta, F=empiric, a0=0):
+    """Calculates the compound log-likelihood for the Wages & Tait method.
+
+    Args:
+        cases (list[tuple[int, int, int]]): A list of cases, where each
+            case is a tuple of (dose, toxicity, efficacy).
+        skeleton (list[float]): A list of prior efficacy probabilities.
+        theta (float): The slope parameter.
+        F (callable, optional): The link function. Defaults to `empiric`.
+        a0 (float, optional): The intercept parameter. Defaults to 0.
+
+    Returns:
+        float: The compound log-likelihood.
+    """
+    ll = 0
+    for dose, tox, eff in cases:
+        p = F(skeleton[dose - 1], a0=a0, beta=theta)
+        p = np.clip(p, 1e-15, 1 - 1e-15)
+        ll += eff * np.log(p) + (1 - eff) * np.log(1 - p)
+    return ll
+
+
 def _wt_get_theta_hat(
     cases,
     skeletons,
