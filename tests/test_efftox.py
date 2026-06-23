@@ -39,6 +39,7 @@ def run_trial(trial, cases, summary_func, **kwargs):
 
 
 def test_thall2014_efftox():
+    np.random.seed(42)
 
     # Recreate all params in a hypothetical path of the
     # trial described in Thall et al, 2014
@@ -258,6 +259,7 @@ def test_matchpoint_efftox():
 
 
 def test_thall2014_efftox_v2():
+    np.random.seed(42)
     real_doses = [1, 2, 4, 6.6, 10]
     trial_size = 39
     first_dose = 1
