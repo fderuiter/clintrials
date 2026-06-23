@@ -7,12 +7,12 @@ class Protocol(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def reset(self):
         """Resets the trial to its initial state."""
-        pass
+        pass  # pragma: no cover
 
     @abc.abstractmethod
     def update(self, *args, **kwargs):
         """Updates the trial with new cases or a new stage."""
-        pass
+        pass  # pragma: no cover
 
     @abc.abstractmethod
     def has_more(self):
@@ -20,7 +20,7 @@ class Protocol(metaclass=abc.ABCMeta):
         Returns:
             bool: True if the trial is ongoing, False otherwise.
         """
-        pass
+        pass  # pragma: no cover
 
     @abc.abstractmethod
     def report(self):
@@ -28,4 +28,4 @@ class Protocol(metaclass=abc.ABCMeta):
         Returns:
             collections.OrderedDict: The trial outcome report.
         """
-        pass
+        pass  # pragma: no cover
