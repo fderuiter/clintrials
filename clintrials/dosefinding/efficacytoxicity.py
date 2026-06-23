@@ -22,7 +22,9 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
-class EfficacyToxicityDoseFindingTrial(metaclass=abc.ABCMeta):
+from clintrials.core.protocol import Protocol
+
+class EfficacyToxicityDoseFindingTrial(Protocol):
     """An abstract base class for dose-finding trials that jointly monitor
     toxicity and efficacy.
     """
@@ -329,6 +331,23 @@ class EfficacyToxicityDoseFindingTrial(metaclass=abc.ABCMeta):
         """
         return (self.size() < self.max_size()) and (self._status >= 0)
 
+    def report(self):
+        """Generates a standardized JSON-serializable report of the trial.
+        
+        Returns:
+            collections.OrderedDict: The trial outcome report.
+        """
+        from collections import OrderedDict
+        from clintrials.utils import atomic_to_json, iterable_to_json
+        
+        report = OrderedDict()
+        report["RecommendedDose"] = atomic_to_json(self.next_dose())
+        report["TrialStatus"] = atomic_to_json(self.status())
+        report["Doses"] = iterable_to_json(self.doses())
+        report["Toxicities"] = iterable_to_json(self.toxicities())
+        report["Efficacies"] = iterable_to_json(self.efficacies())
+        return report
+
     @abc.abstractmethod
     def __calculate_next_dose(self, **kwargs):
         """Calculates the next dose to be administered.
@@ -431,11 +450,7 @@ def _simulate_trial(
     # Do not parrot back parameters
 
     if conduct_trial:
-        report["RecommendedDose"] = atomic_to_json(design.next_dose())
-        report["TrialStatus"] = atomic_to_json(design.status())
-        report["Doses"] = iterable_to_json(design.doses())
-        report["Toxicities"] = iterable_to_json(design.toxicities())
-        report["Efficacies"] = iterable_to_json(design.efficacies())
+        report.update(design.report())
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
         try:
