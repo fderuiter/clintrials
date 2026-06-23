@@ -8,7 +8,7 @@ __author__ = "brockk"
 import abc
 import logging
 from collections import OrderedDict
-from itertools import combinations_with_replacement, product
+from itertools import combinations_with_replacement
 
 import numpy as np
 
@@ -16,7 +16,6 @@ from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,
     iterable_to_json,
-    to_1d_list,
 )
 
 logger = logging.getLogger(__name__)

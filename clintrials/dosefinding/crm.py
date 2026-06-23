@@ -180,12 +180,8 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
             of beta. The variance is `None` if `estimate_var` is `False`.
     """
     if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
-        msg = (
-            "Need heterogeneity in toxic events (i.e. toxic and non-toxic outcomes must be observed) for MLE to "
-            "exist. See Cheung p.23."
-        )
         logging.warning(
-            "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist."
+            "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist. See Cheung p.23."
         )
         return np.nan, None
 

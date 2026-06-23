@@ -16,12 +16,13 @@ import glob
 import json
 import logging
 from collections import OrderedDict
+from functools import reduce
 from itertools import product
 
 import numpy as np
 import pandas as pd
 
-from clintrials.core.stats import ProbabilityDensitySample, chi_squ_test, or_test
+from clintrials.core.stats import ProbabilityDensitySample
 from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes,
@@ -833,7 +834,6 @@ def splice_sims(in_files_pattern, out_file=None):
         return sims
 
 
-from itertools import product
 
 
 def tell_me_about_results(

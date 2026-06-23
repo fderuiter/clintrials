@@ -46,7 +46,7 @@ def test_filter_list_of_dicts():
 
 
 def test_map_reduce_files():
-    with patch("builtins.open", mock_open(read_data='[{"a": 1}]')) as mock_file:
+    with patch("builtins.open", mock_open(read_data='[{"a": 1}]')):
         data = map_reduce_files(
             ["file1.json", "file2.json"],
             lambda x: json.load(open(x)),

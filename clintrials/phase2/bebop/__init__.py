@@ -235,7 +235,7 @@ class BeBOP:
             numpy.ndarray: Array containing lower bound, mean estimate, and upper bound.
         """
 
-        if j < len(self.priors):
+        if i < len(self.priors):
             mu = self._pds.expectation(self._pds._samp[:, i])
             return numpy.array(
                 [

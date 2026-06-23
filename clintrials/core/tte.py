@@ -9,7 +9,7 @@ __contact__ = "kristian.brock@gmail.com"
 from collections import OrderedDict
 
 import numpy as np
-from scipy.stats import expon, invgamma, poisson
+from scipy.stats import expon, invgamma
 
 from clintrials.utils import atomic_to_json, iterable_to_json
 

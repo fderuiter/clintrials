@@ -12,7 +12,7 @@ from random import sample
 
 import numpy as np
 from scipy.integrate import quad
-from scipy.stats import beta, norm
+from scipy.stats import norm
 
 from clintrials.core.math import empiric, inverse_empiric
 from clintrials.dosefinding.crm import CRM

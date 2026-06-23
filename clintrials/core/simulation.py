@@ -18,8 +18,6 @@ from clintrials.utils import (
     fetch_json_from_files,
     filter_list_of_dicts,
     invoke_map_reduce_on_list,
-    map_reduce_files,
-    multiindex_dataframe_from_tuple_map,
     reduce_maps_by_summing,
 )
 

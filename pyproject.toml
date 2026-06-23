@@ -68,7 +68,6 @@ line_length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py39"
-exclude = ["clintrials/phase2/bebop/peps2v1.py", "docs/tutorials/*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F"]
@@ -81,14 +80,12 @@ ignore = [
     "E741",
     "E712",
     "E501",
-    "F821",
-    "F401",
-    "F841",
     "E713",
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
+"docs/tutorials/*" = ["T201", "D103", "D"]
 
 
 [tool.pytest.ini_options]

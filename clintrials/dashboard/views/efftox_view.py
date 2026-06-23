@@ -2,7 +2,6 @@
 Renders the EffTox simulation results view in the Streamlit dashboard.
 """
 
-import json
 
 import pandas as pd
 import plotly.express as px
