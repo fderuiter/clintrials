@@ -98,6 +98,7 @@ class GroupSequentialDesign(Protocol):
         self.reset()
 
     def reset(self):
+        """Reset the group sequential design state."""
         self._stage = 0
         self._stopped = False
         self._rejected = False
@@ -105,6 +106,7 @@ class GroupSequentialDesign(Protocol):
         self._information = []
 
     def update(self, z_score: float, info: float = None):
+        """Update the trial state with the latest test statistic."""
         if self._stopped:
             return
         self._stage += 1
@@ -122,9 +124,11 @@ class GroupSequentialDesign(Protocol):
             self._stopped = True
 
     def has_more(self):
+        """Check if the trial should continue to the next stage."""
         return not self._stopped
 
     def report(self):
+        """Generate a report of the trial state and results."""
         from collections import OrderedDict
         from clintrials.utils import atomic_to_json, iterable_to_json
         
