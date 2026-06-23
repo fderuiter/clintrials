@@ -520,7 +520,10 @@ class TestEffToxAdmissibleSet:
         ]
         hinge_points = [(0.4, 0), (1, 0.7), (0.5, 0.4)]
         metric = LpNormCurve(
-            hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1]
+            hinge_points[0][0],
+            hinge_points[1][1],
+            hinge_points[2][0],
+            hinge_points[2][1],
         )
         trial1 = EffTox(
             real_doses,

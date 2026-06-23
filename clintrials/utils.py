@@ -641,6 +641,7 @@ def cross_tab(
 
 from functools import partial
 
+
 class Memoize:
     """A class to cache function results."""
 

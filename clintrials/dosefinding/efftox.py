@@ -695,12 +695,8 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         prob_tox, prob_eff, prob_acc_tox, prob_acc_eff = zip(*post_probs)
         admissable = np.array(
             [
-                (
-                    x >= self.tox_certainty and y >= self.eff_certainty
-                )
-                or (
-                    i == self.maximum_dose_given() and x >= self.tox_certainty
-                )
+                (x >= self.tox_certainty and y >= self.eff_certainty)
+                or (i == self.maximum_dose_given() and x >= self.tox_certainty)
                 for i, (x, y) in enumerate(zip(prob_acc_tox, prob_acc_eff))
             ]
         )
@@ -721,9 +717,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         if self.treated_at_dose(self.first_dose()) > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            for i in np.argsort(
-                -self.utility
-            ):
+            for i in np.argsort(-self.utility):
                 dose_level = i + 1
                 if dose_level in self.admissable_set():
                     if (
@@ -874,6 +868,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         Returns:
             A ggplot object.
         """
+
         def get_prob_tox(x, samp):
             tox_probs = _pi_T(x, mu=samp[:, 0], beta=samp[:, 1])
             return tox_probs
@@ -898,6 +893,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         Returns:
             A ggplot object.
         """
+
         def get_prob_eff(x, samp):
             eff_probs = _pi_E(x, mu=samp[:, 2], beta1=samp[:, 3], beta2=samp[:, 4])
             return eff_probs
@@ -922,6 +918,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         Returns:
             A ggplot object.
         """
+
         def get_utility(x, samp):
             tox_probs = _pi_T(x, mu=samp[:, 0], beta=samp[:, 1])
             eff_probs = _pi_E(x, mu=samp[:, 2], beta1=samp[:, 3], beta2=samp[:, 4])

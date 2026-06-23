@@ -11,13 +11,18 @@ __contact__ = "kristian.brock@gmail.com"
 from random import sample
 
 import numpy as np
+from scipy.integrate import quad
 from scipy.stats import beta, norm
 
 from clintrials.core.math import empiric, inverse_empiric
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 from clintrials.dosefinding.efftox import solve_metrizable_efftox_scenario
-from clintrials.dosefinding.wagestait import _get_post_eff_bayes, _wt_get_theta_hat
+from clintrials.dosefinding.wagestait import (
+    _get_post_eff_bayes,
+    _wt_get_theta_hat,
+    _wt_lik,
+)
 
 
 class WATU(EfficacyToxicityDoseFindingTrial):
@@ -195,6 +200,21 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         """
         return self.theta_vars[self.most_likely_model_index]
 
+    def _theta_posterior_unnormalized_pdf(self, theta, cases, skeleton):
+        """Calculates the unnormalized posterior PDF for theta.
+
+        Args:
+            theta (float): The value of theta at which to evaluate the PDF.
+            cases (list[tuple[int, int, int]]): A list of cases.
+            skeleton (list[float]): The efficacy skeleton.
+
+        Returns:
+            float: The unnormalized posterior PDF.
+        """
+        lik = _wt_lik(cases, skeleton, theta, F=self.F_func)
+        prior = self.theta_prior.pdf(theta)
+        return lik * prior
+
     def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self):
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
@@ -284,11 +304,21 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         )
         return obd
 
-    def prob_eff_exceeds(self, eff_cutoff):
+    def prob_eff_exceeds(
+        self, eff_cutoff, backend="analytic", n=10**6, epsabs=1.49e-8, epsrel=1.49e-8
+    ):
         """Calculates the probability that efficacy exceeds a cutoff.
 
         Args:
             eff_cutoff (float): The efficacy cutoff.
+            backend (str, optional): The calculation backend, either
+                "analytic", "quadrature", or "mc". Defaults to "analytic".
+            n (int, optional): The number of samples for the "mc" backend.
+                Defaults to 10**6.
+            epsabs (float, optional): Absolute tolerance for "quadrature"
+                backend. Defaults to 1.49e-8.
+            epsrel (float, optional): Relative tolerance for "quadrature"
+                backend. Defaults to 1.49e-8.
 
         Returns:
             numpy.ndarray: An array of probabilities for each dose level.
@@ -302,8 +332,6 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         if eff_cutoff < 0.0:
             return np.ones_like(skeleton, dtype=float)
 
-        theta_posterior = norm(loc=self.model_theta_hat(), scale=np.sqrt(self.model_theta_var()))
-
         one_mask = skeleton == 1.0
         probs[one_mask] = 1.0
 
@@ -311,11 +339,73 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         probs[zero_mask] = 0.0
 
         middle_mask = ~(one_mask | zero_mask)
-        if np.any(middle_mask):
-            sub_skeleton = skeleton[middle_mask]
-            eff_cutoff_clipped = np.maximum(eff_cutoff, 1e-9)
-            thresholds = np.log(eff_cutoff_clipped) / np.log(sub_skeleton)
-            probs[middle_mask] = theta_posterior.cdf(thresholds)
+        if not np.any(middle_mask):
+            return probs
+
+        sub_skeleton = skeleton[middle_mask]
+        eff_cutoff_clipped = np.maximum(eff_cutoff, 1e-9)
+        thresholds = np.log(eff_cutoff_clipped) / np.log(sub_skeleton)
+
+        if backend == "analytic":
+            theta_sd = np.sqrt(self.model_theta_var())
+            if theta_sd <= 0:
+                probs[middle_mask] = (self.model_theta_hat() < thresholds).astype(float)
+            else:
+                theta_posterior = norm(loc=self.model_theta_hat(), scale=theta_sd)
+                probs[middle_mask] = theta_posterior.cdf(thresholds)
+        elif backend == "mc":
+            if self.estimate_var:
+                theta_sd = np.sqrt(self.model_theta_var())
+                if theta_sd <= 0:
+                    theta_sample = np.full(n, self.model_theta_hat())
+                else:
+                    theta_sample = norm(loc=self.model_theta_hat(), scale=theta_sd).rvs(
+                        n
+                    )
+                probs[middle_mask] = np.array(
+                    [np.mean(theta_sample < t) for t in thresholds]
+                )
+            else:
+                raise Exception(
+                    "WATU can only estimate posterior probabilities with backend 'mc' when estimate_var=True"
+                )
+        elif backend == "quadrature":
+            cases = list(zip(self._doses, self._toxicities, self._efficacies))
+            denom, _ = quad(
+                lambda t: self._theta_posterior_unnormalized_pdf(
+                    t, cases, self.skeletons[self.most_likely_model_index]
+                ),
+                -np.inf,
+                np.inf,
+                epsabs=epsabs,
+                epsrel=epsrel,
+            )
+            if denom <= 0:
+                # If the posterior integral is zero, it might be due to a very
+                # narrow prior. In this case, we fall back to the analytic
+                # (Laplace) approximation.
+                theta_sd = np.sqrt(self.model_theta_var())
+                if theta_sd <= 0:
+                    probs[middle_mask] = (self.model_theta_hat() < thresholds).astype(
+                        float
+                    )
+                else:
+                    theta_posterior = norm(loc=self.model_theta_hat(), scale=theta_sd)
+                    probs[middle_mask] = theta_posterior.cdf(thresholds)
+            else:
+                for i, t in enumerate(thresholds):
+                    num, _ = quad(
+                        lambda theta: self._theta_posterior_unnormalized_pdf(
+                            theta, cases, self.skeletons[self.most_likely_model_index]
+                        ),
+                        -np.inf,
+                        t,
+                        epsabs=epsabs,
+                        epsrel=epsrel,
+                    )
+                    probs[np.where(middle_mask)[0][i]] = num / denom
+        else:
+            raise ValueError(f"Unknown backend: {backend}")
 
         return probs
 
@@ -364,12 +454,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         if self.size() > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            attractiveness = np.abs(
-                np.array(self.crm.prob_tox()) - self.tox_target
-            )
-            for i in np.argsort(
-                attractiveness
-            ):
+            attractiveness = np.abs(np.array(self.crm.prob_tox()) - self.tox_target)
+            for i in np.argsort(attractiveness):
                 dose_level = i + 1
                 if dose_level in admissable_set:
                     if (
@@ -415,9 +501,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         if self.size() > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            for i in np.argsort(
-                -utility
-            ):
+            for i in np.argsort(-utility):
                 dose_level = i + 1
                 if dose_level in admissable_set:
                     if (

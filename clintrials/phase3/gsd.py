@@ -191,14 +191,10 @@ class GroupSequentialDesign:
 
         rejection_prob = np.mean(rejected)
 
-        stop_counts = np.bincount(stopped_at, minlength=self.k + 2)[
-            1:
-        ]
+        stop_counts = np.bincount(stopped_at, minlength=self.k + 2)[1:]
         stopping_dist = stop_counts / n_sims
 
-        info_at_stop = np.array(
-            self.timing + [self.timing[-1]]
-        )
+        info_at_stop = np.array(self.timing + [self.timing[-1]])
 
         trial_stop_info = np.array(
             [self.timing[s - 1] if s <= self.k else self.timing[-1] for s in stopped_at]

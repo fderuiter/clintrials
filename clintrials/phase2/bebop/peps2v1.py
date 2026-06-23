@@ -66,9 +66,7 @@ def pi_e(disease_status, mutation_status, beta0=0, beta1=0, beta2=0):
     return 1 / (1 + np.exp(-z))
 
 
-def pi_ab(
-    disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2, psi
-):
+def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2, psi):
     """Calculates the likelihood of a joint efficacy-toxicity outcome.
 
     Args:
@@ -131,9 +129,7 @@ def l_n(cases, alpha0, beta0, beta1, beta2, psi):
         return np.ones_like(alpha0)
 
 
-def get_posterior_probs(
-    cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilon=1e-5
-):
+def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilon=1e-5):
     """Gets the posterior probabilities for the PePS2 trial using the BeBOP design.
 
     This function calculates the posterior probabilities of efficacy and toxicity for each of the
@@ -756,6 +752,7 @@ def splice_sims(in_files_pattern, out_file=None):
         dict or None: The spliced simulation results, or `None` if no files
             are found.
     """
+
     def _splice_sims(sims1, sims2):
         sims1["NumSims"] = atomic_to_json(sims1["NumSims"] + sims2["NumSims"])
         sims1["Group Sizes"] = [

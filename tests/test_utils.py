@@ -2,17 +2,17 @@ import json
 from unittest.mock import mock_open, patch
 
 from clintrials.utils import (
+    Memoize,
     fetch_json_from_files,
     filter_list_of_dicts,
     invoke_map_reduce_on_list,
+    levenshtein,
+    levenshtein_index,
     map_reduce_files,
     multiindex_dataframe_from_tuple_map,
     reduce_maps_by_summing,
-    to_1d_list,
-    levenshtein,
-    levenshtein_index,
     support_match,
-    Memoize,
+    to_1d_list,
 )
 
 
@@ -87,11 +87,13 @@ def test_multiindex_dataframe_from_tuple_map():
     assert isinstance(df, pd.DataFrame)
     assert df.shape == (4, 1)
 
+
 def test_to_1d_list():
     assert to_1d_list(1) == [1]
     assert to_1d_list([1, 2, 3]) == [1, 2, 3]
     assert to_1d_list([1, [2, 3]]) == [1, 2, 3]
     assert to_1d_list([1, [2, [3]]]) == [1, 2, 3]
+
 
 def test_levenshtein():
     assert levenshtein("kitten", "sitting") == 3
@@ -100,17 +102,20 @@ def test_levenshtein():
     assert levenshtein("abc", "") == 3
     assert levenshtein("abc", "abc") == 0
 
+
 def test_levenshtein_index():
-    assert levenshtein_index("kitten", "sitting") == 1 - 3/7
-    assert levenshtein_index("saturday", "sunday") == 1 - 3/8
+    assert levenshtein_index("kitten", "sitting") == 1 - 3 / 7
+    assert levenshtein_index("saturday", "sunday") == 1 - 3 / 8
     assert levenshtein_index("", "abc") == 0.0
     assert levenshtein_index("abc", "abc") == 1.0
 
+
 def test_support_match():
-    assert support_match([1, 2, 3], [1, 2, 4]) == 4/6
+    assert support_match([1, 2, 3], [1, 2, 4]) == 4 / 6
     assert support_match([1, 2, 3], [4, 5, 6]) == 0
     assert support_match([1, 2, 3], [1, 2, 3]) == 1.0
     assert support_match([], []) == 0.0
+
 
 def test_memoize():
 
