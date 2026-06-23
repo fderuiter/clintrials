@@ -56,6 +56,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         avoid_skipping_untried_deescalation_stage_2=True,
         plugin_mean=False,
         mc_sample_size=10**5,
+        mc_samples_stage1=None,
+        mc_samples_stage2=None,
     ):
         """Initializes a WATU trial object.
 
@@ -105,7 +107,14 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                 plugging the parameter estimate into the function. Defaults to
                 `False`.
             mc_sample_size (int, optional): The number of samples to use in Monte
-                Carlo estimation methods. Defaults to 10**5.
+                Carlo estimation methods. Defaults to 10**5. Will be clamped
+                to a minimum of 1000.
+            mc_samples_stage1 (int, optional): The number of samples to use in
+                Monte Carlo estimation methods in stage 1. If `None`, defaults to
+                `mc_sample_size`. Will be clamped to a minimum of 1000.
+            mc_samples_stage2 (int, optional): The number of samples to use in
+                Monte Carlo estimation methods in stage 2. If `None`, defaults to
+                `mc_sample_size`. Will be clamped to a minimum of 1000.
 
         Raises:
             ValueError: If the dimensions of the inputs are inconsistent.
@@ -153,7 +162,16 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             avoid_skipping_untried_deescalation_stage_2
         )
         self.plugin_mean = plugin_mean
-        self.mc_sample_size = mc_sample_size
+        self.mc_sample_size = max(mc_sample_size, 1000)
+        if mc_samples_stage1 is None:
+            self.mc_samples_stage1 = self.mc_sample_size
+        else:
+            self.mc_samples_stage1 = max(mc_samples_stage1, 1000)
+
+        if mc_samples_stage2 is None:
+            self.mc_samples_stage2 = self.mc_sample_size
+        else:
+            self.mc_samples_stage2 = max(mc_samples_stage2, 1000)
 
         self.most_likely_model_index = np.random.choice(
             np.array(range(self.K))[
@@ -215,7 +233,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         prior = self.theta_prior.pdf(theta)
         return lik * prior
 
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self):
+    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self, **kwargs):
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
@@ -259,10 +277,10 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             )
 
         if self.size() < self.stage_one_size:
-            self._next_dose = self._stage_one_next_dose()
+            self._next_dose = self._stage_one_next_dose(**kwargs)
         else:
             self._next_dose = self._stage_two_next_dose(
-                self.post_tox_probs, self.post_eff_probs
+                self.post_tox_probs, self.post_eff_probs, **kwargs
             )
 
         return self._next_dose
@@ -438,11 +456,21 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             threshold = self.tox_limit
         return 1 - self.crm.prob_tox_exceeds(threshold, **kwargs)
 
-    def _stage_one_next_dose(self):
-        prob_unacc_tox = self.crm.prob_tox_exceeds(
-            self.tox_limit, n=self.mc_sample_size
-        )
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit)
+    def _stage_one_next_dose(self, **kwargs):
+        """Determines the next dose for stage 1 of the trial.
+
+        Args:
+            **kwargs: Additional arguments for the dose calculation, including
+                `mc_samples_stage1` or `n` to override the Monte Carlo sample
+                size. All sample sizes will be clamped to a minimum of 1000.
+
+        Returns:
+            int: The next recommended dose level.
+        """
+        n = kwargs.get("mc_samples_stage1", kwargs.get("n", self.mc_samples_stage1))
+        n = max(n, 1000)
+        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=n)
+        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=n)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))
@@ -483,11 +511,23 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         return self._next_dose
 
-    def _stage_two_next_dose(self, tox_probs, eff_probs):
-        prob_unacc_tox = self.crm.prob_tox_exceeds(
-            self.tox_limit, n=self.mc_sample_size
-        )
-        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit)
+    def _stage_two_next_dose(self, tox_probs, eff_probs, **kwargs):
+        """Determines the next dose for stage 2 of the trial.
+
+        Args:
+            tox_probs (numpy.ndarray): The toxicity probabilities for each dose.
+            eff_probs (numpy.ndarray): The efficacy probabilities for each dose.
+            **kwargs: Additional arguments for the dose calculation, including
+                `mc_samples_stage2` or `n` to override the Monte Carlo sample
+                size. All sample sizes will be clamped to a minimum of 1000.
+
+        Returns:
+            int: The next recommended dose level.
+        """
+        n = kwargs.get("mc_samples_stage2", kwargs.get("n", self.mc_samples_stage2))
+        n = max(n, 1000)
+        prob_unacc_tox = self.crm.prob_tox_exceeds(self.tox_limit, n=n)
+        prob_unacc_eff = 1 - self.prob_eff_exceeds(self.eff_limit, n=n)
         admissable = [
             (prob_tox < (1 - self.tox_certainty))
             and (prob_eff < (1 - self.eff_certainty))
