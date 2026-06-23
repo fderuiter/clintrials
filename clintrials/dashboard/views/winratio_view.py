@@ -7,6 +7,7 @@ import streamlit as st
 from clintrials.winratio import run_simulation
 
 
+@st.fragment
 def render() -> None:
     """Render the Win Ratio simulation interface."""
     st.header("Win Ratio Simulation")
@@ -43,6 +44,7 @@ def render() -> None:
         "Significance level", min_value=0.0, max_value=1.0, value=0.05
     )
 
+    print("BUTTON RETURNED:", st.sidebar.button("Run Simulation"))
     if st.sidebar.button("Run Simulation"):
         with st.spinner("Running simulation..."):
             power, average_ci = run_simulation(

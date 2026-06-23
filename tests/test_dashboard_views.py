@@ -39,6 +39,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         error=MagicMock(),
         plotly_chart=MagicMock(),
         sidebar=sidebar,
+        fragment=lambda func: func,
     )
     return st
 
@@ -68,6 +69,7 @@ def _make_winratio_streamlit_mock():
         success=MagicMock(),
         subheader=MagicMock(),
         write=MagicMock(),
+        fragment=lambda func: func,
     )
     return st
 
@@ -205,7 +207,11 @@ def test_efftox_view_warns_when_empty(monkeypatch):
 
 def test_winratio_view_render_success(monkeypatch):
     """Win Ratio view should run the simulation and display results."""
+    import importlib
+    import sys
     st_mock = _make_winratio_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    importlib.reload(winratio_view)
     monkeypatch.setattr(winratio_view, "st", st_mock)
     run_sim = MagicMock(return_value=(0.8, (0.1, 0.2)))
     monkeypatch.setattr(winratio_view, "run_simulation", run_sim)
