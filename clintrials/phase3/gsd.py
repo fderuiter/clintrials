@@ -101,43 +101,50 @@ class GroupSequentialDesign:
         P(Z_1 < u_1, ..., Z_i < u_i) = 1 - alpha_i, where alpha_i is the
         cumulative alpha spent at look i.
         """
-        boundaries = []
-        for i in range(1, self.k + 1):
-            target_alpha = self.sfu(self.timing[i - 1], self.alpha)
-
-            target_cdf = 1 - target_alpha
-
-            cov = np.identity(i)
-            for row in range(i):
-                for col in range(row + 1, i):
-                    corr = np.sqrt(self.timing[row] / self.timing[col])
-                    cov[row, col] = cov[col, row] = corr
-
-            def cdf_at_look_i(u_i):
-                limits = boundaries + [u_i]
-                if i == 1:
-                    return norm.cdf(limits[0])
-                else:
-                    return multivariate_normal.cdf(limits, mean=np.zeros(i), cov=cov)
-
-            def root_func(u_i):
-                return cdf_at_look_i(u_i) - target_cdf
-
-            try:
-                boundary = brentq(root_func, -5, 15)
-            except ValueError:
-                boundary = np.inf
-
-            boundaries.append(boundary)
-
-        if self.alpha < 1 and boundaries[-1] == np.inf:
-            try:
-                boundary = brentq(root_func, -50, 50)
-                boundaries[-1] = boundary
-            except ValueError:
-                raise RuntimeError("Could not find a valid final boundary.")
-
-        return boundaries
+        random_state = np.random.get_state()
+        np.random.seed(42)
+        try:
+            boundaries = []
+            for i in range(1, self.k + 1):
+                target_alpha = self.sfu(self.timing[i - 1], self.alpha)
+    
+                target_cdf = 1 - target_alpha
+    
+                cov = np.identity(i)
+                for row in range(i):
+                    for col in range(row + 1, i):
+                        corr = np.sqrt(self.timing[row] / self.timing[col])
+                        cov[row, col] = cov[col, row] = corr
+    
+                def cdf_at_look_i(u_i):
+                    limits = boundaries + [u_i]
+                    if i == 1:
+                        return norm.cdf(limits[0])
+                    else:
+                        return multivariate_normal.cdf(
+                            limits, mean=np.zeros(i), cov=cov, maxpts=1000000, abseps=1e-5
+                        )
+    
+                def root_func(u_i):
+                    return cdf_at_look_i(u_i) - target_cdf
+    
+                try:
+                    boundary = brentq(root_func, -5, 15)
+                except ValueError:
+                    boundary = np.inf
+    
+                boundaries.append(boundary)
+    
+            if self.alpha < 1 and boundaries[-1] == np.inf:
+                try:
+                    boundary = brentq(root_func, -50, 50)
+                    boundaries[-1] = boundary
+                except ValueError:
+                    raise RuntimeError("Could not find a valid final boundary.")
+    
+            return boundaries
+        finally:
+            np.random.set_state(random_state)
 
     def simulate(self, n_sims: int, theta: float = 0.0) -> dict:
         """Simulates trials to estimate the operating characteristics of the design.

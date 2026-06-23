@@ -2,10 +2,10 @@
 branch = True
 omit =
     clintrials/phase2/*
-    clintrials/simulation.py
+    clintrials/core/simulation.py
     clintrials/dosefinding/*
-    clintrials/stats.py
-    clintrials/util.py
+    clintrials/core/stats.py
+    clintrials/utils.py
     clintrials/common.py
     */__main__*
     tests/*

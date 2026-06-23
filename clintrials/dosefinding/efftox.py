@@ -765,6 +765,11 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
     def tabulate(self):
+        """Returns a pandas DataFrame summarising the trial.
+
+        Returns:
+            pandas.DataFrame: The trial summary.
+        """
         df = EfficacyToxicityDoseFindingTrial.tabulate(self)
         df["P(Eff)"] = self.prob_eff
         df["P(Tox)"] = self.prob_tox
@@ -793,6 +798,15 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return post_params
 
     def optimal_decision(self, prob_tox, prob_eff):
+        """Determines the optimal biological dose.
+
+        Args:
+            prob_tox (list[float]): The probability of toxicity for each dose.
+            prob_eff (list[float]): The probability of efficacy for each dose.
+
+        Returns:
+            int: The optimal biological dose.
+        """
         admiss, u, u_star, obd, u_cushion = solve_metrizable_efftox_scenario(
             prob_tox, prob_eff, self.metric, self.tox_cutoff, self.eff_cutoff
         )

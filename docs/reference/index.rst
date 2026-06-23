@@ -12,3 +12,7 @@ API Reference
    clintrials.core.tte
    clintrials.coll
    clintrials.utils
+   clintrials.phase2.bebop
+   clintrials.dosefinding.efftox
+   clintrials.dosefinding.wagestait
+
