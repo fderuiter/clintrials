@@ -60,8 +60,8 @@ def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
     Returns:
         float: The compound likelihood or log-likelihood.
     """
-    if len(doses) != len(toxs):
-        raise ValueError("doses and toxs should be same length.")
+    from clintrials.validation import validate_matching_lengths
+    validate_matching_lengths(doses=doses, toxs=toxs)
 
     if log:
         l = 0
@@ -383,8 +383,8 @@ def crm(
             toxicity. If `estimate_var` is `True`, the beta standard error
             is also appended as a fifth element.
     """
-    if len(dose_levels) != len(toxicities):
-        raise ValueError("toxicities and dose_levels should be same length.")
+    from clintrials.validation import validate_matching_lengths
+    validate_matching_lengths(toxicities=toxicities, dose_levels=dose_levels)
 
     if "logit1" in F_func.__name__ and isinstance(beta_dist, type(norm())):
         alpha0 = np.exp(beta_dist.mean() + beta_dist.var() / 2)

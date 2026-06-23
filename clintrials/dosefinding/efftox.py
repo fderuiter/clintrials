@@ -172,8 +172,8 @@ def efftox_get_posterior_probs(
             posterior probabilities for each dose, and the
             `ProbabilityDensitySample` object.
     """
-    if len(priors) != 6:
-        raise ValueError("priors should have 6 items.")
+    from clintrials.validation import validate_expected_length
+    validate_expected_length(priors, 6, "priors")
 
     # Convert dose-levels given to dose amounts given
     if len(cases) > 0:
@@ -235,8 +235,8 @@ def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5, epsilon=1e
             posterior parameter estimates and the `ProbabilityDensitySample`
             object.
     """
-    if len(priors) != 6:
-        raise ValueError("priors should have 6 items.")
+    from clintrials.validation import validate_expected_length
+    validate_expected_length(priors, 6, "priors")
 
     # Convert dose-levels given to dose amounts given
     if len(cases) > 0:
@@ -633,8 +633,8 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             self, first_dose, len(real_doses), max_size
         )
 
-        if len(theta_priors) != 6:
-            raise ValueError("theta_priors should have 6 items.")
+        from clintrials.validation import validate_expected_length
+        validate_expected_length(theta_priors, 6, "theta_priors")
 
         self.real_doses = real_doses
         self._scaled_doses = np.log(real_doses) - np.mean(np.log(real_doses))
@@ -959,10 +959,8 @@ def solve_metrizable_efftox_scenario(
         tuple: A tuple containing conformability, utilities, optimal
             utility, optimal dose, and utility cushion.
     """
-    if len(prob_tox) != len(prob_eff):
-        raise Exception(
-            "prob_tox and prob_eff should be lists or tuples of the same length."
-        )
+    from clintrials.validation import validate_matching_lengths
+    validate_matching_lengths(prob_tox=prob_tox, prob_eff=prob_eff)
 
     t = prob_tox
     r = prob_eff

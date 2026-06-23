@@ -125,8 +125,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape
-        if self.I != len(prior_tox_probs):
-            raise ValueError("prior_tox_probs should have %s items." % self.I)
+        from clintrials.validation import validate_expected_length
+        validate_expected_length(prior_tox_probs, self.I, "prior_tox_probs")
         self.prior_tox_probs = prior_tox_probs
         self.tox_target = tox_target
         self.tox_limit = tox_limit
@@ -140,8 +140,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.tox_certainty = tox_certainty
         self.eff_certainty = eff_certainty
         if model_prior_weights is not None:
-            if self.K != len(model_prior_weights):
-                raise ValueError("model_prior_weights should have %s items." % self.K)
+            from clintrials.validation import validate_expected_length
+            validate_expected_length(model_prior_weights, self.K, "model_prior_weights")
             if sum(model_prior_weights) == 0:
                 raise ValueError("model_prior_weights cannot sum to zero.")
             self.model_prior_weights = model_prior_weights / sum(model_prior_weights)

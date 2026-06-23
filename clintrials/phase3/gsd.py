@@ -77,18 +77,17 @@ class GroupSequentialDesign(Protocol):
                 positive integer, or `timing` is not a strictly increasing
                 sequence of length `k` ending in 1.0.
         """
-        if not 0 < alpha < 1:
-            raise ValueError("alpha must be between 0 and 1.")
-        if k < 1:
-            raise ValueError("k must be a positive integer.")
+        from clintrials.validation import validate_probability, validate_positive_integer
+        validate_probability(alpha, "alpha", exclusive=True)
+        validate_positive_integer(k, "k")
 
         self.k = k
         self.alpha = alpha
         self.sfu = sfu
         self.timing = timing if timing is not None else np.linspace(1 / k, 1, k)
 
-        if len(self.timing) != k:
-            raise ValueError("Length of timing must be equal to k.")
+        from clintrials.validation import validate_expected_length
+        validate_expected_length(self.timing, k, "timing")
         if any(self.timing[i] >= self.timing[i + 1] for i in range(k - 1)):
             raise ValueError("Timing must be strictly increasing.")
         if self.timing[-1] != 1.0:
@@ -216,8 +215,8 @@ class GroupSequentialDesign(Protocol):
         Raises:
             ValueError: If `n_sims` is not a positive integer.
         """
-        if n_sims <= 0:
-            raise ValueError("Number of simulations must be positive.")
+        from clintrials.validation import validate_positive_integer
+        validate_positive_integer(n_sims, "Number of simulations")
 
         means = theta * np.array(self.timing)
 
