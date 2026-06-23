@@ -765,75 +765,14 @@ class CRM(DoseFindingTrial):
         Args:
             chart_title (str, optional): The title for the chart.
                 Defaults to a descriptive title.
-            use_ggplot (bool, optional): If `True`, uses ggplot for plotting.
-                Otherwise, uses matplotlib. Defaults to `False`.
+            use_ggplot (bool, optional): Ignored. Included for backwards compatibility.
 
         Returns:
             A plot object.
         """
-        if not chart_title:
-            chart_title = "Prior (dashed) and posterior (solid) dose-toxicity curves"
-            chart_title = chart_title + "\n"
+        import clintrials.visualization as viz
 
-        if use_ggplot:
-            import numpy as np
-            import pandas as pd
-            from ggplot import aes, geom_hline, geom_line, ggplot, ggtitle, ylim
-
-            data = pd.DataFrame(
-                {
-                    "Dose level": self.dose_levels(),
-                    "Prior": self.prior,
-                    "Posterior": self.prob_tox(),
-                }
-            )
-            var_name = "Type"
-            value_name = "Probability of toxicity"
-            melted_data = pd.melt(
-                data, id_vars="Dose level", var_name=var_name, value_name=value_name
-            )
-
-            p = (
-                ggplot(
-                    melted_data, aes(x="Dose level", y=value_name, linetype=var_name)
-                )
-                + geom_line()
-                + ggtitle(chart_title)
-                + ylim(0, 1)
-                + geom_hline(yintercept=self.target, color="black")
-            )
-
-            return p
-        else:
-            import matplotlib.pyplot as plt
-            import numpy as np
-
-            dl = self.dose_levels()
-            prior_tox = self.prior
-            post_tox = self.prob_tox()
-            post_tox_lower = self.get_tox_prob_quantile(0.05)
-            post_tox_upper = self.get_tox_prob_quantile(0.95)
-            plt.plot(dl, prior_tox, "--", c="black")
-            plt.plot(dl, post_tox, "-", c="black")
-            plt.plot(dl, post_tox_lower, "-.", c="black")
-            plt.plot(dl, post_tox_upper, "-.", c="black")
-            plt.scatter(
-                dl, prior_tox, marker="x", s=300, facecolors="none", edgecolors="k"
-            )
-            plt.scatter(
-                dl, post_tox, marker="o", s=300, facecolors="none", edgecolors="k"
-            )
-            plt.axhline(self.target)
-            plt.ylim(0, 1)
-            plt.xlim(np.min(dl), np.max(dl))
-            plt.xticks(dl)
-            plt.ylabel("Probability of toxicity")
-            plt.xlabel("Dose level")
-            plt.title(chart_title)
-
-            p = plt.gcf()
-            phi = (np.sqrt(5) + 1) / 2.0
-            p.set_size_inches(12, 12 / phi)
+        return viz.plot_crm_toxicity_probabilities(self, chart_title=chart_title)
 
 
 def crm_dtp_detail(trial):

@@ -15,6 +15,7 @@ from .statistics import (
 
 from clintrials.core.simulation import run_sims
 
+
 def _single_iteration(
     num_subjects_A: int,
     num_subjects_B: int,
@@ -63,7 +64,7 @@ def _winratio_agg_func(current_sims, new_batch_sims):
             sum_ci0 += ci[0]
             sum_ci1 += ci[1]
             ci_count += 1
-            
+
     return successes, total_sims, sum_ci0, sum_ci1, ci_count
 
 

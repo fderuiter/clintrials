@@ -9,7 +9,6 @@ __contact__ = "kristian.brock@gmail.com"
 import logging
 from collections import OrderedDict
 
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy.optimize import fsolve
 from scipy.stats import chi2, gaussian_kde, norm
@@ -42,8 +41,11 @@ def density(x, n_points=100, covariance_factor=0.25):
     xs = np.linspace(min(x), max(x), n_points)
     d.covariance_factor = lambda: covariance_factor
     d._compute_covariance()
-    plt.plot(xs, d(xs))
-    plt.show()
+
+    import plotly.graph_objects as go
+
+    fig = go.Figure(go.Scatter(x=xs, y=d(xs), mode="lines"))
+    fig.show()
 
 
 def beta_like_normal(mu, sigma):

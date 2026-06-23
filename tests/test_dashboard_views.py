@@ -136,13 +136,17 @@ def test_crm_view_render_success(monkeypatch):
     monkeypatch.setattr(crm_view, "summarise_sims", summarise_mock)
 
     bar_fig = object()
-    monkeypatch.setattr(crm_view.px, "bar", MagicMock(return_value=bar_fig))
+    import clintrials.visualization as viz
+
+    monkeypatch.setattr(
+        viz, "plot_crm_simulation_recommendation", MagicMock(return_value=bar_fig)
+    )
 
     sims = [{"recommended_dose": 1}, {"recommended_dose": 2}]
     crm_view.render(sims)
 
     summarise_mock.assert_called_once()
-    crm_view.px.bar.assert_called_once()
+    viz.plot_crm_simulation_recommendation.assert_called_once()
     st_mock.plotly_chart.assert_called_with(bar_fig)
 
 
@@ -181,13 +185,17 @@ def test_efftox_view_render_success(monkeypatch):
         efftox_view, "summarise_sims", MagicMock(return_value=summary_df)
     )
 
-    monkeypatch.setattr(efftox_view.px, "bar", MagicMock(return_value="fig_bar"))
-    monkeypatch.setattr(efftox_view.px, "line", MagicMock(return_value="fig_line"))
+    import clintrials.visualization as viz
+
+    bar_mock = MagicMock(return_value="fig_bar")
+    line_mock = MagicMock(return_value="fig_line")
+    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+    monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
     efftox_view.render([{}])
 
-    efftox_view.px.bar.assert_called_once()
-    efftox_view.px.line.assert_called_once()
+    bar_mock.assert_called_once()
+    line_mock.assert_called_once()
     # st.plotly_chart called for both figures
     assert st_mock.plotly_chart.call_count == 2
 
@@ -209,6 +217,7 @@ def test_winratio_view_render_success(monkeypatch):
     """Win Ratio view should run the simulation and display results."""
     import importlib
     import sys
+
     st_mock = _make_winratio_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(winratio_view)

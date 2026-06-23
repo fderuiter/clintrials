@@ -257,77 +257,14 @@ class DoseFindingTrial(metaclass=abc.ABCMeta):
         Args:
             chart_title (str, optional): The title for the chart. Defaults to
                 a descriptive title.
-            use_ggplot (bool, optional): If `True`, uses ggplot for plotting.
-                Otherwise, uses matplotlib. Defaults to `False`.
+            use_ggplot (bool, optional): Ignored. Included for backwards compatibility.
 
         Returns:
             A plot object.
         """
-        if not chart_title:
-            chart_title = "Each point represents a patient\nA circle indicates no toxicity, a cross toxicity"
-            chart_title = chart_title + "\n"
+        import clintrials.visualization as viz
 
-        if use_ggplot:
-            if self.size() > 0:
-                import numpy as np
-                import pandas as pd
-                from ggplot import aes, geom_text, ggplot, ggtitle, ylim
-
-                patient_number = range(1, self.size() + 1)
-                symbol = np.where(self.toxicities(), "X", "O")
-                data = pd.DataFrame(
-                    {
-                        "Patient number": patient_number,
-                        "Dose level": self.doses(),
-                        "DLT": self.toxicities(),
-                        "Symbol": symbol,
-                    }
-                )
-
-                p = (
-                    ggplot(
-                        data, aes(x="Patient number", y="Dose level", label="Symbol")
-                    )
-                    + ggtitle(chart_title)
-                    + geom_text(aes(size=20, vjust=-0.07))
-                    + ylim(1, 5)
-                )
-                return p
-        else:
-            if self.size() > 0:
-                import matplotlib.pyplot as plt
-                import numpy as np
-
-                patient_number = np.arange(1, self.size() + 1)
-                doses_given = np.array(self.doses())
-                tox_loc = np.array(self.toxicities()).astype("bool")
-                if sum(tox_loc):
-                    plt.scatter(
-                        patient_number[tox_loc],
-                        doses_given[tox_loc],
-                        marker="x",
-                        s=300,
-                        facecolors="none",
-                        edgecolors="k",
-                    )
-                if sum(~tox_loc):
-                    plt.scatter(
-                        patient_number[~tox_loc],
-                        doses_given[~tox_loc],
-                        marker="o",
-                        s=300,
-                        facecolors="none",
-                        edgecolors="k",
-                    )
-
-                plt.title(chart_title)
-                plt.ylabel("Dose level")
-                plt.xlabel("Patient number")
-                plt.yticks(self.dose_levels())
-                p = plt.gcf()
-                phi = (np.sqrt(5) + 1) / 2.0
-                p.set_size_inches(12, 12 / phi)
-                # return p
+        return viz.plot_dose_finding_outcomes(self, chart_title=chart_title)
 
     @abc.abstractmethod
     def __reset(self):

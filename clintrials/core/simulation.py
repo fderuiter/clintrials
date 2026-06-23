@@ -26,7 +26,9 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
-def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, **kwargs):
+def run_sims(
+    sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, **kwargs
+):
     """Runs simulations using a delegate function.
 
     Args:
@@ -56,19 +58,25 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, 
         if out_file:
             try:
                 with open(out_file, "w") as outfile:
-                    output = {"Parameters": metadata, "Simulations": sims} if metadata is not None else sims
+                    output = (
+                        {"Parameters": metadata, "Simulations": sims}
+                        if metadata is not None
+                        else sims
+                    )
                     json.dump(output, outfile)
             except Exception as e:
                 logger.error("Error writing: %s", e)
         sims_len = len(sims) if isinstance(sims, list) else "agg"
         logger.info(f"{j} {datetime.now()} {sims_len}")
-    
+
     if metadata is not None:
         return {"Parameters": metadata, "Simulations": sims}
     return sims
 
 
-def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=None, metadata=None):
+def sim_parameter_space(
+    sim_func, ps, n1=1, n2=None, out_file=None, agg_func=None, metadata=None
+):
     """Runs simulations for a parameter space.
 
     Args:
@@ -103,7 +111,11 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=Non
         if out_file:
             try:
                 with open(out_file, "w") as outfile:
-                    output = {"Parameters": metadata, "Simulations": sims} if metadata is not None else sims
+                    output = (
+                        {"Parameters": metadata, "Simulations": sims}
+                        if metadata is not None
+                        else sims
+                    )
                     json.dump(output, outfile)
             except Exception as e:
                 logger.error("Error writing: %s", e)
