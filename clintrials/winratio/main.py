@@ -13,6 +13,60 @@ from .statistics import (
 )
 
 
+from clintrials.core.simulation import run_sims
+
+def _single_iteration(
+    num_subjects_A: int,
+    num_subjects_B: int,
+    p_y1_A: float,
+    p_y1_B: float,
+    p_y2_A: float,
+    p_y2_B: float,
+    p_y3_A: float,
+    p_y3_B: float,
+    significance_level: float,
+):
+    treatment_group, control_group = generate_data(
+        num_subjects_A,
+        num_subjects_B,
+        p_y1_A,
+        p_y1_B,
+        p_y2_A,
+        p_y2_B,
+        p_y3_A,
+        p_y3_B,
+    )
+    results = simulate_comparisons(treatment_group, control_group)
+    wr = calculate_win_ratio(results["wins"], results["losses"])
+    if wr == float("inf"):
+        return results["wins"] > 0, None
+    ci = calculate_confidence_intervals(wr, results["wins"], results["losses"])
+    p_value = calculate_p_value(wr, results["wins"], results["losses"])
+    return p_value < significance_level, ci
+
+
+def _winratio_agg_func(current_sims, new_batch_sims):
+    if current_sims is None:
+        successes = 0
+        total_sims = 0
+        sum_ci0 = 0.0
+        sum_ci1 = 0.0
+        ci_count = 0
+    else:
+        successes, total_sims, sum_ci0, sum_ci1, ci_count = current_sims
+
+    for success, ci in new_batch_sims:
+        if success:
+            successes += 1
+        total_sims += 1
+        if ci is not None:
+            sum_ci0 += ci[0]
+            sum_ci1 += ci[1]
+            ci_count += 1
+            
+    return successes, total_sims, sum_ci0, sum_ci1, ci_count
+
+
 def run_simulation(
     num_subjects_A: int,
     num_subjects_B: int,
@@ -45,36 +99,27 @@ def run_simulation(
         tuple[float, tuple[float, float]]: A tuple containing the estimated
             power and the average confidence interval.
     """
-    successes = 0
-    all_cis = []
-    for _ in range(num_simulations):
-        treatment_group, control_group = generate_data(
-            num_subjects_A,
-            num_subjects_B,
-            p_y1_A,
-            p_y1_B,
-            p_y2_A,
-            p_y2_B,
-            p_y3_A,
-            p_y3_B,
-        )
-        results = simulate_comparisons(treatment_group, control_group)
-        wr = calculate_win_ratio(results["wins"], results["losses"])
-        if wr == float("inf"):
-            if results["wins"] > 0:
-                successes += 1
-            continue
-        ci = calculate_confidence_intervals(wr, results["wins"], results["losses"])
-        p_value = calculate_p_value(wr, results["wins"], results["losses"])
-        all_cis.append(ci)
-        if p_value < significance_level:
-            successes += 1
-    power = successes / num_simulations
-    if all_cis:
-        average_ci = (
-            sum(ci[0] for ci in all_cis) / len(all_cis),
-            sum(ci[1] for ci in all_cis) / len(all_cis),
-        )
+    state = run_sims(
+        sim_func=_single_iteration,
+        n1=1,
+        n2=num_simulations,
+        agg_func=_winratio_agg_func,
+        num_subjects_A=num_subjects_A,
+        num_subjects_B=num_subjects_B,
+        p_y1_A=p_y1_A,
+        p_y1_B=p_y1_B,
+        p_y2_A=p_y2_A,
+        p_y2_B=p_y2_B,
+        p_y3_A=p_y3_A,
+        p_y3_B=p_y3_B,
+        significance_level=significance_level,
+    )
+    if state is None:
+        return 0.0, (0.0, 0.0)
+    successes, total_sims, sum_ci0, sum_ci1, ci_count = state
+    power = successes / total_sims if total_sims > 0 else 0.0
+    if ci_count > 0:
+        average_ci = (sum_ci0 / ci_count, sum_ci1 / ci_count)
     else:
         average_ci = (0, 0)
     return power, average_ci

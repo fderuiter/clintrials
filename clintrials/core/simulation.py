@@ -26,7 +26,7 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
-def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
+def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, **kwargs):
     """Runs simulations using a delegate function.
 
     Args:
@@ -36,26 +36,39 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, **kwargs):
         n2 (int, optional): The number of iterations per batch. Defaults to 1.
         out_file (str, optional): The location of the file for incremental
             saving after each batch. Defaults to None.
+        agg_func (callable, optional): Online aggregation function to process
+            incremental results. Should have the signature `agg_func(current_sims, new_batch_sims)`.
+        metadata (dict, optional): Self-describing metadata headers that detail
+            simulation parameters alongside results.
         **kwargs: Keyword arguments to be passed to `sim_func`.
 
     Returns:
-        list: A list of simulation results.
+        list or dict: A list of simulation results, or if metadata is provided,
+            a nested dict with "Parameters" and "Simulations" keys.
     """
-    sims = []
+    sims = [] if agg_func is None else None
     for j in range(n1):
         sims1 = [sim_func(**kwargs) for i in range(n2)]
-        sims += sims1
+        if agg_func:
+            sims = agg_func(sims, sims1)
+        else:
+            sims += sims1
         if out_file:
             try:
                 with open(out_file, "w") as outfile:
-                    json.dump(sims, outfile)
+                    output = {"Parameters": metadata, "Simulations": sims} if metadata is not None else sims
+                    json.dump(output, outfile)
             except Exception as e:
                 logger.error("Error writing: %s", e)
-        logger.info(f"{j} {datetime.now()} {len(sims)}")
+        sims_len = len(sims) if isinstance(sims, list) else "agg"
+        logger.info(f"{j} {datetime.now()} {sims_len}")
+    
+    if metadata is not None:
+        return {"Parameters": metadata, "Simulations": sims}
     return sims
 
 
-def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
+def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=None, metadata=None):
     """Runs simulations for a parameter space.
 
     Args:
@@ -67,25 +80,38 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None):
             defaults to the size of the parameter space. Defaults to None.
         out_file (str, optional): The location of the file for incremental
             saving after each batch. Defaults to None.
+        agg_func (callable, optional): Online aggregation function to process
+            incremental results.
+        metadata (dict, optional): Self-describing metadata headers that detail
+            simulation parameters alongside results.
 
     Returns:
-        list: A list of simulation results.
+        list or dict: A list of simulation results, or if metadata is provided,
+            a nested dict with "Parameters" and "Simulations" keys.
     """
     if not n2 or n2 <= 0:
         n2 = ps.size()
 
-    sims = []
+    sims = [] if agg_func is None else None
     params_iterator = ps.get_cyclical_iterator()
     for j in range(n1):
         sims1 = [sim_func(**params_iterator.next()) for i in range(n2)]
-        sims += sims1
+        if agg_func:
+            sims = agg_func(sims, sims1)
+        else:
+            sims += sims1
         if out_file:
             try:
                 with open(out_file, "w") as outfile:
-                    json.dump(sims, outfile)
+                    output = {"Parameters": metadata, "Simulations": sims} if metadata is not None else sims
+                    json.dump(output, outfile)
             except Exception as e:
                 logger.error("Error writing: %s", e)
-        logger.info(f"{j} {datetime.now()} {len(sims)}")
+        sims_len = len(sims) if isinstance(sims, list) else "agg"
+        logger.info(f"{j} {datetime.now()} {sims_len}")
+
+    if metadata is not None:
+        return {"Parameters": metadata, "Simulations": sims}
     return sims
 
 
