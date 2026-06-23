@@ -43,7 +43,9 @@ def spending_function_obrien_fleming(t: float, alpha: float) -> float:
     return 2 * (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(t)))
 
 
-class GroupSequentialDesign:
+from clintrials.core.protocol import Protocol
+
+class GroupSequentialDesign(Protocol):
     """A class to represent a group sequential design.
 
     This class calculates the efficacy boundaries for a group sequential trial
@@ -93,6 +95,46 @@ class GroupSequentialDesign:
             raise ValueError("The last element of timing must be 1.0.")
 
         self.efficacy_boundaries = self._compute_efficacy_boundaries()
+        self.reset()
+
+    def reset(self):
+        self._stage = 0
+        self._stopped = False
+        self._rejected = False
+        self._z_scores = []
+        self._information = []
+
+    def update(self, z_score: float, info: float = None):
+        if self._stopped:
+            return
+        self._stage += 1
+        self._z_scores.append(z_score)
+        
+        if info is not None:
+            self._information.append(info)
+        else:
+            self._information.append(self.timing[self._stage - 1])
+            
+        if z_score >= self.efficacy_boundaries[self._stage - 1]:
+            self._stopped = True
+            self._rejected = True
+        elif self._stage >= self.k:
+            self._stopped = True
+
+    def has_more(self):
+        return not self._stopped
+
+    def report(self):
+        from collections import OrderedDict
+        from clintrials.utils import atomic_to_json, iterable_to_json
+        
+        report = OrderedDict()
+        report["Stage"] = atomic_to_json(self._stage)
+        report["Stopped"] = atomic_to_json(self._stopped)
+        report["Rejected"] = atomic_to_json(self._rejected)
+        report["ZScores"] = iterable_to_json(self._z_scores)
+        report["Information"] = iterable_to_json(self._information)
+        return report
 
     def _compute_efficacy_boundaries(self) -> List[float]:
         """Computes the efficacy boundaries for the design.
