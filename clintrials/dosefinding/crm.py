@@ -186,9 +186,9 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
         return np.nan, None
 
     f = lambda beta: -1 * _compound_toxicity_likelihood(
-        F, intercept, beta, codified_doses_given, toxs, log=True
+        F, intercept, beta[0], codified_doses_given, toxs, log=True
     )
-    res = minimize(f, x0=0, method="BFGS")
+    res = minimize(f, x0=np.array([0.0]), method="BFGS")
     var = None
     if res.success:
         beta_hat = res.x[0]
@@ -196,9 +196,9 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
             # Numerical Hessian with step-size control for observed information
             eps = np.finfo(float).eps
             h = (eps ** (1 / 4)) * max(abs(beta_hat), 1.0)
-            f_mid = f(beta_hat)
-            f_plus = f(beta_hat + h)
-            f_minus = f(beta_hat - h)
+            f_mid = res.fun
+            f_plus = f(np.array([beta_hat + h]))
+            f_minus = f(np.array([beta_hat - h]))
             hessian = (f_plus - 2 * f_mid + f_minus) / (h**2)
 
             if hessian > 0:
