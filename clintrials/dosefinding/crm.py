@@ -103,9 +103,7 @@ def _get_beta_hat_bayes(
             `False`.
     """
     if use_quick_integration:
-        n = int(
-            100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)
-        )
+        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         num_y = (
             z
@@ -276,9 +274,7 @@ def _get_post_tox_bayes(
     """
     post_tox = []
     if use_quick_integration:
-        n = int(
-            100 * max(np.log(len(codified_doses_given) + 1) / 2, 1)
-        )
+        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))
         z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
         denom_y = _compound_toxicity_likelihood(
             F, intercept, z, codified_doses_given, toxs
@@ -603,9 +599,7 @@ class CRM(DoseFindingTrial):
                 self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
                 for p in self.prior
             ]
-            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(
-                1000000
-            )
+            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(1000000)
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 

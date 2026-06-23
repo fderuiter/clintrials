@@ -1,6 +1,7 @@
+from unittest.mock import patch
+
 import numpy as np
 from scipy.stats import norm
-from unittest.mock import patch
 
 from clintrials.core.numerics import integrate_posterior_1d
 
@@ -55,6 +56,7 @@ def test_integrate_posterior_1d_warn_on_max():
             warn_on_max=True,
         )
 
+
 def test_expansion_logic_is_correct():
     """
     Test that the expansion logic is correct.
@@ -80,7 +82,7 @@ def test_expansion_logic_is_correct():
             hi=initial_hi,
             expand_factor=expand_factor,
             max_expansions=1,
-            n_points=3
+            n_points=3,
         )
         # The second call to linspace will have the expanded limits
         # call_args_list[1] is the second call. `args` is a tuple of positional arguments.

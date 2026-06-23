@@ -1,5 +1,6 @@
 import pytest
 
+
 def test_crm_example():
     """
     Tests the CRM example from the README.md file.
@@ -27,12 +28,14 @@ def test_crm_example():
     next_dose = trial.next_dose()
     assert next_dose == 4
 
+
 def test_efftox_example():
     """
     Tests the EffTox example from the README.md file.
     """
-    from clintrials.dosefinding.efftox import EffTox, LpNormCurve
     from scipy.stats import norm
+
+    from clintrials.dosefinding.efftox import EffTox, LpNormCurve
 
     # Define the real dose levels
     real_doses = [1.0, 2.0, 4.0, 8.0]
@@ -40,11 +43,11 @@ def test_efftox_example():
     # Define priors for the model parameters
     theta_priors = [
         norm(-1.386, 1.732),  # mu_T
-        norm(0, 1.732),       # beta_T
+        norm(0, 1.732),  # beta_T
         norm(-1.386, 1.732),  # mu_E
-        norm(0, 1.732),       # beta1_E
-        norm(0, 1.732),       # beta2_E
-        norm(0, 1),           # psi
+        norm(0, 1.732),  # beta1_E
+        norm(0, 1.732),  # beta2_E
+        norm(0, 1),  # psi
     ]
 
     # Define the utility metric
@@ -70,20 +73,23 @@ def test_efftox_example():
     # Get the next recommended dose
     assert trial.next_dose() == 1
 
+
 def test_gsd_example():
     """
     Tests the GroupSequentialDesign example from the README.md file.
     """
-    from clintrials.phase3.gsd import GroupSequentialDesign, spending_function_obrien_fleming
     import numpy as np
 
-    # Create a 4-look GSD with an O'Brien-Fleming spending function
-    gsd = GroupSequentialDesign(
-        k=4,
-        alpha=0.025,
-        sfu=spending_function_obrien_fleming
+    from clintrials.phase3.gsd import (
+        GroupSequentialDesign,
+        spending_function_obrien_fleming,
     )
+
+    # Create a 4-look GSD with an O'Brien-Fleming spending function
+    gsd = GroupSequentialDesign(k=4, alpha=0.025, sfu=spending_function_obrien_fleming)
 
     # Check the efficacy boundaries
     assert len(gsd.efficacy_boundaries) == 4
-    assert np.all(np.isclose(gsd.efficacy_boundaries, [4.3326, 2.9631, 2.3591, 2.0141], atol=1e-4))
+    assert np.all(
+        np.isclose(gsd.efficacy_boundaries, [4.3326, 2.9631, 2.3591, 2.0141], atol=1e-4)
+    )

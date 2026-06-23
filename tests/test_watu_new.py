@@ -1,19 +1,17 @@
-
 import numpy as np
 import pytest
 from scipy.stats import norm
-from clintrials.dosefinding.watu import WATU
+
 from clintrials.dosefinding.efftox import LpNormCurve
+from clintrials.dosefinding.watu import WATU
+
 
 def test_prob_eff_exceeds_backends_consistency():
     tox_prior = [0.1, 0.2, 0.3]
     tox_target = 0.3
     tox_limit = 0.33
     eff_limit = 0.05
-    skeletons = [
-        [0.6, 0.4, 0.2],
-        [0.2, 0.4, 0.6]
-    ]
+    skeletons = [[0.6, 0.4, 0.2], [0.2, 0.4, 0.6]]
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
 
     trial = WATU(
@@ -24,7 +22,7 @@ def test_prob_eff_exceeds_backends_consistency():
         eff_limit,
         metric,
         first_dose=1,
-        max_size=20
+        max_size=20,
     )
 
     # Add some data to get a non-trivial posterior
@@ -37,15 +35,12 @@ def test_prob_eff_exceeds_backends_consistency():
     p_mc = trial.prob_eff_exceeds(eff_cutoff, backend="mc", n=10**6)
     p_quad = trial.prob_eff_exceeds(eff_cutoff, backend="quadrature")
 
-    print(f"Analytic: {p_analytic}")
-    print(f"MC:       {p_mc}")
-    print(f"Quad:     {p_quad}")
-
     # Quad should be very accurate. MC with 10^6 should be accurate to ~0.001
     assert np.allclose(p_quad, p_mc, atol=0.01)
 
     # Analytic (Laplace) might be slightly different but should be in the same ballpark
     assert np.allclose(p_quad, p_analytic, atol=0.05)
+
 
 def test_prob_eff_exceeds_edge_cases():
     tox_prior = [0.1, 0.2]
@@ -63,7 +58,7 @@ def test_prob_eff_exceeds_edge_cases():
         eff_limit,
         metric,
         first_dose=1,
-        max_size=20
+        max_size=20,
     )
 
     # eff_cutoff >= 1
@@ -81,6 +76,7 @@ def test_prob_eff_exceeds_edge_cases():
     assert p[0] == 1.0
     assert p[2] == 0.0
     assert 0.0 < p[1] < 1.0
+
 
 def test_prob_eff_exceeds_extreme_priors():
     tox_prior = [0.1, 0.2]
@@ -101,7 +97,7 @@ def test_prob_eff_exceeds_extreme_priors():
         metric,
         first_dose=1,
         max_size=20,
-        theta_prior=norm(loc=0, scale=1e-4)
+        theta_prior=norm(loc=0, scale=1e-4),
     )
 
     p_quad = trial.prob_eff_exceeds(0.5, backend="quadrature")
@@ -122,7 +118,7 @@ def test_prob_eff_exceeds_extreme_priors():
         metric,
         first_dose=1,
         max_size=20,
-        theta_prior=norm(0, 100)
+        theta_prior=norm(0, 100),
     )
     # Give some data to pin it down
     trial.update([(1, 0, 1)] * 10 + [(2, 0, 0)] * 10)

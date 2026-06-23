@@ -337,9 +337,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             if theta_sd <= 0:
                 probs[middle_mask] = (self.model_theta_hat() < thresholds).astype(float)
             else:
-                theta_posterior = norm(
-                    loc=self.model_theta_hat(), scale=theta_sd
-                )
+                theta_posterior = norm(loc=self.model_theta_hat(), scale=theta_sd)
                 probs[middle_mask] = theta_posterior.cdf(thresholds)
         elif backend == "mc":
             if self.estimate_var:
@@ -442,12 +440,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         if self.size() > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            attractiveness = np.abs(
-                np.array(self.crm.prob_tox()) - self.tox_target
-            )
-            for i in np.argsort(
-                attractiveness
-            ):
+            attractiveness = np.abs(np.array(self.crm.prob_tox()) - self.tox_target)
+            for i in np.argsort(attractiveness):
                 dose_level = i + 1
                 if dose_level in admissable_set:
                     if (
@@ -493,9 +487,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         if self.size() > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            for i in np.argsort(
-                -utility
-            ):
+            for i in np.argsort(-utility):
                 dose_level = i + 1
                 if dose_level in admissable_set:
                     if (
