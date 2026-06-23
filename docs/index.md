@@ -7,6 +7,9 @@ Welcome to **clintrials**, a Python library providing clinical trial designs and
 :hidden:
 
 installation
+tutorials/CRM.ipynb
+tutorials/EffTox.ipynb
+tutorials/GroupSequentialDesigns.ipynb
 user_guide/tutorials
 tutorials/matchpoint/README.md
 how_to/recipes
@@ -17,3 +20,4 @@ changelog
 ```
 
 Clintrials aims to make trial simulations and design exploration easier. Use the sections above to get started, browse tutorials, or dig into the API reference.
+

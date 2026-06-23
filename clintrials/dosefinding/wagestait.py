@@ -418,9 +418,23 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             )
 
     def has_more(self):
+        """Checks if the trial is ongoing.
+
+        Returns:
+            bool: `True` if the trial is ongoing, `False` otherwise.
+        """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
     def optimal_decision(self, prob_tox, prob_eff):
+        """Determines the optimal biological dose.
+
+        Args:
+            prob_tox (numpy.ndarray): The probability of toxicity for each dose.
+            prob_eff (numpy.ndarray): The probability of efficacy for each dose.
+
+        Returns:
+            int: The optimal biological dose.
+        """
         admiss = prob_tox <= self.tox_limit
         if sum(admiss) > 0:
             wt_obd = np.nanargmax(np.where(admiss, prob_eff, np.nan)) + 1

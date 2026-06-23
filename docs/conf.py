@@ -16,7 +16,11 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.doctest",
     "myst_parser",
+    "nbsphinx",
 ]
+
+nbsphinx_execute = "never"
+
 
 autosummary_generate = True
 autodoc_default_options = {
