@@ -192,6 +192,32 @@ def multiindex_dataframe_from_tuple_map(x, labels):
     return pd.DataFrame(list(v), index=i)
 
 
+def tuple_to_dataframe(row_tuples, index_tuples, column_names=None, index_names=None):
+    """Creates a pandas DataFrame from row and index tuples.
+
+    Args:
+        row_tuples (list[dict]): A list of dictionaries representing the rows.
+        index_tuples (list[tuple]): A list of tuples representing the MultiIndex.
+        column_names (list[str], optional): The column names. Defaults to None.
+        index_names (list[str], optional): The names for the index levels.
+            Defaults to None.
+
+    Returns:
+        pandas.DataFrame: The resulting DataFrame.
+    """
+    import pandas as pd
+
+    if not row_tuples:
+        df = pd.DataFrame(columns=column_names)
+        if index_names:
+            # Create an empty MultiIndex to preserve index names if possible
+            df.index = pd.MultiIndex.from_tuples([], names=index_names)
+        return df
+
+    i = pd.MultiIndex.from_tuples(index_tuples, names=index_names)
+    return pd.DataFrame(row_tuples, index=i)
+
+
 def fullname(o):
     """Gets the fully-qualified class name of an object.
 
