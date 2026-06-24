@@ -529,8 +529,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         prob_unacc_tox = 1 - self.prob_acc_tox(self.tox_limit, **kwargs)
         prob_unacc_eff = 1 - self.prob_acc_eff(self.eff_limit, **kwargs)
         admissable = [
-            (prob_tox <= (1 - self.tox_certainty))
-            and (prob_eff <= (1 - self.eff_certainty))
+            (prob_tox < (1 - self.tox_certainty))
+            and (prob_eff < (1 - self.eff_certainty))
             for (prob_eff, prob_tox) in zip(prob_unacc_eff, prob_unacc_tox)
         ]
         admissable_set = [i + 1 for i, x in enumerate(admissable) if x]
@@ -587,8 +587,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         prob_unacc_tox = 1 - self.prob_acc_tox(self.tox_limit, **kwargs)
         prob_unacc_eff = 1 - self.prob_acc_eff(self.eff_limit, **kwargs)
         admissable = [
-            (prob_tox <= (1 - self.tox_certainty))
-            and (prob_eff <= (1 - self.eff_certainty))
+            (prob_tox < (1 - self.tox_certainty))
+            and (prob_eff < (1 - self.eff_certainty))
             for (prob_eff, prob_tox) in zip(prob_unacc_eff, prob_unacc_tox)
         ]
         admissable_set = [i + 1 for i, x in enumerate(admissable) if x]
