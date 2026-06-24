@@ -126,6 +126,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape
         from clintrials.validation import validate_expected_length
+
         validate_expected_length(prior_tox_probs, self.I, "prior_tox_probs")
         self.prior_tox_probs = prior_tox_probs
         self.tox_target = tox_target
@@ -141,6 +142,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.eff_certainty = eff_certainty
         if model_prior_weights is not None:
             from clintrials.validation import validate_expected_length
+
             validate_expected_length(model_prior_weights, self.K, "model_prior_weights")
             if sum(model_prior_weights) == 0:
                 raise ValueError("model_prior_weights cannot sum to zero.")
@@ -473,10 +475,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         Args:
             threshold (float, optional): The toxicity threshold. Defaults to
                 `self.tox_limit`.
-            **kwargs: Additional arguments for the dose calculation, including
-                `mc_samples_stage1`, `mc_samples_stage2` or `n` to override
-                the Monte Carlo sample size. All sample sizes will be clamped
-                to a minimum of 1000.
+            **kwargs: Additional arguments for the dose calculation (ignored).
 
         Returns:
             numpy.ndarray: An array of probabilities for each dose level.
@@ -484,23 +483,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         if threshold is None:
             threshold = self.tox_limit
 
-        # Resolve n
-        n = kwargs.get("n")
-        if n is None:
-            if self.size() < self.stage_one_size:
-                n = kwargs.get("mc_samples_stage1", self.mc_samples_stage1)
-            else:
-                n = kwargs.get("mc_samples_stage2", self.mc_samples_stage2)
-        n = max(n, 1000)
-
-        # Separate n and mc_samples_stageX from other kwargs to avoid passing
-        # them to crm.prob_tox_exceeds which doesn't support them.
-        crm_kwargs = kwargs.copy()
-        crm_kwargs.pop("mc_samples_stage1", None)
-        crm_kwargs.pop("mc_samples_stage2", None)
-        crm_kwargs["n"] = n
-
-        return 1 - self.crm.prob_tox_exceeds(threshold, **crm_kwargs)
+        return 1 - self.crm.prob_tox_exceeds(threshold)
 
     def _stage_one_next_dose(self, **kwargs):
         """Determines the next dose for stage 1 of the trial.

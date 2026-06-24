@@ -121,13 +121,13 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):
 
 def test_crm_view_render_success(monkeypatch):
     """render() should summarise simulations and plot results when data is valid."""
-    import sys
     import importlib
-    
+    import sys
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(crm_view)
-    
+
     monkeypatch.setattr(crm_view, "st", st_mock)
     monkeypatch.setattr(crm_view, "ParameterSpace", lambda cfg: "ps")
 
@@ -139,7 +139,7 @@ def test_crm_view_render_success(monkeypatch):
         index=pd.Index([0.1], name="true_tox"),
     )
     summarise_mock = MagicMock(return_value=summary_df)
-    monkeypatch.setattr(crm_view, "summarise_sims", summarise_mock)
+    monkeypatch.setattr(crm_view, "extract_sim_data", summarise_mock)
 
     bar_fig = object()
     import clintrials.visualization as viz
@@ -158,18 +158,20 @@ def test_crm_view_render_success(monkeypatch):
 
 def test_crm_view_warns_without_recommended(monkeypatch):
     """If the summary lacks recommendation information a warning is shown."""
-    import sys
     import importlib
-    
+    import sys
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(crm_view)
-    
+
     monkeypatch.setattr(crm_view, "st", st_mock)
     monkeypatch.setattr(crm_view, "ParameterSpace", lambda cfg: "ps")
 
     summary_df = pd.DataFrame({"N": [1]}, index=pd.Index([0.1], name="true_tox"))
-    monkeypatch.setattr(crm_view, "summarise_sims", MagicMock(return_value=summary_df))
+    monkeypatch.setattr(
+        crm_view, "extract_sim_data", MagicMock(return_value=summary_df)
+    )
 
     crm_view.render([{}])
     st_mock.warning.assert_called_once()
@@ -177,13 +179,13 @@ def test_crm_view_warns_without_recommended(monkeypatch):
 
 def test_efftox_view_render_success(monkeypatch):
     """EffTox view should plot recommendation and acceptability probabilities."""
-    import sys
     import importlib
-    
+    import sys
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(efftox_view)
-    
+
     monkeypatch.setattr(efftox_view, "st", st_mock)
     monkeypatch.setattr(efftox_view, "ParameterSpace", lambda cfg: "ps")
 
@@ -200,7 +202,7 @@ def test_efftox_view_render_success(monkeypatch):
         index=index,
     )
     monkeypatch.setattr(
-        efftox_view, "summarise_sims", MagicMock(return_value=summary_df)
+        efftox_view, "extract_sim_data", MagicMock(return_value=summary_df)
     )
 
     import clintrials.visualization as viz
@@ -220,17 +222,17 @@ def test_efftox_view_render_success(monkeypatch):
 
 def test_efftox_view_warns_when_empty(monkeypatch):
     """If the summary dataframe is empty a warning is shown."""
-    import sys
     import importlib
-    
+    import sys
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(efftox_view)
-    
+
     monkeypatch.setattr(efftox_view, "st", st_mock)
     monkeypatch.setattr(efftox_view, "ParameterSpace", lambda cfg: "ps")
     monkeypatch.setattr(
-        efftox_view, "summarise_sims", MagicMock(return_value=pd.DataFrame())
+        efftox_view, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
     )
 
     efftox_view.render([{}])

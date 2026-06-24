@@ -10,7 +10,7 @@ import streamlit as st
 if not hasattr(st, "fragment"):
     st.fragment = lambda func: func
 
-from clintrials.core.simulation import summarise_sims
+from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
 
 
@@ -59,7 +59,9 @@ def render(sims):
     }
 
     try:
-        summary_df = summarise_sims(sims, ps, func_map, var_map=var_map, to_pandas=True)
+        summary_df = extract_sim_data(
+            sims, ps, func_map, var_map=var_map, return_type="dataframe"
+        )
 
         st.subheader("Simulation Summary")
         st.write(summary_df)

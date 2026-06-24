@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 
+from clintrials.core.simulation import run_sims
+
 from .data_generation import generate_data
 from .simulate import simulate_comparisons
 from .statistics import (
@@ -11,9 +13,6 @@ from .statistics import (
     calculate_p_value,
     calculate_win_ratio,
 )
-
-
-from clintrials.core.simulation import run_sims
 
 
 def _single_iteration(

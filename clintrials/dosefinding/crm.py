@@ -61,6 +61,7 @@ def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
         float: The compound likelihood or log-likelihood.
     """
     from clintrials.validation import validate_matching_lengths
+
     validate_matching_lengths(doses=doses, toxs=toxs)
 
     if log:
@@ -244,9 +245,7 @@ def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=
         return np.nan
 
     if len(beta_hats_boot) < B / 2:
-        logging.warning(
-            "More than half of bootstrap samples failed to produce an MLE."
-        )
+        logging.warning("More than half of bootstrap samples failed to produce an MLE.")
 
     return np.var(beta_hats_boot)
 
@@ -384,6 +383,7 @@ def crm(
             is also appended as a fifth element.
     """
     from clintrials.validation import validate_matching_lengths
+
     validate_matching_lengths(toxicities=toxicities, dose_levels=dose_levels)
 
     if "logit1" in F_func.__name__ and isinstance(beta_dist, type(norm())):
@@ -708,43 +708,17 @@ class CRM(DoseFindingTrial):
             out.append(np.sum(post_weights * (tox_probs > tox_cutoff)))
         return np.array(out)
 
-    def prob_tox_exceeds(self, tox_cutoff, backend="quadrature", n=10**6):
+    def prob_tox_exceeds(self, tox_cutoff):
         """Calculates the posterior probability that toxicity exceeds a cutoff.
 
         Args:
             tox_cutoff (float): The toxicity cutoff.
-            backend (str, optional): The calculation backend, either
-                "quadrature" or "laplace". Defaults to "quadrature".
-            n (int, optional): The number of samples for the "laplace"
-                backend. Defaults to 10**6.
 
         Returns:
             numpy.ndarray: An array of posterior probabilities for each
                 dose level.
         """
-        if backend == "quadrature":
-            return self._prob_tox_exceeds_quadrature(tox_cutoff)
-        if backend == "laplace":
-            warnings.warn(
-                "laplace backend is deprecated", DeprecationWarning, stacklevel=2
-            )
-            if self.estimate_var:
-                labels = [
-                    self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
-                    for p in self.prior
-                ]
-                beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(
-                    n
-                )
-                p0_sample = [
-                    self.F_func(label, a0=self.intercept, beta=beta_sample)
-                    for label in labels
-                ]
-                return np.array([np.mean(x > tox_cutoff) for x in p0_sample])
-            raise Exception(
-                "CRM can only estimate posterior probabilities when estimate_var=True"
-            )
-        raise ValueError("Unknown backend")
+        return self._prob_tox_exceeds_quadrature(tox_cutoff)
 
     def has_more(self):
         """Checks if the trial is ongoing.

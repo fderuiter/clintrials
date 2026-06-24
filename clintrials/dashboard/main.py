@@ -6,8 +6,8 @@ import json
 
 import streamlit as st
 
-from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
 from clintrials.dashboard.factory import create_widget
+from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
 
 
 def main():
@@ -37,7 +37,8 @@ def main():
             st,
             "file_uploader",
             "uploaded_file",
-            "Upload a JSON file with simulation results", type=["json"]
+            "Upload a JSON file with simulation results",
+            type=["json"],
         )
 
         if uploaded_file is not None:

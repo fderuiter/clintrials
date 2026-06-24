@@ -1,7 +1,8 @@
 import numpy as np
+import pytest
+
 from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
-import pytest
 
 
 def test_watu_mc_config():
@@ -119,13 +120,13 @@ def test_watu_update_kwargs(mocker):
 
     # Stage 1
     trial.update(cases, mc_samples_stage1=2500)
-    mock_crm_exceeds.assert_called_with(trial.tox_limit, n=2500)
+    mock_crm_exceeds.assert_called_with(trial.tox_limit)
 
     # Stage 2
     trial.stage_one_size = 0  # Force stage 2
     trial.update(cases, mc_samples_stage2=3500)
-    mock_crm_exceeds.assert_called_with(trial.tox_limit, n=3500)
+    mock_crm_exceeds.assert_called_with(trial.tox_limit)
 
     # General n
     trial.update(cases, n=4500)
-    mock_crm_exceeds.assert_called_with(trial.tox_limit, n=4500)
+    mock_crm_exceeds.assert_called_with(trial.tox_limit)

@@ -272,7 +272,9 @@ def _get_posterior_sample(
 
             if s > 0:
                 # Gaussian mass check
-                coverage = norm.cdf(high, loc=m, scale=s) - norm.cdf(low, loc=m, scale=s)
+                coverage = norm.cdf(high, loc=m, scale=s) - norm.cdf(
+                    low, loc=m, scale=s
+                )
             else:
                 coverage = 1.0 if low <= m <= high else 0.0
 
@@ -339,13 +341,9 @@ def efftox_get_posterior_probs(
         _cases = []
 
     limit_args = {
-        k: v
-        for k, v in kwargs.items()
-        if k in ["k_sd", "max_iter", "mass_threshold"]
+        k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
-    pds = _get_posterior_sample(
-        _cases, priors, n=n, epsilon=epsilon, **limit_args
-    )
+    pds = _get_posterior_sample(_cases, priors, n=n, epsilon=epsilon, **limit_args)
     samp = pds._samp
 
     probs = []
@@ -400,13 +398,9 @@ def efftox_get_posterior_params(
         _cases = []
 
     limit_args = {
-        k: v
-        for k, v in kwargs.items()
-        if k in ["k_sd", "max_iter", "mass_threshold"]
+        k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
-    pds = _get_posterior_sample(
-        _cases, priors, n=n, epsilon=epsilon, **limit_args
-    )
+    pds = _get_posterior_sample(_cases, priors, n=n, epsilon=epsilon, **limit_args)
     samp = pds._samp
 
     params = []
@@ -1153,6 +1147,7 @@ def solve_metrizable_efftox_scenario(
             utility, optimal dose, and utility cushion.
     """
     from clintrials.validation import validate_matching_lengths
+
     validate_matching_lengths(prob_tox=prob_tox, prob_eff=prob_eff)
 
     t = prob_tox

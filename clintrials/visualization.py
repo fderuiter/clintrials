@@ -1,9 +1,9 @@
 """Centralized visualization module using Plotly."""
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import numpy as np
 
 
 def plot_dose_finding_outcomes(trial, chart_title=None):

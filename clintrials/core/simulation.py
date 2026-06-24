@@ -127,45 +127,6 @@ def sim_parameter_space(
     return sims
 
 
-def go_fetch_json_sims(file_pattern):
-    """Fetches and combines JSON data from multiple files.
-
-    .. deprecated:: 0.1.4
-       Use `fetch_json_from_files` instead.
-
-    Args:
-        file_pattern (str): A glob pattern for the input files.
-
-    Returns:
-        list: A list of combined JSON objects.
-    """
-    warnings.warn(
-        "go_fetch_json_sims is deprecated; use fetch_json_from_files instead",
-        DeprecationWarning,
-    )
-    return fetch_json_from_files(file_pattern)
-
-
-def filter_sims(sims, filter_dict):
-    """Filters a list of dictionaries based on a filter dictionary.
-
-    .. deprecated:: 0.1.4
-       Use `filter_list_of_dicts` instead.
-
-    Args:
-        sims (list[dict]): The list of dictionaries to filter.
-        filter_dict (dict): A dictionary of key-value pairs to filter by.
-
-    Returns:
-        list[dict]: The filtered list of dictionaries.
-    """
-    warnings.warn(
-        "filter_sims is deprecated; use filter_list_of_dicts instead",
-        DeprecationWarning,
-    )
-    return filter_list_of_dicts(sims, filter_dict)
-
-
 def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
     """Extracts and summarises a list of simulations.
 
@@ -230,61 +191,6 @@ def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
             return pd.DataFrame(columns=func_map.keys())
         else:
             return [], []
-
-
-def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
-    """Summarises a list of simulations.
-
-    .. deprecated:: 0.1.4
-       Use `extract_sim_data` instead.
-
-    Args:
-        sims (list): A list of simulations, likely in JSON format.
-        ps (clintrials.utils.ParameterSpace): The parameter space that
-            explains how to filter simulations.
-        func_map (dict): A map from item name to a function that takes a list
-            of sims and a parameter map as arguments and returns a summary
-            statistic or object.
-        var_map (dict, optional): A map from variable name in the simulation
-            JSON to the argument name in the `ParameterSpace`. If None, it is
-            assumed that the names are the same. Defaults to None.
-        to_pandas (bool, optional): If `True`, returns a pandas.DataFrame.
-            Defaults to `True`.
-
-    Returns:
-        pandas.DataFrame or tuple: A DataFrame with the summarised results,
-            or a tuple of lists for backward compatibility.
-    """
-    import warnings
-
-    warnings.warn(
-        "summarise_sims is deprecated, use extract_sim_data instead",
-        DeprecationWarning,
-    )
-    return_type = "dataframe" if to_pandas else "tuple"
-    return extract_sim_data(sims, ps, func_map, var_map, return_type=return_type)
-
-
-# Map-Reduce methods for summarising sims in memory-efficient ways
-def invoke_map_reduce_function_map(sims, function_map):
-    """Invokes a map-reduce pattern on a list.
-
-    .. deprecated:: 0.1.4
-       Use `invoke_map_reduce_on_list` instead.
-
-    Args:
-        sims (list): The list to process.
-        function_map (dict): A dictionary mapping item names to
-            (map_func, reduce_func) pairs.
-
-    Returns:
-        collections.OrderedDict: A dictionary of the reduced results.
-    """
-    warnings.warn(
-        "invoke_map_reduce_function_map is deprecated; use invoke_map_reduce_on_list instead",
-        DeprecationWarning,
-    )
-    return invoke_map_reduce_on_list(sims, function_map)
 
 
 # The following functions are helper functions for processing simulation results.

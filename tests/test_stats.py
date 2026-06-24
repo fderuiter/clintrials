@@ -221,9 +221,7 @@ def test_correlation_ci_bayes_weighted():
     # 0.25 is before 0.9, so low = 0.1 (interp will handle it)
     # 0.75 is before 0.9, so high = 0.1
 
-    result = correlation_ci(
-        samples=samples, weights=weights, alpha=0.5, method="bayes"
-    )
+    result = correlation_ci(samples=samples, weights=weights, alpha=0.5, method="bayes")
 
     assert np.isclose(result[1], 0.18)
     assert np.isclose(result[0], 0.1)

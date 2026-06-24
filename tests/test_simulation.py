@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from clintrials.core.simulation import extract_sim_data, summarise_sims
+from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
 
 
@@ -70,15 +70,3 @@ def test_extract_sim_data_empty_sims(sample_ps):
     # Test tuple return type
     result_tuple = extract_sim_data([], sample_ps, func_map, return_type="tuple")
     assert result_tuple == ([], [])
-
-
-def test_summarise_sims_deprecated(sample_sims, sample_ps):
-    """Test that the old summarise_sims function is deprecated but functional."""
-    func_map = {"mean_metric": mean_metric}
-    with pytest.deprecated_call():
-        result = summarise_sims(sample_sims, sample_ps, func_map, to_pandas=True)
-        assert isinstance(result, pd.DataFrame)
-
-    with pytest.deprecated_call():
-        result_tuple = summarise_sims(sample_sims, sample_ps, func_map, to_pandas=False)
-        assert isinstance(result_tuple, tuple)
