@@ -62,7 +62,7 @@ class BeBOP:
 
     def _l_n(self, D, theta):
         if len(D) > 0:
-            lik = numpy.array(map(lambda x: self._pi_ab(x, theta), D))
+            lik = numpy.array([self._pi_ab(x, theta) for x in D])
             return lik.prod(axis=0)
         else:
             return numpy.ones(len(theta))
@@ -103,23 +103,61 @@ class BeBOP:
         return [case[i] for case in self.cases]
 
     def update(self, cases, n=10**6, epsilon=0.00001, **kwargs):
-        """Update the model with new observed cases.
+        """
+        Update the model with new observed cases.
 
         This method updates the posterior distribution of the model parameters
         based on new data. It uses Monte Carlo integration to approximate the
         posterior. The posterior is stored as a `ProbabilityDensitySample`
         object in `self._pds`.
 
-        Args:
-            cases (list[list]): A list of case vectors. Each vector represents a patient
-                and should contain the outcome variables followed by the
-                predictor variables.
-            n (int, optional): The number of samples to use for the Monte Carlo integration.
-                Defaults to 10**6.
-            epsilon (float, optional): A small value used to determine the integration limits.
-                Defaults to 0.00001.
-            **kwargs: Not used.
+        Parameters
+        ----------
+        cases : list of list
+            A list of case vectors. Each vector represents a patient and should
+            contain outcome variables followed by predictor variables.
+            For example, in PePS2 version 2, each case is [eff, tox, pre-treated,
+            low_pdl1, mid_pdl1].
+        n : int, optional
+            The number of samples to use for the Monte Carlo integration.
+            Should be a positive integer. Defaults to 1,000,000.
+        epsilon : float, optional
+            A small value in (0, 1) used to determine integration limits via
+            the percent point function (ppf) of the priors.
+            Defaults to 0.00001.
+        **kwargs : dict
+            Additional keyword arguments (currently unused).
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If `n` is not a positive integer or `epsilon` is not between 0 and 1.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from scipy.stats import norm
+        >>> from clintrials.phase2.bebop import BeBOP
+        >>> from clintrials.phase2.bebop.peps2v2 import pi_e, pi_t, pi_ab
+        >>> priors = [norm(0, 2)] * 6
+        >>> model = BeBOP(priors, pi_e, pi_t, pi_ab)
+        >>> cases = [[1, 0, 0, 0, 0], [0, 1, 1, 1, 0]]
+        >>> model.update(cases, n=1000)
+        >>> model.size()
+        2
         """
+        from clintrials.validation import (
+            validate_bounds,
+            validate_positive_integer,
+        )
+
+        validate_positive_integer(n, "n")
+        validate_bounds(epsilon, 0, 1, "epsilon", exclusive=True)
+
         self.cases.extend(cases)
         limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in self.priors]
         samp = numpy.column_stack(
