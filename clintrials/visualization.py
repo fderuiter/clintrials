@@ -5,6 +5,98 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
+COLORBLIND_PALETTE = [
+    "#E69F00",
+    "#56B4E9",
+    "#009E73",
+    "#F0E442",
+    "#0072B2",
+    "#D55E00",
+    "#CC79A7",
+    "#000000",
+]
+
+
+def _format_label(label):
+    if not isinstance(label, str):
+        return label
+    return label.replace("_", " ").title()
+
+
+def _format_labels_dict(cols):
+    if not isinstance(cols, list):
+        cols = [cols]
+    labels = {}
+    for col in cols:
+        if isinstance(col, str):
+            labels[col] = _format_label(col)
+    return labels
+
+
+def create_bar_chart(df, x, y, color, title, labels=None):
+    """Creates a centralized bar chart with accessibility standards."""
+    if labels is None:
+        labels = {}
+
+    auto_labels = _format_labels_dict(x if isinstance(x, list) else [x])
+    auto_labels.update(_format_labels_dict(y))
+    auto_labels.update(_format_labels_dict(color))
+    auto_labels.update(labels)
+
+    fig = px.bar(
+        df,
+        x=x,
+        y=y,
+        color=color,
+        barmode="group",
+        title=title,
+        labels=auto_labels,
+        color_discrete_sequence=COLORBLIND_PALETTE,
+    )
+    return fig
+
+
+def create_line_chart(df, x, y, color, title, labels=None):
+    """Creates a centralized line chart with accessibility standards."""
+    if labels is None:
+        labels = {}
+
+    auto_labels = _format_labels_dict(x if isinstance(x, list) else [x])
+    auto_labels.update(_format_labels_dict(y))
+    auto_labels.update(_format_labels_dict(color))
+    auto_labels.update(labels)
+
+    fig = px.line(
+        df,
+        x=x,
+        y=y,
+        color=color,
+        title=title,
+        labels=auto_labels,
+        color_discrete_sequence=COLORBLIND_PALETTE,
+    )
+    return fig
+
+
+def generate_text_summary(df, title):
+    """Generates a text summary for a chart based on its dataframe."""
+    summary = f"**Data Summary: {title}**\n\n"
+    cols = list(df.columns)
+
+    def fmt(v):
+        if isinstance(v, (float, np.float64)):
+            return f"{v:.4f}"
+        return str(v)
+
+    header = "| " + " | ".join([_format_label(c) for c in cols]) + " |"
+    sep = "| " + " | ".join(["---"] * len(cols)) + " |"
+
+    rows = []
+    for _, row in df.iterrows():
+        rows.append("| " + " | ".join([fmt(x) for x in row]) + " |")
+
+    return summary + "\n".join([header, sep] + rows)
+
 
 def plot_dose_finding_outcomes(trial, chart_title=None):
     """Plots the dose-finding trial outcomes."""
@@ -280,18 +372,19 @@ def plot_crm_simulation_recommendation(summary_df):
         var_name="Dose Level",
         value_name="Probability",
     )
-    fig = px.bar(
+    title = "Dose Recommendation Probabilities by Scenario"
+    fig = create_bar_chart(
         rec_dose_df_melted,
         x="true_tox",
         y="Probability",
         color="Dose Level",
-        barmode="group",
+        title=title,
         labels={
             "true_tox": "True Toxicity Scenario",
             "Probability": "Recommendation Probability",
         },
-        title="Dose Recommendation Probabilities by Scenario",
     )
+    fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
     return fig
 
 
@@ -305,14 +398,15 @@ def plot_efftox_simulation_recommendation(summary_df):
         var_name="Dose Level",
         value_name="Probability",
     )
-    fig = px.bar(
+    title = "Dose Recommendation Probabilities"
+    fig = create_bar_chart(
         rec_dose_df_melted,
         x=["true_prob_tox", "true_prob_eff"],
         y="Probability",
         color="Dose Level",
-        barmode="group",
-        title="Dose Recommendation Probabilities",
+        title=title,
     )
+    fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
     return fig
 
 
@@ -330,11 +424,13 @@ def plot_efftox_simulation_acceptability(summary_df):
         var_name="Probability Type",
         value_name="Probability",
     )
-    fig = px.line(
+    title = "Probability of Acceptable Efficacy and Toxicity"
+    fig = create_line_chart(
         accept_df_melted,
         x="true_prob_tox",  # simplified axis mapping
         y="Probability",
         color="Probability Type",
-        title="Probability of Acceptable Efficacy and Toxicity",
+        title=title,
     )
+    fig.layout.meta = generate_text_summary(accept_df_melted, title)
     return fig

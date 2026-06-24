@@ -61,6 +61,7 @@ def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
         float: The compound likelihood or log-likelihood.
     """
     from clintrials.validation import validate_matching_lengths
+
     validate_matching_lengths(doses=doses, toxs=toxs)
 
     if log:
@@ -244,9 +245,7 @@ def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=
         return np.nan
 
     if len(beta_hats_boot) < B / 2:
-        logging.warning(
-            "More than half of bootstrap samples failed to produce an MLE."
-        )
+        logging.warning("More than half of bootstrap samples failed to produce an MLE.")
 
     return np.var(beta_hats_boot)
 
@@ -384,6 +383,7 @@ def crm(
             is also appended as a fifth element.
     """
     from clintrials.validation import validate_matching_lengths
+
     validate_matching_lengths(toxicities=toxicities, dose_levels=dose_levels)
 
     if "logit1" in F_func.__name__ and isinstance(beta_dist, type(norm())):

@@ -37,7 +37,8 @@ def main():
             st,
             "file_uploader",
             "uploaded_file",
-            "Upload a JSON file with simulation results", type=["json"]
+            "Upload a JSON file with simulation results",
+            type=["json"],
         )
 
         if uploaded_file is not None:

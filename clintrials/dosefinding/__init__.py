@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 from clintrials.core.protocol import Protocol
 
+
 class DoseFindingTrial(Protocol):
     """Base class for a dose-finding trial."""
 
@@ -284,13 +285,13 @@ class DoseFindingTrial(Protocol):
 
     def report(self):
         """Generates a standardized JSON-serializable report of the trial.
-        
+
         Returns:
             collections.OrderedDict: The trial outcome report.
         """
         from collections import OrderedDict
         from clintrials.utils import atomic_to_json, iterable_to_json
-        
+
         report = OrderedDict()
         report["RecommendedDose"] = atomic_to_json(self.next_dose())
         report["TrialStatus"] = atomic_to_json(self.status())

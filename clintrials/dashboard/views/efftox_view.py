@@ -75,6 +75,14 @@ def render(sims):
 
                 fig_rec = viz.plot_efftox_simulation_recommendation(summary_df)
                 st.plotly_chart(fig_rec)
+                with st.expander("Data Summary"):
+                    st.markdown(
+                        getattr(
+                            getattr(fig_rec, "layout", None),
+                            "meta",
+                            "No data summary available.",
+                        )
+                    )
 
             # Acceptability Probabilities
             if (
@@ -86,6 +94,14 @@ def render(sims):
 
                 fig_accept = viz.plot_efftox_simulation_acceptability(summary_df)
                 st.plotly_chart(fig_accept)
+                with st.expander("Data Summary"):
+                    st.markdown(
+                        getattr(
+                            getattr(fig_accept, "layout", None),
+                            "meta",
+                            "No data summary available.",
+                        )
+                    )
 
         else:
             st.warning("Summary dataframe is empty. Cannot generate plots.")
