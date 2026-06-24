@@ -35,18 +35,20 @@ def test_plot_efftox_utility_contours():
     fig = plot_efftox_utility_contours(metric=metric, prob_eff=[0.1], prob_tox=[0.1])
     assert isinstance(fig, go.Figure)
 
+from scipy.stats import norm
+
 def test_plot_efftox_density():
     metric = LpNormCurve(0.5, 0.65, 0.7, 0.25)
     trial = EffTox(
         real_doses=[1, 2, 3],
-        theta_priors={
-            "alpha": (-7.9593, 3.5487),
-            "beta": (1.5482, 3.5018),
-            "gamma": (0.7367, 2.5423),
-            "zeta": (3.4181, 2.4406),
-            "eta": (0, 0.2),
-            "psi": (0, 1),
-        },
+        theta_priors=[
+            norm(-7.9593, 3.5487),
+            norm(1.5482, 3.5018),
+            norm(0.7367, 2.5423),
+            norm(3.4181, 2.4406),
+            norm(0, 0.2),
+            norm(0, 1),
+        ],
         tox_cutoff=0.65,
         eff_cutoff=0.5,
         tox_certainty=0.1,
