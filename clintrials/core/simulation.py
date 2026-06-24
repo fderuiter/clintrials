@@ -21,6 +21,7 @@ from clintrials.utils import (
     map_reduce_files,
     multiindex_dataframe_from_tuple_map,
     reduce_maps_by_summing,
+    tuple_to_dataframe,
 )
 
 logger = logging.getLogger(__name__)
@@ -174,7 +175,8 @@ def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
     subset.
 
     Args:
-        sims (list): A list of simulations, likely in JSON format.
+        sims (list or pandas.DataFrame): A list of simulations, likely in JSON
+            format, or a pandas DataFrame.
         ps (clintrials.utils.ParameterSpace): The parameter space that
             explains how to filter simulations.
         func_map (dict): A map from item name to a function that takes a list
@@ -191,13 +193,22 @@ def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
         pandas.DataFrame or tuple: A DataFrame with the summarised results,
             or a tuple of lists for backward compatibility.
     """
+    # Normalize input
+    try:
+        import pandas as pd
+
+        if isinstance(sims, pd.DataFrame):
+            sims = sims.to_dict(orient="records")
+    except ImportError:
+        pass
+
     if var_map is None:
-        var_names = ps.keys()
+        var_names = list(ps.keys())
         var_map = {}
         for var_name in var_names:
             var_map[var_name] = var_name
     else:
-        var_names = var_map.keys()
+        var_names = list(var_map.keys())
 
     z = [(var_name, ps[var_map[var_name]]) for var_name in var_names]
     labels, val_arrays = zip(*z)
@@ -214,22 +225,13 @@ def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
             }
             index_tuples.append(param_combo)
             row_tuples.append(these_metrics)
-    if len(row_tuples):
-        if return_type == "dataframe":
-            import pandas as pd
 
-            return pd.DataFrame(
-                row_tuples, pd.MultiIndex.from_tuples(index_tuples, names=var_names)
-            )
-        else:
-            return row_tuples, index_tuples
+    if return_type == "dataframe":
+        return tuple_to_dataframe(
+            row_tuples, index_tuples, column_names=func_map.keys(), index_names=var_names
+        )
     else:
-        if return_type == "dataframe":
-            import pandas as pd
-
-            return pd.DataFrame(columns=func_map.keys())
-        else:
-            return [], []
+        return row_tuples, index_tuples
 
 
 def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):

@@ -82,3 +82,23 @@ def test_summarise_sims_deprecated(sample_sims, sample_ps):
     with pytest.deprecated_call():
         result_tuple = summarise_sims(sample_sims, sample_ps, func_map, to_pandas=False)
         assert isinstance(result_tuple, tuple)
+
+
+def test_extract_sim_data_with_dataframe_input(sample_sims, sample_ps):
+    """Test that extract_sim_data accepts a pandas DataFrame as input."""
+    sims_df = pd.DataFrame(sample_sims)
+    func_map = {"mean_metric": mean_metric}
+    result = extract_sim_data(sims_df, sample_ps, func_map)
+    assert isinstance(result, pd.DataFrame)
+    assert not result.empty
+    assert result.loc[(1, "a"), "mean_metric"] == 12.5
+
+
+def test_extract_sim_data_consistent_empty_output(sample_ps):
+    """Test that empty results return a DataFrame with correct column and index names."""
+    func_map = {"mean_metric": mean_metric}
+    result = extract_sim_data([], sample_ps, func_map)
+    assert isinstance(result, pd.DataFrame)
+    assert result.empty
+    assert list(result.columns) == ["mean_metric"]
+    assert list(result.index.names) == ["param1", "param2"]
