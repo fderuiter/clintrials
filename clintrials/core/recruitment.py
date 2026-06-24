@@ -54,13 +54,8 @@ class ConstantRecruitmentStream(RecruitmentStream):
 
         Args:
             intrapatient_gap (float): The constant time gap between patient
-                recruitments. Must be strictly positive.
-
-        Raises:
-            ValueError: If `intrapatient_gap` is not strictly positive.
+                recruitments.
         """
-        if intrapatient_gap <= 0:
-            raise ValueError("intrapatient_gap must be strictly positive.")
         self.delta = intrapatient_gap
         self.cursor = 0
 
@@ -104,10 +99,9 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
 
         Args:
             intrapatient_gap (float): The time to recruit one patient at 100%
-                recruitment intensity. Must be strictly positive.
+                recruitment intensity.
             initial_intensity (float): The initial recruitment intensity, as a
-                proportion of total power. Must be non-negative. Zero is allowed
-                to model delayed recruitment start.
+                proportion of total power. Must be non-negative.
             vertices (list[tuple[float, float]]): A list of (time, intensity)
                 tuples representing vertices where the recruitment intensity
                 changes.
@@ -116,17 +110,11 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
                 Defaults to `True`.
 
         Raises:
-            ValueError: If `intrapatient_gap` is not strictly positive,
-                if `initial_intensity` is negative, or if any of the
+            ValueError: If `initial_intensity` is negative, or if any of the
                 intensities in `vertices` are negative.
         """
-        if intrapatient_gap <= 0:
-            raise ValueError("intrapatient_gap must be strictly positive.")
         if initial_intensity < 0:
-            raise ValueError(
-                "initial_intensity must be non-negative. Zero is allowed to model "
-                "delayed recruitment start."
-            )
+            raise ValueError("initial_intensity cannot be negative.")
         if any(v[1] < 0 for v in vertices):
             raise ValueError("intensity in vertices cannot be negative.")
 

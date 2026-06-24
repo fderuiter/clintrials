@@ -17,9 +17,7 @@ from clintrials.dosefinding.efftox import (
     _pi_ab,
     _pi_E,
     _pi_T,
-    efftox_priors_from_skeleton,
     scale_doses,
-    validate_efftox_priors,
 )
 
 
@@ -677,12 +675,12 @@ def test_efftox_docstring_example():
     )
     trial = EffTox(
         real_doses,
-        theta_priors=theta_priors,
-        tox_cutoff=tox_cutoff,
-        eff_cutoff=eff_cutoff,
-        tox_certainty=tox_certainty,
-        eff_certainty=eff_certainty,
-        metric=metric,
+        theta_priors,
+        tox_cutoff,
+        eff_cutoff,
+        tox_certainty,
+        eff_certainty,
+        metric,
         max_size=30,
         first_dose=3,
         num_integral_steps=10**5,  # Use smaller n for faster test
@@ -690,66 +688,3 @@ def test_efftox_docstring_example():
     assert trial.next_dose() == 3
     trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
     assert trial.next_dose() == 3
-
-
-def test_efftox_priors_from_skeleton():
-    real_doses = [1.0, 2.0, 4.0, 8.0]
-    prior_tox_probs = [0.05, 0.1, 0.2, 0.4]
-    prior_eff_probs = [0.2, 0.4, 0.6, 0.7]
-
-    priors = efftox_priors_from_skeleton(real_doses, prior_tox_probs, prior_eff_probs)
-
-    assert len(priors) == 6
-    # Toxicity slope should be positive
-    assert priors[1].mean() > 0
-    # SDs should be default principled values
-    assert priors[0].std() == 2.0
-    assert priors[4].std() == 0.2
-    assert priors[5].mean() == 0.0
-
-
-def test_efftox_initialization_with_skeleton():
-    real_doses = [1.0, 2.0, 4.0, 8.0]
-    prior_tox_probs = [0.05, 0.1, 0.2, 0.4]
-    prior_eff_probs = [0.2, 0.4, 0.6, 0.7]
-    metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-
-    trial = EffTox(
-        real_doses=real_doses,
-        prior_tox_probs=prior_tox_probs,
-        prior_eff_probs=prior_eff_probs,
-        tox_cutoff=0.4,
-        eff_cutoff=0.2,
-        tox_certainty=0.8,
-        eff_certainty=0.8,
-        metric=metric,
-        max_size=30,
-    )
-
-    assert len(trial.priors) == 6
-    assert trial.priors[1].mean() > 0
-
-
-def test_validate_efftox_priors():
-    scaled_doses = [-1, 0, 1]
-    # Sensible priors
-    priors = [norm(0, 1), norm(1, 1), norm(0, 1), norm(1, 1), norm(0, 0.1), norm(0, 1)]
-    validate_efftox_priors(priors, scaled_doses)
-
-    # Nonsensical toxicity (decreasing)
-    priors_bad = [
-        norm(0, 1),
-        norm(-1, 1),
-        norm(0, 1),
-        norm(1, 1),
-        norm(0, 0.1),
-        norm(0, 1),
-    ]
-    with pytest.raises(ValueError, match="Toxicity prior slope"):
-        validate_efftox_priors(priors_bad, scaled_doses)
-
-
-def test_efftox_missing_params():
-    real_doses = [1, 2, 3]
-    with pytest.raises(ValueError, match="Either theta_priors or both"):
-        EffTox(real_doses=real_doses)

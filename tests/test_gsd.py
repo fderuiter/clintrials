@@ -149,5 +149,5 @@ def test_gsd_update_and_report():
 
 def test_gsd_simulate_invalid_sims():
     design = GroupSequentialDesign(k=3)
-    with pytest.raises(ValueError, match="Number of simulations must be a positive integer."):
+    with pytest.raises(ValueError, match=r"Number of simulations must be a positive integer\."):
         design.simulate(0)

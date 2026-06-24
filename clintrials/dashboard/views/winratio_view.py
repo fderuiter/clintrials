@@ -8,7 +8,6 @@ if not hasattr(st, "fragment"):
     st.fragment = lambda func: func
 
 from clintrials.winratio import run_simulation
-from clintrials.dashboard.factory import create_widget
 
 
 def render() -> None:
@@ -16,38 +15,38 @@ def render() -> None:
     st.header("Win Ratio Simulation")
 
     st.sidebar.header("Simulation Parameters")
-    num_subjects_A = create_widget(
-        st, "number_input", "num_subjects_A", "Number of subjects in Group A", min_value=1, value=100
+    num_subjects_A = st.sidebar.number_input(
+        "Number of subjects in Group A", min_value=1, value=100
     )
-    num_subjects_B = create_widget(
-        st, "number_input", "num_subjects_B", "Number of subjects in Group B", min_value=1, value=50
+    num_subjects_B = st.sidebar.number_input(
+        "Number of subjects in Group B", min_value=1, value=50
     )
-    num_simulations = create_widget(
-        st, "number_input", "num_simulations", "Number of simulations", min_value=1, value=1000
+    num_simulations = st.sidebar.number_input(
+        "Number of simulations", min_value=1, value=1000
     )
-    p_y1_A = create_widget(
-        st, "number_input", "p_y1_A", "Probability of y1=1 for Group A", min_value=0.0, max_value=1.0, value=0.50
+    p_y1_A = st.sidebar.number_input(
+        "Probability of y1=1 for Group A", min_value=0.0, max_value=1.0, value=0.50
     )
-    p_y1_B = create_widget(
-        st, "number_input", "p_y1_B", "Probability of y1=1 for Group B", min_value=0.0, max_value=1.0, value=0.50
+    p_y1_B = st.sidebar.number_input(
+        "Probability of y1=1 for Group B", min_value=0.0, max_value=1.0, value=0.50
     )
-    p_y2_A = create_widget(
-        st, "number_input", "p_y2_A", "Probability of y2=1 for Group A", min_value=0.0, max_value=1.0, value=0.75
+    p_y2_A = st.sidebar.number_input(
+        "Probability of y2=1 for Group A", min_value=0.0, max_value=1.0, value=0.75
     )
-    p_y2_B = create_widget(
-        st, "number_input", "p_y2_B", "Probability of y2=1 for Group B", min_value=0.0, max_value=1.0, value=0.25
+    p_y2_B = st.sidebar.number_input(
+        "Probability of y2=1 for Group B", min_value=0.0, max_value=1.0, value=0.25
     )
-    p_y3_A = create_widget(
-        st, "number_input", "p_y3_A", "Probability of y3=1 for Group A", min_value=0.0, max_value=1.0, value=0.43
+    p_y3_A = st.sidebar.number_input(
+        "Probability of y3=1 for Group A", min_value=0.0, max_value=1.0, value=0.43
     )
-    p_y3_B = create_widget(
-        st, "number_input", "p_y3_B", "Probability of y3=1 for Group B", min_value=0.0, max_value=1.0, value=0.27
+    p_y3_B = st.sidebar.number_input(
+        "Probability of y3=1 for Group B", min_value=0.0, max_value=1.0, value=0.27
     )
-    significance_level = create_widget(
-        st, "number_input", "significance_level", "Significance level", min_value=0.0, max_value=1.0, value=0.05
+    significance_level = st.sidebar.number_input(
+        "Significance level", min_value=0.0, max_value=1.0, value=0.05
     )
 
-    if create_widget(st, "button", "run_simulation_button", "Run Simulation"):
+    if st.sidebar.button("Run Simulation"):
         with st.spinner("Running simulation..."):
             power, average_ci = run_simulation(
                 num_subjects_A,

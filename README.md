@@ -110,9 +110,15 @@ from scipy.stats import norm
 # Define the real dose levels
 real_doses = [1.0, 2.0, 4.0, 8.0]
 
-# Define prior probabilities for elicitation (skeleton)
-prior_tox_probs = [0.05, 0.1, 0.2, 0.4]
-prior_eff_probs = [0.2, 0.4, 0.6, 0.7]
+# Define priors for the model parameters
+theta_priors = [
+    norm(-1.386, 1.732),  # mu_T
+    norm(0, 1.732),       # beta_T
+    norm(-1.386, 1.732),  # mu_E
+    norm(0, 1.732),       # beta1_E
+    norm(0, 1.732),       # beta2_E
+    norm(0, 1),           # psi
+]
 
 # Define the utility metric
 metric = LpNormCurve(
@@ -122,11 +128,10 @@ metric = LpNormCurve(
     hinge_prob_tox=0.2,
 )
 
-# Create an EffTox trial object (priors elicited from skeleton)
+# Create an EffTox trial object
 trial = EffTox(
     real_doses=real_doses,
-    prior_tox_probs=prior_tox_probs,
-    prior_eff_probs=prior_eff_probs,
+    theta_priors=theta_priors,
     tox_cutoff=0.4,
     eff_cutoff=0.2,
     tox_certainty=0.8,

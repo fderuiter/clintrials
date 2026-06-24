@@ -7,7 +7,6 @@ import json
 import streamlit as st
 
 from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
-from clintrials.dashboard.factory import create_widget
 
 
 def main():
@@ -21,10 +20,7 @@ def main():
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Select Trial Design")
-    design_type = create_widget(
-        st,
-        "selectbox",
-        "design_type",
+    design_type = st.sidebar.selectbox(
         "Choose the type of trial design for your simulation results:",
         ("CRM", "EffTox", "Win Ratio"),
     )
@@ -33,10 +29,7 @@ def main():
         winratio_view.render()
     else:
         st.sidebar.header("Upload Simulation Results")
-        uploaded_file = create_widget(
-            st,
-            "file_uploader",
-            "uploaded_file",
+        uploaded_file = st.sidebar.file_uploader(
             "Upload a JSON file with simulation results", type=["json"]
         )
 

@@ -11,8 +11,7 @@ import logging
 from collections import OrderedDict
 
 import numpy as np
-from scipy.optimize import brentq
-from scipy.stats import norm
+from scipy.optimize import brentq, fsolve
 
 from clintrials.core.math import inverse_logit
 from clintrials.core.stats import ProbabilityDensitySample
@@ -30,72 +29,6 @@ def scale_doses(real_doses):
         numpy.ndarray: The scaled doses.
     """
     return np.log(real_doses) - np.mean(np.log(real_doses))
-
-
-def efftox_priors_from_skeleton(real_doses, prior_tox_probs, prior_eff_probs):
-    """Elicits principled EffTox priors from a dose-response skeleton.
-
-    This function fits the EffTox link functions to the provided prior
-    probabilities using least squares on the logit scale.
-
-    Args:
-        real_doses (list[float]): The actual dose amounts.
-        prior_tox_probs (list[float]): Prior toxicity probabilities at each dose.
-        prior_eff_probs (list[float]): Prior efficacy probabilities at each dose.
-
-    Returns:
-        list[scipy.stats.norm]: A list of 6 normal distributions for the
-            parameters (mu_T, beta_T, mu_E, beta1_E, beta2_E, psi).
-    """
-
-    def logit(p):
-        p = np.clip(p, 1e-7, 1 - 1e-7)
-        return np.log(p / (1 - p))
-
-    scaled_x = scale_doses(real_doses)
-
-    # Toxicity: logit(pi_T) = mu_T + beta_T * x
-    logit_tox = logit(np.array(prior_tox_probs))
-    beta_T_mean, mu_T_mean = np.polyfit(scaled_x, logit_tox, 1)
-
-    # Efficacy: logit(pi_E) = mu_E + beta1_E * x + beta2_E * x^2
-    logit_eff = logit(np.array(prior_eff_probs))
-    beta2_E_mean, beta1_E_mean, mu_E_mean = np.polyfit(scaled_x, logit_eff, 2)
-
-    # Principled default SDs:
-    # Intercepts and linear slopes: 2.0
-    # Quadratic term: 0.2 (usually smaller as it's for curvature)
-    # Association parameter psi: mean 0, SD 1.0
-    priors = [
-        norm(loc=mu_T_mean, scale=2.0),
-        norm(loc=beta_T_mean, scale=2.0),
-        norm(loc=mu_E_mean, scale=2.0),
-        norm(loc=beta1_E_mean, scale=2.0),
-        norm(loc=beta2_E_mean, scale=0.2),
-        norm(loc=0.0, scale=1.0),
-    ]
-    return priors
-
-
-def validate_efftox_priors(priors, scaled_doses):
-    """Validates that the EffTox priors imply sensible dose-response shapes.
-
-    Args:
-        priors (list): A list of 6 prior distributions.
-        scaled_doses (list[float]): The scaled dose levels.
-
-    Raises:
-        ValueError: If the priors imply non-sensible dose-response shapes.
-    """
-    from clintrials.validation import validate_expected_length
-
-    validate_expected_length(priors, 6, "priors")
-
-    beta_T = priors[1].mean()
-
-    # Check if toxicity is non-decreasing
-    if beta_T < 0:
-        raise ValueError("Toxicity prior slope (beta_T) should be non-negative.")
 
 
 def _eta_T(scaled_dose, mu, beta):
@@ -213,94 +146,8 @@ def _L_n(D, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi):
     return response
 
 
-def _get_posterior_sample(
-    cases,
-    priors,
-    n=10**5,
-    epsilon=1e-6,
-    k_sd=6.0,
-    max_iter=3,
-    mass_threshold=0.999999,
-):
-    """Generates a posterior sample with adaptive integration limits.
-
-    Args:
-        cases (list[tuple]): A list of cases (scaled_dose, tox, eff).
-        priors (list): A list of 6 prior distributions.
-        n (int, optional): Number of points for Monte Carlo integration.
-            Defaults to 10**5.
-        epsilon (float, optional): Initial quantile for limits. Defaults to
-            1e-6.
-        k_sd (float, optional): Number of standard deviations for limit
-            coverage. Defaults to 6.0.
-        max_iter (int, optional): Maximum number of refinement iterations.
-            Defaults to 3.
-        mass_threshold (float, optional): Threshold for Gaussian-approximate
-            mass coverage within boundaries. Defaults to 0.999999.
-
-    Returns:
-        ProbabilityDensitySample: The posterior sample object.
-    """
-    limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
-
-    lik_integrand = (
-        lambda x: _L_n(cases, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4], x[:, 5])
-        * priors[0].pdf(x[:, 0])
-        * priors[1].pdf(x[:, 1])
-        * priors[2].pdf(x[:, 2])
-        * priors[3].pdf(x[:, 3])
-        * priors[4].pdf(x[:, 4])
-        * priors[5].pdf(x[:, 5])
-    )
-
-    for i in range(max_iter):
-        samp = np.column_stack(
-            [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
-        )
-        pds = ProbabilityDensitySample(samp, lik_integrand)
-
-        # Calculate posterior means and SDs
-        means = [pds.expectation(samp[:, j]) for j in range(6)]
-        variances = [pds.variance(samp[:, j]) for j in range(6)]
-        sds = [np.sqrt(v) if v > 0 else 0 for v in variances]
-
-        needs_refinement = False
-        refined_limits = []
-        for j in range(6):
-            m, s = means[j], sds[j]
-            low, high = limits[j]
-
-            if s > 0:
-                # Gaussian mass check
-                coverage = norm.cdf(high, loc=m, scale=s) - norm.cdf(low, loc=m, scale=s)
-            else:
-                coverage = 1.0 if low <= m <= high else 0.0
-
-            if coverage < mass_threshold:
-                target_low = m - k_sd * s
-                target_high = m + k_sd * s
-                new_low = min(low, target_low)
-                new_high = max(high, target_high)
-                refined_limits.append((new_low, new_high))
-                needs_refinement = True
-            else:
-                refined_limits.append((low, high))
-
-        if not needs_refinement:
-            break
-
-        limits = refined_limits
-        if i == max_iter - 1:
-            logging.warning(
-                "EffTox integration limits did not cover mass threshold after %d iterations.",
-                max_iter,
-            )
-
-    return pds
-
-
 def efftox_get_posterior_probs(
-    cases, priors, scaled_doses, tox_cutoff, eff_cutoff, n=10**5, epsilon=1e-6, **kwargs
+    cases, priors, scaled_doses, tox_cutoff, eff_cutoff, n=10**5, epsilon=1e-6
 ):
     """Calculates posterior probabilities for an EffTox trial.
 
@@ -319,7 +166,6 @@ def efftox_get_posterior_probs(
             Defaults to 10**5.
         epsilon (float, optional): A small number to define the integration
             range. Defaults to 1e-6.
-        **kwargs: Additional arguments for limit refinement.
 
     Returns:
         tuple[list, ProbabilityDensitySample]: A tuple containing a list of
@@ -327,7 +173,6 @@ def efftox_get_posterior_probs(
             `ProbabilityDensitySample` object.
     """
     from clintrials.validation import validate_expected_length
-
     validate_expected_length(priors, 6, "priors")
 
     # Convert dose-levels given to dose amounts given
@@ -338,15 +183,21 @@ def efftox_get_posterior_probs(
     else:
         _cases = []
 
-    limit_args = {
-        k: v
-        for k, v in kwargs.items()
-        if k in ["k_sd", "max_iter", "mass_threshold"]
-    }
-    pds = _get_posterior_sample(
-        _cases, priors, n=n, epsilon=epsilon, **limit_args
+    limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
+    samp = np.column_stack(
+        [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
     )
-    samp = pds._samp
+
+    lik_integrand = (
+        lambda x: _L_n(_cases, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4], x[:, 5])
+        * priors[0].pdf(x[:, 0])
+        * priors[1].pdf(x[:, 1])
+        * priors[2].pdf(x[:, 2])
+        * priors[3].pdf(x[:, 3])
+        * priors[4].pdf(x[:, 4])
+        * priors[5].pdf(x[:, 5])
+    )
+    pds = ProbabilityDensitySample(samp, lik_integrand)
 
     probs = []
     for x in scaled_doses:
@@ -364,9 +215,7 @@ def efftox_get_posterior_probs(
     return probs, pds
 
 
-def efftox_get_posterior_params(
-    cases, priors, scaled_doses, n=10**5, epsilon=1e-6, **kwargs
-):
+def efftox_get_posterior_params(cases, priors, scaled_doses, n=10**5, epsilon=1e-6):
     """Calculates posterior parameter estimates for an EffTox trial.
 
     This function uses Monte Carlo integration to evaluate the posterior
@@ -380,7 +229,6 @@ def efftox_get_posterior_params(
             Defaults to 10**5.
         epsilon (float, optional): A small number to define the integration
             range. Defaults to 1e-6.
-        **kwargs: Additional arguments for limit refinement.
 
     Returns:
         tuple[list, ProbabilityDensitySample]: A tuple containing a list of
@@ -388,26 +236,31 @@ def efftox_get_posterior_params(
             object.
     """
     from clintrials.validation import validate_expected_length
-
     validate_expected_length(priors, 6, "priors")
 
     # Convert dose-levels given to dose amounts given
     if len(cases) > 0:
         dose_levels, tox_events, eff_events = zip(*cases)
         scaled_doses_given = [scaled_doses[x - 1] for x in dose_levels]
-        _cases = list(zip(scaled_doses_given, tox_events, eff_events))
+        _cases = zip(scaled_doses_given, tox_events, eff_events)
     else:
         _cases = []
 
-    limit_args = {
-        k: v
-        for k, v in kwargs.items()
-        if k in ["k_sd", "max_iter", "mass_threshold"]
-    }
-    pds = _get_posterior_sample(
-        _cases, priors, n=n, epsilon=epsilon, **limit_args
+    limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
+    samp = np.column_stack(
+        [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
     )
-    samp = pds._samp
+
+    lik_integrand = (
+        lambda x: _L_n(_cases, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4], x[:, 5])
+        * priors[0].pdf(x[:, 0])
+        * priors[1].pdf(x[:, 1])
+        * priors[2].pdf(x[:, 2])
+        * priors[3].pdf(x[:, 3])
+        * priors[4].pdf(x[:, 4])
+        * priors[5].pdf(x[:, 5])
+    )
+    pds = ProbabilityDensitySample(samp, lik_integrand)
 
     params = []
     params.append(
@@ -483,25 +336,30 @@ class LpNormCurve:
         """Calculates the utility of a given efficacy-toxicity pair.
 
         Args:
-            prob_eff (float): The probability of efficacy.
-            prob_tox (float): The probability of toxicity.
+            prob_eff (float | np.ndarray): The probability of efficacy.
+            prob_tox (float | np.ndarray): The probability of toxicity.
 
         Returns:
-            float: The utility value.
+            float | np.ndarray: The utility value.
         """
-        x = prob_eff
-        y = prob_tox
-        if np.all(0 <= x) and np.all(x <= 1) and np.all(0 <= y) and np.all(y <= 1):
-            a = (1 - x) / (1 - self.minimum_tolerable_efficacy)
-            b = y / self.maximum_tolerable_toxicity
-            r_to_the_p = a**self.p + b**self.p
-            return 1 - r_to_the_p ** (1.0 / self.p)
-        else:
-            if np.isscalar(x) and np.isscalar(y):
-                return np.nan
-            response = np.zeros_like(x, dtype=float)
-            response[:] = np.nan
-            return response
+        x = np.asarray(prob_eff)
+        y = np.asarray(prob_tox)
+
+        valid = (x >= 0) & (x <= 1) & (y >= 0) & (y <= 1)
+
+        res = np.empty(x.shape)
+        res.fill(np.nan)
+
+        if np.any(valid):
+            x_v = x[valid]
+            y_v = y[valid]
+            a = (1 - x_v) / (1 - self.minimum_tolerable_efficacy)
+            b = y_v / self.maximum_tolerable_toxicity
+            res[valid] = 1 - (a**self.p + b**self.p) ** (1.0 / self.p)
+
+        if np.isscalar(prob_eff) and np.isscalar(prob_tox):
+            return float(res)
+        return res
 
     def solve(
         self, delta, *, prob_eff=None, prob_tox=None, bounds=(0, 1), tol=1e-6, maxiter=100
@@ -514,10 +372,10 @@ class LpNormCurve:
             prob_tox (float, optional): The probability of toxicity.
             bounds (tuple, optional): The bounds for the solved probability.
                 Defaults to (0, 1).
-            tol (float, optional): The tolerance for the solution. Defaults
-                to 1e-6.
+            tol (float, optional): The tolerance for the solution. Currently
+                unused as an analytical solution is used.
             maxiter (int, optional): The maximum number of iterations.
-                Defaults to 100.
+                Currently unused as an analytical solution is used.
 
         Returns:
             float: The solved probability.
@@ -677,12 +535,15 @@ class InverseQuadraticCurve:
 
             # Try to find a root for the intersection. We use fsolve with x as a
             # starting point because the root-finding interval can be tricky.
-            x_00 = fsolve(intersection_expression, x, args=(gradient, self.f))[0]
+            x_00, info, ier, msg = fsolve(
+                intersection_expression, x, args=(gradient, self.f), full_output=True
+            )
 
-            # Ensure x_00 is within reasonable bounds
-            if x_00 <= 0 or x_00 >= 1:
+            # Ensure x_00 is within reasonable bounds and fsolve converged
+            if ier != 1 or x_00[0] <= 0 or x_00[0] >= 1:
                 return np.nan
 
+            x_00 = x_00[0]
             y_00 = self.f(x_00)
             d1 = np.sqrt((x_00 - 1) ** 2 + y_00**2)
             d2 = np.sqrt((x - 1) ** 2 + y**2)
@@ -702,10 +563,10 @@ class InverseQuadraticCurve:
             prob_tox (float, optional): The probability of toxicity.
             bounds (tuple, optional): The bounds for the solved probability.
                 Defaults to (0, 1).
-            tol (float, optional): The tolerance for the solution. Defaults
-                to 1e-6.
+            tol (float, optional): The tolerance for the solution. Currently
+                unused as an analytical solution is used.
             maxiter (int, optional): The maximum number of iterations.
-                Defaults to 100.
+                Currently unused as an analytical solution is used.
 
         Returns:
             float: The solved probability.
@@ -744,8 +605,8 @@ class InverseQuadraticCurve:
             B = -self.b
             C = -self.c
 
-            if A == 0:
-                if B == 0:
+            if np.isclose(A, 0):
+                if np.isclose(B, 0):
                     raise ValueError(
                         f"Utility delta {delta} is infeasible for prob_tox={prob_tox}"
                     )
@@ -807,37 +668,25 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     def __init__(
         self,
         real_doses,
-        theta_priors=None,
-        tox_cutoff=None,
-        eff_cutoff=None,
-        tox_certainty=None,
-        eff_certainty=None,
-        metric=None,
-        max_size=None,
+        theta_priors,
+        tox_cutoff,
+        eff_cutoff,
+        tox_certainty,
+        eff_certainty,
+        metric,
+        max_size,
         first_dose=1,
-        prior_tox_probs=None,
-        prior_eff_probs=None,
         avoid_skipping_untried_escalation=True,
         avoid_skipping_untried_deescalation=True,
         num_integral_steps=10**5,
         epsilon=1e-6,
-        k_sd=6.0,
-        max_iter=3,
-        mass_threshold=0.999999,
     ):
         """Initializes an EffTox trial object.
 
         Args:
             real_doses (list[float]): A list of the actual dose amounts.
-            theta_priors (list, optional): A list of 6 prior distributions
-                for the model parameters. If `None`, principled priors are
-                elicited from `prior_tox_probs` and `prior_eff_probs`.
-            prior_tox_probs (list[float], optional): Prior toxicity
-                probabilities at each dose level. Used for elicitation if
-                `theta_priors` is `None`.
-            prior_eff_probs (list[float], optional): Prior efficacy
-                probabilities at each dose level. Used for elicitation if
-                `theta_priors` is `None`.
+            theta_priors (list): A list of 6 prior distributions for the
+                model parameters.
             tox_cutoff (float): The maximum acceptable probability of
                 toxicity.
             eff_cutoff (float): The minimum acceptable probability of
@@ -861,34 +710,19 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 Monte Carlo integration. Defaults to 10**5.
             epsilon (float, optional): A small number to define the
                 integration range. Defaults to 1e-6.
-            k_sd (float, optional): Number of standard deviations for limit
-                coverage. Defaults to 6.0.
-            max_iter (int, optional): Maximum number of refinement iterations.
-                Defaults to 3.
-            mass_threshold (float, optional): Threshold for Gaussian-approximate
-                mass coverage within boundaries. Defaults to 0.999999.
 
         Raises:
-            ValueError: If required parameters are missing or if priors are
-                invalid.
+            ValueError: If `theta_priors` does not have 6 items.
         """
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(real_doses), max_size
         )
 
-        if theta_priors is None:
-            if prior_tox_probs is None or prior_eff_probs is None:
-                raise ValueError(
-                    "Either theta_priors or both prior_tox_probs and prior_eff_probs must be provided."
-                )
-            theta_priors = efftox_priors_from_skeleton(
-                real_doses, prior_tox_probs, prior_eff_probs
-            )
-
-        validate_efftox_priors(theta_priors, scale_doses(real_doses))
+        from clintrials.validation import validate_expected_length
+        validate_expected_length(theta_priors, 6, "theta_priors")
 
         self.real_doses = real_doses
-        self._scaled_doses = scale_doses(real_doses)
+        self._scaled_doses = np.log(real_doses) - np.mean(np.log(real_doses))
         self.priors = theta_priors
         self.tox_cutoff = tox_cutoff
         self.eff_cutoff = eff_cutoff
@@ -899,24 +733,14 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.avoid_skipping_untried_deescalation = avoid_skipping_untried_deescalation
         self.num_integral_steps = num_integral_steps
         self.epsilon = epsilon
-        self.k_sd = k_sd
-        self.max_iter = max_iter
-        self.mass_threshold = mass_threshold
 
         self.reset()
 
-    def _update_integrals(self, n=None, **kwargs):
+    def _update_integrals(self, n=None):
         """Recalculates integrals to update probabilities and utilities."""
         if n is None:
             n = self.num_integral_steps
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
-
-        limit_args = {
-            "k_sd": kwargs.get("k_sd", self.k_sd),
-            "max_iter": kwargs.get("max_iter", self.max_iter),
-            "mass_threshold": kwargs.get("mass_threshold", self.mass_threshold),
-        }
-
         post_probs, _pds = efftox_get_posterior_probs(
             cases,
             self.priors,
@@ -925,7 +749,6 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             self.eff_cutoff,
             n,
             self.epsilon,
-            **limit_args,
         )
         prob_tox, prob_eff, prob_acc_tox, prob_acc_eff = zip(*post_probs)
         admissable = np.array(
@@ -945,10 +768,10 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.utility = utility
         self.pds = _pds
 
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self, n=None, **kwargs):
+    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self, n=None):
         if n is None:
             n = self.num_integral_steps
-        self._update_integrals(n, **kwargs)
+        self._update_integrals(n)
         if self.treated_at_dose(self.first_dose()) > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
@@ -1014,13 +837,12 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         df["Utility"] = self.utility
         return df
 
-    def posterior_params(self, n=None, **kwargs):
+    def posterior_params(self, n=None):
         """Gets the posterior parameter estimates.
 
         Args:
             n (int, optional): The number of points for Monte Carlo
                 integration. Defaults to `None`.
-            **kwargs: Additional arguments for limit refinement.
 
         Returns:
             list: A list of posterior parameter estimates.
@@ -1028,15 +850,8 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         if n is None:
             n = self.num_integral_steps
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
-
-        limit_args = {
-            "k_sd": kwargs.get("k_sd", self.k_sd),
-            "max_iter": kwargs.get("max_iter", self.max_iter),
-            "mass_threshold": kwargs.get("mass_threshold", self.mass_threshold),
-        }
-
         post_params, pds = efftox_get_posterior_params(
-            cases, self.priors, self._scaled_doses, n, self.epsilon, **limit_args
+            cases, self.priors, self._scaled_doses, n, self.epsilon
         )
         return post_params
 
@@ -1401,6 +1216,4 @@ __all__ = [
     "InverseQuadraticCurve",
     "efftox_dtp_detail",
     "solve_metrizable_efftox_scenario",
-    "efftox_priors_from_skeleton",
-    "validate_efftox_priors",
 ]
