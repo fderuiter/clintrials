@@ -369,14 +369,18 @@ class TestLpNormCurve:
         assert np.isnan(lp_norm_curve(0.5, 1))
 
     def test_solve(self, lp_norm_curve):
-        with pytest.raises(Exception):
-            lp_norm_curve.solve()
-        with pytest.raises(Exception):
-            lp_norm_curve.solve(prob_eff=0.5, prob_tox=0.4)
-        assert np.isclose(lp_norm_curve.solve(prob_eff=0.5), 0.4)
-        assert np.isclose(lp_norm_curve.solve(prob_tox=0.4), 0.5)
-        prob_eff = lp_norm_curve.solve(prob_tox=0.2)
+        with pytest.raises(ValueError):
+            lp_norm_curve.solve(0)
+        with pytest.raises(ValueError):
+            lp_norm_curve.solve(0, prob_eff=0.5, prob_tox=0.4)
+        assert np.isclose(lp_norm_curve.solve(0, prob_eff=0.5), 0.4)
+        assert np.isclose(lp_norm_curve.solve(0, prob_tox=0.4), 0.5)
+        prob_eff = lp_norm_curve.solve(0, prob_tox=0.2)
         assert np.isclose(lp_norm_curve(prob_eff, 0.2), 0)
+
+        # Test infeasible delta
+        with pytest.raises(ValueError, match="infeasible"):
+            lp_norm_curve.solve(1.5, prob_eff=0.5)
 
     def test_get_tox(self, lp_norm_curve):
         assert np.isclose(lp_norm_curve.get_tox(eff=0.5, util=0), 0.4)
@@ -410,10 +414,12 @@ class TestLpNormCurve:
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(prob_eff=st.floats(0.01, 0.99))
     def test_solve_consistency(self, lp_norm_curve, prob_eff):
-        prob_tox = lp_norm_curve.solve(prob_eff=prob_eff)
-        if np.iscomplex(prob_tox).any():
-            return
-        assert np.isclose(lp_norm_curve(prob_eff, prob_tox), 0)
+        try:
+            prob_tox = lp_norm_curve.solve(0, prob_eff=prob_eff)
+            assert np.isclose(lp_norm_curve(prob_eff, prob_tox), 0, atol=1e-5)
+        except ValueError:
+            # Infeasible delta is expected for some prob_eff
+            pass
 
     @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
     @given(eff=st.floats(0.01, 0.99), util=st.floats(-0.5, 0.5))
@@ -496,9 +502,21 @@ class TestInverseQuadraticCurve:
         points = [(0.2, 0.1), (0.5, 0.3), (0.8, 0.6)]
         curve = InverseQuadraticCurve(points)
         # The fit is not perfect, so we use a tolerance
-        assert np.isclose(curve.solve(prob_eff=0.5), 0.3, atol=1e-1)
-        with pytest.raises(NotImplementedError):
-            curve.solve(prob_eff=0.5, delta=0.1)
+        assert np.isclose(curve.solve(0, prob_eff=0.5), 0.3, atol=1e-1)
+
+        # Test delta != 0
+        prob_tox = curve.solve(0.1, prob_eff=0.5)
+        assert np.isclose(curve(0.5, prob_tox), 0.1, atol=1e-5)
+
+        # Test infeasible delta
+        with pytest.raises(ValueError, match="infeasible"):
+            curve.solve(2.0, prob_eff=0.5)
+
+        # Test validation
+        with pytest.raises(ValueError):
+            curve.solve(0)
+        with pytest.raises(ValueError):
+            curve.solve(0, prob_eff=0.5, prob_tox=0.3)
 
 
 class TestEffToxAdmissibleSet:
