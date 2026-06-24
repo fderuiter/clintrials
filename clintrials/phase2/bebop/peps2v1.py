@@ -136,39 +136,98 @@ def l_n(cases, alpha0, beta0, beta1, beta2, psi):
 
 
 def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilon=1e-5):
-    """Gets the posterior probabilities for the PePS2 trial using the BeBOP design.
+    """
+    Calculate posterior probabilities for the PePS2 trial using the BeBOP design.
 
-    This function calculates the posterior probabilities of efficacy and toxicity for each of the
-    four subgroups in the PePS2 trial, which are defined by two binary covariates:
-    pre-treatment status and PD-L1 expression.
+    The BeBOP (Bayesian design with Bivariate Outcomes and Predictive variables)
+    design incorporates predictive data to find sub-populations where a treatment
+    is effective and tolerable. In the PePS2 trial context, these populations
+    are defined by pre-treatment status and PD-L1 expression.
 
-    The calculation is done using Monte Carlo integration.
+    The model uses logistic link functions for the marginal probabilities of
+    toxicity and efficacy. For toxicity, an intercept-only model is used:
 
-    Args:
-        cases (list): A list of 4-tuples, where each tuple represents a patient and contains:
-            (disease_status, mutation_status, efficacy, toxicity).
-            - disease_status (int): 1 if patient has been pre-treated, 0 otherwise.
-            - mutation_status (int): 1 if patient is PD-L1 positive, 0 otherwise.
-            - efficacy (int): 1 for an efficacious outcome, 0 for alternative.
-            - toxicity (int): 1 for a toxic event, 0 for tolerance event.
-        priors (list): A list of prior distributions for the model parameters:
-            - alpha_0 (scipy.stats.rv_continuous): Prior for the toxicity intercept.
-            - beta_0 (scipy.stats.rv_continuous): Prior for the efficacy intercept.
-            - beta_1 (scipy.stats.rv_continuous): Prior for the efficacy effect of pre-treatment.
-            - beta_2 (scipy.stats.rv_continuous): Prior for the efficacy effect of PD-L1 status.
-            - psi (scipy.stats.rv_continuous): Prior for the correlation parameter.
-        tox_cutoffs (list or float): The desired maximum toxicity cutoffs for the four groups.
-        eff_cutoffs (list or float): The desired minimum efficacy cutoffs for the four groups.
-        n (int, optional): Number of random points to use in Monte Carlo integration. Defaults to 10**5.
-        epsilon (float, optional): A small number to define the integration range via the ppf of the priors. Defaults to 1e-5.
+    .. math::
+        \\text{logit}(\\pi_T) = \\alpha_0
 
-    Returns:
-        tuple: A tuple containing:
-            - A nested list of posterior probabilities: [Prob(Toxicity), Prob(Efficacy),
-              Prob(Toxicity < cutoff), Prob(Efficacy > cutoff)], for each patient cohort.
-              The cohorts are ordered: (Not pre-treated, PD-L1 neg), (Not pre-treated, PD-L1 pos),
-              (Pre-treated, PD-L1 neg), (Pre-treated, PD-L1 pos).
-            - The ProbabilityDensitySample object used for the calculations.
+    For efficacy, the model includes both pre-treatment status and PD-L1
+    expression as predictors:
+
+    .. math::
+        \\text{logit}(\\pi_E) = \\beta_0 + \\beta_1 \\cdot \\text{PreTreated} +
+        \\beta_2 \\cdot \\text{PD-L1}
+
+    The joint distribution of toxicity (T) and efficacy (E) is modeled using
+    a Farlie-Gumbel-Morgenstern (FGM) copula to account for potential
+    association between the outcomes:
+
+    .. math::
+        P(T=a, E=b) = \\pi_T^a(1-\\pi_T)^{1-a} \\pi_E^b(1-\\pi_E)^{1-b} +
+        (-1)^{a+b} \\pi_T(1-\\pi_T) \\pi_E(1-\\pi_E) \\frac{e^\\psi-1}{e^\\psi+1}
+
+    where :math:`a, b \\in \\{0, 1\\}` and :math:`\\psi` is the association
+    parameter.
+
+    Parameters
+    ----------
+    cases : list of tuple
+        A list of 4-tuples, where each tuple represents a patient:
+        ``(disease_status, mutation_status, efficacy, toxicity)``.
+
+        * disease_status (int): 1 if pre-treated, 0 otherwise.
+        * mutation_status (int): 1 if PD-L1 positive, 0 otherwise.
+        * efficacy (int): 1 for efficacy, 0 otherwise.
+        * toxicity (int): 1 for toxicity, 0 otherwise.
+    priors : list of scipy.stats.rv_continuous
+        A list of five prior distributions for the parameters:
+        ``[alpha_0, beta_0, beta_1, beta_2, psi]``.
+    tox_cutoffs : list of float or float
+        The maximum acceptable toxicity probability for each of the four
+        subgroups. If a single float is provided, it is used for all groups.
+        Subgroups are ordered: (0,0), (0,1), (1,0), (1,1).
+    eff_cutoffs : list of float or float
+        The minimum acceptable efficacy probability for each of the four
+        subgroups. If a single float is provided, it is used for all groups.
+    n : int, optional
+        Number of samples for Monte Carlo integration. Default is 10^5.
+    epsilon : float, optional
+        Quantile used to define the integration range via the PPF of the
+        priors. Default is 1e-5.
+
+    Returns
+    -------
+    probs : list of tuple
+        A list of 4-tuples for each of the four cohorts:
+        ``(E[Prob(Tox)], E[Prob(Eff)], Prob(Prob(Tox) < cutoff),
+        Prob(Prob(Eff) > cutoff))``.
+        The cohorts are:
+
+        1. Not pre-treated, PD-L1 neg
+        2. Not pre-treated, PD-L1 pos
+        3. Pre-treated, PD-L1 neg
+        4. Pre-treated, PD-L1 pos
+    pds : ProbabilityDensitySample
+        The object containing the samples and calculated weights for the
+        posterior distribution.
+
+    References
+    ----------
+    .. [1] Brock, K., et al. (2017). "Implementing the BeBOP design in the PePS2
+       trial." *To be published.*
+
+    Examples
+    --------
+    >>> from scipy.stats import norm
+    >>> from clintrials.phase2.bebop.peps2v1 import get_posterior_probs
+    >>> priors = [norm(0, 2), norm(0, 2), norm(0, 2), norm(0, 2), norm(0, 2)]
+    >>> cases = [(0, 0, 1, 0), (0, 1, 0, 0), (1, 0, 1, 1), (1, 1, 1, 0)]
+    >>> tox_cutoffs = 0.3
+    >>> eff_cutoffs = 0.1
+    >>> probs, pds = get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=1000)
+    >>> len(probs)
+    4
+    >>> len(probs[0])
+    4
     """
     if not isinstance(tox_cutoffs, list):
         tox_cutoffs = [tox_cutoffs] * 4
@@ -838,7 +897,6 @@ def splice_sims(in_files_pattern, out_file=None):
         return sims
 
 
-from itertools import product
 
 
 def tell_me_about_results(
