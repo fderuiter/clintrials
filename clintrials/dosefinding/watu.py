@@ -58,6 +58,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         mc_sample_size=10**5,
         mc_samples_stage1=None,
         mc_samples_stage2=None,
+        must_try_lowest_dose=False,
     ):
         """Initializes a WATU trial object.
 
@@ -115,6 +116,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             mc_samples_stage2 (int, optional): The number of samples to use in
                 Monte Carlo estimation methods in stage 2. If `None`, defaults to
                 `mc_sample_size`. Will be clamped to a minimum of 1000.
+            must_try_lowest_dose (bool, optional): If `True`, the trial must
+                assign dose 1 to the first cohort, provided it is safe to do so.
+                Defaults to `False`.
 
         Raises:
             ValueError: If the dimensions of the inputs are inconsistent.
@@ -122,6 +126,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
         )
+        if must_try_lowest_dose:
+            self._next_dose = 1
 
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape
@@ -174,6 +180,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             self.mc_samples_stage2 = self.mc_sample_size
         else:
             self.mc_samples_stage2 = max(mc_samples_stage2, 1000)
+        self.must_try_lowest_dose = must_try_lowest_dose
 
         self.most_likely_model_index = np.random.choice(
             np.array(range(self.K))[
@@ -289,9 +296,11 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
     def _EfficacyToxicityDoseFindingTrial__reset(self):
         self.most_likely_model_index = sample(
-            np.array(range(self.K))[
-                self.model_prior_weights == max(self.model_prior_weights)
-            ],
+            list(
+                np.array(range(self.K))[
+                    self.model_prior_weights == max(self.model_prior_weights)
+                ]
+            ),
             1,
         )[0]
         self.w = np.zeros(self.K)
@@ -300,6 +309,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.theta_hats = np.zeros(self.K)
         self.theta_vars = np.zeros(self.K)
         self.crm.reset()
+        if self.must_try_lowest_dose:
+            self._next_dose = 1
 
     def has_more(self):
         """Checks if the trial is ongoing.
@@ -518,8 +529,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         prob_unacc_tox = 1 - self.prob_acc_tox(self.tox_limit, **kwargs)
         prob_unacc_eff = 1 - self.prob_acc_eff(self.eff_limit, **kwargs)
         admissable = [
-            (prob_tox < (1 - self.tox_certainty))
-            and (prob_eff < (1 - self.eff_certainty))
+            (prob_tox <= (1 - self.tox_certainty))
+            and (prob_eff <= (1 - self.eff_certainty))
             for (prob_eff, prob_tox) in zip(prob_unacc_eff, prob_unacc_tox)
         ]
         admissable_set = [i + 1 for i, x in enumerate(admissable) if x]
@@ -552,7 +563,10 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                 self._next_dose = -1
                 self._status = -1
         else:
-            self._next_dose = self.first_dose()
+            if self.must_try_lowest_dose and 1 in admissable_set:
+                self._next_dose = 1
+            else:
+                self._next_dose = self.first_dose()
             self._status = -10
 
         return self._next_dose
@@ -573,8 +587,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         prob_unacc_tox = 1 - self.prob_acc_tox(self.tox_limit, **kwargs)
         prob_unacc_eff = 1 - self.prob_acc_eff(self.eff_limit, **kwargs)
         admissable = [
-            (prob_tox < (1 - self.tox_certainty))
-            and (prob_eff < (1 - self.eff_certainty))
+            (prob_tox <= (1 - self.tox_certainty))
+            and (prob_eff <= (1 - self.eff_certainty))
             for (prob_eff, prob_tox) in zip(prob_unacc_eff, prob_unacc_tox)
         ]
         admissable_set = [i + 1 for i, x in enumerate(admissable) if x]
@@ -608,7 +622,10 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                 self._next_dose = -1
                 self._status = -1
         else:
-            self._next_dose = self.first_dose()
+            if self.must_try_lowest_dose and 1 in admissable_set:
+                self._next_dose = 1
+            else:
+                self._next_dose = self.first_dose()
             self._status = -10
 
         return self._next_dose
