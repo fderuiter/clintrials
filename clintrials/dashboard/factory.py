@@ -35,7 +35,7 @@ def _build_registry():
 
 REGISTRY = _build_registry()
 
-def create_widget(st, widget_type, var_name, *args, **kwargs):
+def create_widget(st_module, widget_type, var_name, *args, **kwargs):
     """
     Factory function to create a Streamlit widget with an automatically
     applied help text based on the variable name.
@@ -44,12 +44,12 @@ def create_widget(st, widget_type, var_name, *args, **kwargs):
         kwargs['help'] = REGISTRY[var_name]
         
     if widget_type == "selectbox":
-        return st.sidebar.selectbox(*args, **kwargs)
+        return st_module.sidebar.selectbox(*args, **kwargs)
     elif widget_type == "file_uploader":
-        return st.sidebar.file_uploader(*args, **kwargs)
+        return st_module.sidebar.file_uploader(*args, **kwargs)
     elif widget_type == "number_input":
-        return st.sidebar.number_input(*args, **kwargs)
+        return st_module.sidebar.number_input(*args, **kwargs)
     elif widget_type == "button":
-        return st.sidebar.button(*args, **kwargs)
+        return st_module.sidebar.button(*args, **kwargs)
     else:
         raise ValueError(f"Unsupported widget type: {widget_type}")
