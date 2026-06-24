@@ -63,6 +63,14 @@ def render(sims):
 
             fig = viz.plot_crm_simulation_recommendation(summary_df)
             st.plotly_chart(fig)
+            with st.expander("Data Summary"):
+                st.markdown(
+                    getattr(
+                        getattr(fig, "layout", None),
+                        "meta",
+                        "No data summary available.",
+                    )
+                )
 
         else:
             st.warning(

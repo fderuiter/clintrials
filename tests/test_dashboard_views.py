@@ -38,6 +38,8 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         warning=MagicMock(),
         error=MagicMock(),
         plotly_chart=MagicMock(),
+        expander=MagicMock(),
+        markdown=MagicMock(),
         sidebar=sidebar,
         fragment=lambda func: func,
     )
@@ -123,11 +125,11 @@ def test_crm_view_render_success(monkeypatch):
     """render() should summarise simulations and plot results when data is valid."""
     import sys
     import importlib
-    
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(crm_view)
-    
+
     monkeypatch.setattr(crm_view, "st", st_mock)
     monkeypatch.setattr(crm_view, "ParameterSpace", lambda cfg: "ps")
 
@@ -160,11 +162,11 @@ def test_crm_view_warns_without_recommended(monkeypatch):
     """If the summary lacks recommendation information a warning is shown."""
     import sys
     import importlib
-    
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(crm_view)
-    
+
     monkeypatch.setattr(crm_view, "st", st_mock)
     monkeypatch.setattr(crm_view, "ParameterSpace", lambda cfg: "ps")
 
@@ -179,11 +181,11 @@ def test_efftox_view_render_success(monkeypatch):
     """EffTox view should plot recommendation and acceptability probabilities."""
     import sys
     import importlib
-    
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(efftox_view)
-    
+
     monkeypatch.setattr(efftox_view, "st", st_mock)
     monkeypatch.setattr(efftox_view, "ParameterSpace", lambda cfg: "ps")
 
@@ -222,11 +224,11 @@ def test_efftox_view_warns_when_empty(monkeypatch):
     """If the summary dataframe is empty a warning is shown."""
     import sys
     import importlib
-    
+
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(efftox_view)
-    
+
     monkeypatch.setattr(efftox_view, "st", st_mock)
     monkeypatch.setattr(efftox_view, "ParameterSpace", lambda cfg: "ps")
     monkeypatch.setattr(

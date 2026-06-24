@@ -18,6 +18,8 @@ def fake_streamlit(monkeypatch):
     st.warning = MagicMock()
     st.error = MagicMock()
     st.plotly_chart = MagicMock()
+    st.expander = MagicMock()
+    st.markdown = MagicMock()
     sidebar = types.SimpleNamespace()
     sidebar.header = MagicMock()
     sidebar.write = MagicMock()

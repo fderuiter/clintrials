@@ -3,6 +3,7 @@ from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
 import pytest
 
+
 def test_watu_stage_aware_mc_config(mocker):
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
     tox_cutoff = 0.33
@@ -12,15 +13,28 @@ def test_watu_stage_aware_mc_config(mocker):
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
 
     # Initialise trial with custom stage defaults
-    trial = WATU(skeletons, tox_prior, tox_target, tox_cutoff, eff_cutoff, metric, 1, 64,
-                  stage_one_size=5, mc_samples_stage1=2000, mc_samples_stage2=4000)
+    trial = WATU(
+        skeletons,
+        tox_prior,
+        tox_target,
+        tox_cutoff,
+        eff_cutoff,
+        metric,
+        1,
+        64,
+        stage_one_size=5,
+        mc_samples_stage1=2000,
+        mc_samples_stage2=4000,
+    )
 
     # Mock the CRM and Efficacy resolution to see what 'n' is passed
-    mock_crm_exceeds = mocker.patch.object(trial.crm, 'prob_tox_exceeds', return_value=np.array([0.1]*6))
+    mock_crm_exceeds = mocker.patch.object(
+        trial.crm, "prob_tox_exceeds", return_value=np.array([0.1] * 6)
+    )
 
     # We must ensure model_theta_var and model_theta_hat are properly mocked to avoid analytic failure
-    mocker.patch.object(trial, 'model_theta_var', return_value=1.0)
-    mocker.patch.object(trial, 'model_theta_hat', return_value=0.0)
+    mocker.patch.object(trial, "model_theta_var", return_value=1.0)
+    mocker.patch.object(trial, "model_theta_hat", return_value=0.0)
     trial.estimate_var = True
 
     # 1. Stage 1 logic (trial.size() < 5)

@@ -45,6 +45,7 @@ def spending_function_obrien_fleming(t: float, alpha: float) -> float:
 
 from clintrials.core.protocol import Protocol
 
+
 class GroupSequentialDesign(Protocol):
     """A class to represent a group sequential design.
 
@@ -77,7 +78,11 @@ class GroupSequentialDesign(Protocol):
                 positive integer, or `timing` is not a strictly increasing
                 sequence of length `k` ending in 1.0.
         """
-        from clintrials.validation import validate_probability, validate_positive_integer
+        from clintrials.validation import (
+            validate_probability,
+            validate_positive_integer,
+        )
+
         validate_probability(alpha, "alpha", exclusive=True)
         validate_positive_integer(k, "k")
 
@@ -87,6 +92,7 @@ class GroupSequentialDesign(Protocol):
         self.timing = timing if timing is not None else np.linspace(1 / k, 1, k)
 
         from clintrials.validation import validate_expected_length
+
         validate_expected_length(self.timing, k, "timing")
         if any(self.timing[i] >= self.timing[i + 1] for i in range(k - 1)):
             raise ValueError("Timing must be strictly increasing.")
@@ -110,12 +116,12 @@ class GroupSequentialDesign(Protocol):
             return
         self._stage += 1
         self._z_scores.append(z_score)
-        
+
         if info is not None:
             self._information.append(info)
         else:
             self._information.append(self.timing[self._stage - 1])
-            
+
         if z_score >= self.efficacy_boundaries[self._stage - 1]:
             self._stopped = True
             self._rejected = True
@@ -130,7 +136,7 @@ class GroupSequentialDesign(Protocol):
         """Generate a report of the trial state and results."""
         from collections import OrderedDict
         from clintrials.utils import atomic_to_json, iterable_to_json
-        
+
         report = OrderedDict()
         report["Stage"] = atomic_to_json(self._stage)
         report["Stopped"] = atomic_to_json(self._stopped)
@@ -216,6 +222,7 @@ class GroupSequentialDesign(Protocol):
             ValueError: If `n_sims` is not a positive integer.
         """
         from clintrials.validation import validate_positive_integer
+
         validate_positive_integer(n_sims, "Number of simulations")
 
         means = theta * np.array(self.timing)
