@@ -718,6 +718,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 
     @classmethod
     def get_summary_functions(cls):
+        """Get summary functions for the EffTox protocol."""
         import pandas as pd
         return {
             "N": lambda s, p: len(s),
@@ -804,14 +805,22 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 
         # Build schema kwargs
         schema_kwargs = {"real_doses": real_doses}
-        if prior_tox_probs is not None: schema_kwargs["prior_tox_probs"] = prior_tox_probs
-        if prior_eff_probs is not None: schema_kwargs["prior_eff_probs"] = prior_eff_probs
-        if tox_cutoff is not None: schema_kwargs["tox_cutoff"] = tox_cutoff
-        if eff_cutoff is not None: schema_kwargs["eff_cutoff"] = eff_cutoff
-        if tox_certainty is not None: schema_kwargs["tox_certainty"] = tox_certainty
-        if eff_certainty is not None: schema_kwargs["eff_certainty"] = eff_certainty
-        if max_size is not None: schema_kwargs["max_size"] = max_size
-        if first_dose is not None: schema_kwargs["first_dose"] = first_dose
+        if prior_tox_probs is not None:
+            schema_kwargs["prior_tox_probs"] = prior_tox_probs
+        if prior_eff_probs is not None:
+            schema_kwargs["prior_eff_probs"] = prior_eff_probs
+        if tox_cutoff is not None:
+            schema_kwargs["tox_cutoff"] = tox_cutoff
+        if eff_cutoff is not None:
+            schema_kwargs["eff_cutoff"] = eff_cutoff
+        if tox_certainty is not None:
+            schema_kwargs["tox_certainty"] = tox_certainty
+        if eff_certainty is not None:
+            schema_kwargs["eff_certainty"] = eff_certainty
+        if max_size is not None:
+            schema_kwargs["max_size"] = max_size
+        if first_dose is not None:
+            schema_kwargs["first_dose"] = first_dose
 
         config = EffToxSchema(**schema_kwargs)
         first_dose = config.first_dose

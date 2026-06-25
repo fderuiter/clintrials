@@ -27,11 +27,13 @@ class WinRatioTrial(Protocol):
         self._completed = False
 
     def reset(self):
+        """Reset the simulation state."""
         self.power = 0.0
         self.average_ci = (0.0, 0.0)
         self._completed = False
 
     def update(self, *args, **kwargs):
+        """Run the simulation to update the state."""
         self.power, self.average_ci = run_simulation(
             num_subjects_A=self.config.num_subjects_A,
             num_subjects_B=self.config.num_subjects_B,
@@ -47,9 +49,11 @@ class WinRatioTrial(Protocol):
         self._completed = True
 
     def has_more(self):
+        """Check if simulation is completed."""
         return not self._completed
 
     def report(self):
+        """Report the trial results."""
         return OrderedDict([
             ("power", self.power),
             ("average_ci", self.average_ci)
