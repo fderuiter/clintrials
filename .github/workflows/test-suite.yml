@@ -23,7 +23,7 @@ jobs:
         run: pipx install poetry
       - name: Install dependencies
         run: |
-          poetry install --with dev
+          poetry install --with dev -E viz
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
       - name: Run tests
