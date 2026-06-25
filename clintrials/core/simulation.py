@@ -228,7 +228,10 @@ def extract_sim_data(sims, ps, func_map, var_map=None, return_type="dataframe"):
 
     if return_type == "dataframe":
         return tuple_to_dataframe(
-            row_tuples, index_tuples, column_names=func_map.keys(), index_names=var_names
+            row_tuples,
+            index_tuples,
+            column_names=func_map.keys(),
+            index_names=var_names,
         )
     else:
         return row_tuples, index_tuples

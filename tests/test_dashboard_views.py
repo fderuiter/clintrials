@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 
 import pandas as pd
 
-from clintrials.dashboard import main
-from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
+from clintrials.visualization.dashboard import main
+from clintrials.visualization.dashboard.views import crm_view, efftox_view, winratio_view
 
 
 def _make_streamlit_mock(selectbox_return="CRM", file_data=None):

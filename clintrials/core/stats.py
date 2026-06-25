@@ -102,28 +102,6 @@ def bootstrap(x):
     return np.random.choice(x, size=len(x), replace=1)
 
 
-def density(x, n_points=100, covariance_factor=0.25):
-    """Calculates and plots an approximate density function from a sample.
-
-    Args:
-        x (list): A list of sample observations.
-        n_points (int, optional): The number of points in the density
-            function to estimate. Defaults to 100.
-        covariance_factor (float, optional): The covariance factor for the
-            Gaussian KDE. See `scipy.stats.gaussian_kde` for details.
-            Defaults to 0.25.
-    """
-    d = gaussian_kde(x)
-    xs = np.linspace(min(x), max(x), n_points)
-    d.covariance_factor = lambda: covariance_factor
-    d._compute_covariance()
-
-    import plotly.graph_objects as go
-
-    fig = go.Figure(go.Scatter(x=xs, y=d(xs), mode="lines"))
-    fig.show()
-
-
 def beta_like_normal(mu, sigma):
     """Calculates beta distribution parameters that match a normal distribution.
 

@@ -6,8 +6,12 @@ import json
 
 import streamlit as st
 
-from clintrials.dashboard.views import crm_view, efftox_view, winratio_view
-from clintrials.dashboard.factory import create_widget
+from clintrials.visualization.dashboard.views import (
+    crm_view,
+    efftox_view,
+    winratio_view,
+)
+from clintrials.visualization.dashboard.factory import create_widget
 
 
 def main():
