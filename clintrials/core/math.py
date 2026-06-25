@@ -206,7 +206,6 @@ def inverse_logit1(x, a0=3, beta=0):
     """
     beta = np.clip(beta, -10, 10)
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
-import numpy as np
 
 def association_to_correlation(psi):
     """Converts an association parameter to a correlation coefficient.
