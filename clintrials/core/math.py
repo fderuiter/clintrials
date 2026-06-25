@@ -206,3 +206,34 @@ def inverse_logit1(x, a0=3, beta=0):
     """
     beta = np.clip(beta, -10, 10)
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
+import numpy as np
+
+def association_to_correlation(psi):
+    """Converts an association parameter to a correlation coefficient.
+    
+    The formula is: (e^psi - 1) / (e^psi + 1)
+    
+    Args:
+        psi (float or numpy.ndarray): The association parameter.
+        
+    Returns:
+        float or numpy.ndarray: The correlation coefficient.
+    """
+    return (np.exp(psi) - 1) / (np.exp(psi) + 1)
+
+def fgm_joint_prob(a, b, p1, p2, psi):
+    """Calculates the joint probability of two Bernoulli variables using an FGM copula.
+    
+    Args:
+        a (int or numpy.ndarray): The outcome of the first variable (1 or 0).
+        b (int or numpy.ndarray): The outcome of the second variable (1 or 0).
+        p1 (float or numpy.ndarray): The marginal probability of the first variable.
+        p2 (float or numpy.ndarray): The marginal probability of the second variable.
+        psi (float or numpy.ndarray): The association parameter.
+        
+    Returns:
+        float or numpy.ndarray: The joint probability.
+    """
+    prob = p1**a * (1 - p1) ** (1 - a) * p2**b * (1 - p2) ** (1 - b)
+    prob += (-1) ** (a + b) * p1 * (1 - p1) * p2 * (1 - p2) * association_to_correlation(psi)
+    return prob

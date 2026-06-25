@@ -257,12 +257,14 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             use_quick_integration=self.use_quick_integration,
             estimate_var=True,
         )
-        theta_hats, theta_vars, model_probs = zip(*integrals)
+        theta_hats, theta_vars, log_marginal = zip(*integrals)
         self.theta_hats = theta_hats
         self.theta_vars = theta_vars
-        w = self.model_prior_weights * model_probs
+        log_w = np.log(self.model_prior_weights + 1e-300) + np.array(log_marginal)
+        log_w = log_w - np.max(log_w)
+        w = np.exp(log_w)
         self.w = w / sum(w)
-        most_likely_model_index = np.argmax(w)
+        most_likely_model_index = np.argmax(self.w)
         self.most_likely_model_index = most_likely_model_index
         self.post_tox_probs = np.array(self.crm.prob_tox())
         if self.plugin_mean:

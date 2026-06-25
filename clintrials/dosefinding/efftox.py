@@ -173,20 +173,10 @@ def _pi_ab(scaled_dose, tox, eff, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi):
     Returns:
         float: The likelihood of the outcome.
     """
-    a, b = eff, tox
-    p1 = _pi_E(scaled_dose, mu_E, beta1_E, beta2_E)
-    p2 = _pi_T(scaled_dose, mu_T, beta_T)
-    response = p1**a * (1 - p1) ** (1 - a) * p2**b * (1 - p2) ** (1 - b)
-    response += (
-        -(1 ** (a + b))
-        * p1
-        * (1 - p1)
-        * p2
-        * (1 - p2)
-        * (np.exp(psi) - 1)
-        / (np.exp(psi) + 1)
-    )
-    return response
+    from clintrials.core.math import fgm_joint_prob
+    p_E = _pi_E(scaled_dose, mu_E, beta1_E, beta2_E)
+    p_T = _pi_T(scaled_dose, mu_T, beta_T)
+    return fgm_joint_prob(eff, tox, p_E, p_T, psi)
 
 
 def _L_n(D, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi):
@@ -253,50 +243,15 @@ def _get_posterior_sample(
         * priors[5].pdf(x[:, 5])
     )
 
-    for i in range(max_iter):
-        samp = np.column_stack(
-            [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
-        )
-        pds = ProbabilityDensitySample(samp, lik_integrand)
-
-        # Calculate posterior means and SDs
-        means = [pds.expectation(samp[:, j]) for j in range(6)]
-        variances = [pds.variance(samp[:, j]) for j in range(6)]
-        sds = [np.sqrt(v) if v > 0 else 0 for v in variances]
-
-        needs_refinement = False
-        refined_limits = []
-        for j in range(6):
-            m, s = means[j], sds[j]
-            low, high = limits[j]
-
-            if s > 0:
-                # Gaussian mass check
-                coverage = norm.cdf(high, loc=m, scale=s) - norm.cdf(
-                    low, loc=m, scale=s
-                )
-            else:
-                coverage = 1.0 if low <= m <= high else 0.0
-
-            if coverage < mass_threshold:
-                target_low = m - k_sd * s
-                target_high = m + k_sd * s
-                new_low = min(low, target_low)
-                new_high = max(high, target_high)
-                refined_limits.append((new_low, new_high))
-                needs_refinement = True
-            else:
-                refined_limits.append((low, high))
-
-        if not needs_refinement:
-            break
-
-        limits = refined_limits
-        if i == max_iter - 1:
-            logging.warning(
-                "EffTox integration limits did not cover mass threshold after %d iterations.",
-                max_iter,
-            )
+    from clintrials.core.numerics import adaptive_mc_integration
+    refined_limits, pds = adaptive_mc_integration(
+        lik_integrand,
+        limits,
+        n=n,
+        max_iter=max_iter,
+        mass_threshold=mass_threshold,
+        k_sd=k_sd,
+    )
 
     return pds
 

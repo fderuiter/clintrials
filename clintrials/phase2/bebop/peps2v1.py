@@ -50,9 +50,9 @@ def pi_t(disease_status, mutation_status, alpha0=0, alpha1=0, alpha2=0):
     Returns:
         float: The probability of toxicity.
     """
+    from clintrials.core.math import inverse_logit
     z = alpha0 + alpha1 * disease_status + alpha2 * mutation_status
-    response = 1 / (1 + np.exp(-z))
-    return response
+    return inverse_logit(z)
 
 
 def pi_e(disease_status, mutation_status, beta0=0, beta1=0, beta2=0):
@@ -68,8 +68,9 @@ def pi_e(disease_status, mutation_status, beta0=0, beta1=0, beta2=0):
     Returns:
         float: The probability of efficacy.
     """
+    from clintrials.core.math import inverse_logit
     z = beta0 + beta1 * disease_status + beta2 * mutation_status
-    return 1 / (1 + np.exp(-z))
+    return inverse_logit(z)
 
 
 def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2, psi):
@@ -89,15 +90,10 @@ def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2
     Returns:
         float: The likelihood of the outcome.
     """
-    a = tox
-    b = eff
+    from clintrials.core.math import fgm_joint_prob
     p1 = pi_t(disease_status, mutation_status, alpha0)
     p2 = pi_e(disease_status, mutation_status, beta0, beta1, beta2)
-    response = p1**a * (1 - p1) ** (1 - a) * p2**b * (1 - p2) ** (1 - b)
-    response = response + (-1) ** (a + b) * p1 * (1 - p1) * p2 * (1 - p2) * (
-        np.exp(psi) - 1
-    ) / (np.exp(psi) + 1)
-    return response
+    return fgm_joint_prob(tox, eff, p1, p2, psi)
 
 
 def l_n(cases, alpha0, beta0, beta1, beta2, psi):
@@ -235,9 +231,6 @@ def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilo
         eff_cutoffs = [eff_cutoffs] * 4
 
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
-    samp = np.column_stack(
-        [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
-    )
 
     lik_integrand = (
         lambda x: l_n(cases, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4])
@@ -247,7 +240,15 @@ def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilo
         * priors[3].pdf(x[:, 3])
         * priors[4].pdf(x[:, 4])
     )
-    pds = ProbabilityDensitySample(samp, lik_integrand)
+
+    from clintrials.core.numerics import adaptive_mc_integration
+    refined_limits, pds = adaptive_mc_integration(
+        lik_integrand,
+        limits,
+        n=n,
+        max_iter=1,  # Keep non-iterative logic similar to original, but centralized
+    )
+    samp = pds._samp
 
     probs = []
     patient_cohorts = [(0, 0), (0, 1), (1, 0), (1, 1)]
@@ -493,8 +494,9 @@ class PePS2BeBOP:
             numpy.ndarray: An array containing the lower bound, mean, and
                 upper bound of the correlation.
         """
+        from clintrials.core.math import association_to_correlation
         psi_samples = self._pds._samp[:, 4]
-        correlation_samples = (np.exp(psi_samples) - 1) / (np.exp(psi_samples) + 1)
+        correlation_samples = association_to_correlation(psi_samples)
         return correlation_ci(
             samples=correlation_samples,
             weights=self._pds._probs,
