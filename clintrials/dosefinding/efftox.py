@@ -495,7 +495,16 @@ class LpNormCurve:
             response *= np.nan
             return response
 
-    def solve(self, delta, *, prob_eff=None, prob_tox=None, bounds=(0, 1), tol=1e-6, maxiter=100):
+    def solve(
+        self,
+        delta,
+        *,
+        prob_eff=None,
+        prob_tox=None,
+        bounds=(0, 1),
+        tol=1e-6,
+        maxiter=100,
+    ):
         """Solves for one probability given the other and a utility delta.
 
         Args:
@@ -525,6 +534,7 @@ class LpNormCurve:
 
             def g(p):
                 return self.__call__(prob_eff, p) - delta
+
         else:
 
             def g(p):
@@ -588,7 +598,9 @@ class LpNormCurve:
         Returns:
             A plot object.
         """
-        import clintrials.visualization as viz
+        from clintrials.core.viz_interface import get_visualization_provider
+
+        viz = get_visualization_provider()
 
         return viz.plot_efftox_utility_contours(
             self,
@@ -649,7 +661,9 @@ class InverseQuadraticCurve:
                 return m * (X - 1) - f(X)
 
             try:
-                x_00 = brentq(intersection_expression, 0.0001, 1, args=(gradient, self.f))
+                x_00 = brentq(
+                    intersection_expression, 0.0001, 1, args=(gradient, self.f)
+                )
             except ValueError:
                 # If brentq fails, use cubic root finding for robustness.
                 m = gradient
@@ -669,7 +683,16 @@ class InverseQuadraticCurve:
         else:
             return np.nan
 
-    def solve(self, delta, *, prob_eff=None, prob_tox=None, bounds=(0, 1), tol=1e-6, maxiter=100):
+    def solve(
+        self,
+        delta,
+        *,
+        prob_eff=None,
+        prob_tox=None,
+        bounds=(0, 1),
+        tol=1e-6,
+        maxiter=100,
+    ):
         """Solves for one probability given the other and a utility delta.
 
         Args:
@@ -699,6 +722,7 @@ class InverseQuadraticCurve:
 
             def g(p):
                 return self.__call__(prob_eff, p) - delta
+
         else:
 
             def g(p):
@@ -999,7 +1023,9 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     def _post_density_plot(
         self, func=None, x_name="", plot_title="", include_doses=None, boot_samps=1000
     ):
-        import clintrials.visualization as viz
+        from clintrials.core.viz_interface import get_visualization_provider
+
+        viz = get_visualization_provider()
 
         if include_doses is None:
             include_doses = range(1, self.num_doses + 1)

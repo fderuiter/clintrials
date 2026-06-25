@@ -8,7 +8,7 @@ if not hasattr(st, "fragment"):
     st.fragment = lambda func: func
 
 from clintrials.winratio import run_simulation
-from clintrials.dashboard.factory import create_widget
+from clintrials.visualization.dashboard.factory import create_widget
 
 
 def render() -> None:

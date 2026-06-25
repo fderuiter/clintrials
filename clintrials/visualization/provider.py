@@ -434,3 +434,55 @@ def plot_efftox_simulation_acceptability(summary_df):
     )
     fig.layout.meta = generate_text_summary(accept_df_melted, title)
     return fig
+
+
+from clintrials.core.viz_interface import VisualizationProvider
+
+
+class DefaultVisualizationProvider(VisualizationProvider):
+    def plot_dose_finding_outcomes(self, trial, chart_title=None):
+        return plot_dose_finding_outcomes(trial, chart_title=chart_title)
+
+    def plot_crm_toxicity_probabilities(self, trial, chart_title=None):
+        return plot_crm_toxicity_probabilities(trial, chart_title=chart_title)
+
+    def plot_efftox_utility_contours(
+        self,
+        metric,
+        prob_eff=None,
+        prob_tox=None,
+        n=100,
+        util_lower=-0.8,
+        util_upper=0.8,
+        util_delta=0.2,
+        title="EffTox utility contours",
+        custom_points_label="priors",
+    ):
+        return plot_efftox_utility_contours(
+            metric,
+            prob_eff,
+            prob_tox,
+            n,
+            util_lower,
+            util_upper,
+            util_delta,
+            title,
+            custom_points_label,
+        )
+
+    def plot_efftox_density(
+        self,
+        data_func,
+        trial,
+        x_name="",
+        plot_title="",
+        include_doses=None,
+        boot_samps=1000,
+    ):
+        return plot_efftox_density(
+            data_func, trial, x_name, plot_title, include_doses, boot_samps
+        )
+
+
+def get_default_provider():
+    return DefaultVisualizationProvider()

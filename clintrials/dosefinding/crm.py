@@ -804,7 +804,9 @@ class CRM(DoseFindingTrial):
         Returns:
             A plot object.
         """
-        import clintrials.visualization as viz
+        from clintrials.core.viz_interface import get_visualization_provider
+
+        viz = get_visualization_provider()
 
         return viz.plot_crm_toxicity_probabilities(self, chart_title=chart_title)
 

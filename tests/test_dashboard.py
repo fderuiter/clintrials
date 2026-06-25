@@ -60,7 +60,7 @@ def test_main_dispatches_to_crm(fake_streamlit, fake_plotly, monkeypatch):
 
     fake_streamlit.sidebar.file_uploader.return_value = DummyFile()
 
-    main = reload_module("clintrials.dashboard.main")
+    main = reload_module("clintrials.visualization.dashboard.main")
     monkeypatch.setattr(main.crm_view, "render", MagicMock())
     monkeypatch.setattr(main.efftox_view, "render", MagicMock())
     main.main()
@@ -78,7 +78,7 @@ def test_main_dispatches_to_efftox(fake_streamlit, fake_plotly, monkeypatch):
 
     fake_streamlit.sidebar.file_uploader.return_value = DummyFile()
 
-    main = reload_module("clintrials.dashboard.main")
+    main = reload_module("clintrials.visualization.dashboard.main")
     monkeypatch.setattr(main.crm_view, "render", MagicMock())
     monkeypatch.setattr(main.efftox_view, "render", MagicMock())
     main.main()
@@ -89,7 +89,7 @@ def test_main_dispatches_to_efftox(fake_streamlit, fake_plotly, monkeypatch):
 def test_main_dispatches_to_winratio(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.selectbox.return_value = "Win Ratio"
 
-    main = reload_module("clintrials.dashboard.main")
+    main = reload_module("clintrials.visualization.dashboard.main")
     monkeypatch.setattr(main.crm_view, "render", MagicMock())
     monkeypatch.setattr(main.efftox_view, "render", MagicMock())
     monkeypatch.setattr(main.winratio_view, "render", MagicMock())
@@ -100,7 +100,7 @@ def test_main_dispatches_to_winratio(fake_streamlit, fake_plotly, monkeypatch):
 
 
 def test_crm_render_creates_plot(fake_streamlit, monkeypatch):
-    crm_view = reload_module("clintrials.dashboard.views.crm_view")
+    crm_view = reload_module("clintrials.visualization.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
 
     import clintrials.visualization as viz
@@ -132,7 +132,7 @@ def test_crm_render_creates_plot(fake_streamlit, monkeypatch):
 
 
 def test_efftox_render_creates_plots(fake_streamlit, monkeypatch):
-    efftox_view = reload_module("clintrials.dashboard.views.efftox_view")
+    efftox_view = reload_module("clintrials.visualization.dashboard.views.efftox_view")
     monkeypatch.setattr(efftox_view, "st", fake_streamlit)
 
     import clintrials.visualization as viz
@@ -172,7 +172,7 @@ def test_efftox_render_creates_plots(fake_streamlit, monkeypatch):
 
 
 def test_crm_render_warning_branch(fake_streamlit, monkeypatch):
-    crm_view = reload_module("clintrials.dashboard.views.crm_view")
+    crm_view = reload_module("clintrials.visualization.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
 
     class DummyPS:
