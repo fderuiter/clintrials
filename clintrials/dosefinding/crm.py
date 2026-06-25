@@ -417,6 +417,7 @@ class CRM(DoseFindingTrial):
 
     @classmethod
     def get_summary_functions(cls):
+        """Get summary functions for the CRM protocol."""
         import pandas as pd
         return {
             "N": lambda s, p: len(s),
@@ -510,10 +511,14 @@ class CRM(DoseFindingTrial):
         
         # Build kwargs for schema defaults
         schema_kwargs = {"prior": prior, "target": target, "first_dose": first_dose, "max_size": max_size}
-        if lowest_dose_too_toxic_hurdle is not None: schema_kwargs["lowest_dose_too_toxic_hurdle"] = lowest_dose_too_toxic_hurdle
-        if lowest_dose_too_toxic_certainty is not None: schema_kwargs["lowest_dose_too_toxic_certainty"] = lowest_dose_too_toxic_certainty
-        if coherency_threshold is not None: schema_kwargs["coherency_threshold"] = coherency_threshold
-        if bootstrap_samples is not None: schema_kwargs["bootstrap_samples"] = bootstrap_samples
+        if lowest_dose_too_toxic_hurdle is not None:
+            schema_kwargs["lowest_dose_too_toxic_hurdle"] = lowest_dose_too_toxic_hurdle
+        if lowest_dose_too_toxic_certainty is not None:
+            schema_kwargs["lowest_dose_too_toxic_certainty"] = lowest_dose_too_toxic_certainty
+        if coherency_threshold is not None:
+            schema_kwargs["coherency_threshold"] = coherency_threshold
+        if bootstrap_samples is not None:
+            schema_kwargs["bootstrap_samples"] = bootstrap_samples
 
         config = CRMSchema(**schema_kwargs)
         
