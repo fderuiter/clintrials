@@ -6,10 +6,12 @@ import abc
 class VisualizationProvider(abc.ABC):
     @abc.abstractmethod
     def plot_dose_finding_outcomes(self, trial, chart_title=None):
+        """Plot dose finding outcomes."""
         pass
 
     @abc.abstractmethod
     def plot_crm_toxicity_probabilities(self, trial, chart_title=None):
+        """Plot CRM toxicity probabilities."""
         pass
 
     @abc.abstractmethod
@@ -25,6 +27,7 @@ class VisualizationProvider(abc.ABC):
         title="EffTox utility contours",
         custom_points_label="priors",
     ):
+        """Plot EffTox utility contours."""
         pass
 
     @abc.abstractmethod
@@ -37,6 +40,7 @@ class VisualizationProvider(abc.ABC):
         include_doses=None,
         boot_samps=1000,
     ):
+        """Plot EffTox density."""
         pass
 
 
@@ -44,6 +48,7 @@ _provider = None
 
 
 def get_visualization_provider():
+    """Get the current visualization provider."""
     global _provider
     if _provider is None:
         try:
@@ -59,5 +64,6 @@ def get_visualization_provider():
 
 
 def set_visualization_provider(provider: VisualizationProvider):
+    """Set the current visualization provider."""
     global _provider
     _provider = provider
