@@ -323,7 +323,14 @@ class ProbabilityDensitySample:
         Returns:
             float: The quantile value.
         """
-        return fsolve(lambda z: self.cdf(i, z) - p, start_value)[0]
+        samples = self._samp[:, i]
+        weights = self._probs
+        sorter = np.argsort(samples)
+        samples = samples[sorter]
+        w = weights[sorter]
+        w = w / np.sum(w)
+        cumulative_w = np.cumsum(w)
+        return float(np.interp(p, cumulative_w, samples))
 
     def cdf_vector(self, vector, y):
         """Calculates the CDF for a vector.
@@ -355,4 +362,11 @@ class ProbabilityDensitySample:
         Returns:
             float: The quantile value.
         """
-        return fsolve(lambda z: self.cdf_vector(vector, z) - p, start_value)[0]
+        samples = np.array(vector)
+        weights = self._probs
+        sorter = np.argsort(samples)
+        samples = samples[sorter]
+        w = weights[sorter]
+        w = w / np.sum(w)
+        cumulative_w = np.cumsum(w)
+        return float(np.interp(p, cumulative_w, samples))

@@ -40,6 +40,7 @@ def _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False):
     """
     p = link_func(dose, a0, beta)
     if log:
+        p = np.clip(p, 1e-15, 1 - 1e-15)
         return tox * np.log(p) + (1 - tox) * np.log(1 - p)
     else:
         return p**tox * (1 - p) ** (1 - tox)
@@ -93,8 +94,7 @@ def _get_beta_hat_bayes(
         codified_doses_given (list[float]): The codified dose levels given.
         toxs (list[int]): The observed toxicity events.
         beta_pdf (callable): The PDF of the prior distribution for beta.
-        use_quick_integration (bool, optional): If `True`, uses a faster but
-            less accurate integration method. Defaults to `False`.
+        use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
         estimate_var (bool, optional): If `True`, estimates the variance of
             beta. Defaults to `False`.
 
@@ -103,64 +103,25 @@ def _get_beta_hat_bayes(
             variance of beta. The variance is `None` if `estimate_var` is
             `False`.
     """
-    if use_quick_integration:
-        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))
-        z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
-        num_y = (
-            z
-            * _compound_toxicity_likelihood(F, intercept, z, codified_doses_given, toxs)
-            * beta_pdf(z)
+    from clintrials.core.numerics import integrate_posterior_1d
+
+    def logpost(t):
+        ll = _compound_toxicity_likelihood(
+            F, intercept, t, codified_doses_given, toxs, log=True
         )
-        denom_y = _compound_toxicity_likelihood(
-            F, intercept, z, codified_doses_given, toxs
-        ) * beta_pdf(z)
-        num = trapezoid(num_y, z, dz)
-        denom = trapezoid(denom_y, z, dz)
-        beta_hat = num / denom
-        if estimate_var:
-            num2_y = (
-                z**2
-                * _compound_toxicity_likelihood(
-                    F, intercept, z, codified_doses_given, toxs
-                )
-                * beta_pdf(z)
-            )
-            num2 = trapezoid(num2_y, z, dz)
-            exp_x2 = num2 / denom
-            var = exp_x2 - beta_hat**2
-        else:
-            var = None
+        return ll + np.log(beta_pdf(t) + 1e-300)
+
+    beta_hat = integrate_posterior_1d(
+        logpost, lambda t: t, _min_beta, _max_beta
+    )
+
+    if estimate_var:
+        exp_x2 = integrate_posterior_1d(
+            logpost, lambda t: t**2, _min_beta, _max_beta
+        )
+        var = exp_x2 - beta_hat**2
     else:
-        num = quad(
-            lambda t: t
-            * _compound_toxicity_likelihood(F, intercept, t, codified_doses_given, toxs)
-            * beta_pdf(t),
-            -np.inf,
-            np.inf,
-        )
-        denom = quad(
-            lambda t: _compound_toxicity_likelihood(
-                F, intercept, t, codified_doses_given, toxs
-            )
-            * beta_pdf(t),
-            -np.inf,
-            np.inf,
-        )
-        beta_hat = num[0] / denom[0]
-        if estimate_var:
-            num2 = quad(
-                lambda t: t**2
-                * _compound_toxicity_likelihood(
-                    F, intercept, t, codified_doses_given, toxs
-                )
-                * beta_pdf(t),
-                -np.inf,
-                np.inf,
-            )
-            exp_x2 = num2[0] / denom[0]
-            var = exp_x2 - beta_hat**2
-        else:
-            var = None
+        var = None
 
     return beta_hat, var
 
@@ -286,44 +247,25 @@ def _get_post_tox_bayes(
         codified_doses_given (list[float]): The codified dose levels given.
         toxs (list[int]): The observed toxicity events.
         beta_pdf (callable): The PDF of the prior distribution for beta.
-        use_quick_integration (bool, optional): If `True`, uses a faster but
-            less accurate integration method. Defaults to `False`.
+        use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
 
     Returns:
         list[float]: A list of posterior probabilities of toxicity.
     """
-    post_tox = []
-    if use_quick_integration:
-        n = int(100 * max(np.log(len(codified_doses_given) + 1) / 2, 1))
-        z, dz = np.linspace(_min_beta, _max_beta, num=n, retstep=True)
-        denom_y = _compound_toxicity_likelihood(
-            F, intercept, z, codified_doses_given, toxs
-        ) * beta_pdf(z)
-        denom = trapezoid(denom_y, z, dz)
-        for x in dose_labels:
-            num_y = F(x, a0=intercept, beta=z) * denom_y
-            num = trapezoid(num_y, z, dz)
-            post_tox.append(num / denom)
-    else:
-        denom = quad(
-            lambda t: beta_pdf(t)
-            * _compound_toxicity_likelihood(
-                F, intercept, t, codified_doses_given, toxs
-            ),
-            -np.inf,
-            np.inf,
+    from clintrials.core.numerics import integrate_posterior_1d
+
+    def logpost(t):
+        ll = _compound_toxicity_likelihood(
+            F, intercept, t, codified_doses_given, toxs, log=True
         )
-        for x in dose_labels:
-            num = quad(
-                lambda t: F(x, a0=intercept, beta=t)
-                * beta_pdf(t)
-                * _compound_toxicity_likelihood(
-                    F, intercept, t, codified_doses_given, toxs
-                ),
-                -np.inf,
-                np.inf,
-            )
-            post_tox.append(num[0] / denom[0])
+        return ll + np.log(beta_pdf(t) + 1e-300)
+
+    post_tox = []
+    for x in dose_labels:
+        prob = integrate_posterior_1d(
+            logpost, lambda t: F(x, a0=intercept, beta=t), _min_beta, _max_beta
+        )
+        post_tox.append(prob)
 
     return post_tox
 

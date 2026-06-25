@@ -160,14 +160,18 @@ class BeBOP:
 
         self.cases.extend(cases)
         limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in self.priors]
-        samp = numpy.column_stack(
-            [numpy.random.uniform(*limit_pair, size=n) for limit_pair in limits]
-        )
         lik_integrand = lambda x: self._l_n(cases, x) * numpy.prod(
             numpy.array([dist.pdf(col) for (dist, col) in zip(self.priors, x.T)]),
             axis=0,
         )
-        self._pds = ProbabilityDensitySample(samp, lik_integrand)
+        from clintrials.core.numerics import adaptive_mc_integration
+        refined_limits, pds = adaptive_mc_integration(
+            lik_integrand,
+            limits,
+            n=n,
+            max_iter=1,  # Keep non-iterative logic similar to original, but centralized
+        )
+        self._pds = pds
         return
 
     def _predict_case(self, case, eff_cutoff, tox_cutoff, pds, samp, estimate_ci=False):

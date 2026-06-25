@@ -6,6 +6,84 @@ import warnings
 
 import numpy as np
 from scipy.special import logsumexp
+from scipy.stats import norm
+from clintrials.core.stats import ProbabilityDensitySample
+
+
+def adaptive_mc_integration(
+    lik_integrand,
+    initial_limits,
+    n=10000,
+    max_iter=5,
+    mass_threshold=0.999,
+    k_sd=3.5,
+):
+    """Performs adaptive multi-dimensional Monte Carlo integration.
+
+    Args:
+        lik_integrand (callable): Function taking a 2D array of samples
+            and returning an array of evaluated likelihoods * priors.
+        initial_limits (list[tuple[float, float]]): Initial integration bounds
+            for each dimension.
+        n (int, optional): Number of Monte Carlo samples per iteration. Defaults to 10000.
+        max_iter (int, optional): Maximum iterations for expanding limits. Defaults to 5.
+        mass_threshold (float, optional): The target Gaussian coverage threshold
+            for convergence. Defaults to 0.999.
+        k_sd (float, optional): The multiplier for the standard deviation when
+            expanding limits. Defaults to 3.5.
+
+    Returns:
+        tuple[list[tuple[float, float]], ProbabilityDensitySample]: A tuple
+            containing the refined limits and the ProbabilityDensitySample.
+    """
+    limits = initial_limits
+    num_dims = len(limits)
+    
+    for i in range(max_iter):
+        samp = np.column_stack(
+            [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
+        )
+        pds = ProbabilityDensitySample(samp, lik_integrand)
+
+        means = [pds.expectation(samp[:, j]) for j in range(num_dims)]
+        variances = [pds.variance(samp[:, j]) for j in range(num_dims)]
+        sds = [np.sqrt(v) if v > 0 else 0 for v in variances]
+
+        needs_refinement = False
+        refined_limits = []
+        for j in range(num_dims):
+            m, s = means[j], sds[j]
+            low, high = limits[j]
+
+            if s > 0:
+                coverage = norm.cdf(high, loc=m, scale=s) - norm.cdf(
+                    low, loc=m, scale=s
+                )
+            else:
+                coverage = 1.0 if low <= m <= high else 0.0
+
+            if coverage < mass_threshold:
+                target_low = m - k_sd * s
+                target_high = m + k_sd * s
+                new_low = min(low, target_low)
+                new_high = max(high, target_high)
+                refined_limits.append((new_low, new_high))
+                needs_refinement = True
+            else:
+                refined_limits.append((low, high))
+
+        limits = refined_limits
+        if not needs_refinement:
+            break
+
+        if i == max_iter - 1:
+            import logging
+            logging.warning(
+                "Monte Carlo integration limits did not cover mass threshold after %d iterations.",
+                max_iter,
+            )
+
+    return limits, pds
 
 
 def integrate_posterior_1d(
@@ -78,6 +156,7 @@ def integrate_posterior_1d(
                 "expansions": expansions,
                 "tail_mass": float(tail_mass),
                 "max_at_edge": bool(max_at_edge),
+                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),
             }
             return (val, diag) if return_diagnostics else val
 
@@ -92,6 +171,7 @@ def integrate_posterior_1d(
                 "tail_mass": float(tail_mass),
                 "max_at_edge": bool(max_at_edge),
                 "hit_cap": True,
+                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),
             }
             return (val, diag) if return_diagnostics else val
 

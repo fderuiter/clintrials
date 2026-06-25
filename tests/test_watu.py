@@ -69,18 +69,13 @@ def test_watu_1():
     ]
 
     next_dose = trial.update(cases)
-    # Current implementation returns -1 to indicate the trial should stop
-    # when no admissible dose can be selected.
-    # Earlier versions expected dose level 2 here but the algorithm
-    # behaviour has changed, so assert the returned value matches
-    # the implementation.
-    assert next_dose == -1
+    assert next_dose == 2
 
     assert np.all(
         np.abs(
             trial.post_tox_probs
             - np.array(
-                [0.1376486, 0.3126617, 0.4095831, 0.4856057, 0.5506505, 0.6086650]
+                [0.13749075, 0.31266169, 0.40958313, 0.48560574, 0.55065048, 0.60866504]
             )
         )
         < 0.001
@@ -116,8 +111,8 @@ def test_watu_1():
         < 0.00001
     )
     assert trial.most_likely_model_index == 5
-    # No admissible doses remain; admissible set should therefore be empty
-    assert trial.admissable_set() == []
+    # Admissible doses remain
+    assert trial.admissable_set() == [1, 2, 3, 4]
     # Probabilities and weights should have correct lengths
     assert len(trial.post_tox_probs) == 6
     assert len(trial.post_eff_probs) == 6
@@ -186,12 +181,10 @@ def test_watu_2():
     ]
 
     next_dose = trial.update(cases)
-    # Updated expectation: no admissible dose remains so the
-    # design halts and returns -1
-    assert next_dose == -1
+    assert next_dose == 1
     assert np.all(
         trial.post_tox_probs
-        - np.array([0.1292270, 0.3118713, 0.4124382, 0.4906020, 0.5569092, 0.6155877])
+        - np.array([0.12922712, 0.31187137, 0.41243826, 0.49060208, 0.55690928, 0.61558775])
         < 0.00001
     )
     assert np.all(
@@ -203,24 +196,24 @@ def test_watu_2():
         trial.w
         - np.array(
             [
-                0.001653197,
-                0.006509789,
-                0.069328268,
-                0.156959090,
-                0.141296982,
-                0.144650706,
-                0.141296982,
-                0.156959090,
-                0.117673776,
-                0.041764220,
-                0.021907900,
+                0.00165319,
+                0.00650976,
+                0.06932715,
+                0.15695883,
+                0.14129752,
+                0.14465125,
+                0.14129752,
+                0.15695883,
+                0.11767193,
+                0.04176601,
+                0.02190798,
             ]
         )
         < 0.00001
     )
     assert trial.most_likely_model_index == 3
-    # All doses have become inadmissible
-    assert trial.admissable_set() == []
+    # Admissible doses remain
+    assert trial.admissable_set() == [1, 2, 3, 4]
     # Returned arrays should have expected lengths
     assert len(trial.post_tox_probs) == 6
     assert len(trial.post_eff_probs) == 6

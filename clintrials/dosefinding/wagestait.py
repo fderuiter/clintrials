@@ -80,8 +80,7 @@ def _wt_get_theta_hat(
         theta_prior (scipy.stats.rv_continuous): The prior distribution for
             theta.
         F (callable, optional): The link function. Defaults to `empiric`.
-        use_quick_integration (bool, optional): If `True`, uses a faster but
-            less accurate integration method. Defaults to `False`.
+        use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
         estimate_var (bool, optional): If `True`, estimates the posterior
             variance of theta. Defaults to `False`.
 
@@ -90,49 +89,27 @@ def _wt_get_theta_hat(
             tuple contains the posterior mean of theta, its variance (or
             `None`), and the model probability.
     """
+    from clintrials.core.numerics import integrate_posterior_1d
+
     theta_hats = []
     for skeleton in skeletons:
-        if use_quick_integration:
-            n = int(100 * max(np.log(len(cases) + 1) / 2, 1))
-            z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
-            denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
-            num_y = z * denom_y
-            num = trapezoid(num_y, z, dz)
-            denom = trapezoid(denom_y, z, dz)
-            theta_hat = num / denom
-            if estimate_var:
-                num2_y = z**2 * denom_y
-                num2 = trapezoid(num2_y, z, dz)
-                exp_x2 = num2 / denom
-                var = exp_x2 - theta_hat**2
-                theta_hats.append((theta_hat, var, denom))
-            else:
-                theta_hats.append((num / denom, None, denom))
+        def logpost(t):
+            ll = _wt_log_lik(cases, skeleton, t, F)
+            return ll + np.log(theta_prior.pdf(t) + 1e-300)
+
+        theta_hat, diag = integrate_posterior_1d(
+            logpost, lambda t: t, _min_theta, _max_theta, return_diagnostics=True
+        )
+        marginal_likelihood = diag["log_marginal"]
+
+        if estimate_var:
+            exp_x2 = integrate_posterior_1d(
+                logpost, lambda t: t**2, _min_theta, _max_theta
+            )
+            var = exp_x2 - theta_hat**2
+            theta_hats.append((theta_hat, var, marginal_likelihood))
         else:
-            num = quad(
-                lambda t: t * _wt_lik(cases, skeleton, t, F) * theta_prior.pdf(t),
-                -np.inf,
-                np.inf,
-            )
-            denom = quad(
-                lambda t: _wt_lik(cases, skeleton, t, F) * theta_prior.pdf(t),
-                -np.inf,
-                np.inf,
-            )
-            theta_hat = num[0] / denom[0]
-            if estimate_var:
-                num2 = quad(
-                    lambda t: t**2
-                    * _wt_lik(cases, skeleton, t, F)
-                    * theta_prior.pdf(t),
-                    -np.inf,
-                    np.inf,
-                )
-                exp_x2 = num2[0] / denom[0]
-                var = exp_x2 - theta_hat**2
-                theta_hats.append((theta_hat, var, denom[0]))
-            else:
-                theta_hats.append((theta_hat, None, denom[0]))
+            theta_hats.append((theta_hat, None, marginal_likelihood))
     return theta_hats
 
 
@@ -147,38 +124,24 @@ def _get_post_eff_bayes(
         dose_labels (list[float]): The dose labels.
         theta_prior (scipy.stats.rv_continuous): The prior for theta.
         F (callable, optional): The link function. Defaults to `empiric`.
-        use_quick_integration (bool, optional): If `True`, uses a faster
-            integration method. Defaults to `False`.
+        use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
 
     Returns:
         numpy.ndarray: An array of posterior probabilities of efficacy.
     """
+    from clintrials.core.numerics import integrate_posterior_1d
+
+    def logpost(t):
+        ll = _wt_log_lik(cases, skeleton, t, F)
+        return ll + np.log(theta_prior.pdf(t) + 1e-300)
+
     post_eff = []
     intercept = 0
-    if use_quick_integration:
-        n = int(100 * max(np.log(len(cases) + 1) / 2, 1))
-        z, dz = np.linspace(_min_theta, _max_theta, num=n, retstep=True)
-        denom_y = _wt_lik(cases, skeleton, z, F) * theta_prior.pdf(z)
-        denom = trapezoid(denom_y, z, dz)
-        for x in dose_labels:
-            num_y = F(x, a0=intercept, beta=z) * denom_y
-            num = trapezoid(num_y, z, dz)
-            post_eff.append(num / denom)
-    else:
-        denom = quad(
-            lambda t: theta_prior.pdf(t) * _wt_lik(cases, skeleton, t, F),
-            -np.inf,
-            np.inf,
+    for x in dose_labels:
+        prob = integrate_posterior_1d(
+            logpost, lambda t: F(x, a0=intercept, beta=t), _min_theta, _max_theta
         )
-        for x in dose_labels:
-            num = quad(
-                lambda t: F(x, a0=intercept, beta=t)
-                * theta_prior.pdf(t)
-                * _wt_lik(cases, skeleton, t, F),
-                -np.inf,
-                np.inf,
-            )
-            post_eff.append(num[0] / denom[0])
+        post_eff.append(prob)
 
     return np.array(post_eff)
 
@@ -367,12 +330,14 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             use_quick_integration=self.use_quick_integration,
             estimate_var=False,
         )
-        theta_hats, theta_vars, model_probs = zip(*integrals)
+        theta_hats, theta_vars, log_marginal = zip(*integrals)
 
         self.theta_hats = theta_hats
-        w = self.model_prior_weights * model_probs
+        log_w = np.log(self.model_prior_weights + 1e-300) + np.array(log_marginal)
+        log_w = log_w - np.max(log_w)
+        w = np.exp(log_w)
         self.w = w / sum(w)
-        most_likely_model_index = np.argmax(w)
+        most_likely_model_index = np.argmax(self.w)
         self.most_likely_model_index = most_likely_model_index
         self.post_tox_probs = np.array(self.crm.prob_tox())
         a0 = 0

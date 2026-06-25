@@ -132,7 +132,7 @@ def test_prob_density_sample_quantile(prob_density_sample):
     Test ProbabilityDensitySample.quantile.
     """
     q = prob_density_sample.quantile(0, 0.5)
-    assert np.isclose(q, 0.5562926340774739)
+    assert np.isclose(q, 0.566836066294248)
 
 
 def test_prob_density_sample_cdf_vector(prob_density_sample):
@@ -150,7 +150,7 @@ def test_prob_density_sample_quantile_vector(prob_density_sample):
     """
     vector = prob_density_sample._samp[:, 0]
     q = prob_density_sample.quantile_vector(vector, 0.5)
-    assert np.isclose(q, 0.5562926340774739)
+    assert np.isclose(q, 0.566836066294248)
 
 
 def test_correlation_ci_fisher():

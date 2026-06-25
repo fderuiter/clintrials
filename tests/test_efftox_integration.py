@@ -129,4 +129,4 @@ def test_boundary_mass_warning(caplog):
             mass_threshold=1.0,  # threshold of 1.0 is impossible
         )
 
-    assert "EffTox integration limits did not cover mass threshold" in caplog.text
+    assert "Monte Carlo integration limits did not cover mass threshold" in caplog.text
