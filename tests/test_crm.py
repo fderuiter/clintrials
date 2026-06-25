@@ -279,6 +279,7 @@ class TestCRMMLEVariance:
         assert trial.beta_var > 0
 
     def test_mle_variance_bootstrap(self):
+        np.random.seed(42)
         trial = CRM(
             self.prior,
             self.target,
@@ -297,6 +298,7 @@ class TestCRMMLEVariance:
         assert trial.beta_var > 0
 
     def test_mle_variance_comparison(self):
+        np.random.seed(42)
         trial_hessian = CRM(
             self.prior,
             self.target,
