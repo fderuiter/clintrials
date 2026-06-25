@@ -613,7 +613,7 @@ def test_myeloma_integration_deterministic(mocker):
         norm(loc=0, scale=1),
     ]
     metric = LpNormCurve(0.2, 0.3, 0.5, 0.15)
-    trial = EffTox(real_doses, priors, 0.3, 0.2, 0.9, 0.9, metric, 30, 1, True)
+    trial = EffTox(real_doses, priors, 0.3, 0.2, 0.9, 0.9, metric, 30, 1)
     mock_post_probs = mocker.patch(
         "clintrials.dosefinding.efftox.efftox_get_posterior_probs"
     )

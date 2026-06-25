@@ -248,13 +248,24 @@ def test_winratio_view_render_success(monkeypatch):
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(winratio_view)
     monkeypatch.setattr(winratio_view, "st", st_mock)
-    run_sim = MagicMock(return_value=(0.8, (0.1, 0.2)))
-    monkeypatch.setattr(winratio_view, "run_simulation", run_sim)
+    run_sim = MagicMock()
+    run_sim.return_value.power = 0.8
+    run_sim.return_value.average_ci = (0.1, 0.2)
+    monkeypatch.setattr(winratio_view, "WinRatioTrial", run_sim)
 
     winratio_view.render()
 
     run_sim.assert_called_once_with(
-        100, 50, 1000, 0.5, 0.5, 0.75, 0.25, 0.43, 0.27, 0.05
+        num_subjects_A=100,
+        num_subjects_B=50,
+        num_simulations=1000,
+        p_y1_A=0.5,
+        p_y1_B=0.5,
+        p_y2_A=0.75,
+        p_y2_B=0.25,
+        p_y3_A=0.43,
+        p_y3_B=0.27,
+        significance_level=0.05
     )
     st_mock.success.assert_called_once()
     st_mock.write.assert_any_call("Power of the test: 0.8000")

@@ -716,6 +716,22 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     Efficacy-Toxicity Trade-Offs.
     """
 
+    @classmethod
+    def get_summary_functions(cls):
+        import pandas as pd
+        return {
+            "N": lambda s, p: len(s),
+            "recommended_dose_prob": lambda s, p: pd.Series(
+                [x.get("RecommendedDose") for x in s]
+            ).value_counts(normalize=True).sort_index(),
+            "prob_accept_tox": lambda s, p: pd.Series(
+                [x.get("ProbAcceptTox", 0) > 0.5 for x in s]
+            ).mean(),
+            "prob_accept_eff": lambda s, p: pd.Series(
+                [x.get("ProbAcceptEff", 0) > 0.5 for x in s]
+            ).mean(),
+        }
+
     def __init__(
         self,
         real_doses,
@@ -726,7 +742,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         eff_certainty=None,
         metric=None,
         max_size=None,
-        first_dose=1,
+        first_dose=None,
         prior_tox_probs=None,
         prior_eff_probs=None,
         avoid_skipping_untried_escalation=True,
@@ -784,17 +800,33 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             ValueError: If required parameters are missing or if priors are
                 invalid.
         """
+        from clintrials.core.schema import EffToxSchema
+
+        # Build schema kwargs
+        schema_kwargs = {"real_doses": real_doses}
+        if prior_tox_probs is not None: schema_kwargs["prior_tox_probs"] = prior_tox_probs
+        if prior_eff_probs is not None: schema_kwargs["prior_eff_probs"] = prior_eff_probs
+        if tox_cutoff is not None: schema_kwargs["tox_cutoff"] = tox_cutoff
+        if eff_cutoff is not None: schema_kwargs["eff_cutoff"] = eff_cutoff
+        if tox_certainty is not None: schema_kwargs["tox_certainty"] = tox_certainty
+        if eff_certainty is not None: schema_kwargs["eff_certainty"] = eff_certainty
+        if max_size is not None: schema_kwargs["max_size"] = max_size
+        if first_dose is not None: schema_kwargs["first_dose"] = first_dose
+
+        config = EffToxSchema(**schema_kwargs)
+        first_dose = config.first_dose
+        
         EfficacyToxicityDoseFindingTrial.__init__(
-            self, first_dose, len(real_doses), max_size
+            self, first_dose, len(real_doses), config.max_size
         )
 
         if theta_priors is None:
-            if prior_tox_probs is None or prior_eff_probs is None:
+            if config.prior_tox_probs is None or config.prior_eff_probs is None:
                 raise ValueError(
                     "Either theta_priors or both prior_tox_probs and prior_eff_probs must be provided."
                 )
             theta_priors = efftox_priors_from_skeleton(
-                real_doses, prior_tox_probs, prior_eff_probs
+                real_doses, config.prior_tox_probs, config.prior_eff_probs
             )
 
         validate_efftox_priors(theta_priors, scale_doses(real_doses))
@@ -802,10 +834,10 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.real_doses = real_doses
         self._scaled_doses = scale_doses(real_doses)
         self.priors = theta_priors
-        self.tox_cutoff = tox_cutoff
-        self.eff_cutoff = eff_cutoff
-        self.tox_certainty = tox_certainty
-        self.eff_certainty = eff_certainty
+        self.tox_cutoff = config.tox_cutoff
+        self.eff_cutoff = config.eff_cutoff
+        self.tox_certainty = config.tox_certainty
+        self.eff_certainty = config.eff_certainty
         self.metric = metric
         self.avoid_skipping_untried_escalation = avoid_skipping_untried_escalation
         self.avoid_skipping_untried_deescalation = avoid_skipping_untried_deescalation

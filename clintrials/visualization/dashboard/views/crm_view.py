@@ -38,15 +38,8 @@ def render(sims):
     st.sidebar.write("Parameter space for summarization:")
     st.sidebar.json(param_space_config)
 
-    # Define summary functions for CRM
-    func_map = {
-        "N": lambda s, p: len(s),
-        "recommended_dose_prob": lambda s, p: pd.Series(
-            [x["recommended_dose"] for x in s]
-        )
-        .value_counts(normalize=True)
-        .sort_index(),
-    }
+    from clintrials.dosefinding.crm import CRM
+    func_map = CRM.get_summary_functions()
 
     try:
         summary_df = summarise_sims(sims, ps, func_map, to_pandas=True)

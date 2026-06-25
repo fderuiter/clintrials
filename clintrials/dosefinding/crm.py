@@ -415,6 +415,16 @@ class CRM(DoseFindingTrial):
         True
     """
 
+    @classmethod
+    def get_summary_functions(cls):
+        import pandas as pd
+        return {
+            "N": lambda s, p: len(s),
+            "recommended_dose_prob": lambda s, p: pd.Series(
+                [x.get("RecommendedDose") for x in s]
+            ).value_counts(normalize=True).sort_index(),
+        }
+
     def __init__(
         self,
         prior,
@@ -429,15 +439,15 @@ class CRM(DoseFindingTrial):
         estimate_var=True,
         avoid_skipping_untried_escalation=False,
         avoid_skipping_untried_deescalation=False,
-        lowest_dose_too_toxic_hurdle=0.0,
-        lowest_dose_too_toxic_certainty=0.0,
-        coherency_threshold=0.0,
+        lowest_dose_too_toxic_hurdle=None,
+        lowest_dose_too_toxic_certainty=None,
+        coherency_threshold=None,
         principle_escalation_func=None,
         termination_func=None,
         plugin_mean=True,
         intercept=3,
         mle_var_method="hessian",
-        bootstrap_samples=200,
+        bootstrap_samples=None,
     ):
         """Initializes a CRM trial object.
 
@@ -496,12 +506,23 @@ class CRM(DoseFindingTrial):
                 samples to use if `mle_var_method` is "bootstrap". Defaults
                 to 200.
         """
+        from clintrials.core.schema import CRMSchema
+        
+        # Build kwargs for schema defaults
+        schema_kwargs = {"prior": prior, "target": target, "first_dose": first_dose, "max_size": max_size}
+        if lowest_dose_too_toxic_hurdle is not None: schema_kwargs["lowest_dose_too_toxic_hurdle"] = lowest_dose_too_toxic_hurdle
+        if lowest_dose_too_toxic_certainty is not None: schema_kwargs["lowest_dose_too_toxic_certainty"] = lowest_dose_too_toxic_certainty
+        if coherency_threshold is not None: schema_kwargs["coherency_threshold"] = coherency_threshold
+        if bootstrap_samples is not None: schema_kwargs["bootstrap_samples"] = bootstrap_samples
+
+        config = CRMSchema(**schema_kwargs)
+        
         DoseFindingTrial.__init__(
-            self, first_dose=first_dose, num_doses=len(prior), max_size=max_size
+            self, first_dose=config.first_dose, num_doses=len(config.prior), max_size=config.max_size
         )
 
-        self.prior = prior
-        self.target = target
+        self.prior = config.prior
+        self.target = config.target
         self.F_func = F_func
         self.inverse_F = inverse_F
         self.beta_prior = beta_prior
@@ -510,15 +531,15 @@ class CRM(DoseFindingTrial):
         self.estimate_var = estimate_var
         self.avoid_skipping_untried_escalation = avoid_skipping_untried_escalation
         self.avoid_skipping_untried_deescalation = avoid_skipping_untried_deescalation
-        self.lowest_dose_too_toxic_hurdle = lowest_dose_too_toxic_hurdle
-        self.lowest_dose_too_toxic_certainty = lowest_dose_too_toxic_certainty
-        self.coherency_threshold = coherency_threshold
+        self.lowest_dose_too_toxic_hurdle = config.lowest_dose_too_toxic_hurdle
+        self.lowest_dose_too_toxic_certainty = config.lowest_dose_too_toxic_certainty
+        self.coherency_threshold = config.coherency_threshold
         self.principle_escalation_func = principle_escalation_func
         self.termination_func = termination_func
         self.plugin_mean = plugin_mean
         self.intercept = intercept
         self.mle_var_method = mle_var_method
-        self.bootstrap_samples = bootstrap_samples
+        self.bootstrap_samples = config.bootstrap_samples
 
         if lowest_dose_too_toxic_hurdle and lowest_dose_too_toxic_certainty:
             if not self.estimate_var:

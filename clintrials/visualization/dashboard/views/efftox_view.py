@@ -36,21 +36,8 @@ def render(sims):
     st.sidebar.write("Parameter space for summarization:")
     st.sidebar.json(param_space_config)
 
-    # Define summary functions for EffTox
-    func_map = {
-        "N": lambda s, p: len(s),
-        "recommended_dose_prob": lambda s, p: pd.Series(
-            [x.get("recommended_dose") for x in s]
-        )
-        .value_counts(normalize=True)
-        .sort_index(),
-        "prob_accept_tox": lambda s, p: pd.Series(
-            [x.get("prob_accept_tox", 0) > 0.5 for x in s]
-        ).mean(),
-        "prob_accept_eff": lambda s, p: pd.Series(
-            [x.get("prob_accept_eff", 0) > 0.5 for x in s]
-        ).mean(),
-    }
+    from clintrials.dosefinding.efftox import EffTox
+    func_map = EffTox.get_summary_functions()
 
     # Need to map the parameter space names to the names in the simulation file
     var_map = {

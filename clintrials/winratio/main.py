@@ -12,8 +12,48 @@ from .statistics import (
     calculate_win_ratio,
 )
 
-
+from collections import OrderedDict
+from clintrials.core.protocol import Protocol
+from clintrials.core.schema import WinRatioSchema
 from clintrials.core.simulation import run_sims
+
+class WinRatioTrial(Protocol):
+    """Win-Ratio simulation wrapped as a Protocol."""
+    
+    def __init__(self, **kwargs):
+        self.config = WinRatioSchema(**kwargs)
+        self.power = 0.0
+        self.average_ci = (0.0, 0.0)
+        self._completed = False
+
+    def reset(self):
+        self.power = 0.0
+        self.average_ci = (0.0, 0.0)
+        self._completed = False
+
+    def update(self, *args, **kwargs):
+        self.power, self.average_ci = run_simulation(
+            num_subjects_A=self.config.num_subjects_A,
+            num_subjects_B=self.config.num_subjects_B,
+            num_simulations=self.config.num_simulations,
+            p_y1_A=self.config.p_y1_A,
+            p_y1_B=self.config.p_y1_B,
+            p_y2_A=self.config.p_y2_A,
+            p_y2_B=self.config.p_y2_B,
+            p_y3_A=self.config.p_y3_A,
+            p_y3_B=self.config.p_y3_B,
+            significance_level=self.config.significance_level,
+        )
+        self._completed = True
+
+    def has_more(self):
+        return not self._completed
+
+    def report(self):
+        return OrderedDict([
+            ("power", self.power),
+            ("average_ci", self.average_ci)
+        ])
 
 
 def _single_iteration(
@@ -131,49 +171,31 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run a win-ratio simulation to calculate statistical power."
     )
-    parser.add_argument(
-        "--num_subjects_A", type=int, default=100, help="Number of subjects in Group A."
-    )
-    parser.add_argument(
-        "--num_subjects_B", type=int, default=50, help="Number of subjects in Group B."
-    )
-    parser.add_argument(
-        "--num_simulations", type=int, default=10000, help="Number of simulations."
-    )
-    parser.add_argument(
-        "--p_y1_A", type=float, default=0.50, help="Probability of y1=1 for Group A."
-    )
-    parser.add_argument(
-        "--p_y1_B", type=float, default=0.50, help="Probability of y1=1 for Group B."
-    )
-    parser.add_argument(
-        "--p_y2_A", type=float, default=0.75, help="Probability of y2=1 for Group A."
-    )
-    parser.add_argument(
-        "--p_y2_B", type=float, default=0.25, help="Probability of y2=1 for Group B."
-    )
-    parser.add_argument(
-        "--p_y3_A", type=float, default=0.43, help="Probability of y3=1 for Group A."
-    )
-    parser.add_argument(
-        "--p_y3_B", type=float, default=0.27, help="Probability of y3=1 for Group B."
-    )
-    parser.add_argument(
-        "--significance", type=float, default=0.05, help="Significance level."
-    )
+    for name, field in WinRatioSchema.model_fields.items():
+        arg_name = f"--{name}"
+        if name == "significance_level":
+            arg_name = "--significance"
+        
+        arg_type = int if "PositiveInt" in str(field.annotation) else float
+        parser.add_argument(
+            arg_name,
+            type=arg_type,
+            default=field.default,
+            help=field.description,
+        )
+
     args = parser.parse_args()
-    power, average_ci = run_simulation(
-        args.num_subjects_A,
-        args.num_subjects_B,
-        args.num_simulations,
-        args.p_y1_A,
-        args.p_y1_B,
-        args.p_y2_A,
-        args.p_y2_B,
-        args.p_y3_A,
-        args.p_y3_B,
-        args.significance,
-    )
+    
+    # Map back significance to significance_level if passed
+    kwargs = vars(args)
+    if "significance" in kwargs:
+        kwargs["significance_level"] = kwargs.pop("significance")
+
+    trial = WinRatioTrial(**kwargs)
+    trial.update()
+    power = trial.power
+    average_ci = trial.average_ci
+    
     print(f"Power of the test: {power:.4f}")  # noqa: T201
     print(  # noqa: T201
         "Average confidence interval: " f"({average_ci[0]:.4f}, {average_ci[1]:.4f})"
