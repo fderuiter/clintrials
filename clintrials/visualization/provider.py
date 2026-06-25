@@ -364,9 +364,10 @@ def plot_efftox_density(
 
 def plot_crm_simulation_recommendation(summary_df):
     """Plots CRM simulation recommendation probabilities."""
-    if summary_df.empty or "recommended_dose_prob" not in summary_df.columns:
+    col_name = "RecommendedDoseProb" if "RecommendedDoseProb" in summary_df.columns else "recommended_dose_prob"
+    if summary_df.empty or col_name not in summary_df.columns:
         return go.Figure()
-    rec_dose_df = summary_df["recommended_dose_prob"].apply(pd.Series).fillna(0)
+    rec_dose_df = summary_df[col_name].apply(pd.Series).fillna(0)
     rec_dose_df_melted = rec_dose_df.reset_index().melt(
         id_vars=[col for col in rec_dose_df.index.names],
         var_name="Dose Level",
@@ -390,9 +391,10 @@ def plot_crm_simulation_recommendation(summary_df):
 
 def plot_efftox_simulation_recommendation(summary_df):
     """Plots EffTox simulation recommendation probabilities."""
-    if summary_df.empty or "recommended_dose_prob" not in summary_df.columns:
+    col_name = "RecommendedDoseProb" if "RecommendedDoseProb" in summary_df.columns else "recommended_dose_prob"
+    if summary_df.empty or col_name not in summary_df.columns:
         return go.Figure()
-    rec_dose_df = summary_df["recommended_dose_prob"].apply(pd.Series).fillna(0)
+    rec_dose_df = summary_df[col_name].apply(pd.Series).fillna(0)
     rec_dose_df_melted = rec_dose_df.reset_index().melt(
         id_vars=[col for col in rec_dose_df.index.names],
         var_name="Dose Level",
@@ -412,13 +414,15 @@ def plot_efftox_simulation_recommendation(summary_df):
 
 def plot_efftox_simulation_acceptability(summary_df):
     """Plots EffTox simulation acceptability probabilities."""
+    tox_col = "ProbAcceptTox" if "ProbAcceptTox" in summary_df.columns else "prob_accept_tox"
+    eff_col = "ProbAcceptEff" if "ProbAcceptEff" in summary_df.columns else "prob_accept_eff"
     if (
         summary_df.empty
-        or "prob_accept_tox" not in summary_df.columns
-        or "prob_accept_eff" not in summary_df.columns
+        or tox_col not in summary_df.columns
+        or eff_col not in summary_df.columns
     ):
         return go.Figure()
-    accept_df = summary_df[["prob_accept_tox", "prob_accept_eff"]].reset_index()
+    accept_df = summary_df[[tox_col, eff_col]].reset_index()
     accept_df_melted = accept_df.melt(
         id_vars=["true_prob_tox", "true_prob_eff"],
         var_name="Probability Type",
