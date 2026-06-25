@@ -440,10 +440,14 @@ from clintrials.core.viz_interface import VisualizationProvider
 
 
 class DefaultVisualizationProvider(VisualizationProvider):
+    """Default visualization provider implementation."""
+
     def plot_dose_finding_outcomes(self, trial, chart_title=None):
+        """Plot dose finding outcomes."""
         return plot_dose_finding_outcomes(trial, chart_title=chart_title)
 
     def plot_crm_toxicity_probabilities(self, trial, chart_title=None):
+        """Plot CRM toxicity probabilities."""
         return plot_crm_toxicity_probabilities(trial, chart_title=chart_title)
 
     def plot_efftox_utility_contours(
@@ -458,6 +462,7 @@ class DefaultVisualizationProvider(VisualizationProvider):
         title="EffTox utility contours",
         custom_points_label="priors",
     ):
+        """Plot EffTox utility contours."""
         return plot_efftox_utility_contours(
             metric,
             prob_eff,
@@ -479,10 +484,12 @@ class DefaultVisualizationProvider(VisualizationProvider):
         include_doses=None,
         boot_samps=1000,
     ):
+        """Plot EffTox density."""
         return plot_efftox_density(
             data_func, trial, x_name, plot_title, include_doses, boot_samps
         )
 
 
 def get_default_provider():
+    """Get default visualization provider."""
     return DefaultVisualizationProvider()
