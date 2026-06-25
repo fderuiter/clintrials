@@ -44,3 +44,36 @@ def test_run_simulation_executes():
     power, ci = run_simulation(5, 5, 10, 0.6, 0.4, 0.6, 0.4, 0.6, 0.4)
     assert 0 <= power <= 1
     assert len(ci) == 2
+
+
+from unittest.mock import patch
+from clintrials.winratio.main import WinRatioTrial, main
+
+
+def test_winratio_trial():
+    trial = WinRatioTrial(
+        num_subjects_A=10,
+        num_subjects_B=10,
+        num_simulations=5,
+        p_y1_A=0.6,
+        p_y1_B=0.4,
+        p_y2_A=0.6,
+        p_y2_B=0.4,
+        p_y3_A=0.6,
+        p_y3_B=0.4,
+        significance_level=0.05
+    )
+    assert trial.has_more() is True
+    trial.update()
+    assert trial.has_more() is False
+    report = trial.report()
+    assert "power" in report
+    assert "average_ci" in report
+    trial.reset()
+    assert trial.power == 0.0
+    assert trial.has_more() is True
+
+
+@patch("sys.argv", ["main", "--num_subjects_A", "10", "--num_subjects_B", "10", "--num_simulations", "5"])
+def test_main_cli():
+    main()
