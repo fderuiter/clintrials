@@ -364,3 +364,56 @@ def reduce_product_of_two_files_by_summing(x, y):
     for k in x.keys():
         response[k] = reduce_maps_by_summing(x[k], y[k])
     return response
+
+class UniversalProtocolSimulationRunner:
+    """Universal Protocol Simulation Runner for executing trial designs.
+    
+    This runner standardises the simulation loop across all trial types, handling
+    initialisation, recruitment timing, outcome generation, and standard reporting.
+    """
+
+    def __init__(self, design, outcome_generator=None, recruitment_stream=None):
+        self.design = design
+        self.outcome_generator = outcome_generator
+        self.recruitment_stream = recruitment_stream
+
+    def run(self, cohort_size=1, **kwargs):
+        """Runs the trial simulation loop.
+        
+        Args:
+            cohort_size (int): Number of patients per cohort. Defaults to 1.
+            **kwargs: Additional keyword arguments passed to the outcome
+                generator and the design's update method.
+        
+        Returns:
+            collections.OrderedDict: The trial simulation report.
+        """
+        self.design.reset()
+        if self.recruitment_stream:
+            self.recruitment_stream.reset()
+
+        i = 0
+        max_size = self.design.max_size()
+
+        while i < max_size and self.design.has_more():
+            current_cohort_size = min(cohort_size, max_size - i)
+
+            if self.recruitment_stream:
+                kwargs["arrival_times"] = [
+                    self.recruitment_stream.next() for _ in range(current_cohort_size)
+                ]
+
+            if self.outcome_generator:
+                cases = self.outcome_generator(
+                    design=self.design,
+                    current_size=i,
+                    cohort_size=current_cohort_size,
+                    **kwargs
+                )
+            else:
+                cases = []
+
+            self.design.update(cases, **kwargs)
+            i += current_cohort_size
+
+        return self.design.report()

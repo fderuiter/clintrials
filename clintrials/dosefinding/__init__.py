@@ -208,7 +208,7 @@ class DoseFindingTrial(Protocol):
         """
         return self._next_dose
 
-    def update(self, cases):
+    def update(self, cases, **kwargs):
         """Updates the trial with a list of new cases.
 
         Args:
@@ -442,6 +442,14 @@ class ThreePlusThree(DoseFindingTrial):
         return DoseFindingTrial.has_more(self) and self._continue
 
 
+def _df_outcome_generator(design, current_size, cohort_size, true_toxicities, tolerances, **kwargs):
+    dose_level = design.next_dose()
+    tox = [
+        1 if x < true_toxicities[dose_level - 1] else 0
+        for x in tolerances[current_size : current_size + cohort_size]
+    ]
+    return list(zip([dose_level] * cohort_size, tox))
+
 def simulate_dose_finding_trial(
     design,
     true_toxicities,
@@ -449,6 +457,7 @@ def simulate_dose_finding_trial(
     cohort_size=1,
     conduct_trial=True,
     calculate_optimal_decision=True,
+    recruitment_stream=None,
 ):
     """Simulates a dose-finding trial.
 
@@ -464,10 +473,14 @@ def simulate_dose_finding_trial(
             cohort-by-cohort. Defaults to `True`.
         calculate_optimal_decision (bool, optional): If `True`, calculates
             the optimal dose decision. Defaults to `True`.
+        recruitment_stream (RecruitmentStream, optional): A recruitment
+            stream for patient arrival modeling. Defaults to None.
 
     Returns:
         collections.OrderedDict: A dictionary containing the simulation report.
     """
+    from clintrials.core.simulation import UniversalProtocolSimulationRunner
+
     # Validate inputs
     if tolerances is None:
         tolerances = uniform().rvs(design.max_size())
@@ -477,25 +490,25 @@ def simulate_dose_finding_trial(
                 "You have provided fewer tolerances than maximum number of patients on trial. Beware errors!"
             )
 
-    # Simulate trial
-    if conduct_trial:
-        i = 0
-        design.reset()
-        dose_level = design.next_dose()
-        while i <= design.max_size() and design.has_more():
-            tox = [
-                1 if x < true_toxicities[dose_level - 1] else 0
-                for x in tolerances[i : i + cohort_size]
-            ]
-            cases = zip([dose_level] * cohort_size, tox)
-            dose_level = design.update(cases)
-            i += cohort_size
-
-    # Report findings
     report = OrderedDict()
     report["TrueToxicities"] = iterable_to_json(true_toxicities)
+
+    # Simulate trial
     if conduct_trial:
+        runner = UniversalProtocolSimulationRunner(
+            design=design,
+            outcome_generator=_df_outcome_generator,
+            recruitment_stream=recruitment_stream
+        )
+        sim_report = runner.run(
+            cohort_size=cohort_size,
+            true_toxicities=true_toxicities,
+            tolerances=tolerances
+        )
+        report.update(sim_report)
+    else:
         report.update(design.report())
+
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
         try:
@@ -519,6 +532,7 @@ def simulate_dose_finding_trials(
     cohort_size=1,
     conduct_trial=True,
     calculate_optimal_decision=True,
+    recruitment_stream=None,
 ):
     """Simulates multiple toxicity-driven dose-finding trials from the same
     patient data.
@@ -536,6 +550,8 @@ def simulate_dose_finding_trials(
             cohort-by-cohort. Defaults to `True`.
         calculate_optimal_decision (bool, optional): If `True`, calculates
             the optimal dose decision. Defaults to `True`.
+        recruitment_stream (RecruitmentStream, optional): A recruitment
+            stream for patient arrival modeling. Defaults to None.
 
     Returns:
         collections.OrderedDict: A dictionary of simulation reports, with
@@ -560,6 +576,7 @@ def simulate_dose_finding_trials(
             cohort_size=cohort_size,
             conduct_trial=conduct_trial,
             calculate_optimal_decision=calculate_optimal_decision,
+            recruitment_stream=recruitment_stream,
         )
         report[label] = design_sim
     return report

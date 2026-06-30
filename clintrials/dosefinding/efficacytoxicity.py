@@ -385,6 +385,17 @@ def _efftox_patient_outcome_to_label(po):
         return "Error"
 
 
+def _efftox_outcome_generator(design, current_size, cohort_size, true_toxicities, true_efficacies, tox_eff_odds_ratio, tolerances, correlated_outcomes, **kwargs):
+    dose_level = design.next_dose()
+    u = (true_toxicities[dose_level - 1], true_efficacies[dose_level - 1])
+    if correlated_outcomes:
+        events = correlated_binary_outcomes_from_uniforms(
+            tolerances[current_size : current_size + cohort_size,], u, psi=tox_eff_odds_ratio
+        ).astype(int)
+    else:
+        events = (tolerances[current_size : current_size + cohort_size, 0:2] < u).astype(int)
+    return np.column_stack(([dose_level] * cohort_size, events))
+
 def _simulate_trial(
     design,
     true_toxicities,
@@ -394,6 +405,7 @@ def _simulate_trial(
     cohort_size=1,
     conduct_trial=1,
     calculate_optimal_decision=1,
+    recruitment_stream=None,
 ):
     """Simulates a single efficacy-toxicity dose-finding trial.
 
@@ -425,24 +437,20 @@ def _simulate_trial(
 
     # Simulate trial
     if conduct_trial:
-        i = 0
-        design.reset()
-        dose_level = design.next_dose()
-        while i <= design.max_size() and design.has_more():
-            u = (true_toxicities[dose_level - 1], true_efficacies[dose_level - 1])
-            if correlated_outcomes:
-                # Where outcomes are associated, simulated outcomes must reflect the association.
-                # There is a special method for that:
-                events = correlated_binary_outcomes_from_uniforms(
-                    tolerances[i : i + cohort_size,], u, psi=tox_eff_odds_ratio
-                ).astype(int)
-            else:
-                # Outcomes are not associated. Simply use first two columns of tolerances as
-                # uniformally-distributed thresholds for tox and eff. The third col is ignored.
-                events = (tolerances[i : i + cohort_size, 0:2] < u).astype(int)
-            cases = np.column_stack(([dose_level] * cohort_size, events))
-            dose_level = design.update(cases)
-            i += cohort_size
+        from clintrials.core.simulation import UniversalProtocolSimulationRunner
+        runner = UniversalProtocolSimulationRunner(
+            design=design,
+            outcome_generator=_efftox_outcome_generator,
+            recruitment_stream=recruitment_stream
+        )
+        sim_report = runner.run(
+            cohort_size=cohort_size,
+            true_toxicities=true_toxicities,
+            true_efficacies=true_efficacies,
+            tox_eff_odds_ratio=tox_eff_odds_ratio,
+            tolerances=tolerances,
+            correlated_outcomes=correlated_outcomes
+        )
 
     # Report findings
     report = OrderedDict()
@@ -451,7 +459,7 @@ def _simulate_trial(
     # Do not parrot back parameters
 
     if conduct_trial:
-        report.update(design.report())
+        report.update(sim_report)
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
         try:
@@ -500,6 +508,7 @@ def simulate_trial(
     cohort_size=1,
     conduct_trial=1,
     calculate_optimal_decision=1,
+    recruitment_stream=None,
 ):
     """Simulates a single efficacy-toxicity dose-finding trial.
 
@@ -555,6 +564,7 @@ def simulate_trial(
         cohort_size,
         conduct_trial,
         calculate_optimal_decision,
+        recruitment_stream,
     )
 
 
@@ -571,6 +581,7 @@ def simulate_efficacy_toxicity_dose_finding_trials(
     cohort_size=1,
     conduct_trial=1,
     calculate_optimal_decision=1,
+    recruitment_stream=None,
 ):
     """Simulates multiple efficacy-toxicity dose-finding trials.
 
@@ -627,6 +638,7 @@ def simulate_efficacy_toxicity_dose_finding_trials(
             cohort_size,
             conduct_trial,
             calculate_optimal_decision,
+            recruitment_stream,
         )
         report[label] = this_sim
 
