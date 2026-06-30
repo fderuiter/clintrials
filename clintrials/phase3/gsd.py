@@ -169,11 +169,9 @@ class GroupSequentialDesign(Protocol):
                 if i == 1:
                     return norm.cdf(limits[0])
                 else:
-                    return multivariate_normal(
-                        mean=np.zeros(i),
-                        cov=cov,
-                        seed=42
-                    ).cdf(limits)
+                    return multivariate_normal(mean=np.zeros(i), cov=cov, seed=42).cdf(
+                        limits
+                    )
 
             def root_func(u_i):
                 return cdf_at_look_i(u_i) - target_cdf
@@ -194,7 +192,9 @@ class GroupSequentialDesign(Protocol):
 
         return boundaries
 
-    def run_bulk(self, n_sims: int, show_progress: bool = False, theta: float = 0.0, **kwargs) -> dict:
+    def run_bulk(
+        self, n_sims: int, show_progress: bool = False, theta: float = 0.0, **kwargs
+    ) -> dict:
         """Simulates trials in bulk to estimate the operating characteristics of the design.
 
         Args:
@@ -254,6 +254,11 @@ class GroupSequentialDesign(Protocol):
     def simulate(self, n_sims: int, theta: float = 0.0):
         """Legacy method for backward compatibility."""
         import warnings
-        warnings.warn("simulate is deprecated, use run(..., method='bulk') instead.", DeprecationWarning, stacklevel=2)
+
+        warnings.warn(
+            "simulate is deprecated, use run(..., method='bulk') instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
         return self.run(n_sims=n_sims, method="bulk", theta=theta)

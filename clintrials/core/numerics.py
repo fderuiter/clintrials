@@ -38,7 +38,7 @@ def adaptive_mc_integration(
     """
     limits = initial_limits
     num_dims = len(limits)
-    
+
     for i in range(max_iter):
         samp = np.column_stack(
             [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
@@ -78,6 +78,7 @@ def adaptive_mc_integration(
 
         if i == max_iter - 1:
             import logging
+
             logging.warning(
                 "Monte Carlo integration limits did not cover mass threshold after %d iterations.",
                 max_iter,

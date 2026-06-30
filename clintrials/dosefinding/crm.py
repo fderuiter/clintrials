@@ -111,14 +111,10 @@ def _get_beta_hat_bayes(
         )
         return ll + np.log(beta_pdf(t) + 1e-300)
 
-    beta_hat = integrate_posterior_1d(
-        logpost, lambda t: t, _min_beta, _max_beta
-    )
+    beta_hat = integrate_posterior_1d(logpost, lambda t: t, _min_beta, _max_beta)
 
     if estimate_var:
-        exp_x2 = integrate_posterior_1d(
-            logpost, lambda t: t**2, _min_beta, _max_beta
-        )
+        exp_x2 = integrate_posterior_1d(logpost, lambda t: t**2, _min_beta, _max_beta)
         var = exp_x2 - beta_hat**2
     else:
         var = None
@@ -419,11 +415,14 @@ class CRM(DoseFindingTrial):
     def get_summary_functions(cls):
         """Get summary functions for the CRM protocol."""
         import pandas as pd
+
         return {
             "N": lambda s, p: len(s),
             "recommended_dose_prob": lambda s, p: pd.Series(
                 [x.get("RecommendedDose") for x in s]
-            ).value_counts(normalize=True).sort_index(),
+            )
+            .value_counts(normalize=True)
+            .sort_index(),
         }
 
     def __init__(
@@ -508,22 +507,32 @@ class CRM(DoseFindingTrial):
                 to 200.
         """
         from clintrials.core.schema import CRMSchema
-        
+
         # Build kwargs for schema defaults
-        schema_kwargs = {"prior": prior, "target": target, "first_dose": first_dose, "max_size": max_size}
+        schema_kwargs = {
+            "prior": prior,
+            "target": target,
+            "first_dose": first_dose,
+            "max_size": max_size,
+        }
         if lowest_dose_too_toxic_hurdle is not None:
             schema_kwargs["lowest_dose_too_toxic_hurdle"] = lowest_dose_too_toxic_hurdle
         if lowest_dose_too_toxic_certainty is not None:
-            schema_kwargs["lowest_dose_too_toxic_certainty"] = lowest_dose_too_toxic_certainty
+            schema_kwargs["lowest_dose_too_toxic_certainty"] = (
+                lowest_dose_too_toxic_certainty
+            )
         if coherency_threshold is not None:
             schema_kwargs["coherency_threshold"] = coherency_threshold
         if bootstrap_samples is not None:
             schema_kwargs["bootstrap_samples"] = bootstrap_samples
 
         config = CRMSchema(**schema_kwargs)
-        
+
         DoseFindingTrial.__init__(
-            self, first_dose=config.first_dose, num_doses=len(config.prior), max_size=config.max_size
+            self,
+            first_dose=config.first_dose,
+            num_doses=len(config.prior),
+            max_size=config.max_size,
         )
 
         self.prior = config.prior

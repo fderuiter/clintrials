@@ -61,7 +61,7 @@ def test_winratio_trial():
         p_y2_B=0.4,
         p_y3_A=0.6,
         p_y3_B=0.4,
-        significance_level=0.05
+        significance_level=0.05,
     )
     assert trial.has_more() is True
     trial.update()
@@ -74,6 +74,17 @@ def test_winratio_trial():
     assert trial.has_more() is True
 
 
-@patch("sys.argv", ["main", "--num_subjects_A", "10", "--num_subjects_B", "10", "--num_simulations", "5"])
+@patch(
+    "sys.argv",
+    [
+        "main",
+        "--num_subjects_A",
+        "10",
+        "--num_subjects_B",
+        "10",
+        "--num_simulations",
+        "5",
+    ],
+)
 def test_main_cli():
     main()

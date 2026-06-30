@@ -518,14 +518,15 @@ def correlated_binary_outcomes(num_pairs, u, psi, seed=None):
         numpy.ndarray: A 2D array of paired binary outcomes.
     """
     from clintrials.core.rng import get_rng
+
     rng = get_rng(seed)
 
     u12 = _correlated_binary_outcomes_solve2(u[0], u[1], psi)
     y = -1 * np.ones(shape=(num_pairs, 2))
     y[:, 0] = (rng.uniform(size=num_pairs) < u[0]).astype(int)
-    y[:, 1] = y[:, 0] * (rng.uniform(size=num_pairs) <= u12 / u[0]) + (
-        1 - y[:, 0]
-    ) * (rng.uniform(size=num_pairs) <= (u[1] - u12) / (1 - u[0]))
+    y[:, 1] = y[:, 0] * (rng.uniform(size=num_pairs) <= u12 / u[0]) + (1 - y[:, 0]) * (
+        rng.uniform(size=num_pairs) <= (u[1] - u12) / (1 - u[0])
+    )
     return y
 
 

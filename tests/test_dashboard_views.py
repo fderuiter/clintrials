@@ -5,7 +5,11 @@ from unittest.mock import MagicMock
 import pandas as pd
 
 from clintrials.visualization.dashboard import main
-from clintrials.visualization.dashboard.views import crm_view, efftox_view, winratio_view
+from clintrials.visualization.dashboard.views import (
+    crm_view,
+    efftox_view,
+    winratio_view,
+)
 
 
 def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
@@ -265,7 +269,7 @@ def test_winratio_view_render_success(monkeypatch):
         p_y2_B=0.25,
         p_y3_A=0.43,
         p_y3_B=0.27,
-        significance_level=0.05
+        significance_level=0.05,
     )
     st_mock.success.assert_called_once()
     st_mock.write.assert_any_call("Power of the test: 0.8000")

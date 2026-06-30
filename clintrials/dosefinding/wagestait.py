@@ -93,6 +93,7 @@ def _wt_get_theta_hat(
 
     theta_hats = []
     for skeleton in skeletons:
+
         def logpost(t):
             ll = _wt_log_lik(cases, skeleton, t, F)
             return ll + np.log(theta_prior.pdf(t) + 1e-300)

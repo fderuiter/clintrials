@@ -783,9 +783,8 @@ def _efftox_row_formatter(x, dose_label_func, verbose=False):
             template_txt = "{} -> Dose {}, Superiority={} * tentative *"
         else:
             template_txt = "{} -> Dose {}, Superiority={}"
-        return template_txt.format(
-            path, dose_label_func(obd), np.round(prob_sup, 2)
-        )
+        return template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2))
+
 
 def print_dtps(dtps, indent=0, dose_label_func=None):
     """Prints the dose-transition pathways.
@@ -797,6 +796,7 @@ def print_dtps(dtps, indent=0, dose_label_func=None):
             label. Defaults to `str`.
     """
     from clintrials.dosefinding import print_dtps as base_print_dtps
+
     base_print_dtps(
         dtps,
         indent=indent,
@@ -816,6 +816,7 @@ def print_dtps_verbose(dtps, indent=0, dose_label_func=None):
             label. Defaults to `str`.
     """
     from clintrials.dosefinding import print_dtps as base_print_dtps
+
     base_print_dtps(
         dtps,
         indent=indent,

@@ -35,6 +35,7 @@ def pi_e(x, theta):
         numpy.ndarray: An array of efficacy probabilities.
     """
     from clintrials.core.math import inverse_logit
+
     z = theta[:, 0] + theta[:, 1] * x[2] + theta[:, 2] * x[3] + theta[:, 3] * x[4]
     return inverse_logit(z)
 
@@ -50,6 +51,7 @@ def pi_t(x, theta):
         numpy.ndarray: An array of toxicity probabilities.
     """
     from clintrials.core.math import inverse_logit
+
     z = theta[:, 4]
     return inverse_logit(z)
 
@@ -65,6 +67,7 @@ def pi_ab(x, theta):
         numpy.ndarray: An array of joint probabilities.
     """
     from clintrials.core.math import fgm_joint_prob
+
     b = x[0]
     a = x[1]
     psi = theta[:, 5]

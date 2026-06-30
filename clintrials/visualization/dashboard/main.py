@@ -24,6 +24,19 @@ def main():
     """
     st.title("Interactive Simulation Dashboard")
 
+    st.sidebar.header("Accessibility")
+    if not hasattr(st, "session_state"):
+        st.session_state = {}
+    if "accessibility_mode" not in st.session_state:
+        st.session_state["accessibility_mode"] = False
+
+    toggle_fn = getattr(st.sidebar, "toggle", lambda *args, **kwargs: False)
+    st.session_state["accessibility_mode"] = toggle_fn(
+        "Accessibility Mode",
+        value=st.session_state.get("accessibility_mode", False),
+        help="Enable high-fidelity text alternatives for screen readers.",
+    )
+
     st.sidebar.header("Select Trial Design")
     design_type = create_widget(
         st,

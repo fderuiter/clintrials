@@ -51,6 +51,7 @@ def pi_t(disease_status, mutation_status, alpha0=0, alpha1=0, alpha2=0):
         float: The probability of toxicity.
     """
     from clintrials.core.math import inverse_logit
+
     z = alpha0 + alpha1 * disease_status + alpha2 * mutation_status
     return inverse_logit(z)
 
@@ -69,6 +70,7 @@ def pi_e(disease_status, mutation_status, beta0=0, beta1=0, beta2=0):
         float: The probability of efficacy.
     """
     from clintrials.core.math import inverse_logit
+
     z = beta0 + beta1 * disease_status + beta2 * mutation_status
     return inverse_logit(z)
 
@@ -91,6 +93,7 @@ def pi_ab(disease_status, mutation_status, eff, tox, alpha0, beta0, beta1, beta2
         float: The likelihood of the outcome.
     """
     from clintrials.core.math import fgm_joint_prob
+
     p1 = pi_t(disease_status, mutation_status, alpha0)
     p2 = pi_e(disease_status, mutation_status, beta0, beta1, beta2)
     return fgm_joint_prob(tox, eff, p1, p2, psi)
@@ -242,6 +245,7 @@ def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilo
     )
 
     from clintrials.core.numerics import adaptive_mc_integration
+
     refined_limits, pds = adaptive_mc_integration(
         lik_integrand,
         limits,
@@ -495,6 +499,7 @@ class PePS2BeBOP:
                 upper bound of the correlation.
         """
         from clintrials.core.math import association_to_correlation
+
         psi_samples = self._pds._samp[:, 4]
         correlation_samples = association_to_correlation(psi_samples)
         return correlation_ci(
@@ -897,8 +902,6 @@ def splice_sims(in_files_pattern, out_file=None):
         json.dump(sims, open(out_file, "w"))
     else:
         return sims
-
-
 
 
 def tell_me_about_results(
