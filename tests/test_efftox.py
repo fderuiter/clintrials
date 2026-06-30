@@ -53,8 +53,8 @@ def test_thall2014_efftox():
     # Model params
     tox_cutoff = 0.3
     eff_cutoff = 0.5
-    tox_certainty = 0.1
-    eff_certainty = 0.1
+    tox_certainty = 0.15
+    eff_certainty = 0.05
 
     efftox_priors = [
         norm(loc=-7.9593, scale=3.5487),
@@ -200,8 +200,8 @@ def test_matchpoint_efftox():
         mp_hinge_points[2][0],
         mp_hinge_points[2][1],
     )
-    mp_tox_certainty = 0.05
-    mp_eff_certainty = 0.05
+    mp_tox_certainty = 0.20
+    mp_eff_certainty = 0.10
     mp_mu_t_mean, mp_mu_t_sd = -5.4317, 2.7643
     mp_beta_t_mean, mp_beta_t_sd = 3.1761, 2.7703
     mp_mu_e_mean, mp_mu_e_sd = -0.8442, 1.9786
@@ -267,8 +267,8 @@ def test_thall2014_efftox_v2():
     first_dose = 1
     tox_cutoff = 0.3
     eff_cutoff = 0.5
-    tox_certainty = 0.1
-    eff_certainty = 0.1
+    tox_certainty = 0.15
+    eff_certainty = 0.05
     efftox_priors = [
         norm(loc=-7.9593, scale=3.5487),
         norm(loc=1.5482, scale=3.5018),
@@ -482,7 +482,7 @@ def efftox_trial():
         tox_cutoff=0.3,
         eff_cutoff=0.5,
         tox_certainty=0.9,
-        eff_certainty=0.9,
+        eff_certainty=0.85,
         metric=LpNormCurve(0.5, 0.3, 0.7, 0.25),
         max_size=30,
     )
@@ -582,7 +582,7 @@ class TestEffToxAdmissibleSet:
     @patch("clintrials.dosefinding.efftox.efftox_get_posterior_probs")
     def test_admissible_set_logic(self, mock_post_probs, efftox_trial):
         prob_acc_tox = [0.8, 0.95, 0.8, 0.8, 0.8]
-        prob_acc_eff = [0.8, 0.95, 0.8, 0.8, 0.8]
+        prob_acc_eff = [0.8, 0.87, 0.8, 0.8, 0.8]
         mock_post_probs.return_value = (
             list(zip([0.1] * 5, [0.6] * 5, prob_acc_tox, prob_acc_eff)),
             None,
@@ -613,7 +613,7 @@ def test_myeloma_integration_deterministic(mocker):
         norm(loc=0, scale=1),
     ]
     metric = LpNormCurve(0.2, 0.3, 0.5, 0.15)
-    trial = EffTox(real_doses, priors, 0.3, 0.2, 0.9, 0.9, metric, 30, 1)
+    trial = EffTox(real_doses, priors, 0.3, 0.2, 0.9, 0.8, metric, 30, 1)
     mock_post_probs = mocker.patch(
         "clintrials.dosefinding.efftox.efftox_get_posterior_probs"
     )
@@ -622,7 +622,7 @@ def test_myeloma_integration_deterministic(mocker):
     prob_tox = [0.1, 0.12, 0.15, 0.2, 0.25]
     prob_eff = [0.3, 0.5, 0.6, 0.55, 0.5]
     acc_tox = [0.95] * 5
-    acc_eff = [0.95] * 5
+    acc_eff = [0.85] * 5
     mock_post_probs.return_value = (
         list(zip(prob_tox, prob_eff, acc_tox, acc_eff)),
         None,
