@@ -174,6 +174,7 @@ def _pi_ab(scaled_dose, tox, eff, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi):
         float: The likelihood of the outcome.
     """
     from clintrials.core.math import fgm_joint_prob
+
     p_E = _pi_E(scaled_dose, mu_E, beta1_E, beta2_E)
     p_T = _pi_T(scaled_dose, mu_T, beta_T)
     return fgm_joint_prob(eff, tox, p_E, p_T, psi)
@@ -244,6 +245,7 @@ def _get_posterior_sample(
     )
 
     from clintrials.core.numerics import adaptive_mc_integration
+
     refined_limits, pds = adaptive_mc_integration(
         lik_integrand,
         limits,
@@ -720,11 +722,14 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     def get_summary_functions(cls):
         """Get summary functions for the EffTox protocol."""
         import pandas as pd
+
         return {
             "N": lambda s, p: len(s),
             "recommended_dose_prob": lambda s, p: pd.Series(
                 [x.get("RecommendedDose") for x in s]
-            ).value_counts(normalize=True).sort_index(),
+            )
+            .value_counts(normalize=True)
+            .sort_index(),
             "prob_accept_tox": lambda s, p: pd.Series(
                 [x.get("ProbAcceptTox", 0) > 0.5 for x in s]
             ).mean(),
@@ -761,12 +766,6 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             theta_priors (list, optional): A list of 6 prior distributions
                 for the model parameters. If `None`, principled priors are
                 elicited from `prior_tox_probs` and `prior_eff_probs`.
-            prior_tox_probs (list[float], optional): Prior toxicity
-                probabilities at each dose level. Used for elicitation if
-                `theta_priors` is `None`.
-            prior_eff_probs (list[float], optional): Prior efficacy
-                probabilities at each dose level. Used for elicitation if
-                `theta_priors` is `None`.
             tox_cutoff (float): The maximum acceptable probability of
                 toxicity.
             eff_cutoff (float): The minimum acceptable probability of
@@ -778,8 +777,17 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             metric (LpNormCurve | InverseQuadraticCurve): An object for
                 calculating the utility of efficacy-toxicity pairs.
             max_size (int): The maximum number of patients in the trial.
+                Note: In EffTox, `max_size` appears before `first_dose` in the
+                initialization signature, differing from other design patterns.
             first_dose (int, optional): The starting dose level (1-based).
-                Defaults to 1.
+                Note: This parameter follows `max_size` in EffTox, differing
+                from typical patterns. Defaults to 1.
+            prior_tox_probs (list[float], optional): Prior toxicity
+                probabilities at each dose level. Used for elicitation if
+                `theta_priors` is `None`.
+            prior_eff_probs (list[float], optional): Prior efficacy
+                probabilities at each dose level. Used for elicitation if
+                `theta_priors` is `None`.
             avoid_skipping_untried_escalation (bool, optional): If `True`,
                 avoids skipping untried doses when escalating. Defaults to
                 `True`.
@@ -824,7 +832,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 
         config = EffToxSchema(**schema_kwargs)
         first_dose = config.first_dose
-        
+
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(real_doses), config.max_size
         )
