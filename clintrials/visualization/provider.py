@@ -5,6 +5,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 
+from clintrials.core.viz_interface import VisualizationResult
+
 COLORBLIND_PALETTE = [
     "#E69F00",
     "#56B4E9",
@@ -104,7 +106,7 @@ def plot_dose_finding_outcomes(trial, chart_title=None):
         chart_title = "Each point represents a patient<br>A circle indicates no toxicity, a cross toxicity"
 
     if trial.size() == 0:
-        return go.Figure()
+        return VisualizationResult(chart=go.Figure(), metadata=pd.DataFrame())
 
     patient_number = list(range(1, trial.size() + 1))
     doses = trial.doses()
@@ -139,7 +141,19 @@ def plot_dose_finding_outcomes(trial, chart_title=None):
         height=500,
         template="plotly_white",
     )
-    return fig
+
+    df = pd.DataFrame({
+        "Patient Number": patient_number,
+        "Dose Level": doses,
+        "Toxicity": ["Yes" if t else "No" for t in toxicities]
+    })
+    
+    return VisualizationResult(
+        chart=fig,
+        metadata=df,
+        title=chart_title,
+        summary_text=generate_text_summary(df, chart_title)
+    )
 
 
 def plot_crm_toxicity_probabilities(trial, chart_title=None):
@@ -216,7 +230,21 @@ def plot_crm_toxicity_probabilities(trial, chart_title=None):
         width=800,
         height=500,
     )
-    return fig
+
+    df = pd.DataFrame({
+        "Dose Level": dl,
+        "Prior Toxicity": prior_tox,
+        "Posterior Toxicity": post_tox,
+        "5% Quantile": post_tox_lower,
+        "95% Quantile": post_tox_upper
+    })
+
+    return VisualizationResult(
+        chart=fig,
+        metadata=df,
+        title=chart_title,
+        summary_text=generate_text_summary(df, chart_title)
+    )
 
 
 def plot_efftox_utility_contours(
@@ -312,7 +340,18 @@ def plot_efftox_utility_contours(
         width=800,
         height=600,
     )
-    return fig
+
+    df = pd.DataFrame({
+        "Hinge Prob Efficacy": hinge_prob_eff,
+        "Hinge Prob Toxicity": hinge_prob_tox
+    })
+
+    return VisualizationResult(
+        chart=fig,
+        metadata=df,
+        title=title,
+        summary_text=generate_text_summary(df, title)
+    )
 
 
 def plot_efftox_density(
@@ -359,14 +398,20 @@ def plot_efftox_density(
         width=800,
         height=500,
     )
-    return fig
+
+    return VisualizationResult(
+        chart=fig,
+        metadata=df,
+        title=plot_title,
+        summary_text=generate_text_summary(df, plot_title)
+    )
 
 
 def plot_crm_simulation_recommendation(summary_df):
     """Plots CRM simulation recommendation probabilities."""
     col_name = "RecommendedDoseProb" if "RecommendedDoseProb" in summary_df.columns else "recommended_dose_prob"
     if summary_df.empty or col_name not in summary_df.columns:
-        return go.Figure()
+        return VisualizationResult(chart=go.Figure(), metadata=pd.DataFrame())
     rec_dose_df = summary_df[col_name].apply(pd.Series).fillna(0)
     rec_dose_df_melted = rec_dose_df.reset_index().melt(
         id_vars=[col for col in rec_dose_df.index.names],
@@ -386,14 +431,19 @@ def plot_crm_simulation_recommendation(summary_df):
         },
     )
     fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
-    return fig
+    return VisualizationResult(
+        chart=fig,
+        metadata=rec_dose_df_melted,
+        title=title,
+        summary_text=fig.layout.meta
+    )
 
 
 def plot_efftox_simulation_recommendation(summary_df):
     """Plots EffTox simulation recommendation probabilities."""
     col_name = "RecommendedDoseProb" if "RecommendedDoseProb" in summary_df.columns else "recommended_dose_prob"
     if summary_df.empty or col_name not in summary_df.columns:
-        return go.Figure()
+        return VisualizationResult(chart=go.Figure(), metadata=pd.DataFrame())
     rec_dose_df = summary_df[col_name].apply(pd.Series).fillna(0)
     rec_dose_df_melted = rec_dose_df.reset_index().melt(
         id_vars=[col for col in rec_dose_df.index.names],
@@ -409,7 +459,12 @@ def plot_efftox_simulation_recommendation(summary_df):
         title=title,
     )
     fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
-    return fig
+    return VisualizationResult(
+        chart=fig,
+        metadata=rec_dose_df_melted,
+        title=title,
+        summary_text=fig.layout.meta
+    )
 
 
 def plot_efftox_simulation_acceptability(summary_df):
@@ -421,7 +476,7 @@ def plot_efftox_simulation_acceptability(summary_df):
         or tox_col not in summary_df.columns
         or eff_col not in summary_df.columns
     ):
-        return go.Figure()
+        return VisualizationResult(chart=go.Figure(), metadata=pd.DataFrame())
     accept_df = summary_df[[tox_col, eff_col]].reset_index()
     accept_df_melted = accept_df.melt(
         id_vars=["true_prob_tox", "true_prob_eff"],
@@ -437,7 +492,60 @@ def plot_efftox_simulation_acceptability(summary_df):
         title=title,
     )
     fig.layout.meta = generate_text_summary(accept_df_melted, title)
-    return fig
+    return VisualizationResult(
+        chart=fig,
+        metadata=accept_df_melted,
+        title=title,
+        summary_text=fig.layout.meta
+    )
+
+
+def plot_winratio_simulations(power, average_ci, title="Win Ratio Simulations"):
+    """Plots Win-Ratio simulations."""
+    # Create a simple figure (e.g. bar chart or indicator)
+    df = pd.DataFrame({
+        "Metric": ["Power", "CI Lower", "CI Upper"],
+        "Value": [power, average_ci[0], average_ci[1]]
+    })
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=["Power"],
+        y=[power],
+        name="Power",
+        marker_color="#0072B2"
+    ))
+    
+    # Add a point for the Confidence Interval
+    fig.add_trace(go.Scatter(
+        x=["95% CI"],
+        y=[(average_ci[0] + average_ci[1]) / 2],
+        error_y=dict(
+            type='data',
+            symmetric=False,
+            array=[average_ci[1] - (average_ci[0] + average_ci[1]) / 2],
+            arrayminus=[(average_ci[0] + average_ci[1]) / 2 - average_ci[0]]
+        ),
+        mode='markers',
+        name="Average CI",
+        marker=dict(color="#D55E00", size=10)
+    ))
+    
+    fig.update_layout(
+        title=title,
+        yaxis_title="Value",
+        template="plotly_white",
+        width=800,
+        height=500,
+        showlegend=False
+    )
+    
+    return VisualizationResult(
+        chart=fig,
+        metadata=df,
+        title=title,
+        summary_text=generate_text_summary(df, title)
+    )
 
 
 from clintrials.core.viz_interface import VisualizationProvider
@@ -492,6 +600,10 @@ class DefaultVisualizationProvider(VisualizationProvider):
         return plot_efftox_density(
             data_func, trial, x_name, plot_title, include_doses, boot_samps
         )
+
+    def plot_winratio_simulations(self, power, average_ci, title="Win Ratio Simulations"):
+        """Plot Win-Ratio simulations."""
+        return plot_winratio_simulations(power, average_ci, title=title)
 
 
 def get_default_provider():

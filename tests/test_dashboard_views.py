@@ -72,6 +72,9 @@ def _make_winratio_streamlit_mock():
         subheader=MagicMock(),
         write=MagicMock(),
         fragment=lambda func: func,
+        plotly_chart=MagicMock(),
+        expander=MagicMock(),
+        dataframe=MagicMock(),
     )
     return st
 
@@ -143,7 +146,8 @@ def test_crm_view_render_success(monkeypatch):
     summarise_mock = MagicMock(return_value=summary_df)
     monkeypatch.setattr(crm_view, "summarise_sims", summarise_mock)
 
-    bar_fig = object()
+    from clintrials.core.viz_interface import VisualizationResult
+    bar_fig = VisualizationResult(chart="bar_obj", metadata=None)
     import clintrials.visualization as viz
 
     monkeypatch.setattr(
@@ -155,7 +159,7 @@ def test_crm_view_render_success(monkeypatch):
 
     summarise_mock.assert_called_once()
     viz.plot_crm_simulation_recommendation.assert_called_once()
-    st_mock.plotly_chart.assert_called_with(bar_fig)
+    st_mock.plotly_chart.assert_called_with("bar_obj")
 
 
 def test_crm_view_warns_without_recommended(monkeypatch):
@@ -206,9 +210,10 @@ def test_efftox_view_render_success(monkeypatch):
     )
 
     import clintrials.visualization as viz
+    from clintrials.core.viz_interface import VisualizationResult
 
-    bar_mock = MagicMock(return_value="fig_bar")
-    line_mock = MagicMock(return_value="fig_line")
+    bar_mock = MagicMock(return_value=VisualizationResult(chart="fig_bar", metadata=None))
+    line_mock = MagicMock(return_value=VisualizationResult(chart="fig_line", metadata=None))
     monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
     monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
@@ -253,7 +258,14 @@ def test_winratio_view_render_success(monkeypatch):
     run_sim.return_value.average_ci = (0.1, 0.2)
     monkeypatch.setattr(winratio_view, "WinRatioTrial", run_sim)
 
+    import clintrials.visualization as viz
+    from clintrials.core.viz_interface import VisualizationResult
+    mock_plot = MagicMock(return_value=VisualizationResult(chart="winratio_chart", metadata=None))
+    monkeypatch.setattr(viz, "plot_winratio_simulations", mock_plot)
+
     winratio_view.render()
+
+    st_mock.plotly_chart.assert_called_with("winratio_chart")
 
     run_sim.assert_called_once_with(
         num_subjects_A=100,
@@ -268,5 +280,3 @@ def test_winratio_view_render_success(monkeypatch):
         significance_level=0.05
     )
     st_mock.success.assert_called_once()
-    st_mock.write.assert_any_call("Power of the test: 0.8000")
-    st_mock.write.assert_any_call("Average 95% Confidence Interval: (0.1000, 0.2000)")

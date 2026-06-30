@@ -11,4 +11,5 @@ from clintrials.visualization.provider import (
     plot_crm_simulation_recommendation,
     plot_efftox_simulation_recommendation,
     plot_efftox_simulation_acceptability,
+    plot_winratio_simulations,
 )

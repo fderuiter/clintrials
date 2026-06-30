@@ -42,8 +42,13 @@ def render() -> None:
             average_ci = trial.average_ci
         st.success("Simulation complete")
         st.subheader("Results")
-        st.write(f"Power of the test: {power:.4f}")
-        st.write(
-            "Average 95% Confidence Interval: "
-            f"({average_ci[0]:.4f}, {average_ci[1]:.4f})"
-        )
+        
+        import clintrials.visualization as viz
+        result = viz.plot_winratio_simulations(power, average_ci)
+        
+        st.plotly_chart(result.chart)
+        with st.expander("Data Summary"):
+            if result.metadata is not None:
+                st.dataframe(result.metadata)
+            else:
+                st.write("No data summary available.")

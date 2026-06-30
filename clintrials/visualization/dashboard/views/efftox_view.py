@@ -60,16 +60,13 @@ def render(sims):
                 st.subheader("Dose Recommendation Probability")
                 import clintrials.visualization as viz
 
-                fig_rec = viz.plot_efftox_simulation_recommendation(summary_df)
-                st.plotly_chart(fig_rec)
+                result_rec = viz.plot_efftox_simulation_recommendation(summary_df)
+                st.plotly_chart(result_rec.chart)
                 with st.expander("Data Summary"):
-                    st.markdown(
-                        getattr(
-                            getattr(fig_rec, "layout", None),
-                            "meta",
-                            "No data summary available.",
-                        )
-                    )
+                    if result_rec.metadata is not None:
+                        st.dataframe(result_rec.metadata)
+                    else:
+                        st.write("No data summary available.")
 
             # Acceptability Probabilities
             if (
@@ -79,16 +76,13 @@ def render(sims):
                 st.subheader("Acceptability Probabilities")
                 import clintrials.visualization as viz
 
-                fig_accept = viz.plot_efftox_simulation_acceptability(summary_df)
-                st.plotly_chart(fig_accept)
+                result_accept = viz.plot_efftox_simulation_acceptability(summary_df)
+                st.plotly_chart(result_accept.chart)
                 with st.expander("Data Summary"):
-                    st.markdown(
-                        getattr(
-                            getattr(fig_accept, "layout", None),
-                            "meta",
-                            "No data summary available.",
-                        )
-                    )
+                    if result_accept.metadata is not None:
+                        st.dataframe(result_accept.metadata)
+                    else:
+                        st.write("No data summary available.")
 
         else:
             st.warning("Summary dataframe is empty. Cannot generate plots.")

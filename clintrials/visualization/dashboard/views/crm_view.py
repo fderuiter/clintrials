@@ -54,16 +54,13 @@ def render(sims):
             st.subheader("Dose Recommendation Probability")
             import clintrials.visualization as viz
 
-            fig = viz.plot_crm_simulation_recommendation(summary_df)
-            st.plotly_chart(fig)
+            result = viz.plot_crm_simulation_recommendation(summary_df)
+            st.plotly_chart(result.chart)
             with st.expander("Data Summary"):
-                st.markdown(
-                    getattr(
-                        getattr(fig, "layout", None),
-                        "meta",
-                        "No data summary available.",
-                    )
-                )
+                if result.metadata is not None:
+                    st.dataframe(result.metadata)
+                else:
+                    st.write("No data summary available.")
 
         else:
             st.warning(

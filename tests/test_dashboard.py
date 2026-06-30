@@ -104,8 +104,9 @@ def test_crm_render_creates_plot(fake_streamlit, monkeypatch):
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
 
     import clintrials.visualization as viz
+    from clintrials.core.viz_interface import VisualizationResult
 
-    bar_mock = MagicMock(return_value="bar_fig")
+    bar_mock = MagicMock(return_value=VisualizationResult(chart="bar_fig", metadata=None))
     monkeypatch.setattr(viz, "plot_crm_simulation_recommendation", bar_mock)
 
     class DummyPS:
@@ -136,9 +137,10 @@ def test_efftox_render_creates_plots(fake_streamlit, monkeypatch):
     monkeypatch.setattr(efftox_view, "st", fake_streamlit)
 
     import clintrials.visualization as viz
+    from clintrials.core.viz_interface import VisualizationResult
 
-    bar_mock = MagicMock(return_value="bar_fig")
-    line_mock = MagicMock(return_value="line_fig")
+    bar_mock = MagicMock(return_value=VisualizationResult(chart="bar_fig", metadata=None))
+    line_mock = MagicMock(return_value=VisualizationResult(chart="line_fig", metadata=None))
     monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
     monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
