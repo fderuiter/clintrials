@@ -48,8 +48,27 @@ def test_unified_protocol():
     assert res_iter.mode == "iterative"
     assert res_bulk.mode == "bulk"
 
-    # Due to same seed, normal draws for 5 steps * 100 times iteratively
-    # matches (100, 5) draws vectorized if we transpose or order correctly?
-    # Actually, np default_rng might not yield identical sequence if shaped vs loop,
-    # but let's test if we can make it pass or at least structure it.
-    pass
+def test_simulation_result_dict_methods():
+    res = SimulationResult({"a": 1, "b": 2}, mode="bulk")
+    assert res.get("a") == 1
+    assert res.get("c", 3) == 3
+    assert list(res.keys()) == ["a", "b"]
+    assert list(res.values()) == [1, 2]
+    assert list(res.items()) == [("a", 1), ("b", 2)]
+    assert res.to_list() == [{"a": 1, "b": 2}]
+
+def test_simulation_result_list_methods():
+    res = SimulationResult([1, 2, 3], mode="iterative")
+    assert len(res) == 3
+    assert res[1] == 2
+    assert list(iter(res)) == [1, 2, 3]
+    assert res.to_list() == [1, 2, 3]
+    
+    with pytest.raises(AttributeError):
+        res.get("a")
+    with pytest.raises(AttributeError):
+        res.keys()
+    with pytest.raises(AttributeError):
+        res.values()
+    with pytest.raises(AttributeError):
+        res.items()
