@@ -152,60 +152,54 @@ class GroupSequentialDesign(Protocol):
         P(Z_1 < u_1, ..., Z_i < u_i) = 1 - alpha_i, where alpha_i is the
         cumulative alpha spent at look i.
         """
-        random_state = np.random.get_state()
-        np.random.seed(42)
-        try:
-            boundaries = []
-            for i in range(1, self.k + 1):
-                target_alpha = self.sfu(self.timing[i - 1], self.alpha)
+        boundaries = []
+        for i in range(1, self.k + 1):
+            target_alpha = self.sfu(self.timing[i - 1], self.alpha)
 
-                target_cdf = 1 - target_alpha
+            target_cdf = 1 - target_alpha
 
-                cov = np.identity(i)
-                for row in range(i):
-                    for col in range(row + 1, i):
-                        corr = np.sqrt(self.timing[row] / self.timing[col])
-                        cov[row, col] = cov[col, row] = corr
+            cov = np.identity(i)
+            for row in range(i):
+                for col in range(row + 1, i):
+                    corr = np.sqrt(self.timing[row] / self.timing[col])
+                    cov[row, col] = cov[col, row] = corr
 
-                def cdf_at_look_i(u_i):
-                    limits = boundaries + [u_i]
-                    if i == 1:
-                        return norm.cdf(limits[0])
-                    else:
-                        return multivariate_normal.cdf(
-                            limits,
-                            mean=np.zeros(i),
-                            cov=cov,
-                            maxpts=1000000,
-                            abseps=1e-5,
-                        )
+            def cdf_at_look_i(u_i):
+                limits = boundaries + [u_i]
+                if i == 1:
+                    return norm.cdf(limits[0])
+                else:
+                    return multivariate_normal(
+                        mean=np.zeros(i),
+                        cov=cov,
+                        seed=42
+                    ).cdf(limits)
 
-                def root_func(u_i):
-                    return cdf_at_look_i(u_i) - target_cdf
+            def root_func(u_i):
+                return cdf_at_look_i(u_i) - target_cdf
 
-                try:
-                    boundary = brentq(root_func, -5, 15)
-                except ValueError:
-                    boundary = np.inf
+            try:
+                boundary = brentq(root_func, -5, 15)
+            except ValueError:
+                boundary = np.inf
 
-                boundaries.append(boundary)
+            boundaries.append(boundary)
 
-            if self.alpha < 1 and boundaries[-1] == np.inf:
-                try:
-                    boundary = brentq(root_func, -50, 50)
-                    boundaries[-1] = boundary
-                except ValueError:
-                    raise RuntimeError("Could not find a valid final boundary.")
+        if self.alpha < 1 and boundaries[-1] == np.inf:
+            try:
+                boundary = brentq(root_func, -50, 50)
+                boundaries[-1] = boundary
+            except ValueError:
+                raise RuntimeError("Could not find a valid final boundary.")
 
-            return boundaries
-        finally:
-            np.random.set_state(random_state)
+        return boundaries
 
-    def simulate(self, n_sims: int, theta: float = 0.0) -> dict:
-        """Simulates trials to estimate the operating characteristics of the design.
+    def run_bulk(self, n_sims: int, show_progress: bool = False, theta: float = 0.0, **kwargs) -> dict:
+        """Simulates trials in bulk to estimate the operating characteristics of the design.
 
         Args:
             n_sims (int): The number of trials to simulate.
+            show_progress (bool): Whether to show progress tracking (not implemented for bulk gsd yet).
             theta (float, optional): The effect size (drift parameter).
                 `theta = 0` corresponds to the null hypothesis, and the result
                 is the Type I error rate. A non-zero theta corresponds to an
@@ -213,13 +207,7 @@ class GroupSequentialDesign(Protocol):
                 Defaults to 0.0.
 
         Returns:
-            dict: A dictionary containing the simulation results, including:
-                - 'rejection_prob': The overall probability of rejecting the null.
-                - 'stopping_dist': The distribution of stopping times.
-                - 'expected_info': The expected information at trial conclusion.
-
-        Raises:
-            ValueError: If `n_sims` is not a positive integer.
+            dict: A dictionary containing the simulation results.
         """
         from clintrials.validation import validate_positive_integer
 
@@ -233,7 +221,7 @@ class GroupSequentialDesign(Protocol):
                 corr = np.sqrt(self.timing[i] / self.timing[j])
                 cov[i, j] = cov[j, i] = corr
 
-        simulated_z = np.random.multivariate_normal(mean=means, cov=cov, size=n_sims)
+        simulated_z = self.rng.multivariate_normal(mean=means, cov=cov, size=n_sims)
 
         stopped_at = np.full(n_sims, self.k + 1, dtype=int)
         rejected = np.zeros(n_sims, dtype=bool)
@@ -262,3 +250,10 @@ class GroupSequentialDesign(Protocol):
             "stopping_dist": stopping_dist[: self.k],
             "expected_info": expected_info,
         }
+
+    def simulate(self, n_sims: int, theta: float = 0.0):
+        """Legacy method for backward compatibility."""
+        import warnings
+        warnings.warn("simulate is deprecated, use run(..., method='bulk') instead.", DeprecationWarning, stacklevel=2)
+        # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
+        return self.run(n_sims=n_sims, method="bulk", theta=theta)
