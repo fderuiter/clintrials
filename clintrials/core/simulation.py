@@ -1,5 +1,8 @@
 """
 Functions for running and analyzing clinical trial simulations.
+
+
+Random Seed Strategy: {simulation_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -417,3 +420,9 @@ class UniversalProtocolSimulationRunner:
             i += current_cohort_size
 
         return self.design.report()
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

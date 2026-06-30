@@ -1,11 +1,14 @@
 """
 Common, useful functions in the statistics and mathematics of clinical trials.
+
+Random Seed Strategy: {math_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 import numpy as np
+from clintrials.core.registry import REGISTRY, inject_docs
 
 
 def inverse_logit(x):
@@ -29,8 +32,9 @@ def inverse_logit(x):
 # Two-parameter link functions used in CRM-style designs
 # They are written in pairs and all use the same call signature.
 # They take their lead from the same in the dfcrm R-package.
+@inject_docs()
 def empiric(x, a0=None, beta=0):
-    """Calculates the empiric function value.
+    """Calculates the empiric function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     The formula is: x^(e^beta)
 
@@ -50,7 +54,7 @@ def empiric(x, a0=None, beta=0):
         0.25
     """
 
-    beta = np.clip(beta, -10, 10)
+    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
     return x ** np.exp(beta)
 
 
@@ -77,8 +81,9 @@ def inverse_empiric(x, a0=0, beta=0):
     return x ** np.exp(-beta)
 
 
+@inject_docs()
 def logistic(x, a0=0, beta=0):
-    """Calculates the logistic function value.
+    """Calculates the logistic function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     The formula is: 1 / (1 + e^(-a0 - e^beta * x))
 
@@ -94,12 +99,13 @@ def logistic(x, a0=0, beta=0):
         >>> logistic(0.25, -1, 1)
         0.42057106852688747
     """
-    beta = np.clip(beta, -10, 10)
+    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 
+@inject_docs()
 def inverse_logistic(x, a0=0, beta=0):
-    """Calculates the inverse logistic function value.
+    """Calculates the inverse logistic function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     This function is the inverse of `logistic`.
     The formula is: (log(x / (1 - x)) - a0) / e^beta
@@ -116,7 +122,7 @@ def inverse_logistic(x, a0=0, beta=0):
         >>> round(inverse_logistic(0.42057106852688747, -1, 1), 2)
         0.25
     """
-    beta = np.clip(beta, -10, 10)
+    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 
 
@@ -164,8 +170,9 @@ def inverse_hyperbolic_tan(x, a0=0, beta=0):
     return np.arctanh(2 * x ** np.exp(-beta) - 1)
 
 
+@inject_docs()
 def logit1(x, a0=3, beta=0):
-    """Calculates the 1-parameter logistic function value.
+    """Calculates the 1-parameter logistic function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     This is a logistic function, typically used with a single parameter `beta`,
     and a fixed intercept `a0`. The formula is:
@@ -183,12 +190,13 @@ def logit1(x, a0=3, beta=0):
         >>> logit1(0.5, beta=1)
         0.972...
     """
-    beta = np.clip(beta, -10, 10)
+    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 
+@inject_docs()
 def inverse_logit1(x, a0=3, beta=0):
-    """Calculates the inverse 1-parameter logistic function value.
+    """Calculates the inverse 1-parameter logistic function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     This function is the inverse of `logit1`.
 
@@ -204,7 +212,7 @@ def inverse_logit1(x, a0=3, beta=0):
         >>> inverse_logit1(0.972..., beta=1)
         0.5
     """
-    beta = np.clip(beta, -10, 10)
+    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 
 
@@ -245,3 +253,8 @@ def fgm_joint_prob(a, b, p1, p2, psi):
         * association_to_correlation(psi)
     )
     return prob
+
+
+# Inject module-level docstring
+if __doc__:
+    __doc__ = __doc__.format(**REGISTRY)

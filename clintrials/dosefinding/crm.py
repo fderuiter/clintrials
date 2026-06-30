@@ -1,5 +1,7 @@
 """
 Continual Reassessment Method (CRM) for dose-finding clinical trials.
+
+Random Seed Strategy: {crm_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -10,6 +12,7 @@ import warnings
 from collections import OrderedDict
 
 import numpy as np
+from clintrials.core.registry import REGISTRY, inject_docs
 from numpy import trapezoid
 from scipy.integrate import quad
 from scipy.optimize import minimize
@@ -303,8 +306,7 @@ def crm(
             distribution.
         method (str, optional): The estimation method, either "bayes" or
             "mle". Defaults to "bayes".
-        use_quick_integration (bool, optional): If `True`, uses a faster,
-            approximate integration method. Defaults to `False`.
+        use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
         estimate_var (bool, optional): If `True`, estimates the posterior
             variance of beta. Defaults to `False`.
         plugin_mean (bool, optional): If `True`, plugs the beta estimate into
@@ -466,8 +468,7 @@ class CRM(DoseFindingTrial):
                 distribution.
             method (str, optional): The estimation method, either "bayes" or
                 "mle". Defaults to "bayes".
-            use_quick_integration (bool, optional): If `True`, uses a faster,
-                approximate integration method. Defaults to `False`.
+            use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
             estimate_var (bool, optional): If `True`, estimates the posterior
                 variance of beta. Defaults to `True`.
             avoid_skipping_untried_escalation (bool, optional): If `True`,
@@ -653,7 +654,7 @@ class CRM(DoseFindingTrial):
         """
         return list(self.post_tox)
 
-    def _prob_tox_exceeds_quadrature(self, tox_cutoff, deg=40):
+    def _prob_tox_exceeds_quadrature(self, tox_cutoff, deg=REGISTRY["crm_deg"]):
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
         mu0 = self.beta_prior.mean()
         sd0 = np.sqrt(self.beta_prior.var())
@@ -691,8 +692,8 @@ class CRM(DoseFindingTrial):
         Args:
             tox_cutoff (float): The toxicity cutoff.
             backend (str, optional): The calculation backend, either
-                "quadrature" or "laplace". Defaults to "quadrature".
-            n (int, optional): The number of samples for the "laplace"
+                "quadrature" or "bootstrap". Defaults to "quadrature".
+            n (int, optional): The number of samples for the "bootstrap"
                 backend. Defaults to 10**6.
 
         Returns:
@@ -701,9 +702,9 @@ class CRM(DoseFindingTrial):
         """
         if backend == "quadrature":
             return self._prob_tox_exceeds_quadrature(tox_cutoff)
-        if backend == "laplace":
+        if backend == "bootstrap":
             warnings.warn(
-                "laplace backend is deprecated", DeprecationWarning, stacklevel=2
+                "bootstrap backend is deprecated", DeprecationWarning, stacklevel=2
             )
             if self.estimate_var:
                 labels = [
@@ -815,3 +816,8 @@ def crm_dtp_detail(trial):
 
 
 __all__ = ["CRM", "crm", "crm_dtp_detail"]
+
+
+# Inject module-level docstring
+if __doc__:
+    __doc__ = __doc__.format(**REGISTRY)

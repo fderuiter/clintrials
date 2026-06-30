@@ -1,5 +1,8 @@
 """
 Renders the Win Ratio simulation view in the Streamlit dashboard.
+
+
+Random Seed Strategy: {winratio_view_seed_strategy}
 """
 
 import pandas as pd
@@ -84,3 +87,9 @@ def render() -> None:
             file_name="winratio_simulation.pdf",
             mime="application/pdf",
         )
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

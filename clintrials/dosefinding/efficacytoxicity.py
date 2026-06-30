@@ -1,5 +1,8 @@
 """
 Base classes and utilities for efficacy-toxicity dose-finding trials.
+
+
+Random Seed Strategy: {efficacytoxicity_seed_strategy}
 """
 
 __author__ = "brockk"
@@ -836,3 +839,9 @@ def print_dtps_verbose(dtps, indent=0, dose_label_func=None):
         row_formatter=_efftox_row_formatter,
         verbose=True,
     )
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

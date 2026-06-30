@@ -1,5 +1,8 @@
 """
 Main entry point for the Streamlit dashboard.
+
+
+Random Seed Strategy: {main_seed_strategy}
 """
 
 import json
@@ -71,3 +74,9 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

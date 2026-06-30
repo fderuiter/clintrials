@@ -1,6 +1,9 @@
 """
 An implementation of Wages & Tait's adaptive Bayesian design for dose-finding
 in clinical trials.
+
+
+Random Seed Strategy: {wagestait_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -462,3 +465,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             self._status = -1
             self._admissable_set = []
             return -1
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

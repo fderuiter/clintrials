@@ -1,5 +1,8 @@
 """
 Classes and methods to perform general useful statistical routines.
+
+
+Random Seed Strategy: {stats_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -348,3 +351,9 @@ class ProbabilityDensitySample:
         w = w / np.sum(w)
         cumulative_w = np.cumsum(w)
         return float(np.interp(p, cumulative_w, samples))
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

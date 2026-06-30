@@ -1,4 +1,7 @@
-"""Statistical helpers for win-ratio simulations."""
+"""Statistical helpers for win-ratio simulations.
+
+Random Seed Strategy: {statistics_seed_strategy}
+"""
 
 from __future__ import annotations
 
@@ -64,3 +67,9 @@ def calculate_win_ratio(wins: int, losses: int) -> float:
     if losses == 0:
         return float("inf")
     return wins / losses
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

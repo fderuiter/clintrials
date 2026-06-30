@@ -1,6 +1,9 @@
 """
 An implementation of Thall & Cook's EffTox design for dose-finding in
 clinical trials.
+
+
+Random Seed Strategy: {efftox_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -1368,3 +1371,9 @@ __all__ = [
     "efftox_priors_from_skeleton",
     "validate_efftox_priors",
 ]
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

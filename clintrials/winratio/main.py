@@ -1,4 +1,7 @@
-"""Command-line entry point for win-ratio power simulations."""
+"""Command-line entry point for win-ratio power simulations.
+
+Random Seed Strategy: {main_seed_strategy}
+"""
 
 from __future__ import annotations
 
@@ -206,3 +209,9 @@ def main() -> None:
 
 if __name__ == "__main__":  # pragma: no cover - CLI entry
     main()
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)
