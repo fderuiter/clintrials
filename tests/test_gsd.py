@@ -153,3 +153,22 @@ def test_gsd_simulate_invalid_sims():
         ValueError, match="Number of simulations must be a positive integer"
     ):
         design.simulate(0)
+
+from unittest.mock import patch
+
+def test_gsd_brentq_fallback():
+    from clintrials.phase3.gsd import GroupSequentialDesign
+    
+    with patch("clintrials.phase3.gsd.brentq") as mock_brentq:
+        mock_brentq.side_effect = [ValueError("First interval failed"), 2.0]
+        design = GroupSequentialDesign(k=1, alpha=0.025)
+        assert design.efficacy_boundaries[0] == 2.0
+
+def test_gsd_brentq_fallback_failure():
+    from clintrials.phase3.gsd import GroupSequentialDesign
+    import pytest
+    
+    with patch("clintrials.phase3.gsd.brentq") as mock_brentq:
+        mock_brentq.side_effect = ValueError("Both intervals failed")
+        with pytest.raises(RuntimeError, match="Could not find a valid final boundary."):
+            GroupSequentialDesign(k=1, alpha=0.025)
