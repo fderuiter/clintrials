@@ -173,14 +173,24 @@ class GroupSequentialDesign(Protocol):
                 if i == 1:
                     return norm.cdf(limits[0])
                 else:
-                    return multivariate_normal.cdf(
-                        limits,
-                        mean=np.zeros(i),
-                        cov=cov,
-                        maxpts=REGISTRY["gsd_maxpts"],
-                        abseps=REGISTRY["gsd_abseps"],
-                        rng=REGISTRY["gsd_multivariate_normal_seed"]
-                    )
+                    try:
+                        return multivariate_normal.cdf(
+                            limits,
+                            mean=np.zeros(i),
+                            cov=cov,
+                            maxpts=REGISTRY["gsd_maxpts"],
+                            abseps=REGISTRY["gsd_abseps"],
+                            rng=REGISTRY["gsd_multivariate_normal_seed"]
+                        )
+                    except TypeError:
+                        # Fallback for Scipy < 1.15 which does not support the 'rng' argument
+                        return multivariate_normal.cdf(
+                            limits,
+                            mean=np.zeros(i),
+                            cov=cov,
+                            maxpts=REGISTRY["gsd_maxpts"],
+                            abseps=REGISTRY["gsd_abseps"],
+                        )
 
             def root_func(u_i):
                 return cdf_at_look_i(u_i) - target_cdf
