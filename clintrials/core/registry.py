@@ -47,7 +47,6 @@ REGISTRY: Dict[str, Any] = {
     "crm_view_seed_strategy": "not applicable",
     "efftox_view_seed_strategy": "not applicable",
     "simulate_seed_strategy": "global state",
-    "main_seed_strategy": "not applicable",
     "data_generation_seed_strategy": "not applicable",
     "compare_seed_strategy": "not applicable",
     "statistics_seed_strategy": "not applicable",
