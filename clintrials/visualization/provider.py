@@ -1,4 +1,7 @@
-"""Centralized visualization module using Plotly."""
+"""Centralized visualization module using Plotly.
+
+Random Seed Strategy: {provider_seed_strategy}
+"""
 
 import pandas as pd
 import plotly.express as px
@@ -534,3 +537,9 @@ class DefaultVisualizationProvider(VisualizationProvider):
 def get_default_provider():
     """Get default visualization provider."""
     return DefaultVisualizationProvider()
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

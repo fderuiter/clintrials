@@ -1,4 +1,7 @@
-"""Generate synthetic data for win-ratio simulations."""
+"""Generate synthetic data for win-ratio simulations.
+
+Random Seed Strategy: {data_generation_seed_strategy}
+"""
 
 from __future__ import annotations
 
@@ -51,3 +54,9 @@ def generate_data(
     ).T
 
     return group_A, group_B
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

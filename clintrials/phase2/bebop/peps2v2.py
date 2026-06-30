@@ -15,6 +15,9 @@ The parameter vector is theta:
 - theta[3] is efficacy model middle PD-L1 group coeff
 - theta[4] is toxicity model intercept
 - theta[5] is association param
+
+
+Random Seed Strategy: {peps2v2_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -74,3 +77,9 @@ def pi_ab(x, theta):
     pe = pi_e(x, theta)
     pt = pi_t(x, theta)
     return fgm_joint_prob(b, a, pe, pt, psi)
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

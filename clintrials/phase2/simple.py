@@ -1,5 +1,8 @@
 """
 Implementations of simple phase II clinical trial designs.
+
+
+Random Seed Strategy: {simple_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -169,3 +172,9 @@ def chisqu_two_arm_comparison(p0, p1, n, alpha):
     reject = (p < alpha * 2) & (n0 < n1)
     data = np.column_stack([n0, n1, lik, test_stat, p, reject])
     return sum(data[data[:, 5] == True, 2]), sum(data[data[:, 5] == False, 2])
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

@@ -2,6 +2,9 @@
 Brock & Yap's novel seamless phase I/II efficacy/toxicity design, fusing
 elements of Wages & Tait's design with elements of Thall & Cook's EffTox
 design.
+
+
+Random Seed Strategy: {watu_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -631,3 +634,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             self._status = -10
 
         return self._next_dose
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

@@ -1,5 +1,7 @@
 """
 Module for Group Sequential Designs (GSDs).
+
+Random Seed Strategy: {gsd_seed_strategy}
 """
 
 from typing import Callable, List
@@ -8,7 +10,9 @@ import numpy as np
 from scipy.optimize import brentq
 from scipy.stats import multivariate_normal, norm
 
+from clintrials.core.registry import REGISTRY, inject_docs
 
+@inject_docs()
 def spending_function_pocock(t: float, alpha: float) -> float:
     """Pocock-like alpha spending function.
 
@@ -169,15 +173,24 @@ class GroupSequentialDesign(Protocol):
                 if i == 1:
                     return norm.cdf(limits[0])
                 else:
-                    return multivariate_normal(mean=np.zeros(i), cov=cov, seed=42).cdf(
-                        limits
+                    return multivariate_normal.cdf(
+                        limits,
+                        mean=np.zeros(i),
+                        cov=cov,
+                        maxpts=REGISTRY["gsd_maxpts"],
+                        abseps=REGISTRY["gsd_abseps"],
+                        rng=REGISTRY["gsd_multivariate_normal_seed"]
                     )
 
             def root_func(u_i):
                 return cdf_at_look_i(u_i) - target_cdf
 
             try:
-                boundary = brentq(root_func, -5, 15)
+                boundary = brentq(
+                    root_func,
+                    REGISTRY["gsd_brentq_first_min"],
+                    REGISTRY["gsd_brentq_first_max"]
+                )
             except ValueError:
                 boundary = np.inf
 
@@ -185,7 +198,11 @@ class GroupSequentialDesign(Protocol):
 
         if self.alpha < 1 and boundaries[-1] == np.inf:
             try:
-                boundary = brentq(root_func, -50, 50)
+                boundary = brentq(
+                    root_func,
+                    REGISTRY["gsd_brentq_second_min"],
+                    REGISTRY["gsd_brentq_second_max"]
+                )
                 boundaries[-1] = boundary
             except ValueError:
                 raise RuntimeError("Could not find a valid final boundary.")
@@ -262,3 +279,7 @@ class GroupSequentialDesign(Protocol):
         )
         # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
         return self.run(n_sims=n_sims, method="bulk", theta=theta)
+
+# Inject module-level docstring
+if __doc__:
+    __doc__ = __doc__.format(**REGISTRY)

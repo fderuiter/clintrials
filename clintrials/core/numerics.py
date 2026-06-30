@@ -1,5 +1,8 @@
 """
 Numerical integration routines for Bayesian models.
+
+
+Random Seed Strategy: {numerics_seed_strategy}
 """
 
 import warnings
@@ -179,3 +182,9 @@ def integrate_posterior_1d(
         lo -= expand_factor * width / 2
         hi += expand_factor * width / 2
         expansions += 1
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

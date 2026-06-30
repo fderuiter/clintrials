@@ -1,4 +1,7 @@
-"""Abstract interface for visualization providers."""
+"""Abstract interface for visualization providers.
+
+Random Seed Strategy: {viz_interface_seed_strategy}
+"""
 
 import abc
 
@@ -67,3 +70,9 @@ def set_visualization_provider(provider: VisualizationProvider):
     """Set the current visualization provider."""
     global _provider
     _provider = provider
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

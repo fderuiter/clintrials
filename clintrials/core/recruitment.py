@@ -1,5 +1,8 @@
 """
 Classes and functions for modelling recruitment to clinical trials.
+
+
+Random Seed Strategy: {recruitment_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -272,3 +275,9 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             else:
                 assert t0 + tau1 > 0
                 return t0 + tau1
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

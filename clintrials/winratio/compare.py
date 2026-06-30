@@ -1,4 +1,7 @@
-"""Compare two subjects component-wise in a hierarchical manner."""
+"""Compare two subjects component-wise in a hierarchical manner.
+
+Random Seed Strategy: {compare_seed_strategy}
+"""
 
 from __future__ import annotations
 
@@ -24,3 +27,9 @@ def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
         if subject1[i] < subject2[i]:
             return "loss"
     return "tie"
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

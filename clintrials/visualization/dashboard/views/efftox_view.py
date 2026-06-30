@@ -1,5 +1,8 @@
 """
 Renders the EffTox simulation results view in the Streamlit dashboard.
+
+
+Random Seed Strategy: {efftox_view_seed_strategy}
 """
 
 import json
@@ -115,3 +118,9 @@ def render(sims):
 
     except Exception as e:
         st.error(f"An error occurred during summarization or plotting: {e}")
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

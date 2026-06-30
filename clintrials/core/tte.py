@@ -1,5 +1,8 @@
 """
 Time-to-event trial designs.
+
+
+Random Seed Strategy: {tte_seed_strategy}
 """
 
 __author__ = "Kristian Brock"
@@ -256,3 +259,9 @@ def matrix_cohort_analysis(
         return reports[0]
     else:
         return reports
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)

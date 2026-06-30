@@ -1,4 +1,7 @@
-"""Pairwise win-ratio comparisons between treatment and control subjects."""
+"""Pairwise win-ratio comparisons between treatment and control subjects.
+
+Random Seed Strategy: {simulate_seed_strategy}
+"""
 
 from __future__ import annotations
 
@@ -32,3 +35,9 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
             else:
                 results["ties"] += 1
     return results
+
+
+# Inject module-level docstring
+if __doc__:
+    from clintrials.core.registry import REGISTRY
+    __doc__ = __doc__.format(**REGISTRY)
