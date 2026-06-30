@@ -750,49 +750,12 @@ def get_path(x, dose_label_func=None):
     return path
 
 
-def print_dtps(dtps, indent=0, dose_label_func=None):
-    """Prints the dose-transition pathways.
+def _efftox_row_formatter(x, dose_label_func, verbose=False):
+    path = get_path(x, dose_label_func=dose_label_func)
+    obd = x["RecommendedDose"]
+    prob_sup = x["MinProbSuperiority"]
 
-    Args:
-        dtps (dict): A nested dictionary of DTPs.
-        indent (int, optional): The indentation level. Defaults to 0.
-        dose_label_func (callable, optional): A function to format the dose
-            label. Defaults to `str`.
-    """
-    if dose_label_func is None:
-        dose_label_func = lambda x: str(x)
-    for x in dtps:
-        path = get_path(x, dose_label_func=dose_label_func)
-        obd = x["RecommendedDose"]
-        prob_sup = x["MinProbSuperiority"]
-
-        if prob_sup < 0.6:
-            template_txt = "\t" * indent + "{} -> Dose {}, Superiority={} * tentative *"
-        else:
-            template_txt = "\t" * indent + "{} -> Dose {}, Superiority={}"
-        logger.info(
-            template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2))
-        )
-
-        if "Next" in x:
-            print_dtps(x["Next"], indent=indent + 1, dose_label_func=dose_label_func)
-
-
-def print_dtps_verbose(dtps, indent=0, dose_label_func=None):
-    """Prints the dose-transition pathways with verbose information.
-
-    Args:
-        dtps (dict): A nested dictionary of DTPs.
-        indent (int, optional): The indentation level. Defaults to 0.
-        dose_label_func (callable, optional): A function to format the dose
-            label. Defaults to `str`.
-    """
-    if dose_label_func is None:
-        dose_label_func = lambda x: str(x)
-    for x in dtps:
-        path = get_path(x, dose_label_func=dose_label_func)
-        obd = x["RecommendedDose"]
-        prob_sup = x["MinProbSuperiority"]
+    if verbose:
         util = [x["Utility1"], x["Utility2"], x["Utility3"], x["Utility4"]]
         prob_acc_eff = [
             x["ProbAccEff1"],
@@ -806,22 +769,57 @@ def print_dtps_verbose(dtps, indent=0, dose_label_func=None):
             x["ProbAccTox3"],
             x["ProbAccTox4"],
         ]
-        template_txt = (
-            "\t" * indent
-            + "{} -> Dose {}, Sup={}, Util={}, Pr(Acc Eff)={}, Pr(Acc Tox)={}"
+        template_txt = "{} -> Dose {}, Sup={}, Util={}, Pr(Acc Eff)={}, Pr(Acc Tox)={}"
+        return template_txt.format(
+            path,
+            dose_label_func(obd),
+            np.round(prob_sup, 2),
+            np.round(util, 2),
+            np.round(prob_acc_eff, 2),
+            np.round(prob_acc_tox, 2),
         )
-        logger.info(
-            template_txt.format(
-                path,
-                dose_label_func(obd),
-                np.round(prob_sup, 2),
-                np.round(util, 2),
-                np.round(prob_acc_eff, 2),
-                np.round(prob_acc_tox, 2),
-            )
+    else:
+        if prob_sup < 0.6:
+            template_txt = "{} -> Dose {}, Superiority={} * tentative *"
+        else:
+            template_txt = "{} -> Dose {}, Superiority={}"
+        return template_txt.format(
+            path, dose_label_func(obd), np.round(prob_sup, 2)
         )
 
-        if "Next" in x:
-            print_dtps_verbose(
-                x["Next"], indent=indent + 1, dose_label_func=dose_label_func
-            )
+def print_dtps(dtps, indent=0, dose_label_func=None):
+    """Prints the dose-transition pathways.
+
+    Args:
+        dtps (dict): A nested dictionary of DTPs.
+        indent (int, optional): The indentation level. Defaults to 0.
+        dose_label_func (callable, optional): A function to format the dose
+            label. Defaults to `str`.
+    """
+    from clintrials.dosefinding import print_dtps as base_print_dtps
+    base_print_dtps(
+        dtps,
+        indent=indent,
+        dose_label_func=dose_label_func,
+        row_formatter=_efftox_row_formatter,
+        verbose=False,
+    )
+
+
+def print_dtps_verbose(dtps, indent=0, dose_label_func=None):
+    """Prints the dose-transition pathways with verbose information.
+
+    Args:
+        dtps (dict): A nested dictionary of DTPs.
+        indent (int, optional): The indentation level. Defaults to 0.
+        dose_label_func (callable, optional): A function to format the dose
+            label. Defaults to `str`.
+    """
+    from clintrials.dosefinding import print_dtps as base_print_dtps
+    base_print_dtps(
+        dtps,
+        indent=indent,
+        dose_label_func=dose_label_func,
+        row_formatter=_efftox_row_formatter,
+        verbose=True,
+    )

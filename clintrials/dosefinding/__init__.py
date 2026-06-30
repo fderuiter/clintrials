@@ -819,7 +819,7 @@ def dose_transition_pathways_to_json(
 dose_transition_pathways = dose_transition_pathways_to_json
 
 
-def print_dtps(dtps, indent=0, dose_label_func=None):
+def print_dtps(dtps, indent=0, dose_label_func=None, row_formatter=None, verbose=False):
     """Prints the dose-transition pathways.
 
     Args:
@@ -827,18 +827,30 @@ def print_dtps(dtps, indent=0, dose_label_func=None):
         indent (int, optional): The indentation level. Defaults to 0.
         dose_label_func (callable, optional): A function to format the dose
             label. Defaults to `str`.
+        row_formatter (callable, optional): A function to format the row.
+        verbose (bool, optional): Whether to print verbose output.
     """
     if dose_label_func is None:
         dose_label_func = lambda x: str(x)
     for x in dtps:
-        num_tox = x["NumTox"]
-        mtd = x["RecommendedDose"]
+        if row_formatter:
+            row_str = row_formatter(x, dose_label_func=dose_label_func, verbose=verbose)
+        else:
+            num_tox = x["NumTox"]
+            mtd = x["RecommendedDose"]
+            row_str = f"{num_tox} -> Dose {dose_label_func(mtd)}"
 
-        template_txt = "\t" * indent + "{} -> Dose {}"
-        logger.info(template_txt.format(num_tox, dose_label_func(mtd)))
+        prefix = "  " * indent + "- "
+        logger.info(prefix + row_str)
 
         if "Next" in x:
-            print_dtps(x["Next"], indent=indent + 1, dose_label_func=dose_label_func)
+            print_dtps(
+                x["Next"],
+                indent=indent + 1,
+                dose_label_func=dose_label_func,
+                row_formatter=row_formatter,
+                verbose=verbose
+            )
 
 
 def _dtps_to_rows(dtps, dose_label_func=None, pre=[]):
