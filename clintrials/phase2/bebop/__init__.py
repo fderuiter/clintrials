@@ -165,6 +165,7 @@ class BeBOP:
             axis=0,
         )
         from clintrials.core.numerics import adaptive_mc_integration
+
         refined_limits, pds = adaptive_mc_integration(
             lik_integrand,
             limits,

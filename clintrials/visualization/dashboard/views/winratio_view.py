@@ -2,6 +2,7 @@
 Renders the Win Ratio simulation view in the Streamlit dashboard.
 """
 
+import pandas as pd
 import streamlit as st
 
 if not hasattr(st, "fragment"):
@@ -10,6 +11,7 @@ if not hasattr(st, "fragment"):
 from clintrials.winratio.main import WinRatioTrial
 from clintrials.core.schema import WinRatioSchema
 from clintrials.visualization.dashboard.factory import create_widget
+from clintrials.core.report import generate_pdf_report
 
 
 def render() -> None:
@@ -17,13 +19,13 @@ def render() -> None:
     st.header("Win Ratio Simulation")
 
     st.sidebar.header("Simulation Parameters")
-    
+
     # Use schema to generate UI inputs
     kwargs = {}
     for name, field in WinRatioSchema.model_fields.items():
         min_val = 0.0 if "Probability" in str(field.annotation) else 1
         max_val = 1.0 if "Probability" in str(field.annotation) else None
-        
+
         kwargs[name] = create_widget(
             st,
             "number_input",
@@ -46,4 +48,39 @@ def render() -> None:
         st.write(
             "Average 95% Confidence Interval: "
             f"({average_ci[0]:.4f}, {average_ci[1]:.4f})"
+        )
+
+        # Create simple DataFrame for export
+        results_dict = kwargs.copy()
+        results_dict["power"] = power
+        results_dict["ci_lower"] = average_ci[0]
+        results_dict["ci_upper"] = average_ci[1]
+
+        df = pd.DataFrame([results_dict])
+
+        st.header("Export Results")
+        if not hasattr(st, "columns"):
+            st.columns = lambda x: (st, st)
+        col1, col2 = st.columns(2)
+
+        csv_data = df.to_csv(index=False)
+        getattr(col1, "download_button", lambda *args, **kwargs: None)(
+            label="Download CSV",
+            data=csv_data,
+            file_name="winratio_simulation.csv",
+            mime="text/csv",
+        )
+
+        pdf_data = generate_pdf_report(
+            df,
+            "Win Ratio",
+            text_summaries=[
+                f"Power: {power:.4f}\n95% CI: ({average_ci[0]:.4f}, {average_ci[1]:.4f})"
+            ],
+        )
+        getattr(col2, "download_button", lambda *args, **kwargs: None)(
+            label="Download PDF",
+            data=pdf_data,
+            file_name="winratio_simulation.pdf",
+            mime="application/pdf",
         )

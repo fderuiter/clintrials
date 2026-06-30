@@ -16,6 +16,7 @@ class Protocol(metaclass=abc.ABCMeta):
     def rng(self):
         """Get the current RNG. If not set, raise an error to enforce injection."""
         import numpy as np
+
         if self._rng is None:
             # Fallback to local numpy random generator but warn or just create one
             self._rng = np.random.default_rng()
@@ -53,12 +54,12 @@ class Protocol(metaclass=abc.ABCMeta):
             from tqdm import tqdm
         except ImportError:
             show_progress = False
-            
+
         results = []
         iterator = range(n_sims)
         if show_progress:
             iterator = tqdm(iterator, desc="Iterative Simulation")
-            
+
         for _ in iterator:
             self.reset()
             while self.has_more():
@@ -69,21 +70,26 @@ class Protocol(metaclass=abc.ABCMeta):
     def run_bulk(self, n_sims: int, show_progress: bool = False, **kwargs):
         """Run vectorized bulk simulations. Must be overridden if supported."""
         raise NotImplementedError("Bulk mode not implemented for this protocol.")
-        
-    def run(self, n_sims: int, method: str = "iterative", seed: int = None, show_progress: bool = False, **kwargs):
+
+    def run(
+        self,
+        n_sims: int,
+        method: str = "iterative",
+        seed: int = None,
+        show_progress: bool = False,
+        **kwargs,
+    ):
         """Polymorphic entry point for simulation execution."""
         from clintrials.core.rng import get_rng
         from clintrials.core.unified import SimulationResult
-        
+
         self.set_rng(get_rng(seed))
-        
+
         if method == "bulk":
             results = self.run_bulk(n_sims, show_progress=show_progress, **kwargs)
         elif method == "iterative":
             results = self.run_iterative(n_sims, show_progress=show_progress, **kwargs)
         else:
             raise ValueError(f"Unknown execution method: {method}")
-            
+
         return SimulationResult(results, mode=method)
-
-

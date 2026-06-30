@@ -18,8 +18,17 @@ def fake_streamlit(monkeypatch):
     st.warning = MagicMock()
     st.error = MagicMock()
     st.plotly_chart = MagicMock()
+    st.session_state = {}
+    st.columns = lambda x: (MagicMock(), MagicMock())
+    st.download_button = MagicMock()
     st.expander = MagicMock()
     st.markdown = MagicMock()
+    st.session_state = {}
+    st.columns = lambda x: (MagicMock(), MagicMock())
+    st.download_button = MagicMock()
+    st.session_state = {}
+    st.columns = MagicMock(return_value=(MagicMock(), MagicMock()))
+    st.download_button = MagicMock()
     sidebar = types.SimpleNamespace()
     sidebar.header = MagicMock()
     sidebar.write = MagicMock()

@@ -866,7 +866,7 @@ def print_dtps(dtps, indent=0, dose_label_func=None, row_formatter=None, verbose
                 indent=indent + 1,
                 dose_label_func=dose_label_func,
                 row_formatter=row_formatter,
-                verbose=verbose
+                verbose=verbose,
             )
 
 

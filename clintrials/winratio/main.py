@@ -17,9 +17,10 @@ from clintrials.core.protocol import Protocol
 from clintrials.core.schema import WinRatioSchema
 from clintrials.core.simulation import run_sims
 
+
 class WinRatioTrial(Protocol):
     """Win-Ratio simulation wrapped as a Protocol."""
-    
+
     def __init__(self, **kwargs):
         self.config = WinRatioSchema(**kwargs)
         self.power = 0.0
@@ -54,10 +55,7 @@ class WinRatioTrial(Protocol):
 
     def report(self):
         """Report the trial results."""
-        return OrderedDict([
-            ("power", self.power),
-            ("average_ci", self.average_ci)
-        ])
+        return OrderedDict([("power", self.power), ("average_ci", self.average_ci)])
 
 
 def _single_iteration(
@@ -179,7 +177,7 @@ def main() -> None:
         arg_name = f"--{name}"
         if name == "significance_level":
             arg_name = "--significance"
-        
+
         arg_type = int if "PositiveInt" in str(field.annotation) else float
         parser.add_argument(
             arg_name,
@@ -189,7 +187,7 @@ def main() -> None:
         )
 
     args = parser.parse_args()
-    
+
     # Map back significance to significance_level if passed
     kwargs = vars(args)
     if "significance" in kwargs:
@@ -199,7 +197,7 @@ def main() -> None:
     trial.update()
     power = trial.power
     average_ci = trial.average_ci
-    
+
     print(f"Power of the test: {power:.4f}")  # noqa: T201
     print(  # noqa: T201
         "Average confidence interval: " f"({average_ci[0]:.4f}, {average_ci[1]:.4f})"

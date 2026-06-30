@@ -129,6 +129,15 @@ def plot_dose_finding_outcomes(trial, chart_title=None):
         )
     )
 
+    df_summary = pd.DataFrame(
+        {
+            "Patient number": patient_number,
+            "Dose level": doses,
+            "Toxicity": [int(t) for t in toxicities],
+        }
+    )
+    fig.layout.meta = generate_text_summary(df_summary, chart_title)
+
     fig.update_layout(
         title=chart_title,
         xaxis_title="Patient number",
@@ -205,6 +214,17 @@ def plot_crm_toxicity_probabilities(trial, chart_title=None):
     )
 
     fig.add_hline(y=trial.target, line_color="red", annotation_text="Target")
+
+    df_summary = pd.DataFrame(
+        {
+            "Dose level": dl,
+            "Prior": prior_tox,
+            "Posterior": post_tox,
+            "5% Quantile": post_tox_lower,
+            "95% Quantile": post_tox_upper,
+        }
+    )
+    fig.layout.meta = generate_text_summary(df_summary, chart_title)
 
     fig.update_layout(
         title=chart_title,
@@ -302,6 +322,8 @@ def plot_efftox_utility_contours(
             )
         )
 
+    fig.layout.meta = "Contour plot displaying EffTox utility values across Probability of Efficacy and Toxicity."
+
     fig.update_layout(
         title=title,
         xaxis_title="Probability of Efficacy",
@@ -351,6 +373,9 @@ def plot_efftox_density(
     group_labels = [f"Dose {d}" for d in include_doses]
 
     fig = ff.create_distplot(hist_data, group_labels, show_hist=False, show_rug=False)
+    summary_df = df.groupby("Dose")[x_name].agg(["mean", "min", "max"]).reset_index()
+    fig.layout.meta = generate_text_summary(summary_df, plot_title)
+
     fig.update_layout(
         title=plot_title,
         xaxis_title=x_name,
@@ -364,7 +389,11 @@ def plot_efftox_density(
 
 def plot_crm_simulation_recommendation(summary_df):
     """Plots CRM simulation recommendation probabilities."""
-    col_name = "RecommendedDoseProb" if "RecommendedDoseProb" in summary_df.columns else "recommended_dose_prob"
+    col_name = (
+        "RecommendedDoseProb"
+        if "RecommendedDoseProb" in summary_df.columns
+        else "recommended_dose_prob"
+    )
     if summary_df.empty or col_name not in summary_df.columns:
         return go.Figure()
     rec_dose_df = summary_df[col_name].apply(pd.Series).fillna(0)
@@ -391,7 +420,11 @@ def plot_crm_simulation_recommendation(summary_df):
 
 def plot_efftox_simulation_recommendation(summary_df):
     """Plots EffTox simulation recommendation probabilities."""
-    col_name = "RecommendedDoseProb" if "RecommendedDoseProb" in summary_df.columns else "recommended_dose_prob"
+    col_name = (
+        "RecommendedDoseProb"
+        if "RecommendedDoseProb" in summary_df.columns
+        else "recommended_dose_prob"
+    )
     if summary_df.empty or col_name not in summary_df.columns:
         return go.Figure()
     rec_dose_df = summary_df[col_name].apply(pd.Series).fillna(0)
@@ -414,8 +447,12 @@ def plot_efftox_simulation_recommendation(summary_df):
 
 def plot_efftox_simulation_acceptability(summary_df):
     """Plots EffTox simulation acceptability probabilities."""
-    tox_col = "ProbAcceptTox" if "ProbAcceptTox" in summary_df.columns else "prob_accept_tox"
-    eff_col = "ProbAcceptEff" if "ProbAcceptEff" in summary_df.columns else "prob_accept_eff"
+    tox_col = (
+        "ProbAcceptTox" if "ProbAcceptTox" in summary_df.columns else "prob_accept_tox"
+    )
+    eff_col = (
+        "ProbAcceptEff" if "ProbAcceptEff" in summary_df.columns else "prob_accept_eff"
+    )
     if (
         summary_df.empty
         or tox_col not in summary_df.columns
