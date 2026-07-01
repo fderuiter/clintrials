@@ -1,4 +1,5 @@
 import inspect
+
 import streamlit as st
 
 
@@ -66,6 +67,14 @@ def _build_registry():
                 "true_efficacies": ["true_prob_eff"],
             },
         )
+    except ImportError:
+        pass
+
+    # Extract from WATU core logic
+    try:
+        from clintrials.dosefinding.watu import WATU
+
+        extract_from_docstring(WATU.__init__.__doc__)
     except ImportError:
         pass
 

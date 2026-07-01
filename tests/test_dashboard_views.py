@@ -112,6 +112,21 @@ def test_dashboard_main_routes_to_efftox(monkeypatch):
     assert called["data"] == [{"foo": "bar"}]
 
 
+def test_dashboard_main_routes_to_watu(monkeypatch):
+    """main() should invoke watu_view.render when WATU is selected."""
+    st_mock = _make_streamlit_mock(selectbox_return="WATU")
+    monkeypatch.setattr(main, "st", st_mock)
+
+    called = {}
+
+    def fake_render(data):
+        called["data"] = data
+
+    monkeypatch.setattr(main.watu_view, "render", fake_render)
+    main.main()
+    assert called["data"] == [{"foo": "bar"}]
+
+
 def test_dashboard_main_routes_to_winratio(monkeypatch):
     """main() should invoke winratio_view.render when Win Ratio is selected."""
     st_mock = _make_streamlit_mock(selectbox_return="Win Ratio")
@@ -129,8 +144,8 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):
 
 def test_crm_view_render_success(monkeypatch):
     """render() should summarise simulations and plot results when data is valid."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -166,8 +181,8 @@ def test_crm_view_render_success(monkeypatch):
 
 def test_crm_view_warns_without_recommended(monkeypatch):
     """If the summary lacks recommendation information a warning is shown."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -185,8 +200,8 @@ def test_crm_view_warns_without_recommended(monkeypatch):
 
 def test_efftox_view_render_success(monkeypatch):
     """EffTox view should plot recommendation and acceptability probabilities."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -228,8 +243,8 @@ def test_efftox_view_render_success(monkeypatch):
 
 def test_efftox_view_warns_when_empty(monkeypatch):
     """If the summary dataframe is empty a warning is shown."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)

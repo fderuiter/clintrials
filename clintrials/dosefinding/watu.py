@@ -33,6 +33,20 @@ class WATU(EfficacyToxicityDoseFindingTrial):
     Cook's EffTox utility contours.
     """
 
+    @classmethod
+    def get_summary_functions(cls):
+        """Get summary functions for the WATU protocol."""
+        import pandas as pd
+
+        return {
+            "N": lambda s, p: len(s),
+            "recommended_dose_prob": lambda s, p: pd.Series(
+                [x.get("RecommendedDose") for x in s]
+            )
+            .value_counts(normalize=True)
+            .sort_index(),
+        }
+
     def __init__(
         self,
         skeletons,
@@ -639,4 +653,5 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import REGISTRY
+
     __doc__ = __doc__.format(**REGISTRY)
