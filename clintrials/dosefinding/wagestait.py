@@ -17,7 +17,6 @@ __contact__ = "kristian.brock@gmail.com"
 
 from random import sample
 
-import numpy as np
 from numpy import trapezoid
 from scipy.integrate import quad
 from scipy.stats import beta, norm

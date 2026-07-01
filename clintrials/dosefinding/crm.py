@@ -16,7 +16,6 @@ import logging
 import warnings
 from collections import OrderedDict
 
-import numpy as np
 from clintrials.core.registry import REGISTRY, inject_docs
 from numpy import trapezoid
 from scipy.integrate import quad
@@ -390,7 +389,6 @@ class CRM(DoseFindingTrial):
     @classmethod
     def get_summary_functions(cls) -> Any:
         """Get summary functions for the CRM protocol."""
-        import pandas as pd
 
         return {
             "N": lambda s, p: len(s),
