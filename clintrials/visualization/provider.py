@@ -466,6 +466,21 @@ def plot_efftox_simulation_acceptability(summary_df):
     return fig
 
 
+def plot_winratio_power_curve(df):
+    """Plots a Win Ratio simulation power curve."""
+    title = "Win Ratio Simulation Power Curve"
+    fig = create_line_chart(
+        df,
+        x="num_subjects_A",
+        y="power",
+        color=None,
+        title=title,
+        labels={"num_subjects_A": "Group A Subjects", "power": "Statistical Power"}
+    )
+    fig.layout.meta = generate_text_summary(df, title)
+    return fig
+
+
 from clintrials.core.viz_interface import VisualizationProvider
 
 

@@ -125,3 +125,19 @@ def render_metric(st_module, label, value, precision=4):
         formatted_value = str(value)
 
     st_module.metric(label=label, value=formatted_value)
+
+
+def render_accessible_chart(st_module, fig, expander_label="Data Summary"):
+    """
+    Shared utility to render either a Plotly chart or an accessible Markdown table
+    based on the global Accessibility Mode session state.
+    """
+    accessibility_mode = getattr(st_module, "session_state", {}).get("accessibility_mode", False)
+    meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
+    
+    if accessibility_mode:
+        st_module.markdown(meta)
+    else:
+        st_module.plotly_chart(fig)
+        with st_module.expander(expander_label):
+            st_module.markdown(meta)

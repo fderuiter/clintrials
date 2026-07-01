@@ -63,6 +63,12 @@ def render() -> None:
 
         df = pd.DataFrame([results_dict])
 
+        st.subheader("Visualizations")
+        import clintrials.visualization as viz
+        fig = viz.plot_winratio_power_curve(df)
+        from clintrials.visualization.dashboard.factory import render_accessible_chart
+        render_accessible_chart(st, fig)
+
         st.header("Export Results")
         if not hasattr(st, "columns"):
             st.columns = lambda x: (st, st)
