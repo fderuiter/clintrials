@@ -32,6 +32,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         success=MagicMock(),
         write=MagicMock(),
         json=MagicMock(),
+        expander=MagicMock(),
     )
 
     st = SimpleNamespace(

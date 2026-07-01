@@ -5,30 +5,62 @@ import streamlit as st
 def _build_registry():
     registry = {}
 
+    def extract_from_docstring(doc, aliases=None):
+        if not doc:
+            return
+        lines = doc.split("\n")
+        for i, line in enumerate(lines):
+            line = line.strip()
+            if "(" in line and "):" in line:
+                var_name = line.split(" (")[0].strip()
+                desc = line.split("):", 1)[1].strip()
+
+                # Check next line for continuation
+                if i + 1 < len(lines):
+                    next_line = lines[i + 1].strip()
+                    if (
+                        next_line
+                        and not ("(" in next_line and "):" in next_line)
+                        and not next_line.startswith(("Returns:", "Args:", "Raises:", "Yields:"))
+                    ):
+                        desc += " " + next_line
+
+                registry[var_name] = desc
+                if aliases and var_name in aliases:
+                    for alias in aliases[var_name]:
+                        registry[alias] = desc
+
     # Extract from Win Ratio core logic
     try:
         from clintrials.winratio.main import run_simulation
+        extract_from_docstring(run_simulation.__doc__)
+    except ImportError:
+        pass
 
-        doc = run_simulation.__doc__
-        if doc:
-            lines = doc.split("\n")
-            for i, line in enumerate(lines):
-                line = line.strip()
-                if "(" in line and "):" in line:
-                    var_name = line.split(" (")[0].strip()
-                    desc = line.split("):", 1)[1].strip()
+    # Extract from CRM core logic
+    try:
+        from clintrials.dosefinding import simulate_dose_finding_trial
+        from clintrials.dosefinding.crm import CRM
+        extract_from_docstring(CRM.__init__.__doc__)
+        extract_from_docstring(
+            simulate_dose_finding_trial.__doc__, 
+            aliases={"true_toxicities": ["true_tox"]}
+        )
+    except ImportError:
+        pass
 
-                    # Check next line for continuation
-                    if i + 1 < len(lines):
-                        next_line = lines[i + 1].strip()
-                        if (
-                            next_line
-                            and not ("(" in next_line and "):" in next_line)
-                            and not next_line.startswith(("Returns:", "Args:"))
-                        ):
-                            desc += " " + next_line
-
-                    registry[var_name] = desc
+    # Extract from EffTox core logic
+    try:
+        from clintrials.dosefinding.efficacytoxicity import simulate_trial
+        from clintrials.dosefinding.efftox import EffTox
+        extract_from_docstring(EffTox.__init__.__doc__)
+        extract_from_docstring(
+            simulate_trial.__doc__,
+            aliases={
+                "true_toxicities": ["true_prob_tox"],
+                "true_efficacies": ["true_prob_eff"]
+            }
+        )
     except ImportError:
         pass
 

@@ -49,6 +49,32 @@ def main():
         ("CRM", "EffTox", "Win Ratio"),
     )
 
+    from clintrials.visualization.dashboard.factory import REGISTRY
+    with st.sidebar.expander("View Glossary"):
+        # Aggregate relevant fields for the selected view
+        entries = []
+        entries.append(("Choose the type of trial design for your simulation results:", REGISTRY.get("design_type", "")))
+        
+        if design_type == "Win Ratio":
+            from clintrials.core.schema import WinRatioSchema
+            for name, field in WinRatioSchema.model_fields.items():
+                if name in REGISTRY:
+                    entries.append((field.description, REGISTRY[name]))
+            entries.append(("Run Simulation", REGISTRY.get("run_simulation_button", "")))
+        else:
+            entries.append(("Upload a JSON file with simulation results", REGISTRY.get("uploaded_file", "")))
+            if design_type == "CRM":
+                if "true_tox" in REGISTRY:
+                    entries.append(("true_tox", REGISTRY["true_tox"]))
+            elif design_type == "EffTox":
+                if "true_prob_tox" in REGISTRY:
+                    entries.append(("true_prob_tox", REGISTRY["true_prob_tox"]))
+                if "true_prob_eff" in REGISTRY:
+                    entries.append(("true_prob_eff", REGISTRY["true_prob_eff"]))
+                    
+        for label, desc in entries:
+            st.markdown(f"**{label}**: {desc}")
+
     if design_type == "Win Ratio":
         winratio_view.render()
     else:
