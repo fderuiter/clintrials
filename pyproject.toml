@@ -27,7 +27,7 @@ streamlit = {version = ">=1.0.0", optional = true}
 altair = {version = ">=4.2.0", optional = true}
 plotly = {version = ">=5.0.0", optional = true}
 sphinx = {version = "^7.2.6", optional = true}
-furo = {version = "^2024.1.29", optional = true}
+furo = {version = ">=2024.1.29,<2026.0.0", optional = true}
 tqdm = "^4.68.3"
 fpdf2 = {version = "^2.7.9", optional = true}
 
