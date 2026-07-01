@@ -10,9 +10,9 @@ import streamlit as st
 if not hasattr(st, "fragment"):
     st.fragment = lambda func: func
 
-from clintrials.core.report import generate_pdf_report
 from clintrials.core.simulation import summarise_sims
 from clintrials.utils import ParameterSpace
+from clintrials.core.viz_interface import get_visualization_provider
 
 
 def render(sims):
@@ -83,15 +83,20 @@ def render(sims):
             mime="text/csv",
         )
 
-        pdf_data = generate_pdf_report(
+        viz_provider = get_visualization_provider()
+        pdf_data = viz_provider.generate_pdf_report(
             summary_df, "WATU", text_summaries=text_summaries
-        )
-        getattr(col2, "download_button", lambda *args, **kwargs: None)(
-            label="Download PDF",
-            data=pdf_data,
-            file_name="watu_simulations.pdf",
-            mime="application/pdf",
-        )
+        ) if viz_provider else None
+
+        if pdf_data is not None:
+            getattr(col2, "download_button", lambda *args, **kwargs: None)(
+                label="Download PDF",
+                data=pdf_data,
+                file_name="watu_simulations.pdf",
+                mime="application/pdf",
+            )
+        else:
+            col2.warning("PDF export requires the 'fpdf2' package.")
 
     except Exception as e:
         st.error(f"An error occurred during summarization or plotting: {e}")
