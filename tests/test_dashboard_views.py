@@ -8,6 +8,7 @@ from clintrials.visualization.dashboard import main
 from clintrials.visualization.dashboard.views import (
     crm_view,
     efftox_view,
+    watu_view,
     winratio_view,
 )
 
@@ -112,6 +113,21 @@ def test_dashboard_main_routes_to_efftox(monkeypatch):
     assert called["data"] == [{"foo": "bar"}]
 
 
+def test_dashboard_main_routes_to_watu(monkeypatch):
+    """main() should invoke watu_view.render when WATU is selected."""
+    st_mock = _make_streamlit_mock(selectbox_return="WATU")
+    monkeypatch.setattr(main, "st", st_mock)
+
+    called = {}
+
+    def fake_render(data):
+        called["data"] = data
+
+    monkeypatch.setattr(main.watu_view, "render", fake_render)
+    main.main()
+    assert called["data"] == [{"foo": "bar"}]
+
+
 def test_dashboard_main_routes_to_winratio(monkeypatch):
     """main() should invoke winratio_view.render when Win Ratio is selected."""
     st_mock = _make_streamlit_mock(selectbox_return="Win Ratio")
@@ -129,8 +145,8 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):
 
 def test_crm_view_render_success(monkeypatch):
     """render() should summarise simulations and plot results when data is valid."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -166,8 +182,8 @@ def test_crm_view_render_success(monkeypatch):
 
 def test_crm_view_warns_without_recommended(monkeypatch):
     """If the summary lacks recommendation information a warning is shown."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -185,8 +201,8 @@ def test_crm_view_warns_without_recommended(monkeypatch):
 
 def test_efftox_view_render_success(monkeypatch):
     """EffTox view should plot recommendation and acceptability probabilities."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -228,8 +244,8 @@ def test_efftox_view_render_success(monkeypatch):
 
 def test_efftox_view_warns_when_empty(monkeypatch):
     """If the summary dataframe is empty a warning is shown."""
-    import sys
     import importlib
+    import sys
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -278,3 +294,60 @@ def test_winratio_view_render_success(monkeypatch):
     st_mock.metric.assert_any_call(
         label="Average 95% Confidence Interval", value="(0.1000, 0.2000)"
     )
+
+
+def test_watu_view_render_success(monkeypatch):
+    """WATU view should plot recommendation probabilities."""
+    import importlib
+    import sys
+
+    st_mock = _make_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    importlib.reload(watu_view)
+
+    monkeypatch.setattr(watu_view, "st", st_mock)
+    monkeypatch.setattr(watu_view, "ParameterSpace", lambda cfg: "ps")
+
+    index = pd.MultiIndex.from_tuples(
+        [(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"]
+    )
+    summary_df = pd.DataFrame(
+        {
+            "N": [1],
+            "recommended_dose_prob": [{1: 1.0}],
+        },
+        index=index,
+    )
+    monkeypatch.setattr(
+        watu_view, "summarise_sims", MagicMock(return_value=summary_df)
+    )
+
+    import clintrials.visualization as viz
+
+    bar_mock = MagicMock(return_value="fig_bar")
+    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+
+    watu_view.render([{}])
+
+    bar_mock.assert_called_once()
+    # st.plotly_chart called once
+    assert st_mock.plotly_chart.call_count == 1
+
+
+def test_watu_view_warns_when_empty(monkeypatch):
+    """If the summary dataframe is empty a warning is shown."""
+    import importlib
+    import sys
+
+    st_mock = _make_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    importlib.reload(watu_view)
+
+    monkeypatch.setattr(watu_view, "st", st_mock)
+    monkeypatch.setattr(watu_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(
+        watu_view, "summarise_sims", MagicMock(return_value=pd.DataFrame())
+    )
+
+    watu_view.render([{}])
+    st_mock.warning.assert_called_once()

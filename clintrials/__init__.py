@@ -1,12 +1,10 @@
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-from . import core
-from . import dosefinding
-from . import phase2
-from . import utils
+from . import core, dosefinding, phase2, utils
 from .core.math import fgm_joint_prob
 from .core.numerics import adaptive_mc_integration, integrate_posterior_1d
+from .dosefinding.watu import WATU
 
 __all__ = [
     "core",
@@ -16,6 +14,7 @@ __all__ = [
     "fgm_joint_prob",
     "adaptive_mc_integration",
     "integrate_posterior_1d",
+    "WATU",
 ]
 
 import logging

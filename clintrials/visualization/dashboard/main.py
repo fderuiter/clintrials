@@ -9,12 +9,13 @@ import json
 
 import streamlit as st
 
+from clintrials.visualization.dashboard.factory import create_widget
 from clintrials.visualization.dashboard.views import (
     crm_view,
     efftox_view,
+    watu_view,
     winratio_view,
 )
-from clintrials.visualization.dashboard.factory import create_widget
 
 
 def main():
@@ -46,32 +47,46 @@ def main():
         "selectbox",
         "design_type",
         "Choose the type of trial design for your simulation results:",
-        ("CRM", "EffTox", "Win Ratio"),
+        ("CRM", "EffTox", "WATU", "Win Ratio"),
     )
 
     from clintrials.visualization.dashboard.factory import REGISTRY
+
     with st.sidebar.expander("View Glossary"):
         # Aggregate relevant fields for the selected view
         entries = []
-        entries.append(("Choose the type of trial design for your simulation results:", REGISTRY.get("design_type", "")))
-        
+        entries.append(
+            (
+                "Choose the type of trial design for your simulation results:",
+                REGISTRY.get("design_type", ""),
+            )
+        )
+
         if design_type == "Win Ratio":
             from clintrials.core.schema import WinRatioSchema
+
             for name, field in WinRatioSchema.model_fields.items():
                 if name in REGISTRY:
                     entries.append((field.description, REGISTRY[name]))
-            entries.append(("Run Simulation", REGISTRY.get("run_simulation_button", "")))
+            entries.append(
+                ("Run Simulation", REGISTRY.get("run_simulation_button", ""))
+            )
         else:
-            entries.append(("Upload a JSON file with simulation results", REGISTRY.get("uploaded_file", "")))
+            entries.append(
+                (
+                    "Upload a JSON file with simulation results",
+                    REGISTRY.get("uploaded_file", ""),
+                )
+            )
             if design_type == "CRM":
                 if "true_tox" in REGISTRY:
                     entries.append(("true_tox", REGISTRY["true_tox"]))
-            elif design_type == "EffTox":
+            elif design_type == "EffTox" or design_type == "WATU":
                 if "true_prob_tox" in REGISTRY:
                     entries.append(("true_prob_tox", REGISTRY["true_prob_tox"]))
                 if "true_prob_eff" in REGISTRY:
                     entries.append(("true_prob_eff", REGISTRY["true_prob_eff"]))
-                    
+
         for label, desc in entries:
             st.markdown(f"**{label}**: {desc}")
 
@@ -96,6 +111,8 @@ def main():
                 crm_view.render(sims)
             elif design_type == "EffTox":
                 efftox_view.render(sims)
+            elif design_type == "WATU":
+                watu_view.render(sims)
 
 
 if __name__ == "__main__":
@@ -105,4 +122,5 @@ if __name__ == "__main__":
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import REGISTRY
+
     __doc__ = __doc__.format(**REGISTRY)
