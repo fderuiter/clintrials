@@ -83,8 +83,8 @@ def create_line_chart(df, x, y, color, title, labels=None):
 
 def generate_text_summary(df, title):
     """Generates a text summary for a chart based on its dataframe."""
-    from clintrials.visualization.models import TableSection
-    return TableSection(title=title, df=df)
+    from clintrials.visualization.models import MultiFormatSummaryContainer
+    return MultiFormatSummaryContainer(title=title, df=df)
 
 
 def plot_dose_finding_outcomes(trial, chart_title=None):

@@ -87,10 +87,10 @@ def generate_pdf_report(df, design_type, text_summaries=None):
             return f"{v:.4f}"
         return str(v)
 
-    from clintrials.visualization.models import TableSection, _format_label
+    from clintrials.visualization.models import MultiFormatSummaryContainer, _format_label
 
     for summary in text_summaries:
-        if isinstance(summary, TableSection):
+        if isinstance(summary, MultiFormatSummaryContainer):
             pdf.add_p(f"Data Summary: {summary.title}")
             pdf.set_font("helvetica", "", 10)
             with pdf.accessible_table() as table:
