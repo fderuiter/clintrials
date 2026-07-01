@@ -21,7 +21,9 @@ def _build_registry():
                     if (
                         next_line
                         and not ("(" in next_line and "):" in next_line)
-                        and not next_line.startswith(("Returns:", "Args:", "Raises:", "Yields:"))
+                        and not next_line.startswith(
+                            ("Returns:", "Args:", "Raises:", "Yields:")
+                        )
                     ):
                         desc += " " + next_line
 
@@ -33,6 +35,7 @@ def _build_registry():
     # Extract from Win Ratio core logic
     try:
         from clintrials.winratio.main import run_simulation
+
         extract_from_docstring(run_simulation.__doc__)
     except ImportError:
         pass
@@ -41,10 +44,11 @@ def _build_registry():
     try:
         from clintrials.dosefinding import simulate_dose_finding_trial
         from clintrials.dosefinding.crm import CRM
+
         extract_from_docstring(CRM.__init__.__doc__)
         extract_from_docstring(
-            simulate_dose_finding_trial.__doc__, 
-            aliases={"true_toxicities": ["true_tox"]}
+            simulate_dose_finding_trial.__doc__,
+            aliases={"true_toxicities": ["true_tox"]},
         )
     except ImportError:
         pass
@@ -53,13 +57,14 @@ def _build_registry():
     try:
         from clintrials.dosefinding.efficacytoxicity import simulate_trial
         from clintrials.dosefinding.efftox import EffTox
+
         extract_from_docstring(EffTox.__init__.__doc__)
         extract_from_docstring(
             simulate_trial.__doc__,
             aliases={
                 "true_toxicities": ["true_prob_tox"],
-                "true_efficacies": ["true_prob_eff"]
-            }
+                "true_efficacies": ["true_prob_eff"],
+            },
         )
     except ImportError:
         pass
@@ -95,3 +100,19 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):
         return st_module.sidebar.button(*args, **kwargs)
     else:
         raise ValueError(f"Unsupported widget type: {widget_type}")
+
+
+def render_metric(st_module, label, value, precision=4):
+    """
+    Renders a semantic metric card with configurable numeric precision for statistical floats.
+    """
+    if isinstance(value, float):
+        formatted_value = f"{value:.{precision}f}"
+    elif isinstance(value, (list, tuple)) and all(
+        isinstance(x, (int, float)) for x in value
+    ):
+        formatted_value = "(" + ", ".join(f"{x:.{precision}f}" for x in value) + ")"
+    else:
+        formatted_value = str(value)
+
+    st_module.metric(label=label, value=formatted_value)
