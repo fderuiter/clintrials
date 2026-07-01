@@ -83,22 +83,8 @@ def create_line_chart(df, x, y, color, title, labels=None):
 
 def generate_text_summary(df, title):
     """Generates a text summary for a chart based on its dataframe."""
-    summary = f"**Data Summary: {title}**\n\n"
-    cols = list(df.columns)
-
-    def fmt(v):
-        if isinstance(v, (float, np.float64)):
-            return f"{v:.4f}"
-        return str(v)
-
-    header = "| " + " | ".join([_format_label(c) for c in cols]) + " |"
-    sep = "| " + " | ".join(["---"] * len(cols)) + " |"
-
-    rows = []
-    for _, row in df.iterrows():
-        rows.append("| " + " | ".join([fmt(x) for x in row]) + " |")
-
-    return summary + "\n".join([header, sep] + rows)
+    from clintrials.visualization.models import TableSection
+    return TableSection(title=title, df=df)
 
 
 def plot_dose_finding_outcomes(trial, chart_title=None):
