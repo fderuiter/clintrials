@@ -8,6 +8,7 @@ from clintrials.visualization.dashboard import main
 from clintrials.visualization.dashboard.views import (
     crm_view,
     efftox_view,
+    watu_view,
     winratio_view,
 )
 
@@ -293,3 +294,60 @@ def test_winratio_view_render_success(monkeypatch):
     st_mock.metric.assert_any_call(
         label="Average 95% Confidence Interval", value="(0.1000, 0.2000)"
     )
+
+
+def test_watu_view_render_success(monkeypatch):
+    """WATU view should plot recommendation probabilities."""
+    import importlib
+    import sys
+
+    st_mock = _make_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    importlib.reload(watu_view)
+
+    monkeypatch.setattr(watu_view, "st", st_mock)
+    monkeypatch.setattr(watu_view, "ParameterSpace", lambda cfg: "ps")
+
+    index = pd.MultiIndex.from_tuples(
+        [(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"]
+    )
+    summary_df = pd.DataFrame(
+        {
+            "N": [1],
+            "recommended_dose_prob": [{1: 1.0}],
+        },
+        index=index,
+    )
+    monkeypatch.setattr(
+        watu_view, "summarise_sims", MagicMock(return_value=summary_df)
+    )
+
+    import clintrials.visualization as viz
+
+    bar_mock = MagicMock(return_value="fig_bar")
+    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+
+    watu_view.render([{}])
+
+    bar_mock.assert_called_once()
+    # st.plotly_chart called once
+    assert st_mock.plotly_chart.call_count == 1
+
+
+def test_watu_view_warns_when_empty(monkeypatch):
+    """If the summary dataframe is empty a warning is shown."""
+    import importlib
+    import sys
+
+    st_mock = _make_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    importlib.reload(watu_view)
+
+    monkeypatch.setattr(watu_view, "st", st_mock)
+    monkeypatch.setattr(watu_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(
+        watu_view, "summarise_sims", MagicMock(return_value=pd.DataFrame())
+    )
+
+    watu_view.render([{}])
+    st_mock.warning.assert_called_once()
