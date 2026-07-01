@@ -143,6 +143,16 @@ class CRMSchema(BaseModel):
         default=0.0, description="Coherency threshold"
     )
     bootstrap_samples: PositiveInt = Field(default=200, description="Bootstrap samples")
+    min_beta: Optional[float] = Field(default=None, description="Minimum beta limit")
+    max_beta: Optional[float] = Field(default=None, description="Maximum beta limit")
+    n_points: Optional[PositiveInt] = Field(default=None, description="Integration point count")
+    sample_size: Optional[PositiveInt] = Field(default=None, description="Monte Carlo sample size")
+
+    def __post_init__(self):
+        super().__post_init__()
+        if self.min_beta is not None and self.max_beta is not None:
+            if self.min_beta >= self.max_beta:
+                raise ValueError("min_beta must be less than max_beta")
 
 class EffToxSchema(BaseModel):
     real_doses: List[float] = Field(description="Real dose values")

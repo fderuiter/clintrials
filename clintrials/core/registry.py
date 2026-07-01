@@ -12,6 +12,12 @@ REGISTRY: Dict[str, Any] = {
     # Quadrature nodes
     "crm_deg": 40,
     
+    # CRM Integration parameters
+    "crm_min_beta": -10,
+    "crm_max_beta": 10,
+    "crm_n_points": 2001,
+    "crm_sample_size": 1000000,
+    
     # Search intervals
     "gsd_brentq_first_min": -5,
     "gsd_brentq_first_max": 15,
