@@ -12,6 +12,7 @@ class FieldInfo:
         self.annotation = None
 
 def Field(default=dataclasses.MISSING, description=None, ge=None, le=None, gt=None, lt=None, **kwargs):
+    """Create and return a FieldInfo instance."""
     return FieldInfo(default=default, description=description, ge=ge, le=le, gt=gt, lt=lt)
 
 class BaseModel:
