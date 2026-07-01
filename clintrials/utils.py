@@ -1,22 +1,59 @@
+from typing import Any
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 import glob
 import json
 import logging
+import warnings
 from collections import OrderedDict
 from collections.abc import Iterable
 from copy import copy
 from datetime import datetime
-from functools import reduce
+from functools import reduce, wraps
 from itertools import product
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
+def deprecated(alternative):
+    """
+    Decorator to mark a function, method, or class as deprecated.
+    Emits a DeprecationWarning pointing to the `alternative`.
+    
+    Args:
+        alternative (str): The modern alternative function, method, or class to use.
+    """
+    def decorator(obj):
+        if isinstance(obj, type):
+            orig_init = obj.__init__
+            @wraps(orig_init)
+            def new_init(self, *args, **kwargs):
+                warnings.warn(
+                    f"{obj.__name__} is deprecated and will be removed in a future version. "
+                    f"Use {alternative} instead.",
+                    category=DeprecationWarning,
+                    stacklevel=2
+                )
+                orig_init(self, *args, **kwargs)
+            obj.__init__ = new_init
+            return obj
+        else:
+            @wraps(obj)
+            def wrapper(*args, **kwargs):
+                warnings.warn(
+                    f"{obj.__name__} is deprecated and will be removed in a future version. "
+                    f"Use {alternative} instead.",
+                    category=DeprecationWarning,
+                    stacklevel=2
+                )
+                return obj(*args, **kwargs)
+            return wrapper
+    return decorator
 
-def to_1d_list_gen(x):
+
+def to_1d_list_gen(x: Any) -> Any:
     """Generator function to flatten a list of lists.
 
     This function recursively flattens a list of lists of arbitrary depth
@@ -32,7 +69,7 @@ def to_1d_list_gen(x):
         yield x
 
 
-def to_1d_list(x):
+def to_1d_list(x: Any) -> Any:
     """Flattens a list of lists of arbitrary depth to a single list.
 
     Args:
@@ -56,7 +93,7 @@ def get_logger(name: str = __name__) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def _open_json_local(file_loc):
+def _open_json_local(file_loc: Any) -> Any:
     """Opens a local JSON file.
 
     Args:
@@ -68,7 +105,7 @@ def _open_json_local(file_loc):
     return json.load(open(file_loc))
 
 
-def _open_json_url(url):
+def _open_json_url(url: Any) -> Any:
     """Opens a JSON file from a URL.
 
     Args:
@@ -82,7 +119,7 @@ def _open_json_url(url):
     return json.load(urlopen(url))
 
 
-def fetch_json_from_files(file_pattern):
+def fetch_json_from_files(file_pattern: Any) -> Any:
     """Fetches and combines JSON data from multiple files.
 
     Args:
@@ -101,7 +138,7 @@ def fetch_json_from_files(file_pattern):
     return sims
 
 
-def filter_list_of_dicts(list_of_dicts, filter_dict):
+def filter_list_of_dicts(list_of_dicts: Any, filter_dict: Any) -> Any:
     """Filters a list of dictionaries based on a filter dictionary.
 
     Args:
@@ -121,7 +158,7 @@ def filter_list_of_dicts(list_of_dicts, filter_dict):
     return list_of_dicts
 
 
-def map_reduce_files(files, map_func, reduce_func):
+def map_reduce_files(files: Any, map_func: Any, reduce_func: Any) -> Any:
     """Applies a map-reduce pattern to a list of files.
 
     Args:
@@ -139,7 +176,7 @@ def map_reduce_files(files, map_func, reduce_func):
         raise TypeError("No files")
 
 
-def invoke_map_reduce_on_list(a_list, function_map):
+def invoke_map_reduce_on_list(a_list: Any, function_map: Any) -> Any:
     """Invokes a map-reduce pattern on a list.
 
     Args:
@@ -159,7 +196,7 @@ def invoke_map_reduce_on_list(a_list, function_map):
     return response
 
 
-def reduce_maps_by_summing(x, y):
+def reduce_maps_by_summing(x: Any, y: Any) -> Any:
     """Reduces two maps by summing their values.
 
     Args:
@@ -175,7 +212,7 @@ def reduce_maps_by_summing(x, y):
     return response
 
 
-def multiindex_dataframe_from_tuple_map(x, labels):
+def multiindex_dataframe_from_tuple_map(x: Any, labels: Any) -> Any:
     """Creates a pandas DataFrame with a multi-index from a map.
 
     Args:
@@ -192,7 +229,7 @@ def multiindex_dataframe_from_tuple_map(x, labels):
     return pd.DataFrame(list(v), index=i)
 
 
-def tuple_to_dataframe(row_tuples, index_tuples, column_names=None, index_names=None):
+def tuple_to_dataframe(row_tuples: Any, index_tuples: Any, column_names: Any = None, index_names: Any = None) -> Any:
     """Creates a pandas DataFrame from row and index tuples.
 
     Args:
@@ -218,7 +255,7 @@ def tuple_to_dataframe(row_tuples, index_tuples, column_names=None, index_names=
     return pd.DataFrame(row_tuples, index=i)
 
 
-def fullname(o):
+def fullname(o: Any) -> Any:
     """Gets the fully-qualified class name of an object.
 
     Args:
@@ -230,7 +267,7 @@ def fullname(o):
     return o.__module__ + "." + o.__class__.__name__
 
 
-def atomic_to_json(obj):
+def atomic_to_json(obj: Any) -> Any:
     """Converts an atomic object to a JSON-friendly format.
 
     Args:
@@ -245,7 +282,7 @@ def atomic_to_json(obj):
         return obj
 
 
-def iterable_to_json(obj):
+def iterable_to_json(obj: Any) -> Any:
     """Converts an iterable to a JSON-friendly list.
 
     Args:
@@ -260,7 +297,7 @@ def iterable_to_json(obj):
         return atomic_to_json(obj)
 
 
-def row_to_json(row, **kwargs):
+def row_to_json(row: Any, **kwargs: Any) -> Any:
     """Converts a pandas Series to a JSON-friendly dictionary.
 
     Args:
@@ -282,7 +319,7 @@ def row_to_json(row, **kwargs):
     return doc
 
 
-def _serialize_table_structure(df):
+def _serialize_table_structure(df: Any) -> Any:
     """Serializes the structure of a DataFrame to a dictionary."""
     doc = OrderedDict()
     doc["Format"] = "Table"
@@ -322,7 +359,7 @@ def _serialize_table_structure(df):
     return doc
 
 
-def _calculate_value_counts(df, definitely_do_value_counts=False):
+def _calculate_value_counts(df: Any, definitely_do_value_counts: Any = False) -> Any:
     """Calculates value counts for each column in a DataFrame."""
     freqs = OrderedDict()
     for col_name in df:
@@ -334,7 +371,7 @@ def _calculate_value_counts(df, definitely_do_value_counts=False):
     return freqs
 
 
-def _calculate_column_summaries(df):
+def _calculate_column_summaries(df: Any) -> Any:
     """Calculates summary statistics for each column in a DataFrame."""
     col_summaries = OrderedDict()
     for i, col_name in enumerate(df):
@@ -351,7 +388,7 @@ def _calculate_column_summaries(df):
     return col_summaries
 
 
-def _calculate_row_summaries(df):
+def _calculate_row_summaries(df: Any) -> Any:
     """Calculates summary statistics for each row in a DataFrame."""
     row_summaries = OrderedDict()
     for i, row_name in enumerate(df.index):
@@ -364,13 +401,7 @@ def _calculate_row_summaries(df):
     return row_summaries
 
 
-def df_to_json(
-    df,
-    do_value_counts=True,
-    definitely_do_value_counts=False,
-    do_column_summaries=True,
-    do_row_summaries=True,
-):
+def df_to_json(df: Any, do_value_counts: Any = True, definitely_do_value_counts: Any = False, do_column_summaries: Any = True, do_row_summaries: Any = True) -> Any:
     """Serializes a pandas DataFrame to a JSON-friendly object.
 
     Args:
@@ -402,7 +433,7 @@ def df_to_json(
     return doc
 
 
-def levenshtein(s1, s2):
+def levenshtein(s1: Any, s2: Any) -> Any:
     """Calculates the Levenshtein distance between two strings.
 
     Args:
@@ -431,7 +462,7 @@ def levenshtein(s1, s2):
     return previous_row[-1]
 
 
-def levenshtein_index(s1, s2):
+def levenshtein_index(s1: Any, s2: Any) -> Any:
     """Calculates a similarity score between two strings based on the
     Levenshtein distance.
 
@@ -450,7 +481,7 @@ def levenshtein_index(s1, s2):
         return 0.0
 
 
-def support_match(a, b):
+def support_match(a: Any, b: Any) -> Any:
     """Calculates a support match score between two collections.
 
     The score is the percentage of elements of `a` in `b` and `b` in `a`.
@@ -472,7 +503,7 @@ def support_match(a, b):
         return 0.0
 
 
-def _correlated_binary_outcomes_mardia(a, b, c):
+def _correlated_binary_outcomes_mardia(a: Any, b: Any, c: Any) -> Any:
     """Helper function for `correlated_binary_outcomes`."""
     if a == 0:
         return -c / b
@@ -490,7 +521,7 @@ def _correlated_binary_outcomes_mardia(a, b, c):
     return r
 
 
-def _correlated_binary_outcomes_solve2(mui, muj, psi):
+def _correlated_binary_outcomes_solve2(mui: Any, muj: Any, psi: Any) -> Any:
     """Helper function for `correlated_binary_outcomes`."""
     if psi == 1:
         return mui * muj
@@ -502,7 +533,7 @@ def _correlated_binary_outcomes_solve2(mui, muj, psi):
     return muij
 
 
-def correlated_binary_outcomes(num_pairs, u, psi, seed=None):
+def correlated_binary_outcomes(num_pairs: Any, u: Any, psi: Any, seed: Any = None) -> Any:
     """Generates correlated binary outcomes.
 
     This function uses the method from the R-package `ranBin2`.
@@ -530,7 +561,7 @@ def correlated_binary_outcomes(num_pairs, u, psi, seed=None):
     return y
 
 
-def correlated_binary_outcomes_from_uniforms(unifs, u, psi):
+def correlated_binary_outcomes_from_uniforms(unifs: Any, u: Any, psi: Any) -> Any:
     """Generates correlated binary outcomes from uniform random numbers.
 
     Args:
@@ -555,7 +586,7 @@ def correlated_binary_outcomes_from_uniforms(unifs, u, psi):
         raise ValueError("unifs must be an n*3 array")
 
 
-def _create_conf_int_report(conf_int, alpha, method_name):
+def _create_conf_int_report(conf_int: Any, alpha: Any, method_name: Any) -> Any:
     """Creates a confidence interval report dictionary."""
     report = OrderedDict()
     report["Lower"] = conf_int[0]
@@ -565,17 +596,7 @@ def _create_conf_int_report(conf_int, alpha, method_name):
     return report
 
 
-def get_proportion_confint_report(
-    num_successes,
-    num_trials,
-    alpha=0.05,
-    do_normal=True,
-    do_agresti_coull=True,
-    do_beta=False,
-    do_wilson=True,
-    do_jeffrey=False,
-    do_binom_test=False,
-):
+def get_proportion_confint_report(num_successes: Any, num_trials: Any, alpha: Any = 0.05, do_normal: Any = True, do_agresti_coull: Any = True, do_beta: Any = False, do_wilson: Any = True, do_jeffrey: Any = False, do_binom_test: Any = False) -> Any:
     """Gets a report of confidence intervals for a proportion.
 
     Args:
@@ -622,9 +643,7 @@ def get_proportion_confint_report(
     return conf_int_reports
 
 
-def cross_tab(
-    col_row_pairs, cols=None, rows=None, to_json=False, do_value_counts=False
-):
+def cross_tab(col_row_pairs: Any, cols: Any = None, rows: Any = None, to_json: Any = False, do_value_counts: Any = False) -> Any:
     """Creates a cross-tabulation of data pairs.
 
     Args:
@@ -672,7 +691,7 @@ from functools import partial
 class Memoize:
     """A class to cache function results."""
 
-    def __init__(self, f):
+    def __init__(self, f: Any) -> None:
         """Initializes a Memoize object.
 
         Args:
@@ -681,7 +700,7 @@ class Memoize:
         self.f = f
         self.memo = {}
 
-    def __call__(self, *args):
+    def __call__(self, *args: Any) -> Any:
         """Calls the memoized function.
 
         Args:
@@ -694,7 +713,7 @@ class Memoize:
             self.memo[args] = self.f(*args)
         return self.memo[args]
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance: Any, owner: Any) -> Any:
         """Support instance methods."""
         return partial(self, instance)
 
@@ -702,11 +721,11 @@ class Memoize:
 class ParameterSpace:
     """A class to handle combinations of parameters in simulations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes a ParameterSpace object."""
         self.vals_map = OrderedDict()
 
-    def add(self, label, values):
+    def add(self, label: Any, values: Any) -> Any:
         """Adds a parameter and its possible values to the space.
 
         Args:
@@ -715,7 +734,7 @@ class ParameterSpace:
         """
         self.vals_map[label] = values
 
-    def sample(self, label):
+    def sample(self, label: Any) -> Any:
         """Randomly samples a value for a given parameter.
 
         Args:
@@ -730,7 +749,7 @@ class ParameterSpace:
         else:
             return None
 
-    def sample_all(self):
+    def sample_all(self) -> Any:
         """Randomly samples a value for each parameter.
 
         Returns:
@@ -741,7 +760,7 @@ class ParameterSpace:
             sampled[label] = self.sample(label)
         return sampled
 
-    def get_cyclical_iterator(self, limit=-1):
+    def get_cyclical_iterator(self, limit: Any = -1) -> Any:
         """Gets a cyclical iterator for the parameter space.
 
         Args:
@@ -753,7 +772,7 @@ class ParameterSpace:
         """
         return _ParameterSpaceIter(self, limit)
 
-    def keys(self):
+    def keys(self) -> Any:
         """Gets the names of the parameters.
 
         Returns:
@@ -761,7 +780,7 @@ class ParameterSpace:
         """
         return self.vals_map.keys()
 
-    def dimensions(self):
+    def dimensions(self) -> Any:
         """Gets the number of values for each parameter.
 
         Returns:
@@ -770,7 +789,7 @@ class ParameterSpace:
         """
         return np.array([len(y) for x, y in self.vals_map.items()])
 
-    def size(self):
+    def size(self) -> Any:
         """Gets the total size of the parameter space.
 
         Returns:
@@ -778,7 +797,7 @@ class ParameterSpace:
         """
         return np.prod(self.dimensions())
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> Any:
         """Gets the values for a given parameter.
 
         Args:
@@ -793,7 +812,7 @@ class ParameterSpace:
 class _ParameterSpaceIter:
     """An iterator for the ParameterSpace class."""
 
-    def __init__(self, parameter_space, limit):
+    def __init__(self, parameter_space: Any, limit: Any) -> None:
         """Initializes a _ParameterSpaceIter object."""
         self.limit = limit
         self.cursor = 0
@@ -804,10 +823,10 @@ class _ParameterSpaceIter:
             num_options.append(len(parameter_space[label]))
         self.paths = list(product(*[range(x) for x in num_options]))
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         return self
 
-    def __next__(self):
+    def __next__(self) -> Any:
         if 0 < self.limit <= self.cursor:
             raise StopIteration()
         i = self.cursor % len(self.paths)
