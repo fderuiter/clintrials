@@ -36,6 +36,7 @@ def fake_streamlit(monkeypatch):
     sidebar.selectbox = MagicMock()
     sidebar.file_uploader = MagicMock()
     sidebar.success = MagicMock()
+    sidebar.expander = MagicMock()
     st.sidebar = sidebar
     st.fragment = lambda func: func
     monkeypatch.setitem(sys.modules, "streamlit", st)
