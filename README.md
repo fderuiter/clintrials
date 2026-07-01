@@ -173,7 +173,13 @@ The repository is organized as follows:
 
 ## Interactive Dashboard
 
-This project includes an interactive web-based dashboard for visualizing simulation results. To run the dashboard, make sure you have installed the project dependencies with Poetry, as described above. Then, run the following command:
+This project includes an interactive web-based dashboard for visualizing simulation results. To run the dashboard, make sure you have installed the project with the `viz` extra:
+
+```bash
+poetry install -E viz
+```
+
+Then, run the following command:
 
 ```bash
 poetry run dashboard
@@ -193,12 +199,14 @@ Contributions are welcome! Please see the [contributing guide](docs/contributing
 
 ## Development
 
-To set up a development environment, install the development requirements and run the style checks using pre-commit:
+We recommend using the provided Dev Container for a standardized development environment. When you open this repository in a supported editor (like VS Code), you will be prompted to reopen it in a container. The Dev Container automatically installs all necessary system and Python dependencies using Poetry.
+
+To set up a development environment locally without a container, use Poetry:
 
 ```bash
-pip install -e .[dev]
-pre-commit install
-pre-commit run --all-files
+poetry install --all-extras
+poetry run pre-commit install
+poetry run pre-commit run --all-files
 ```
 
 ### Testing
@@ -206,16 +214,15 @@ pre-commit run --all-files
 Run the test suite with:
 
 ```bash
-pytest -q
+poetry run pytest -q
 ```
 
 ### Building the Documentation
 
-To build the documentation locally, install the optional docs dependencies and run Sphinx:
+To build the documentation locally with Poetry, run:
 
 ```bash
-pip install -e .[docs]
-make -C docs html
+poetry run make -C docs html
 ```
 
 The documentation will be generated in the `docs/_build/html` directory.
