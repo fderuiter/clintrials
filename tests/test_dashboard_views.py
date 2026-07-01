@@ -79,6 +79,9 @@ def _make_winratio_streamlit_mock():
         write=MagicMock(),
         fragment=lambda func: func,
         metric=MagicMock(),
+        plotly_chart=MagicMock(),
+        markdown=MagicMock(),
+        expander=MagicMock()
     )
     return st
 

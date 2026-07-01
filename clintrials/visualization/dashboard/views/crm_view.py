@@ -54,12 +54,8 @@ def render(sims):
             )
             text_summaries.append(meta)
 
-            if getattr(st, "session_state", {}).get("accessibility_mode", False):
-                st.markdown(meta)
-            else:
-                st.plotly_chart(fig)
-                with st.expander("Data Summary"):
-                    st.markdown(meta)
+            from clintrials.visualization.dashboard.factory import render_accessible_chart
+            render_accessible_chart(st, fig)
         else:
             st.warning(
                 "Could not generate Dose Recommendation Probability plot. Check simulation data and summary output."
