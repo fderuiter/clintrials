@@ -575,6 +575,7 @@ def simulate_trial(
 
 @deprecated(alternative="simulate_trial")
 def simulate_efficacy_toxicity_dose_finding_trial(*args, **kwargs):
+    """Deprecated alias for simulate_trial."""
     return simulate_trial(*args, **kwargs)
 
 
@@ -653,6 +654,7 @@ def simulate_efficacy_toxicity_dose_finding_trials(
 
 @deprecated(alternative="simulate_efficacy_toxicity_dose_finding_trials")
 def simulate_trials(*args, **kwargs):
+    """Deprecated alias for simulate_efficacy_toxicity_dose_finding_trials."""
     return simulate_efficacy_toxicity_dose_finding_trials(*args, **kwargs)
 
 
@@ -746,10 +748,12 @@ def dose_transition_pathways(
 
 @deprecated(alternative="dose_transition_pathways")
 def efftox_dose_transition_pathways(*args, **kwargs):
+    """Deprecated alias for dose_transition_pathways."""
     return dose_transition_pathways(*args, **kwargs)
 
 @deprecated(alternative="dose_transition_pathways")
 def efficacy_toxicity_dose_transition_pathways(*args, **kwargs):
+    """Deprecated alias for dose_transition_pathways."""
     return dose_transition_pathways(*args, **kwargs)
 
 
