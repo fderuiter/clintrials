@@ -10,9 +10,10 @@ API Reference
    clintrials.core.simulation
    clintrials.core.stats
    clintrials.core.tte
-   clintrials.coll
    clintrials.utils
    clintrials.phase2.bebop
    clintrials.dosefinding.efftox
    clintrials.dosefinding.wagestait
-
+   clintrials.fgm_joint_prob
+   clintrials.adaptive_mc_integration
+   clintrials.integrate_posterior_1d
