@@ -44,6 +44,7 @@ class AccessiblePDF(FPDF):
 
     @contextmanager
     def accessible_table(self, *args, **kwargs):
+        """Creates an accessible table context for the PDF report."""
         kwargs.setdefault("num_heading_rows", 1)
         table = AccessibleTable(self, *args, **kwargs)
         yield table
