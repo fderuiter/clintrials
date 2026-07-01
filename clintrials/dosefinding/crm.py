@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
 """
 Continual Reassessment Method (CRM) for dose-finding clinical trials.
 
@@ -11,7 +16,6 @@ import logging
 import warnings
 from collections import OrderedDict
 
-import numpy as np
 from clintrials.core.registry import REGISTRY, inject_docs
 from numpy import trapezoid
 from scipy.integrate import quad
@@ -26,7 +30,7 @@ from clintrials.utils import atomic_to_json, iterable_to_json
 _min_beta, _max_beta = -10, 10
 
 
-def _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False):
+def _toxicity_likelihood(link_func: Any, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False) -> Any:
     """Calculates the likelihood of a single toxicity outcome.
 
     Args:
@@ -49,7 +53,7 @@ def _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False):
         return p**tox * (1 - p) ** (1 - tox)
 
 
-def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
+def _compound_toxicity_likelihood(link_func: Any, a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False) -> Any:
     """Calculates the compound likelihood of multiple toxicity outcomes.
 
     Args:
@@ -66,7 +70,7 @@ def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
     """
     from clintrials.validation import validate_matching_lengths
 
-    validate_matching_lengths(doses=doses, toxs=toxs)
+    validate_matching_lengths(doses=doses, toxs=toxs)  # type: ignore
 
     if log:
         l = 0
@@ -80,15 +84,7 @@ def _compound_toxicity_likelihood(link_func, a0, beta, doses, toxs, log=False):
         return l
 
 
-def _get_beta_hat_bayes(
-    F,
-    intercept,
-    codified_doses_given,
-    toxs,
-    beta_pdf,
-    use_quick_integration=False,
-    estimate_var=False,
-):
+def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Any, use_quick_integration: Any = False, estimate_var: Any = False) -> Any:
     """Estimates the beta parameter using Bayesian inference.
 
     Args:
@@ -108,16 +104,16 @@ def _get_beta_hat_bayes(
     """
     from clintrials.core.numerics import integrate_posterior_1d
 
-    def logpost(t):
+    def logpost(t: Any) -> Any:
         ll = _compound_toxicity_likelihood(
             F, intercept, t, codified_doses_given, toxs, log=True
         )
         return ll + np.log(beta_pdf(t) + 1e-300)
 
-    beta_hat = integrate_posterior_1d(logpost, lambda t: t, _min_beta, _max_beta)
+    beta_hat = integrate_posterior_1d(logpost, lambda t: t, _min_beta, _max_beta)  # type: ignore
 
     if estimate_var:
-        exp_x2 = integrate_posterior_1d(logpost, lambda t: t**2, _min_beta, _max_beta)
+        exp_x2 = integrate_posterior_1d(logpost, lambda t: t**2, _min_beta, _max_beta)  # type: ignore
         var = exp_x2 - beta_hat**2
     else:
         var = None
@@ -125,7 +121,7 @@ def _get_beta_hat_bayes(
     return beta_hat, var
 
 
-def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=False):
+def _get_beta_hat_mle(F: Any, intercept: Any, codified_doses_given: Any, toxs: Any, estimate_var: Any = False) -> Any:
     """Estimates the beta parameter using maximum likelihood estimation (MLE).
 
     Args:
@@ -140,7 +136,7 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
         tuple[float, float | None]: A tuple containing the MLE and variance
             of beta. The variance is `None` if `estimate_var` is `False`.
     """
-    if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
+    if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:  # type: ignore
         logging.warning(
             "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist."
         )
@@ -158,8 +154,8 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
             eps = np.finfo(float).eps
             h = (eps ** (1 / 4)) * max(abs(beta_hat), 1.0)
             f_mid = res.fun
-            f_plus = f(np.array([beta_hat + h]))
-            f_minus = f(np.array([beta_hat - h]))
+            f_plus = f(np.array([beta_hat + h]))  # type: ignore
+            f_minus = f(np.array([beta_hat - h]))  # type: ignore
             hessian = (f_plus - 2 * f_mid + f_minus) / (h**2)
 
             if hessian > 0:
@@ -175,7 +171,7 @@ def _get_beta_hat_mle(F, intercept, codified_doses_given, toxs, estimate_var=Fal
         return np.nan, None
 
 
-def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=200):
+def _get_beta_hat_mle_bootstrap(F: Any, intercept: Any, beta_hat: Any, codified_doses_given: Any, B: Any = 200) -> Any:
     """Estimates the variance of the beta MLE using parametric bootstrap.
 
     Args:
@@ -210,7 +206,7 @@ def _get_beta_hat_mle_bootstrap(F, intercept, beta_hat, codified_doses_given, B=
     return np.var(beta_hats_boot)
 
 
-def _estimate_prob_tox_from_param(F, intercept, beta_hat, dose_labels):
+def _estimate_prob_tox_from_param(F: Any, intercept: Any, beta_hat: Any, dose_labels: Any) -> Any:
     """Estimates the probability of toxicity by plugging in a beta estimate.
 
     Args:
@@ -227,15 +223,7 @@ def _estimate_prob_tox_from_param(F, intercept, beta_hat, dose_labels):
     return post_tox
 
 
-def _get_post_tox_bayes(
-    F,
-    intercept,
-    dose_labels,
-    codified_doses_given,
-    toxs,
-    beta_pdf,
-    use_quick_integration=False,
-):
+def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Any, use_quick_integration: Any = False) -> Any:
     """Calculates the posterior probability of toxicity using Bayesian integration.
 
     Args:
@@ -253,7 +241,7 @@ def _get_post_tox_bayes(
     """
     from clintrials.core.numerics import integrate_posterior_1d
 
-    def logpost(t):
+    def logpost(t: Any) -> Any:
         ll = _compound_toxicity_likelihood(
             F, intercept, t, codified_doses_given, toxs, log=True
         )
@@ -261,7 +249,7 @@ def _get_post_tox_bayes(
 
     post_tox = []
     for x in dose_labels:
-        prob = integrate_posterior_1d(
+        prob = integrate_posterior_1d(  # type: ignore
             logpost, lambda t: F(x, a0=intercept, beta=t), _min_beta, _max_beta
         )
         post_tox.append(prob)
@@ -269,22 +257,7 @@ def _get_post_tox_bayes(
     return post_tox
 
 
-def crm(
-    prior,
-    target,
-    toxicities,
-    dose_levels,
-    intercept=3,
-    F_func=logistic,
-    inverse_F=inverse_logistic,
-    beta_dist=norm(loc=0, scale=np.sqrt(1.34)),
-    method="bayes",
-    use_quick_integration=False,
-    estimate_var=False,
-    plugin_mean=True,
-    mle_var_method="hessian",
-    bootstrap_samples=200,
-):
+def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Any = logistic, inverse_F: Any = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200) -> Any:
     """Performs a Continual Reassessment Method (CRM) calculation.
 
     Args:
@@ -324,7 +297,7 @@ def crm(
     """
     from clintrials.validation import validate_matching_lengths
 
-    validate_matching_lengths(toxicities=toxicities, dose_levels=dose_levels)
+    validate_matching_lengths(toxicities=toxicities, dose_levels=dose_levels)  # type: ignore
 
     if "logit1" in F_func.__name__ and isinstance(beta_dist, type(norm())):
         alpha0 = np.exp(beta_dist.mean() + beta_dist.var() / 2)
@@ -414,9 +387,8 @@ class CRM(DoseFindingTrial):
     """
 
     @classmethod
-    def get_summary_functions(cls):
+    def get_summary_functions(cls) -> Any:
         """Get summary functions for the CRM protocol."""
-        import pandas as pd
 
         return {
             "N": lambda s, p: len(s),
@@ -427,30 +399,7 @@ class CRM(DoseFindingTrial):
             .sort_index(),
         }
 
-    def __init__(
-        self,
-        prior,
-        target,
-        first_dose,
-        max_size,
-        F_func=empiric,
-        inverse_F=inverse_empiric,
-        beta_prior=norm(0, np.sqrt(1.34)),
-        method="bayes",
-        use_quick_integration=False,
-        estimate_var=True,
-        avoid_skipping_untried_escalation=False,
-        avoid_skipping_untried_deescalation=False,
-        lowest_dose_too_toxic_hurdle=None,
-        lowest_dose_too_toxic_certainty=None,
-        coherency_threshold=None,
-        principle_escalation_func=None,
-        termination_func=None,
-        plugin_mean=True,
-        intercept=3,
-        mle_var_method="hessian",
-        bootstrap_samples=None,
-    ):
+    def __init__(self, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Any = None, termination_func: Any = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None) -> None:
         """Initializes a CRM trial object.
 
         Args:
@@ -566,12 +515,12 @@ class CRM(DoseFindingTrial):
         self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = list(self.prior)
 
-    def _DoseFindingTrial__reset(self):
+    def _DoseFindingTrial__reset(self) -> Any:
         self.beta_hat, self.beta_var = self.beta_prior.mean(), self.beta_prior.var()
         self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = self.prior
 
-    def _DoseFindingTrial__calculate_next_dose(self):
+    def _DoseFindingTrial__calculate_next_dose(self) -> Any:
         if self.principle_escalation_func:
             cases = zip(self._doses, self._toxicities)
             proposed_dose = self.principle_escalation_func(cases)
@@ -611,7 +560,7 @@ class CRM(DoseFindingTrial):
                 self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
                 for p in self.prior
             ]
-            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(1000000)
+            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(1000000)  # type: ignore
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 
@@ -621,7 +570,7 @@ class CRM(DoseFindingTrial):
                 return proposed_dose
 
         if self.coherency_threshold and proposed_dose > current_dose:
-            tox_rate_at_current = self.observed_toxicity_rates()[current_dose - 1]
+            tox_rate_at_current = self.observed_toxicity_rates()[current_dose - 1]  # type: ignore
             if (
                 not np.isnan(tox_rate_at_current)
                 and tox_rate_at_current > self.coherency_threshold
@@ -646,7 +595,7 @@ class CRM(DoseFindingTrial):
 
         return proposed_dose
 
-    def prob_tox(self):
+    def prob_tox(self) -> npt.NDArray[np.float64]:  # type: ignore
         """Gets the posterior probabilities of toxicity for each dose level.
 
         Returns:
@@ -654,13 +603,13 @@ class CRM(DoseFindingTrial):
         """
         return list(self.post_tox)
 
-    def _prob_tox_exceeds_quadrature(self, tox_cutoff, deg=REGISTRY["crm_deg"]):
+    def _prob_tox_exceeds_quadrature(self, tox_cutoff: Any, deg: Any = REGISTRY["crm_deg"]) -> Any:
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
         mu0 = self.beta_prior.mean()
         sd0 = np.sqrt(self.beta_prior.var())
-        nodes, weights = np.polynomial.hermite.hermgauss(deg)
-        betas = mu0 + np.sqrt(2) * sd0 * nodes
-        log_w = np.log(weights)
+        nodes, weights = np.polynomial.hermite.hermgauss(deg)  # type: ignore
+        betas = mu0 + np.sqrt(2) * sd0 * nodes  # type: ignore
+        log_w = np.log(weights)  # type: ignore
         dose_labels = [
             self.inverse_F(self.prior[d - 1], a0=self.intercept, beta=mu0)
             for d in self.doses()
@@ -686,7 +635,7 @@ class CRM(DoseFindingTrial):
             out.append(np.sum(post_weights * (tox_probs > tox_cutoff)))
         return np.array(out)
 
-    def prob_tox_exceeds(self, tox_cutoff, backend="quadrature", n=10**6):
+    def prob_tox_exceeds(self, tox_cutoff: Any, backend: Any = "quadrature", n: Any = 10**6) -> Any:
         """Calculates the posterior probability that toxicity exceeds a cutoff.
 
         Args:
@@ -724,7 +673,7 @@ class CRM(DoseFindingTrial):
             )
         raise ValueError("Unknown backend")
 
-    def has_more(self):
+    def has_more(self) -> bool:
         """Checks if the trial is ongoing.
 
         Returns:
@@ -737,7 +686,7 @@ class CRM(DoseFindingTrial):
         else:
             return True
 
-    def optimal_decision(self, prob_tox):
+    def optimal_decision(self, prob_tox: Sequence[float]) -> int:
         """Gets the optimal dose choice for a given dose-toxicity curve.
 
         Args:
@@ -747,9 +696,9 @@ class CRM(DoseFindingTrial):
         Returns:
             int: The optimal 1-based dose level.
         """
-        return np.argmin(np.abs(prob_tox - self.target)) + 1
+        return np.argmin(np.abs(prob_tox - self.target)) + 1  # type: ignore
 
-    def get_tox_prob_quantile(self, p):
+    def get_tox_prob_quantile(self, p: Any) -> Any:
         """Gets the quantiles of the toxicity probabilities for each dose.
 
         This method uses a normal approximation.
@@ -771,7 +720,7 @@ class CRM(DoseFindingTrial):
         p = [self.F_func(x, a0=self.intercept, beta=beta_est) for x in labels]
         return p
 
-    def plot_toxicity_probabilities(self, chart_title=None, use_ggplot=False):
+    def plot_toxicity_probabilities(self, chart_title: Optional[str] = None, use_ggplot: bool = False) -> Any:
         """Plots the prior and posterior dose-toxicity curves.
 
         Args:
@@ -784,12 +733,12 @@ class CRM(DoseFindingTrial):
         """
         from clintrials.core.viz_interface import get_visualization_provider
 
-        viz = get_visualization_provider()
+        viz = get_visualization_provider()  # type: ignore
 
         return viz.plot_crm_toxicity_probabilities(self, chart_title=chart_title)
 
 
-def crm_dtp_detail(trial):
+def crm_dtp_detail(trial: Any) -> Any:
     """Gets CRM-specific details for DTP reporting.
 
     Args:

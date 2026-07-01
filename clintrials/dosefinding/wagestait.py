@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
 """
 An implementation of Wages & Tait's adaptive Bayesian design for dose-finding
 in clinical trials.
@@ -12,7 +17,6 @@ __contact__ = "kristian.brock@gmail.com"
 
 from random import sample
 
-import numpy as np
 from numpy import trapezoid
 from scipy.integrate import quad
 from scipy.stats import beta, norm
@@ -24,7 +28,7 @@ from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingT
 _min_theta, _max_theta = -10, 10
 
 
-def _wt_lik(cases, skeleton, theta, F=empiric, a0=0):
+def _wt_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0) -> Any:
     """Calculates the compound likelihood for the Wages & Tait method.
 
     Args:
@@ -45,7 +49,7 @@ def _wt_lik(cases, skeleton, theta, F=empiric, a0=0):
     return l
 
 
-def _wt_log_lik(cases, skeleton, theta, F=empiric, a0=0):
+def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0) -> Any:
     """Calculates the compound log-likelihood for the Wages & Tait method.
 
     Args:
@@ -67,14 +71,7 @@ def _wt_log_lik(cases, skeleton, theta, F=empiric, a0=0):
     return ll
 
 
-def _wt_get_theta_hat(
-    cases,
-    skeletons,
-    theta_prior,
-    F=empiric,
-    use_quick_integration=False,
-    estimate_var=False,
-):
+def _wt_get_theta_hat(cases: Any, skeletons: Any, theta_prior: Any, F: Any = empiric, use_quick_integration: Any = False, estimate_var: Any = False) -> Any:
     """Estimates the theta parameter for the Wages & Tait method.
 
     Args:
@@ -97,17 +94,17 @@ def _wt_get_theta_hat(
     theta_hats = []
     for skeleton in skeletons:
 
-        def logpost(t):
+        def logpost(t: Any) -> Any:
             ll = _wt_log_lik(cases, skeleton, t, F)
             return ll + np.log(theta_prior.pdf(t) + 1e-300)
 
-        theta_hat, diag = integrate_posterior_1d(
+        theta_hat, diag = integrate_posterior_1d(  # type: ignore
             logpost, lambda t: t, _min_theta, _max_theta, return_diagnostics=True
         )
         marginal_likelihood = diag["log_marginal"]
 
         if estimate_var:
-            exp_x2 = integrate_posterior_1d(
+            exp_x2 = integrate_posterior_1d(  # type: ignore
                 logpost, lambda t: t**2, _min_theta, _max_theta
             )
             var = exp_x2 - theta_hat**2
@@ -117,9 +114,7 @@ def _wt_get_theta_hat(
     return theta_hats
 
 
-def _get_post_eff_bayes(
-    cases, skeleton, dose_labels, theta_prior, F=empiric, use_quick_integration=False
-):
+def _get_post_eff_bayes(cases: Any, skeleton: Any, dose_labels: Any, theta_prior: Any, F: Any = empiric, use_quick_integration: Any = False) -> Any:
     """Calculates the posterior probability of efficacy using Bayesian integration.
 
     Args:
@@ -135,14 +130,14 @@ def _get_post_eff_bayes(
     """
     from clintrials.core.numerics import integrate_posterior_1d
 
-    def logpost(t):
+    def logpost(t: Any) -> Any:
         ll = _wt_log_lik(cases, skeleton, t, F)
         return ll + np.log(theta_prior.pdf(t) + 1e-300)
 
     post_eff = []
     intercept = 0
     for x in dose_labels:
-        prob = integrate_posterior_1d(
+        prob = integrate_posterior_1d(  # type: ignore
             logpost, lambda t: F(x, a0=intercept, beta=t), _min_theta, _max_theta
         )
         post_eff.append(prob)
@@ -155,26 +150,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
     design for oncology trials of molecularly targeted agents.
     """
 
-    def __init__(
-        self,
-        skeletons,
-        prior_tox_probs,
-        tox_target,
-        tox_limit,
-        eff_limit,
-        first_dose,
-        max_size,
-        randomisation_stage_size,
-        F_func=empiric,
-        inverse_F=inverse_empiric,
-        theta_prior=norm(0, np.sqrt(1.34)),
-        beta_prior=norm(0, np.sqrt(1.34)),
-        excess_toxicity_alpha=0.025,
-        deficient_efficacy_alpha=0.025,
-        model_prior_weights=None,
-        use_quick_integration=False,
-        estimate_var=False,
-    ):
+    def __init__(self, skeletons: Any, prior_tox_probs: Any, tox_target: Any, tox_limit: Any, eff_limit: Any, first_dose: Any, max_size: Any, randomisation_stage_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, theta_prior: Any = norm(0, np.sqrt(1.34)), beta_prior: Any = norm(0, np.sqrt(1.34)), excess_toxicity_alpha: Any = 0.025, deficient_efficacy_alpha: Any = 0.025, model_prior_weights: Any = None, use_quick_integration: Any = False, estimate_var: Any = False) -> None:
         """Initializes a WagesTait trial object.
 
         Args:
@@ -215,7 +191,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         )
 
         self.skeletons = skeletons
-        self.K, self.I = np.array(skeletons).shape
+        self.K, self.I = np.array(skeletons).shape  # type: ignore
         if self.I != len(prior_tox_probs):
             raise ValueError("prior_tox_probs should have %s items." % self.I)
         if tox_target > tox_limit:
@@ -243,8 +219,8 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.use_quick_integration = use_quick_integration
         self.estimate_var = estimate_var
 
-        self.most_likely_model_index = np.random.choice(
-            np.array(range(self.K))[
+        self.most_likely_model_index = np.random.choice(  # type: ignore
+            np.array(range(self.K))[  # type: ignore
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -257,7 +233,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             self.randomise_at_start = True
         else:
             self.randomise_at_start = False
-        self.crm = CRM(
+        self.crm = CRM(  # type: ignore
             prior=prior_tox_probs,
             target=tox_target,
             first_dose=first_dose,
@@ -273,7 +249,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.post_eff_probs = np.zeros(self.I)
         self.theta_hats = np.zeros(self.K)
 
-    def dose_toxicity_lower_bound(self, dose_level, alpha=0.025):
+    def dose_toxicity_lower_bound(self, dose_level: Any, alpha: Any = 0.025) -> Any:
         """Gets the lower bound of the toxicity probability for a dose level.
 
         This method uses the Clopper-Pearson (exact) method.
@@ -292,7 +268,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 return beta(x, n - x + 1).ppf(alpha)
         return 0
 
-    def dose_efficacy_upper_bound(self, dose_level, alpha=0.025):
+    def dose_efficacy_upper_bound(self, dose_level: Any, alpha: Any = 0.025) -> Any:
         """Gets the upper bound of the efficacy probability for a dose level.
 
         This method uses the Clopper-Pearson (exact) method.
@@ -311,15 +287,15 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 return beta(x + 1, n - x).ppf(1 - alpha)
         return 1
 
-    def model_theta_hat(self):
+    def model_theta_hat(self) -> Any:
         """Gets the theta estimate for the most likely model.
 
         Returns:
             float: The theta estimate.
         """
-        return self.theta_hats[self.most_likely_model_index]
+        return self.theta_hats[self.most_likely_model_index]  # type: ignore
 
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self):
+    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self) -> Any:
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
@@ -387,9 +363,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 
         return self._next_dose
 
-    def _EfficacyToxicityDoseFindingTrial__reset(self):
+    def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
         self.most_likely_model_index = sample(
-            np.array(range(self.K))[
+            np.array(range(self.K))[  # type: ignore
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -404,7 +380,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 self.prior_tox_probs, self.skeletons[self.most_likely_model_index]
             )
 
-    def has_more(self):
+    def has_more(self) -> bool:
         """Checks if the trial is ongoing.
 
         Returns:
@@ -412,7 +388,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
-    def optimal_decision(self, prob_tox, prob_eff):
+    def optimal_decision(self, prob_tox: Sequence[float], prob_eff: Sequence[float]) -> int:
         """Determines the optimal biological dose.
 
         Args:
@@ -426,10 +402,10 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         if sum(admiss) > 0:
             wt_obd = np.nanargmax(np.where(admiss, prob_eff, np.nan)) + 1
         else:
-            wt_obd = -1
-        return wt_obd
+            wt_obd = -1  # type: ignore
+        return wt_obd  # type: ignore
 
-    def _randomise_next_dose(self, tox_probs, eff_probs):
+    def _randomise_next_dose(self, tox_probs: Any, eff_probs: Any) -> Any:
         acceptable_doses = tox_probs <= self.tox_limit
         if sum(acceptable_doses) > 0:
             prob_randomise = []
@@ -451,7 +427,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             self._admissable_set = []
             return -1
 
-    def _maximise_next_dose(self, tox_probs, eff_probs):
+    def _maximise_next_dose(self, tox_probs: Any, eff_probs: Any) -> Any:
         acceptable_doses = tox_probs <= self.tox_limit
         if sum(acceptable_doses) > 0:
             self._status = 1
@@ -460,7 +436,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 for (acc, i) in zip(acceptable_doses, range(1, self.num_doses + 1))
                 if acc
             ]
-            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1
+            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1  # type: ignore
         else:
             self._status = -1
             self._admissable_set = []

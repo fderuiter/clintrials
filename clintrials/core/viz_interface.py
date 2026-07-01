@@ -46,6 +46,11 @@ class VisualizationProvider(abc.ABC):
         """Plot EffTox density."""
         pass
 
+    @abc.abstractmethod
+    def generate_pdf_report(self, df, design_type, text_summaries=None):
+        """Generates an accessibility-first PDF report for trial simulations."""
+        pass
+
 
 _provider = None
 

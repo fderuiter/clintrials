@@ -14,7 +14,7 @@ if not hasattr(st, "fragment"):
 from clintrials.winratio.main import WinRatioTrial
 from clintrials.core.schema import WinRatioSchema
 from clintrials.visualization.dashboard.factory import create_widget, render_metric
-from clintrials.core.report import generate_pdf_report
+from clintrials.core.viz_interface import get_visualization_provider
 
 
 def render() -> None:
@@ -76,19 +76,24 @@ def render() -> None:
             mime="text/csv",
         )
 
-        pdf_data = generate_pdf_report(
+        viz_provider = get_visualization_provider()
+        pdf_data = viz_provider.generate_pdf_report(
             df,
             "Win Ratio",
             text_summaries=[
                 f"Power: {power:.4f}\n95% CI: ({average_ci[0]:.4f}, {average_ci[1]:.4f})"
             ],
-        )
-        getattr(col2, "download_button", lambda *args, **kwargs: None)(
-            label="Download PDF",
-            data=pdf_data,
-            file_name="winratio_simulation.pdf",
-            mime="application/pdf",
-        )
+        ) if viz_provider else None
+
+        if pdf_data is not None:
+            getattr(col2, "download_button", lambda *args, **kwargs: None)(
+                label="Download PDF",
+                data=pdf_data,
+                file_name="winratio_simulation.pdf",
+                mime="application/pdf",
+            )
+        else:
+            col2.warning("PDF export requires the 'fpdf2' package.")
 
 
 # Inject module-level docstring

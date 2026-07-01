@@ -48,7 +48,7 @@ def test_simulation_type1_error():
     # This is a stochastic test, so it might fail by chance.
     # A high number of sims and a reasonable tolerance are needed.
     n_sims = 20000  # Increased for stability
-    results = design.simulate(n_sims=n_sims, theta=0)
+    results = design.run(n_sims=n_sims, method="bulk", theta=0)
 
     # Allow for some Monte Carlo error.
     assert results["rejection_prob"] == pytest.approx(alpha, abs=0.01)
@@ -147,12 +147,12 @@ def test_gsd_update_and_report():
     assert design2._rejected is False
 
 
-def test_gsd_simulate_invalid_sims():
+def test_gsd_run_bulk_invalid_sims():
     design = GroupSequentialDesign(k=3)
     with pytest.raises(
         ValueError, match="Number of simulations must be a positive integer"
     ):
-        design.simulate(0)
+        design.run(0, method="bulk")
 
 from unittest.mock import patch
 
