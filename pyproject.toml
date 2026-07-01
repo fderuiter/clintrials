@@ -28,7 +28,6 @@ streamlit = {version = ">=1.0.0", optional = true}
 altair = {version = "<5", optional = true}
 plotly = {version = ">=5.0.0", optional = true}
 sphinx = {version = "^7.2.6", optional = true}
-myst-parser = {version = "^2.0.0", optional = true}
 furo = {version = "^2024.1.29", optional = true}
 tqdm = "^4.68.3"
 fpdf2 = "^2.7.9"
@@ -97,5 +96,5 @@ ignore = [
 testpaths = ["tests"]
 
 [tool.poetry.extras]
-docs = ["sphinx", "myst-parser", "furo"]
+docs = ["sphinx", "furo"]
 viz = ["streamlit", "altair", "plotly", "ggplot", "matplotlib"]
