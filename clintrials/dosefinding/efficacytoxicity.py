@@ -18,8 +18,6 @@ import logging
 from collections import OrderedDict
 from itertools import combinations_with_replacement, product
 
-import numpy as np
-
 from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,

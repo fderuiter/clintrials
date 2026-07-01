@@ -16,7 +16,6 @@ import logging
 from collections import OrderedDict
 from itertools import combinations_with_replacement, product
 
-import numpy as np
 from scipy.stats import uniform
 
 from clintrials.utils import (

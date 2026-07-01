@@ -18,7 +18,6 @@ __contact__ = "kristian.brock@gmail.com"
 import logging
 from collections import OrderedDict
 
-import numpy as np
 from scipy.optimize import brentq
 from scipy.stats import norm
 
@@ -672,7 +671,6 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     @classmethod
     def get_summary_functions(cls) -> Any:
         """Get summary functions for the EffTox protocol."""
-        import pandas as pd
 
         return {
             "N": lambda s, p: len(s),
