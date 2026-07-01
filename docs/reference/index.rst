@@ -10,7 +10,6 @@ API Reference
    clintrials.core.simulation
    clintrials.core.stats
    clintrials.core.tte
-   clintrials.coll
    clintrials.utils
    clintrials.phase2.bebop
    clintrials.dosefinding.efftox
