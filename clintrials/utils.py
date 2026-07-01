@@ -4,16 +4,52 @@ __contact__ = "kristian.brock@gmail.com"
 import glob
 import json
 import logging
+import warnings
 from collections import OrderedDict
 from collections.abc import Iterable
 from copy import copy
 from datetime import datetime
-from functools import reduce
+from functools import reduce, wraps
 from itertools import product
 
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
+def deprecated(alternative):
+    """
+    Decorator to mark a function, method, or class as deprecated.
+    Emits a DeprecationWarning pointing to the `alternative`.
+    
+    Args:
+        alternative (str): The modern alternative function, method, or class to use.
+    """
+    def decorator(obj):
+        if isinstance(obj, type):
+            orig_init = obj.__init__
+            @wraps(orig_init)
+            def new_init(self, *args, **kwargs):
+                warnings.warn(
+                    f"{obj.__name__} is deprecated and will be removed in a future version. "
+                    f"Use {alternative} instead.",
+                    category=DeprecationWarning,
+                    stacklevel=2
+                )
+                orig_init(self, *args, **kwargs)
+            obj.__init__ = new_init
+            return obj
+        else:
+            @wraps(obj)
+            def wrapper(*args, **kwargs):
+                warnings.warn(
+                    f"{obj.__name__} is deprecated and will be removed in a future version. "
+                    f"Use {alternative} instead.",
+                    category=DeprecationWarning,
+                    stacklevel=2
+                )
+                return obj(*args, **kwargs)
+            return wrapper
+    return decorator
 
 
 def to_1d_list_gen(x):

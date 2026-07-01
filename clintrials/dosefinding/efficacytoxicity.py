@@ -20,6 +20,7 @@ from clintrials.utils import (
     correlated_binary_outcomes_from_uniforms,
     iterable_to_json,
     to_1d_list,
+    deprecated,
 )
 
 logger = logging.getLogger(__name__)
@@ -498,8 +499,9 @@ def _simulate_trial(
     return report
 
 
-# Alias
-_simulate_eff_tox_trial = _simulate_trial
+@deprecated(alternative="_simulate_trial")
+def _simulate_eff_tox_trial(*args, **kwargs):
+    return _simulate_trial(*args, **kwargs)
 
 
 def simulate_trial(
@@ -571,8 +573,9 @@ def simulate_trial(
     )
 
 
-# Alias
-simulate_efficacy_toxicity_dose_finding_trial = simulate_trial
+@deprecated(alternative="simulate_trial")
+def simulate_efficacy_toxicity_dose_finding_trial(*args, **kwargs):
+    return simulate_trial(*args, **kwargs)
 
 
 def simulate_efficacy_toxicity_dose_finding_trials(
@@ -648,8 +651,9 @@ def simulate_efficacy_toxicity_dose_finding_trials(
     return report
 
 
-# Alias
-simulate_trials = simulate_efficacy_toxicity_dose_finding_trials
+@deprecated(alternative="simulate_efficacy_toxicity_dose_finding_trials")
+def simulate_trials(*args, **kwargs):
+    return simulate_efficacy_toxicity_dose_finding_trials(*args, **kwargs)
 
 
 def dose_transition_pathways(
@@ -740,9 +744,13 @@ def dose_transition_pathways(
         return path_outputs
 
 
-# Aliases
-efftox_dose_transition_pathways = dose_transition_pathways
-efficacy_toxicity_dose_transition_pathways = dose_transition_pathways
+@deprecated(alternative="dose_transition_pathways")
+def efftox_dose_transition_pathways(*args, **kwargs):
+    return dose_transition_pathways(*args, **kwargs)
+
+@deprecated(alternative="dose_transition_pathways")
+def efficacy_toxicity_dose_transition_pathways(*args, **kwargs):
+    return dose_transition_pathways(*args, **kwargs)
 
 
 def get_path(x, dose_label_func=None):
