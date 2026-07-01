@@ -40,7 +40,6 @@ class WATU(EfficacyToxicityDoseFindingTrial):
     @classmethod
     def get_summary_functions(cls):
         """Get summary functions for the WATU protocol."""
-        import pandas as pd
 
         return {
             "N": lambda s, p: len(s),
