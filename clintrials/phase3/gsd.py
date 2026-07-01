@@ -11,6 +11,7 @@ from scipy.optimize import brentq
 from scipy.stats import multivariate_normal, norm
 
 from clintrials.core.registry import REGISTRY, inject_docs
+from clintrials.utils import deprecated
 
 @inject_docs()
 def spending_function_pocock(t: float, alpha: float) -> float:
@@ -267,15 +268,9 @@ class GroupSequentialDesign(Protocol):
             "expected_info": expected_info,
         }
 
+    @deprecated(alternative="run(..., method='bulk')")
     def simulate(self, n_sims: int, theta: float = 0.0):
         """Legacy method for backward compatibility."""
-        import warnings
-
-        warnings.warn(
-            "simulate is deprecated, use run(..., method='bulk') instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
         # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
         return self.run(n_sims=n_sims, method="bulk", theta=theta)
 

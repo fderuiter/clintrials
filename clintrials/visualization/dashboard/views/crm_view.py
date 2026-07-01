@@ -14,7 +14,7 @@ if not hasattr(st, "fragment"):
 
 from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
-from clintrials.core.report import generate_pdf_report
+from clintrials.core.viz_interface import get_visualization_provider
 
 
 def render(sims):
@@ -78,13 +78,20 @@ def render(sims):
             mime="text/csv",
         )
 
-        pdf_data = generate_pdf_report(summary_df, "CRM", text_summaries=text_summaries)
-        getattr(col2, "download_button", lambda *args, **kwargs: None)(
-            label="Download PDF",
-            data=pdf_data,
-            file_name="crm_simulations.pdf",
-            mime="application/pdf",
-        )
+        viz_provider = get_visualization_provider()
+        pdf_data = viz_provider.generate_pdf_report(
+            summary_df, "CRM", text_summaries=text_summaries
+        ) if viz_provider else None
+
+        if pdf_data is not None:
+            getattr(col2, "download_button", lambda *args, **kwargs: None)(
+                label="Download PDF",
+                data=pdf_data,
+                file_name="crm_simulations.pdf",
+                mime="application/pdf",
+            )
+        else:
+            col2.warning("PDF export requires the 'fpdf2' package.")
 
     except Exception as e:
         st.error(f"An error occurred during summarization or plotting: {e}")

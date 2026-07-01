@@ -533,6 +533,16 @@ class DefaultVisualizationProvider(VisualizationProvider):
             data_func, trial, x_name, plot_title, include_doses, boot_samps
         )
 
+    def generate_pdf_report(self, df, design_type, text_summaries=None):
+        """Generates an accessibility-first PDF report for trial simulations."""
+        try:
+            from clintrials.visualization.report import generate_pdf_report as _gen_pdf
+        except ImportError as e:
+            import warnings
+            warnings.warn("PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`.")
+            return None
+        return _gen_pdf(df, design_type, text_summaries)
+
 
 def get_default_provider():
     """Get default visualization provider."""
