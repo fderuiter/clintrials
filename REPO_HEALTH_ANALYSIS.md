@@ -70,7 +70,7 @@ The current directory structure of the repository is logical and follows establi
 The `clintrials/` directory is further subdivided into logical modules, such as:
 
 *   `core/`: For core mathematical and statistical functions.
-*   `dashboard/`: For the interactive dashboard.
+*   `visualization/dashboard/`: For the interactive dashboard.
 *   `dosefinding/`, `phase2/`, `phase3/`: For different phases of clinical trials.
 
 ### Assessment
@@ -133,11 +133,13 @@ The error handling strategy is not consistent throughout the codebase.
 *   **Inconsistent Error Handling:** Some functions raise `ValueError` for invalid arguments (e.g., `clintrials/core/recruitment.py`), while others lack any explicit error handling, which could lead to unexpected behavior.
 *   **Recommendation:** Implement a consistent error handling strategy across the entire codebase. This should include validating inputs and raising appropriate exceptions when errors occur.
 
-### Inconsistent Web Frameworks
+### Streamlit Dashboard Architecture and Accessibility
 
-The project includes two different web-based dashboards: one using **Dash** (`clintrials/dashboard/main.py`) and another using **Streamlit**. This creates redundancy and increases the maintenance burden.
+The project utilizes a robust **Streamlit** dashboard as its sole web-based visualization tool. The primary entry point for the dashboard is located at `clintrials/visualization/dashboard/main.py`.
 
-*   **Recommendation:** Choose a single web framework for all dashboards to ensure consistency and reduce complexity. The choice should be based on the project's specific needs and the team's expertise.
+A major technical strength of this implementation is its factory-based UI synchronization, housed in `clintrials/visualization/dashboard/factory.py`. This mechanism implements a `REGISTRY` and a `create_widget()` factory that automatically scrapes documentation from core logic modules at runtime. This dynamically injects help documentation and tooltips, ensuring the UI remains perfectly synchronized with the underlying library's documentation without redundant maintenance.
+
+Furthermore, the dashboard incorporates significant accessibility features. The `factory.py` module utilizes a `render_accessible_chart()` function that checks the current accessibility state. When enabled, it swaps complex visual charts for high-fidelity, text-based Markdown summaries, making the data insights fully accessible to screen readers.
 
 By addressing these areas, the codebase can be made more maintainable, scalable, and welcoming to new contributors.
 
@@ -166,7 +168,7 @@ The entire codebase was scanned for hardcoded secrets, API keys, and other crede
 
 ### Vulnerability Assessment
 
-A manual code review was conducted on the `clintrials/dashboard/` directory to identify potential security flaws such as those that could lead to SQL injection or Cross-Site Scripting (XSS).
+A manual code review was conducted on the `clintrials/visualization/dashboard/` directory to identify potential security flaws such as those that could lead to SQL injection or Cross-Site Scripting (XSS).
 
 *   **No SQL Injection or XSS Vulnerabilities Found:** The dashboard is built using the `streamlit` library, which handles user input and rendering in a way that mitigates these risks. The application does not interact with a database, eliminating the risk of SQL injection. User-provided data is used to generate plots and is not rendered as raw HTML, which prevents XSS attacks.
 
