@@ -7,6 +7,7 @@ omit =
     clintrials/core/stats.py
     clintrials/utils.py
     clintrials/common.py
+    clintrials/legacy/*
     */__main__*
     tests/*
 

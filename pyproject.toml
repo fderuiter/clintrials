@@ -69,7 +69,7 @@ line_length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py39"
-exclude = ["clintrials/phase2/bebop/peps2v1.py", "docs/tutorials/*.ipynb"]
+exclude = ["clintrials/legacy/peps2v1.py", "docs/tutorials/*.ipynb"]
 
 [tool.ruff.lint]
 select = ["E", "F"]
