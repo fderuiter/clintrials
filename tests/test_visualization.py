@@ -123,3 +123,50 @@ def test_plot_efftox_simulation_acceptability():
     empty_df = pd.DataFrame()
     fig = plot_efftox_simulation_acceptability(empty_df)
     assert isinstance(fig, go.Figure)
+
+
+def test_visualization_models():
+    from clintrials.visualization.models import TextSection, TableSection, _format_label
+    
+    # Test _format_label
+    assert _format_label("some_label") == "Some Label"
+    assert _format_label(123) == 123
+    
+    # Test TextSection
+    ts = TextSection("Hello World")
+    assert str(ts) == "Hello World"
+    
+    # Test TableSection
+    df = pd.DataFrame({
+        "col_a": [1.12345, 2.5],
+        "col_b": ["x", "y"]
+    })
+    table = TableSection("My Title", df)
+    
+    table_str = str(table)
+    assert "My Title" in table_str
+    assert "Col A" in table_str
+    assert "Col B" in table_str
+    assert "1.1235" in table_str or "1.1234" in table_str
+    assert "x" in table_str
+
+
+def test_generate_pdf_report():
+    from clintrials.visualization.report import generate_pdf_report
+    from clintrials.visualization.models import TableSection, TextSection
+    import pandas as pd
+    
+    df = pd.DataFrame({
+        "scenario": [1, 2],
+        "prob_tox": [0.1, 0.2]
+    })
+    table_sec = TableSection("My Table", df)
+    text_sec = TextSection("My Text")
+    
+    pdf_bytes = generate_pdf_report(df, "CRM", text_summaries=[text_sec, table_sec])
+    assert pdf_bytes is not None
+    assert isinstance(pdf_bytes, bytearray) or isinstance(pdf_bytes, bytes)
+    
+    # Test None summaries
+    pdf_bytes2 = generate_pdf_report(df, "CRM", text_summaries=None)
+    assert pdf_bytes2 is not None
