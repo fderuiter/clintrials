@@ -7,11 +7,11 @@ set -euo pipefail
 
 if ! command -v poetry >/dev/null 2>&1; then
   echo "Poetry not found. Installing..."
-  pip install poetry
+  pipx install poetry
 fi
 
 echo "Installing project dependencies with Poetry..."
-poetry install
+poetry install --all-extras
 
 echo "Setup complete."
 
