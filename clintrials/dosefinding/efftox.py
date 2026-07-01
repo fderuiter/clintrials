@@ -20,7 +20,7 @@ from scipy.stats import norm
 from clintrials.core.math import inverse_logit
 from clintrials.core.stats import ProbabilityDensitySample
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
-from clintrials.utils import atomic_to_json, iterable_to_json
+from clintrials.utils import atomic_to_json, iterable_to_json, deprecated
 
 
 def scale_doses(real_doses):
@@ -710,8 +710,13 @@ class InverseQuadraticCurve:
         raise NotImplementedError()
 
 
-HingedCurve = LpNormCurve
-ABC_Curve = InverseQuadraticCurve
+@deprecated(alternative="LpNormCurve")
+class HingedCurve(LpNormCurve):
+    pass
+
+@deprecated(alternative="InverseQuadraticCurve")
+class ABC_Curve(InverseQuadraticCurve):
+    pass
 
 
 class EffTox(EfficacyToxicityDoseFindingTrial):
