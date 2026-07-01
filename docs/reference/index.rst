@@ -14,4 +14,6 @@ API Reference
    clintrials.phase2.bebop
    clintrials.dosefinding.efftox
    clintrials.dosefinding.wagestait
-
+   clintrials.fgm_joint_prob
+   clintrials.adaptive_mc_integration
+   clintrials.integrate_posterior_1d

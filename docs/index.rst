@@ -6,11 +6,11 @@ Welcome to **clintrials**, a Python library providing clinical trial designs and
 .. toctree::
    :maxdepth: 2
    :hidden:
+   :glob:
 
    getting_started
-   tutorials/CRM.ipynb
-   tutorials/EffTox.ipynb
-   tutorials/GroupSequentialDesigns.ipynb
+   tutorials/*
+   tutorials/matchpoint/*
    win_ratio_simulation
    reference/index
    contributing
