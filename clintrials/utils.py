@@ -15,6 +15,27 @@ from itertools import product
 
 import numpy as np
 
+__all__ = [
+    "get_logger",
+    "fetch_json_from_files",
+    "filter_list_of_dicts",
+    "map_reduce_files",
+    "invoke_map_reduce_on_list",
+    "reduce_maps_by_summing",
+    "multiindex_dataframe_from_tuple_map",
+    "tuple_to_dataframe",
+    "df_to_json",
+    "levenshtein",
+    "levenshtein_index",
+    "support_match",
+    "correlated_binary_outcomes",
+    "correlated_binary_outcomes_from_uniforms",
+    "get_proportion_confint_report",
+    "cross_tab",
+    "Memoize",
+    "ParameterSpace"
+]
+
 logger = logging.getLogger(__name__)
 
 def deprecated(alternative):
@@ -53,33 +74,6 @@ def deprecated(alternative):
     return decorator
 
 
-def to_1d_list_gen(x: Any) -> Any:
-    """Generator function to flatten a list of lists.
-
-    This function recursively flattens a list of lists of arbitrary depth
-    to a single list.
-
-    Yields:
-        object: The next item in the flattened list.
-    """
-    if isinstance(x, list):
-        for y in x:
-            yield from to_1d_list_gen(y)
-    else:
-        yield x
-
-
-def to_1d_list(x: Any) -> Any:
-    """Flattens a list of lists of arbitrary depth to a single list.
-
-    Args:
-        x (list or object): The list or object to flatten.
-
-    Returns:
-        list: A flattened list.
-    """
-    return list(to_1d_list_gen(x))
-
 
 def get_logger(name: str = __name__) -> logging.Logger:
     """Gets a logger instance.
@@ -105,18 +99,6 @@ def _open_json_local(file_loc: Any) -> Any:
     return json.load(open(file_loc))
 
 
-def _open_json_url(url: Any) -> Any:
-    """Opens a JSON file from a URL.
-
-    Args:
-        url (str): The URL of the JSON file.
-
-    Returns:
-        dict: The loaded JSON data.
-    """
-    from urllib.request import urlopen
-
-    return json.load(urlopen(url))
 
 
 def fetch_json_from_files(file_pattern: Any) -> Any:
@@ -255,68 +237,6 @@ def tuple_to_dataframe(row_tuples: Any, index_tuples: Any, column_names: Any = N
     return pd.DataFrame(row_tuples, index=i)
 
 
-def fullname(o: Any) -> Any:
-    """Gets the fully-qualified class name of an object.
-
-    Args:
-        o (object): The object.
-
-    Returns:
-        str: The fully-qualified class name.
-    """
-    return o.__module__ + "." + o.__class__.__name__
-
-
-def atomic_to_json(obj: Any) -> Any:
-    """Converts an atomic object to a JSON-friendly format.
-
-    Args:
-        obj (object): The object to convert.
-
-    Returns:
-        object: The JSON-friendly object.
-    """
-    if isinstance(obj, np.generic):
-        return obj.item()
-    else:
-        return obj
-
-
-def iterable_to_json(obj: Any) -> Any:
-    """Converts an iterable to a JSON-friendly list.
-
-    Args:
-        obj (iterable): The iterable to convert.
-
-    Returns:
-        list: A list of JSON-friendly objects.
-    """
-    if isinstance(obj, Iterable):
-        return [atomic_to_json(x) for x in obj]
-    else:
-        return atomic_to_json(obj)
-
-
-def row_to_json(row: Any, **kwargs: Any) -> Any:
-    """Converts a pandas Series to a JSON-friendly dictionary.
-
-    Args:
-        row (pandas.Series): The Series to convert.
-        **kwargs: Keyword arguments for `json.loads`.
-
-    Returns:
-        dict: The JSON-friendly dictionary.
-    """
-    try:
-        doc = json.loads(row.to_json(), **kwargs)
-    except UnicodeDecodeError:
-        return row_to_json(row, encoding="iso-8859-1")
-    import pandas as pd
-
-    for x in row.index:
-        if isinstance(row[x], datetime) and not pd.isnull(row[x]):
-            doc[x] = pd.to_datetime(row[x]).date().isoformat()
-    return doc
 
 
 def _serialize_table_structure(df: Any) -> Any:
@@ -840,6 +760,18 @@ class _ParameterSpaceIter:
 
     next = __next__
 
+
+
+# Legacy imports for backward compatibility
+from clintrials.legacy.utils import (
+    _open_json_url,
+    to_1d_list_gen,
+    to_1d_list,
+    fullname,
+    atomic_to_json,
+    iterable_to_json,
+    row_to_json,
+)
 
 if __name__ == "__main__":
     import doctest

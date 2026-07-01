@@ -1,6 +1,7 @@
 import json
 from unittest.mock import mock_open, patch
 
+from clintrials.legacy.utils import to_1d_list
 from clintrials.utils import (
     Memoize,
     fetch_json_from_files,
@@ -12,7 +13,7 @@ from clintrials.utils import (
     multiindex_dataframe_from_tuple_map,
     reduce_maps_by_summing,
     support_match,
-    to_1d_list,
+
 )
 
 

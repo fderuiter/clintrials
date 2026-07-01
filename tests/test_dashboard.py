@@ -132,7 +132,7 @@ def test_crm_render_creates_plot(fake_streamlit, monkeypatch):
         index=pd.Index([0.1], name="true_tox"),
     )
     summarise = MagicMock(return_value=summary_df)
-    monkeypatch.setattr(crm_view, "summarise_sims", summarise)
+    monkeypatch.setattr(crm_view, "extract_sim_data", summarise)
 
     sims = [{"recommended_dose": 1}, {"recommended_dose": 2}]
     crm_view.render(sims)
@@ -171,7 +171,7 @@ def test_efftox_render_creates_plots(fake_streamlit, monkeypatch):
         index=index,
     )
     summarise = MagicMock(return_value=summary_df)
-    monkeypatch.setattr(efftox_view, "summarise_sims", summarise)
+    monkeypatch.setattr(efftox_view, "extract_sim_data", summarise)
 
     sims = [{"recommended_dose": 1, "prob_accept_tox": 0.6, "prob_accept_eff": 0.7}]
     efftox_view.render(sims)
@@ -192,7 +192,7 @@ def test_crm_render_warning_branch(fake_streamlit, monkeypatch):
     monkeypatch.setattr(crm_view, "ParameterSpace", DummyPS)
     summary_df = pd.DataFrame({"N": [2]}, index=pd.Index([0.1], name="true_tox"))
     summarise = MagicMock(return_value=summary_df)
-    monkeypatch.setattr(crm_view, "summarise_sims", summarise)
+    monkeypatch.setattr(crm_view, "extract_sim_data", summarise)
     sims = [{"recommended_dose": 1}]
     crm_view.render(sims)
     fake_streamlit.warning.assert_called_once()

@@ -7,7 +7,25 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
-__all__ = ["crm", "efftox", "efficacytoxicity", "wagestait", "watu"]
+__all__ = [
+    "crm",
+    "efftox",
+    "efficacytoxicity",
+    "wagestait",
+    "watu",
+    "DoseFindingTrial",
+    "SimpleToxicityCountingDoseEscalationTrial",
+    "ThreePlusThree",
+    "simulate_dose_finding_trial",
+    "simulate_dose_finding_trials",
+    "find_mtd",
+    "summarise_dose_finding_sims",
+    "batch_summarise_dose_finding_sims",
+    "dose_transition_pathways_to_json",
+    "dose_transition_pathways",
+    "print_dtps",
+    "dtps_to_pandas",
+]
 
 
 import abc

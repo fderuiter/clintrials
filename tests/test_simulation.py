@@ -1,7 +1,8 @@
 import pandas as pd
 import pytest
 
-from clintrials.core.simulation import extract_sim_data, summarise_sims
+from clintrials.core.simulation import extract_sim_data
+from clintrials.legacy.simulation import summarise_sims
 from clintrials.utils import ParameterSpace
 
 

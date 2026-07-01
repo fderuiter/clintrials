@@ -12,7 +12,7 @@ import streamlit as st
 if not hasattr(st, "fragment"):
     st.fragment = lambda func: func
 
-from clintrials.core.simulation import summarise_sims
+from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
 from clintrials.core.viz_interface import get_visualization_provider
 
@@ -35,7 +35,7 @@ def render(sims):
     func_map = CRM.get_summary_functions()
 
     try:
-        summary_df = summarise_sims(sims, ps, func_map, to_pandas=True)
+        summary_df = extract_sim_data(sims, ps, func_map, to_pandas=True)
 
         st.subheader("Simulation Summary")
         st.write(summary_df)
