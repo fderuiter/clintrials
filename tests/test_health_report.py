@@ -1,5 +1,8 @@
 import os
-import tomllib
+try:
+    import tomllib
+except ImportError:
+    import tomli as tomllib
 
 def test_dashboard_framework_dependencies():
     """Verify that Streamlit is the only dashboard framework, and Dash is removed."""
