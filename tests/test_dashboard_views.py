@@ -77,6 +77,7 @@ def _make_winratio_streamlit_mock():
         subheader=MagicMock(),
         write=MagicMock(),
         fragment=lambda func: func,
+        metric=MagicMock(),
     )
     return st
 
@@ -273,5 +274,7 @@ def test_winratio_view_render_success(monkeypatch):
         significance_level=0.05,
     )
     st_mock.success.assert_called_once()
-    st_mock.write.assert_any_call("Power of the test: 0.8000")
-    st_mock.write.assert_any_call("Average 95% Confidence Interval: (0.1000, 0.2000)")
+    st_mock.metric.assert_any_call(label="Power", value="0.8000")
+    st_mock.metric.assert_any_call(
+        label="Average 95% Confidence Interval", value="(0.1000, 0.2000)"
+    )

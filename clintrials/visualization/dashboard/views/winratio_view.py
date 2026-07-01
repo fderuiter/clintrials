@@ -13,7 +13,7 @@ if not hasattr(st, "fragment"):
 
 from clintrials.winratio.main import WinRatioTrial
 from clintrials.core.schema import WinRatioSchema
-from clintrials.visualization.dashboard.factory import create_widget
+from clintrials.visualization.dashboard.factory import create_widget, render_metric
 from clintrials.core.report import generate_pdf_report
 
 
@@ -47,11 +47,13 @@ def render() -> None:
             average_ci = trial.average_ci
         st.success("Simulation complete")
         st.subheader("Results")
-        st.write(f"Power of the test: {power:.4f}")
-        st.write(
-            "Average 95% Confidence Interval: "
-            f"({average_ci[0]:.4f}, {average_ci[1]:.4f})"
-        )
+
+        if not hasattr(st, "columns"):
+            st.columns = lambda x: (st, st)
+        met_col1, met_col2 = st.columns(2)
+
+        render_metric(met_col1, "Power", power)
+        render_metric(met_col2, "Average 95% Confidence Interval", average_ci)
 
         # Create simple DataFrame for export
         results_dict = kwargs.copy()
@@ -92,4 +94,5 @@ def render() -> None:
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import REGISTRY
+
     __doc__ = __doc__.format(**REGISTRY)
