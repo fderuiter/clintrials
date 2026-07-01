@@ -1,7 +1,7 @@
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-__all__ = ["peps2v1", "peps2v2"]
+__all__ = ["peps2v2"]
 
 """
 
