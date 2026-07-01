@@ -30,7 +30,7 @@ plotly = {version = ">=5.0.0", optional = true}
 sphinx = {version = "^7.2.6", optional = true}
 furo = {version = "^2024.1.29", optional = true}
 tqdm = "^4.68.3"
-fpdf2 = "^2.7.9"
+fpdf2 = {version = "^2.7.9", optional = true}
 
 [tool.poetry.scripts]
 dashboard = "clintrials.visualization.dashboard.main:main"
@@ -97,4 +97,4 @@ testpaths = ["tests"]
 
 [tool.poetry.extras]
 docs = ["sphinx", "furo"]
-viz = ["streamlit", "altair", "plotly", "ggplot", "matplotlib"]
+viz = ["streamlit", "altair", "plotly", "ggplot", "matplotlib", "fpdf2"]
