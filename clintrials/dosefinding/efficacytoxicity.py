@@ -1,3 +1,8 @@
+from __future__ import annotations
+from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+import numpy as np
+import numpy.typing as npt
+import pandas as pd
 """
 Base classes and utilities for efficacy-toxicity dose-finding trials.
 
@@ -34,7 +39,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
     toxicity and efficacy.
     """
 
-    def __init__(self, first_dose, num_doses, max_size):
+    def __init__(self, first_dose: int, num_doses: int, max_size: int) -> None:
         """Initializes an EfficacyToxicityDoseFindingTrial object.
 
         Args:
@@ -53,14 +58,14 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         self._max_size = max_size
 
         # Reset
-        self._doses = []
-        self._toxicities = []
-        self._efficacies = []
+        self._doses = []  # type: ignore
+        self._toxicities = []  # type: ignore
+        self._efficacies: List[int] = []
         self._next_dose = self._first_dose
         self._status = 0
-        self._admissable_set = []
+        self._admissable_set = []  # type: ignore
 
-    def status(self):
+    def status(self) -> int:
         """Gets the current status of the trial.
 
         Returns:
@@ -68,16 +73,16 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._status
 
-    def reset(self):
+    def reset(self) -> None:
         """Resets the trial to its initial state."""
         self._doses = []
         self._toxicities = []
-        self._efficacies = []
+        self._efficacies: List[int] = []  # type: ignore
         self._next_dose = self._first_dose
         self._status = 0
         self.__reset()
 
-    def number_of_doses(self):
+    def number_of_doses(self) -> int:
         """Gets the number of dose levels under investigation.
 
         Returns:
@@ -85,7 +90,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self.num_doses
 
-    def dose_levels(self):
+    def dose_levels(self) -> Iterable[int]:
         """Gets a list of the dose levels (1-based indices).
 
         Returns:
@@ -93,7 +98,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return list(range(1, self.num_doses + 1))
 
-    def first_dose(self):
+    def first_dose(self) -> int:
         """Gets the starting dose level.
 
         Returns:
@@ -101,7 +106,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._first_dose
 
-    def size(self):
+    def size(self) -> int:
         """Gets the current number of treated patients.
 
         Returns:
@@ -109,7 +114,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return len(self._doses)
 
-    def max_size(self):
+    def max_size(self) -> int:
         """Gets the maximum number of patients for the trial.
 
         Returns:
@@ -117,7 +122,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._max_size
 
-    def doses(self):
+    def doses(self) -> List[int]:
         """Gets the list of doses given to patients.
 
         Returns:
@@ -125,7 +130,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._doses
 
-    def toxicities(self):
+    def toxicities(self) -> List[int]:
         """Gets the list of observed toxicities.
 
         Returns:
@@ -134,7 +139,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._toxicities
 
-    def efficacies(self):
+    def efficacies(self) -> List[int]:
         """Gets the list of observed efficacies.
 
         Returns:
@@ -143,7 +148,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._efficacies
 
-    def treated_at_dose(self, dose):
+    def treated_at_dose(self, dose: int) -> int:
         """Gets the number of patients treated at a specific dose level.
 
         Args:
@@ -152,9 +157,9 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         Returns:
             int: The number of patients treated at the given dose.
         """
-        return sum(np.array(self._doses) == dose)
+        return sum(np.array(self._doses) == dose)  # type: ignore
 
-    def toxicities_at_dose(self, dose):
+    def toxicities_at_dose(self, dose: int) -> int:
         """Gets the number of toxicities observed at a specific dose level.
 
         Args:
@@ -165,7 +170,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose])
 
-    def efficacies_at_dose(self, dose):
+    def efficacies_at_dose(self, dose: int) -> int:
         """Gets the number of efficacies observed at a specific dose level.
 
         Args:
@@ -176,7 +181,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return sum([e for d, e in zip(self.doses(), self.efficacies()) if d == dose])
 
-    def maximum_dose_given(self):
+    def maximum_dose_given(self) -> Optional[int]:
         """Gets the maximum dose level administered so far.
 
         Returns:
@@ -184,11 +189,11 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 have been treated.
         """
         if len(self._doses) > 0:
-            return max(self._doses)
+            return max(self._doses)  # type: ignore
         else:
             return None
 
-    def minimum_dose_given(self):
+    def minimum_dose_given(self) -> Optional[int]:
         """Gets the minimum dose level administered so far.
 
         Returns:
@@ -196,11 +201,11 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 have been treated.
         """
         if len(self._doses) > 0:
-            return min(self._doses)
+            return min(self._doses)  # type: ignore
         else:
             return None
 
-    def tabulate(self):
+    def tabulate(self) -> pd.DataFrame:
         """Generates a summary table of the trial data.
 
         Returns:
@@ -222,7 +227,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         df["ToxRate"] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
         return df
 
-    def set_next_dose(self, dose):
+    def set_next_dose(self, dose: int) -> None:
         """Sets the next dose to be administered.
 
         Args:
@@ -230,7 +235,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         self._next_dose = dose
 
-    def next_dose(self):
+    def next_dose(self) -> int:
         """Gets the next dose to be administered.
 
         Returns:
@@ -238,7 +243,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._next_dose
 
-    def update(self, cases, **kwargs):
+    def update(self, cases: List[Tuple[int, int, int]], **kwargs: Any) -> int:
         """Updates the trial with a list of new cases.
 
         Args:
@@ -261,7 +266,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
 
         return self._next_dose
 
-    def admissable_set(self):
+    def admissable_set(self) -> Any:
         """Gets the current set of admissible doses.
 
         Returns:
@@ -269,7 +274,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return self._admissable_set
 
-    def dose_admissability(self):
+    def dose_admissability(self) -> Any:
         """Gets a boolean array indicating the admissibility of each dose.
 
         Returns:
@@ -278,7 +283,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return np.array([(x in self._admissable_set) for x in self.dose_levels()])
 
-    def observed_toxicity_rates(self):
+    def observed_toxicity_rates(self) -> Any:
         """Gets the observed toxicity rate for each dose level.
 
         Returns:
@@ -294,7 +299,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 tox_rates.append(np.nan)
         return np.array(tox_rates)
 
-    def observed_efficacy_rates(self):
+    def observed_efficacy_rates(self) -> Any:
         """Gets the observed efficacy rate for each dose level.
 
         Returns:
@@ -310,7 +315,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 eff_rates.append(np.nan)
         return np.array(eff_rates)
 
-    def optimal_decision(self, prob_tox, prob_eff):
+    def optimal_decision(self, prob_tox: Sequence[float], prob_eff: Sequence[float]) -> int:
         """Gets the optimal dose choice for given toxicity and efficacy curves.
 
         Args:
@@ -323,12 +328,12 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def __reset(self):
+    def __reset(self) -> None:
         """Performs implementation-specific reset operations."""
         return
 
     @abc.abstractmethod
-    def has_more(self):
+    def has_more(self) -> bool:
         """Checks if the trial is ongoing.
 
         Returns:
@@ -336,7 +341,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return (self.size() < self.max_size()) and (self._status >= 0)
 
-    def report(self):
+    def report(self) -> Dict[str, Any]:
         """Generates a standardized JSON-serializable report of the trial.
 
         Returns:
@@ -354,7 +359,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         return report
 
     @abc.abstractmethod
-    def __calculate_next_dose(self, **kwargs):
+    def __calculate_next_dose(self, **kwargs: Any) -> Any:
         """Calculates the next dose to be administered.
 
         Subclasses should override this method.
@@ -365,7 +370,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         return -1
 
 
-def _efftox_patient_outcome_to_label(po):
+def _efftox_patient_outcome_to_label(po: Any) -> Any:
     """Converts a patient outcome tuple to a string label.
 
     Args:
@@ -389,7 +394,7 @@ def _efftox_patient_outcome_to_label(po):
         return "Error"
 
 
-def _efftox_outcome_generator(design, current_size, cohort_size, true_toxicities, true_efficacies, tox_eff_odds_ratio, tolerances, correlated_outcomes, **kwargs):
+def _efftox_outcome_generator(design: Any, current_size: Any, cohort_size: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any, tolerances: Any, correlated_outcomes: Any, **kwargs: Any) -> Any:
     dose_level = design.next_dose()
     u = (true_toxicities[dose_level - 1], true_efficacies[dose_level - 1])
     if correlated_outcomes:
@@ -400,17 +405,7 @@ def _efftox_outcome_generator(design, current_size, cohort_size, true_toxicities
         events = (tolerances[current_size : current_size + cohort_size, 0:2] < u).astype(int)
     return np.column_stack(([dose_level] * cohort_size, events))
 
-def _simulate_trial(
-    design,
-    true_toxicities,
-    true_efficacies,
-    tox_eff_odds_ratio=1.0,
-    tolerances=None,
-    cohort_size=1,
-    conduct_trial=1,
-    calculate_optimal_decision=1,
-    recruitment_stream=None,
-):
+def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
     """Simulates a single efficacy-toxicity dose-finding trial.
 
     Args:
@@ -442,12 +437,12 @@ def _simulate_trial(
     # Simulate trial
     if conduct_trial:
         from clintrials.core.simulation import UniversalProtocolSimulationRunner
-        runner = UniversalProtocolSimulationRunner(
+        runner = UniversalProtocolSimulationRunner(  # type: ignore
             design=design,
             outcome_generator=_efftox_outcome_generator,
             recruitment_stream=recruitment_stream
         )
-        sim_report = runner.run(
+        sim_report = runner.run(  # type: ignore
             cohort_size=cohort_size,
             true_toxicities=true_toxicities,
             true_efficacies=true_efficacies,
@@ -476,14 +471,14 @@ def _simulate_trial(
                         for v in zip(true_toxicities, true_efficacies)
                     ]
                 )
-                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]
+                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]  # type: ignore
             else:
                 had_tox = lambda x: x < np.array(true_toxicities)
-                tox_horizons = np.array([had_tox(x) for x in tolerances[:, 0]])
-                tox_hat = tox_horizons.mean(axis=0)
+                tox_horizons = np.array([had_tox(x) for x in tolerances[:, 0]])  # type: ignore
+                tox_hat = tox_horizons.mean(axis=0)  # type: ignore
                 had_eff = lambda x: x < np.array(true_efficacies)
-                eff_horizons = np.array([had_eff(x) for x in tolerances[:, 1]])
-                eff_hat = eff_horizons.mean(axis=0)
+                eff_horizons = np.array([had_eff(x) for x in tolerances[:, 1]])  # type: ignore
+                eff_hat = eff_horizons.mean(axis=0)  # type: ignore
 
             optimal_allocation = design.optimal_decision(tox_hat, eff_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(
@@ -504,17 +499,7 @@ def _simulate_eff_tox_trial(*args, **kwargs):
     return _simulate_trial(*args, **kwargs)
 
 
-def simulate_trial(
-    design,
-    true_toxicities,
-    true_efficacies,
-    tox_eff_odds_ratio=1.0,
-    tolerances=None,
-    cohort_size=1,
-    conduct_trial=1,
-    calculate_optimal_decision=1,
-    recruitment_stream=None,
-):
+def simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
     """Simulates a single efficacy-toxicity dose-finding trial.
 
     This function is a wrapper around `_simulate_trial` that performs input
@@ -579,17 +564,7 @@ def simulate_efficacy_toxicity_dose_finding_trial(*args, **kwargs):
     return simulate_trial(*args, **kwargs)
 
 
-def simulate_efficacy_toxicity_dose_finding_trials(
-    design_map,
-    true_toxicities,
-    true_efficacies,
-    tox_eff_odds_ratio=1.0,
-    tolerances=None,
-    cohort_size=1,
-    conduct_trial=1,
-    calculate_optimal_decision=1,
-    recruitment_stream=None,
-):
+def simulate_efficacy_toxicity_dose_finding_trials(design_map: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
     """Simulates multiple efficacy-toxicity dose-finding trials.
 
     This method allows for the comparison of different designs on the same set
@@ -658,16 +633,7 @@ def simulate_trials(*args, **kwargs):
     return simulate_efficacy_toxicity_dose_finding_trials(*args, **kwargs)
 
 
-def dose_transition_pathways(
-    trial,
-    next_dose,
-    cohort_sizes,
-    cohort_number=1,
-    cases_already_observed=[],
-    custom_output_func=None,
-    verbose=False,
-    **kwargs,
-):
+def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, cohort_number: Any = 1, cases_already_observed: Any = [], custom_output_func: Any = None, verbose: Any = False, **kwargs: Any) -> Any:
     """Calculates the dose-transition pathways for an efficacy-toxicity design.
 
     Args:
@@ -757,7 +723,7 @@ def efficacy_toxicity_dose_transition_pathways(*args, **kwargs):
     return dose_transition_pathways(*args, **kwargs)
 
 
-def get_path(x, dose_label_func=None):
+def get_path(x: Any, dose_label_func: Any = None) -> Any:
     """Constructs a string representation of a dose-transition path.
 
     Args:
@@ -772,12 +738,12 @@ def get_path(x, dose_label_func=None):
         dose_label_func = lambda x: str(x)
     path = [x[z] for z in sorted([z for z in x.keys() if "Pat" in z])]
     path = [z[0] for z in path]
-    path = "".join(path)
+    path = "".join(path)  # type: ignore
     path = dose_label_func(x["DoseGiven"]) + path
     return path
 
 
-def _efftox_row_formatter(x, dose_label_func, verbose=False):
+def _efftox_row_formatter(x: Any, dose_label_func: Any, verbose: Any = False) -> Any:
     path = get_path(x, dose_label_func=dose_label_func)
     obd = x["RecommendedDose"]
     prob_sup = x["MinProbSuperiority"]
@@ -813,7 +779,7 @@ def _efftox_row_formatter(x, dose_label_func, verbose=False):
         return template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2))
 
 
-def print_dtps(dtps, indent=0, dose_label_func=None):
+def print_dtps(dtps: Any, indent: Any = 0, dose_label_func: Any = None) -> Any:
     """Prints the dose-transition pathways.
 
     Args:
@@ -833,7 +799,7 @@ def print_dtps(dtps, indent=0, dose_label_func=None):
     )
 
 
-def print_dtps_verbose(dtps, indent=0, dose_label_func=None):
+def print_dtps_verbose(dtps: Any, indent: Any = 0, dose_label_func: Any = None) -> Any:
     """Prints the dose-transition pathways with verbose information.
 
     Args:
