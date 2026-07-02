@@ -129,6 +129,17 @@ except Exception as ex:
             worker.postMessage(msg)
 
     def execute(self, payload, total_sims, batch_size=100, on_progress=None):
+        """Execute simulations across the worker pool in batches.
+
+        Args:
+            payload: The simulation payload to process.
+            total_sims: The total number of simulations to run.
+            batch_size: The number of simulations per batch.
+            on_progress: Optional callback function for progress updates.
+            
+        Returns:
+            list: Aggregated results from all simulation batches.
+        """
         if not self.is_pyodide:
             return self._execute_native(payload, total_sims, batch_size, on_progress)
             
@@ -215,6 +226,7 @@ except Exception as ex:
         return results
 
     def cancel(self):
+        """Cancel all running simulations and terminate workers."""
         self._cancelled = True
         if self.is_pyodide:
             for w in self.workers:
