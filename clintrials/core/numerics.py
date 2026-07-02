@@ -16,6 +16,7 @@ from clintrials.core.stats import ProbabilityDensitySample
 def adaptive_mc_integration(
     lik_integrand,
     initial_limits,
+    rng,
     n=10000,
     max_iter=5,
     mass_threshold=0.999,
@@ -44,7 +45,7 @@ def adaptive_mc_integration(
 
     for i in range(max_iter):
         samp = np.column_stack(
-            [np.random.uniform(*limit_pair, size=n) for limit_pair in limits]
+            [rng.uniform(*limit_pair, size=n) for limit_pair in limits]
         )
         pds = ProbabilityDensitySample(samp, lik_integrand)
 

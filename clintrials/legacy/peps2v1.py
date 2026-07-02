@@ -134,7 +134,7 @@ def l_n(cases, alpha0, beta0, beta1, beta2, psi):
         return np.ones_like(alpha0)
 
 
-def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilon=1e-5):
+def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilon=1e-5, rng=None):
     """
     Calculate posterior probabilities for the PePS2 trial using the BeBOP design.
 
@@ -228,6 +228,10 @@ def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilo
     >>> len(probs[0])
     4
     """
+    if rng is None:
+        import numpy as np
+        rng = np.random.default_rng()
+
     if not isinstance(tox_cutoffs, list):
         tox_cutoffs = [tox_cutoffs] * 4
     if not isinstance(eff_cutoffs, list):
@@ -249,6 +253,7 @@ def get_posterior_probs(cases, priors, tox_cutoffs, eff_cutoffs, n=10**5, epsilo
     refined_limits, pds = adaptive_mc_integration(
         lik_integrand,
         limits,
+        rng,
         n=n,
         max_iter=1,  # Keep non-iterative logic similar to original, but centralized
     )
@@ -366,13 +371,14 @@ class PePS2BeBOP:
         """
         return [case[3] for case in self.cases]
 
-    def update(self, cases, n=10**6, **kwargs):
+    def update(self, cases, n=10**6, rng=None, **kwargs):
         """Updates the trial with new patient cases.
 
         Args:
             cases (list): A list of new patient cases.
             n (int, optional): The number of samples for Monte Carlo
                 integration. Defaults to 10**6.
+            rng (numpy.random.Generator, optional): Random number generator.
             **kwargs: Additional keyword arguments.
 
         Returns:
@@ -388,6 +394,7 @@ class PePS2BeBOP:
             self.eff_cutoffs,
             n,
             self.epsilon,
+            rng,
         )
         self._update(post_probs)
         self._pds = pds
