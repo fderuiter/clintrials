@@ -16,8 +16,6 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
-from random import sample
-
 from scipy.integrate import quad
 from scipy.stats import beta, norm
 
@@ -202,7 +200,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             self.mc_samples_stage2 = max(mc_samples_stage2, 1000)
         self.must_try_lowest_dose = must_try_lowest_dose
 
-        self.most_likely_model_index = np.random.choice(  # type: ignore
+        self.most_likely_model_index = self.rng.choice(  # type: ignore
             np.array(range(self.K))[  # type: ignore
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
@@ -317,14 +315,11 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         return self._next_dose
 
     def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
-        self.most_likely_model_index = sample(
-            list(
-                np.array(range(self.K))[  # type: ignore
-                    self.model_prior_weights == max(self.model_prior_weights)
-                ]
-            ),
-            1,
-        )[0]
+        self.most_likely_model_index = self.rng.choice(
+            np.array(range(self.K))[  # type: ignore
+                self.model_prior_weights == max(self.model_prior_weights)
+            ]
+        )
         self.w = np.zeros(self.K)
         self.post_tox_probs = np.zeros(self.I)
         self.post_eff_probs = np.zeros(self.I)

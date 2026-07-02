@@ -174,7 +174,7 @@ def _get_beta_hat_mle(F: Any, intercept: Any, codified_doses_given: Any, toxs: A
         return np.nan, None
 
 
-def _get_beta_hat_mle_bootstrap(F: Any, intercept: Any, beta_hat: Any, codified_doses_given: Any, B: Any = 200) -> Any:
+def _get_beta_hat_mle_bootstrap(F: Any, intercept: Any, beta_hat: Any, codified_doses_given: Any, B: Any = 200, rng: Any = None) -> Any:
     """Estimates the variance of the beta MLE using parametric bootstrap.
 
     Args:
@@ -183,15 +183,20 @@ def _get_beta_hat_mle_bootstrap(F: Any, intercept: Any, beta_hat: Any, codified_
         beta_hat (float): The MLE of beta.
         codified_doses_given (list[float]): The codified dose levels given.
         B (int, optional): The number of bootstrap samples. Defaults to 200.
+        rng (Generator, optional): Local RNG generator object.
 
     Returns:
         float: The estimated variance of beta_hat. Returns `np.nan` if no
             valid bootstrap samples are obtained.
     """
+    if rng is None:
+        from clintrials.core.rng import get_rng
+        rng = get_rng()
+
     beta_hats_boot = []
     for _ in range(B):
         tox_probs = [F(dose, intercept, beta_hat) for dose in codified_doses_given]
-        toxs_boot = [np.random.binomial(1, p) for p in tox_probs]
+        toxs_boot = [rng.binomial(1, p) for p in tox_probs]
 
         beta_hat_boot, _ = _get_beta_hat_mle(
             F, intercept, codified_doses_given, toxs_boot, estimate_var=False
@@ -263,7 +268,7 @@ def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses
     return post_tox
 
 
-def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Any = logistic, inverse_F: Any = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:
+def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Any = logistic, inverse_F: Any = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, rng: Any = None) -> Any:
     """Performs a Continual Reassessment Method (CRM) calculation.
 
     Args:
@@ -355,7 +360,7 @@ def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: A
         )
         if estimate_var and mle_var_method == "bootstrap":
             var = _get_beta_hat_mle_bootstrap(
-                F_func, intercept, beta_hat, codified_doses, B=bootstrap_samples
+                F_func, intercept, beta_hat, codified_doses, B=bootstrap_samples, rng=rng
             )
 
         post_tox = _estimate_prob_tox_from_param(
@@ -593,6 +598,7 @@ class CRM(DoseFindingTrial):
             min_beta=self.min_beta,
             max_beta=self.max_beta,
             n_points=self.n_points,
+            rng=self.rng,
         )
         proposed_dose = crm_res[0]
         self.beta_hat = crm_res[1]
@@ -608,7 +614,7 @@ class CRM(DoseFindingTrial):
                 self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
                 for p in self.prior
             ]
-            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(self.sample_size)  # type: ignore
+            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(self.sample_size, random_state=self.rng)  # type: ignore
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 
@@ -710,7 +716,7 @@ class CRM(DoseFindingTrial):
                 ]
                 n_samples = n if n is not None else self.sample_size
                 beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(
-                    n_samples
+                    n_samples, random_state=self.rng
                 )
                 p0_sample = [
                     self.F_func(label, a0=self.intercept, beta=beta_sample)
