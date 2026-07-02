@@ -762,24 +762,14 @@ class _ParameterSpaceIter:
 
 # Legacy imports for backward compatibility
 from clintrials.legacy.utils import (
-    _open_json_url,
-    to_1d_list_gen,
-    to_1d_list,
-    fullname,
-    atomic_to_json,
-    iterable_to_json,
-    row_to_json,
+    _open_json_url as _open_json_url,
+    to_1d_list_gen as to_1d_list_gen,
+    to_1d_list as to_1d_list,
+    fullname as fullname,
+    atomic_to_json as atomic_to_json,
+    iterable_to_json as iterable_to_json,
+    row_to_json as row_to_json,
 )
-
-__all__ = [
-    "_open_json_url",
-    "to_1d_list_gen",
-    "to_1d_list",
-    "fullname",
-    "atomic_to_json",
-    "iterable_to_json",
-    "row_to_json",
-]
 
 if __name__ == "__main__":
     import doctest
