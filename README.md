@@ -11,7 +11,7 @@
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
-- [Interactive Dashboard](#interactive-dashboard)
+- [Trial Simulation Hub](#trial-simulation-hub)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Development](#development)
@@ -42,9 +42,9 @@
 -   **Patient Recruitment:** Simulate patient arrival times with constant or time-varying intensity to model realistic trial conditions.
 -   **Parameter Space Exploration:** Tools for running simulations over a grid of parameters to evaluate the operating characteristics of a design under various scenarios.
 
-### Interactive Dashboard
+### Trial Simulation Hub
 
--   A web-based dashboard built with Streamlit for visualizing simulation results, making it easy to explore and understand the performance of different trial designs.
+-   A web-based Trial Simulation Hub for visualizing simulation results, making it easy to explore and understand the performance of different trial designs.
 
 ## Getting Started
 
@@ -167,13 +167,17 @@ The repository is organized as follows:
     -   **`phase2/`**: Implementations of Phase II trial designs, including a two-stage Bayesian design and the BEBOP design.
     -   **`phase3/`**: Implementations of Phase III trial designs, including Group Sequential Designs.
     -   **`winratio/`**: Tools for win-ratio analysis.
-    -   **`visualization/dashboard/main.py`**: The Streamlit dashboard entry point and source code for the interactive web dashboard.
+    -   **`visualization/dashboard/main.py`**: The Trial Simulation Hub entry point and source code for the interactive web dashboard.
 -   **`docs/`**: Documentation files, including tutorials and API reference.
 -   **`tests/`**: Unit tests for the library.
 
-## Interactive Dashboard
+## Trial Simulation Hub
 
-This project includes an interactive web-based dashboard for visualizing simulation results. To run the dashboard, make sure you have installed the project with the `viz` extra:
+This project includes an interactive Trial Simulation Hub for visualizing simulation results. You can access the hosted version online at:
+
+<https://fderuiter.github.io/clintrials/hub/>
+
+To run the Trial Simulation Hub locally, make sure you have installed the project with the `viz` extra:
 
 ```bash
 poetry install -E viz
@@ -185,7 +189,7 @@ Then, run the following command:
 poetry run dashboard
 ```
 
-This will start a local web server and open the dashboard in your browser.
+This will start a local web server and open the Trial Simulation Hub in your browser.
 
 ## Documentation
 
