@@ -19,9 +19,11 @@ def render(sims):
     """Renders the CRM simulation results view."""
     st.sidebar.header("Define Parameter Space for CRM")
     param_space_config = {
-        "true_tox": [[0.05, 0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3, 0.4, 0.5]]
+        "true_tox": [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)]
     }
-    ps = ParameterSpace(param_space_config)
+    ps = ParameterSpace()
+    for k, v in param_space_config.items():
+        ps.add(k, v)
 
     st.sidebar.write("Parameter space for summarization:")
     st.sidebar.json(param_space_config)
@@ -29,7 +31,7 @@ def render(sims):
     from clintrials.dosefinding.crm import CRM
     func_map = CRM.get_summary_functions()
 
-    summary_df = extract_sim_data(sims, ps, func_map, to_pandas=True)
+summary_df = extract_sim_data(sims, ps, func_map, return_type="dataframe")
 
     figures = []
     if not summary_df.empty and "recommended_dose_prob" in summary_df.columns:
