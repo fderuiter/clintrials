@@ -647,10 +647,13 @@ def test_myeloma_integration_deterministic(mocker):
     assert trial.next_dose() == 3
 
 
-def test_efftox_docstring_example():
+@patch("numpy.random.default_rng")
+def test_efftox_docstring_example(mock_rng):
     """
     Test the example from the EffTox class docstring.
     """
+    original_rng = np.random.Generator(np.random.PCG64(42))
+    mock_rng.return_value = original_rng
     real_doses = [7.5, 15, 30, 45]
     tox_cutoff = 0.40
     eff_cutoff = 0.45
