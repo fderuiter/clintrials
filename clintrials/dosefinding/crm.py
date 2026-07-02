@@ -27,9 +27,6 @@ from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, log
 from clintrials.dosefinding import DoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json
 
-_min_beta, _max_beta = -10, 10
-
-
 def _toxicity_likelihood(link_func: Any, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False) -> Any:
     """Calculates the likelihood of a single toxicity outcome.
 
@@ -84,7 +81,7 @@ def _compound_toxicity_likelihood(link_func: Any, a0: Any, beta: Any, doses: Any
         return l
 
 
-def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Any, use_quick_integration: Any = False, estimate_var: Any = False) -> Any:
+def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Any, use_quick_integration: Any = False, estimate_var: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:
     """Estimates the beta parameter using Bayesian inference.
 
     Args:
@@ -110,10 +107,13 @@ def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs:
         )
         return ll + np.log(beta_pdf(t) + 1e-300)
 
-    beta_hat = integrate_posterior_1d(logpost, lambda t: t, _min_beta, _max_beta)  # type: ignore
+    min_b = min_beta if min_beta is not None else REGISTRY["crm_min_beta"]
+    max_b = max_beta if max_beta is not None else REGISTRY["crm_max_beta"]
+    n_pts = n_points if n_points is not None else REGISTRY["crm_n_points"]
+    beta_hat = integrate_posterior_1d(logpost, lambda t: t, min_b, max_b, n_points=n_pts)  # type: ignore
 
     if estimate_var:
-        exp_x2 = integrate_posterior_1d(logpost, lambda t: t**2, _min_beta, _max_beta)  # type: ignore
+        exp_x2 = integrate_posterior_1d(logpost, lambda t: t**2, min_b, max_b, n_points=n_pts)  # type: ignore
         var = exp_x2 - beta_hat**2
     else:
         var = None
@@ -223,7 +223,7 @@ def _estimate_prob_tox_from_param(F: Any, intercept: Any, beta_hat: Any, dose_la
     return post_tox
 
 
-def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Any, use_quick_integration: Any = False) -> Any:
+def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Any, use_quick_integration: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:
     """Calculates the posterior probability of toxicity using Bayesian integration.
 
     Args:
@@ -248,16 +248,19 @@ def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses
         return ll + np.log(beta_pdf(t) + 1e-300)
 
     post_tox = []
+    min_b = min_beta if min_beta is not None else REGISTRY["crm_min_beta"]
+    max_b = max_beta if max_beta is not None else REGISTRY["crm_max_beta"]
+    n_pts = n_points if n_points is not None else REGISTRY["crm_n_points"]
     for x in dose_labels:
         prob = integrate_posterior_1d(  # type: ignore
-            logpost, lambda t: F(x, a0=intercept, beta=t), _min_beta, _max_beta
+            logpost, lambda t: F(x, a0=intercept, beta=t), min_b, max_b, n_points=n_pts
         )
         post_tox.append(prob)
 
     return post_tox
 
 
-def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Any = logistic, inverse_F: Any = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200) -> Any:
+def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Any = logistic, inverse_F: Any = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:
     """Performs a Continual Reassessment Method (CRM) calculation.
 
     Args:
@@ -318,6 +321,9 @@ def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: A
             beta_dist.pdf,
             use_quick_integration,
             estimate_var,
+            min_beta=min_beta,
+            max_beta=max_beta,
+            n_points=n_points,
         )
         if plugin_mean:
             post_tox = _estimate_prob_tox_from_param(
@@ -332,6 +338,9 @@ def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: A
                 toxicities,
                 beta_dist.pdf,
                 use_quick_integration,
+                min_beta=min_beta,
+                max_beta=max_beta,
+                n_points=n_points,
             )
     elif method == "mle":
         beta_hat, var = _get_beta_hat_mle(
@@ -399,7 +408,7 @@ class CRM(DoseFindingTrial):
             .sort_index(),
         }
 
-    def __init__(self, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Any = None, termination_func: Any = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None) -> None:
+    def __init__(self, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Any = None, termination_func: Any = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, sample_size: Any = None) -> None:
         """Initializes a CRM trial object.
 
         Args:
@@ -475,6 +484,14 @@ class CRM(DoseFindingTrial):
             schema_kwargs["coherency_threshold"] = coherency_threshold
         if bootstrap_samples is not None:
             schema_kwargs["bootstrap_samples"] = bootstrap_samples
+        if min_beta is not None:
+            schema_kwargs["min_beta"] = min_beta
+        if max_beta is not None:
+            schema_kwargs["max_beta"] = max_beta
+        if n_points is not None:
+            schema_kwargs["n_points"] = n_points
+        if sample_size is not None:
+            schema_kwargs["sample_size"] = sample_size
 
         config = CRMSchema(**schema_kwargs)
 
@@ -504,6 +521,10 @@ class CRM(DoseFindingTrial):
         self.intercept = intercept
         self.mle_var_method = mle_var_method
         self.bootstrap_samples = config.bootstrap_samples
+        self._min_beta_override = config.min_beta
+        self._max_beta_override = config.max_beta
+        self._n_points_override = config.n_points
+        self._sample_size_override = config.sample_size
 
         if lowest_dose_too_toxic_hurdle and lowest_dose_too_toxic_certainty:
             if not self.estimate_var:
@@ -514,6 +535,27 @@ class CRM(DoseFindingTrial):
         self.beta_hat, self.beta_var = beta_prior.mean(), beta_prior.var()
         self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = list(self.prior)
+
+
+    @property
+    def min_beta(self):
+        """Gets the minimum limit for beta integration."""
+        return self._min_beta_override if self._min_beta_override is not None else REGISTRY["crm_min_beta"]
+
+    @property
+    def max_beta(self):
+        """Gets the maximum limit for beta integration."""
+        return self._max_beta_override if self._max_beta_override is not None else REGISTRY["crm_max_beta"]
+
+    @property
+    def n_points(self):
+        """Gets the number of grid points for numeric integration."""
+        return self._n_points_override if self._n_points_override is not None else REGISTRY["crm_n_points"]
+
+    @property
+    def sample_size(self):
+        """Gets the Monte Carlo sample size."""
+        return self._sample_size_override if self._sample_size_override is not None else REGISTRY["crm_sample_size"]
 
     def _DoseFindingTrial__reset(self) -> Any:
         self.beta_hat, self.beta_var = self.beta_prior.mean(), self.beta_prior.var()
@@ -545,6 +587,9 @@ class CRM(DoseFindingTrial):
             plugin_mean=self.plugin_mean,
             mle_var_method=self.mle_var_method,
             bootstrap_samples=self.bootstrap_samples,
+            min_beta=self.min_beta,
+            max_beta=self.max_beta,
+            n_points=self.n_points,
         )
         proposed_dose = crm_res[0]
         self.beta_hat = crm_res[1]
@@ -560,7 +605,7 @@ class CRM(DoseFindingTrial):
                 self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
                 for p in self.prior
             ]
-            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(1000000)  # type: ignore
+            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(self.sample_size)  # type: ignore
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 
@@ -635,7 +680,7 @@ class CRM(DoseFindingTrial):
             out.append(np.sum(post_weights * (tox_probs > tox_cutoff)))
         return np.array(out)
 
-    def prob_tox_exceeds(self, tox_cutoff: Any, backend: Any = "quadrature", n: Any = 10**6) -> Any:
+    def prob_tox_exceeds(self, tox_cutoff: Any, backend: Any = "quadrature", n: Any = None) -> Any:
         """Calculates the posterior probability that toxicity exceeds a cutoff.
 
         Args:
@@ -660,8 +705,9 @@ class CRM(DoseFindingTrial):
                     self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
                     for p in self.prior
                 ]
+                n_samples = n if n is not None else self.sample_size
                 beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(
-                    n
+                    n_samples
                 )
                 p0_sample = [
                     self.F_func(label, a0=self.intercept, beta=beta_sample)
