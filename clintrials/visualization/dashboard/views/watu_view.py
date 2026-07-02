@@ -2,8 +2,6 @@
 Renders the WATU simulation results view in the Streamlit dashboard.
 """
 
-import json
-import pandas as pd
 import streamlit as st
 
 from clintrials.core.simulation import extract_sim_data

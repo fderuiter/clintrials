@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 from clintrials.visualization.models import TextSection, MultiFormatSummaryContainer, _format_label
 from clintrials.visualization.report import generate_pdf_report
 

@@ -18,7 +18,6 @@ from .statistics import (
 from collections import OrderedDict
 from clintrials.core.protocol import Protocol
 from clintrials.core.schema import WinRatioSchema
-from clintrials.core.simulation import run_sims
 
 
 class WinRatioTrial(Protocol):

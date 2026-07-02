@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -32,13 +32,12 @@ import abc
 import copy
 import logging
 from collections import OrderedDict
-from itertools import combinations_with_replacement, product
+from itertools import product
 
 from scipy.stats import uniform
 
 from clintrials.utils import (
     atomic_to_json,
-    correlated_binary_outcomes_from_uniforms,
     filter_list_of_dicts,
     iterable_to_json,
     to_1d_list,

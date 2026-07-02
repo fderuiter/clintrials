@@ -1,6 +1,5 @@
 import logging
 import numpy as np
-import pytest
 from scipy.stats import norm
 from clintrials.dosefinding.efftox import (
     EffTox,
@@ -50,7 +49,7 @@ def test_adaptive_integration_extreme_case(caplog):
     )
 
     # Compare limits
-    limits1 = [(p.ppf(1e-6), p.ppf(1 - 1e-6)) for p in priors]
+    [(p.ppf(1e-6), p.ppf(1 - 1e-6)) for p in priors]
     # We can't easily get the final limits from pds without modifying the return
     # but we can check if results differ significantly if the first one was truncated.
     # In my repro, it wasn't truncated much by [-4.75, 4.75].

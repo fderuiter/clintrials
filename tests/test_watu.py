@@ -4,9 +4,7 @@ __contact__ = "kristian.brock@gmail.com"
 """ Tests of the clintrials.dosefindings.wagestait module. """
 
 import numpy as np
-from scipy.stats import norm
 
-from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic
 from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
 

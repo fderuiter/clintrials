@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Annotated, Any, List, Optional, Union, get_origin, get_args
+from typing import Annotated, List, Optional, Union, get_origin, get_args
 
 class FieldInfo:
     def __init__(self, default=dataclasses.MISSING, description=None, ge=None, le=None, gt=None, lt=None):

@@ -13,17 +13,13 @@ import copy
 import itertools
 import json
 import logging
-import warnings
 from collections import OrderedDict
 from datetime import datetime
 
 from clintrials.utils import (
     _open_json_local,
-    fetch_json_from_files,
     filter_list_of_dicts,
     invoke_map_reduce_on_list,
-    map_reduce_files,
-    multiindex_dataframe_from_tuple_map,
     reduce_maps_by_summing,
     tuple_to_dataframe,
 )
@@ -426,12 +422,6 @@ class UniversalProtocolSimulationRunner:
 
 
 # Legacy imports for backward compatibility
-from clintrials.legacy.simulation import (
-    go_fetch_json_sims,
-    filter_sims,
-    summarise_sims,
-    invoke_map_reduce_function_map,
-)
 
 # Inject module-level docstring
 if __doc__:

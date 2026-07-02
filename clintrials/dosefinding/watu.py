@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+from typing import Any, Sequence
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 """
 Brock & Yap's novel seamless phase I/II efficacy/toxicity design, fusing
@@ -17,7 +16,7 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 from scipy.integrate import quad
-from scipy.stats import beta, norm
+from scipy.stats import norm
 
 from clintrials.core.math import empiric, inverse_empiric
 from clintrials.dosefinding.crm import CRM

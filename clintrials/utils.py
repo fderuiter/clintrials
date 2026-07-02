@@ -7,9 +7,7 @@ import json
 import logging
 import warnings
 from collections import OrderedDict
-from collections.abc import Iterable
 from copy import copy
-from datetime import datetime
 from functools import reduce, wraps
 from itertools import product
 
@@ -772,6 +770,17 @@ from clintrials.legacy.utils import (
     iterable_to_json,
     row_to_json,
 )
+
+__all__ = [
+    "_open_json_url",
+    "to_1d_list_gen",
+    "to_1d_list",
+    "fullname",
+    "atomic_to_json",
+    "iterable_to_json",
+    "row_to_json",
+    # any others that might have been there, but typically __all__ is enough for linter to not delete them
+]
 
 if __name__ == "__main__":
     import doctest
