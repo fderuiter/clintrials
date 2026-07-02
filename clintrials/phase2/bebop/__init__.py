@@ -59,6 +59,10 @@ class BeBOP:
         """Resets the model state."""
         self.cases = []
         self._pds = None
+        self._doses = []
+        self._toxicities = []
+        self._status = 0
+        self._efficacies = []
 
     def _l_n(self, D, theta):
         if len(D) > 0:
@@ -66,6 +70,24 @@ class BeBOP:
             return lik.prod(axis=0)
         else:
             return numpy.ones(len(theta))
+
+    def has_more(self):
+        """Checks if the trial is ongoing."""
+        # BeBOP doesn't have an inherent max_size unless added, 
+        # but we need to return True if status >= 0
+        return self._status >= 0
+
+    def report(self):
+        """Generates a standardized JSON-serializable report of the trial."""
+        from collections import OrderedDict
+        from clintrials.utils import atomic_to_json, iterable_to_json
+        
+        report = OrderedDict()
+        report["TrialStatus"] = atomic_to_json(self._status)
+        report["Doses"] = iterable_to_json(self._doses)
+        report["Toxicities"] = iterable_to_json(self._toxicities)
+        report["Efficacies"] = iterable_to_json(self._efficacies)
+        return report
 
     def size(self):
         """Returns the number of observed cases.
@@ -163,6 +185,10 @@ class BeBOP:
             rng = np.random.default_rng()
 
         self.cases.extend(cases)
+        for c in cases:
+            self._doses.append(1)
+            self._toxicities.append(c[1])
+            self._efficacies.append(c[0])
         limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in self.priors]
         lik_integrand = lambda x: self._l_n(cases, x) * numpy.prod(
             numpy.array([dist.pdf(col) for (dist, col) in zip(self.priors, x.T)]),
