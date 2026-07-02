@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+from typing import Any, Optional, Sequence
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -16,11 +16,8 @@ import logging
 import warnings
 from collections import OrderedDict
 
-from clintrials.core.registry import REGISTRY, inject_docs
-from numpy import trapezoid
-from scipy.integrate import quad
+from clintrials.core.registry import REGISTRY
 from scipy.optimize import minimize
-from scipy.special import logsumexp
 from scipy.stats import norm
 
 from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic, bernoulli_likelihood
@@ -608,7 +605,7 @@ class CRM(DoseFindingTrial):
                 self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
                 for p in self.prior
             ]
-            beta_sample = norm(loc=beta_hat, scale=np.sqrt(beta_var)).rvs(self.sample_size, random_state=self.rng)  # type: ignore
+            beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(self.sample_size, random_state=self.rng)  # type: ignore
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 

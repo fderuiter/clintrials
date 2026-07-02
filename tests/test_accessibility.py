@@ -3,7 +3,7 @@ import time
 import pytest
 import os
 import urllib.request
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
 from axe_playwright_python.sync_playwright import Axe
 
 # Define viewports to test

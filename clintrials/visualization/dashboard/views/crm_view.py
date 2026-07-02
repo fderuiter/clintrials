@@ -5,8 +5,6 @@ Renders the CRM simulation results view in the Streamlit dashboard.
 Random Seed Strategy: {crm_view_seed_strategy}
 """
 
-import json
-import pandas as pd
 import streamlit as st
 
 from clintrials.core.simulation import extract_sim_data

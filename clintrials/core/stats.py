@@ -13,8 +13,7 @@ import logging
 from collections import OrderedDict
 
 import numpy as np
-from scipy.optimize import fsolve
-from scipy.stats import chi2, gaussian_kde, norm
+from scipy.stats import chi2, norm
 
 
 def correlation_ci(

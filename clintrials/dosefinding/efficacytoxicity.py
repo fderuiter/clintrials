@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 """
 Base classes and utilities for efficacy-toxicity dose-finding trials.
@@ -16,13 +15,12 @@ __author__ = "brockk"
 import abc
 import logging
 from collections import OrderedDict
-from itertools import combinations_with_replacement, product
+from itertools import combinations_with_replacement
 
 from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,
     iterable_to_json,
-    to_1d_list,
     deprecated,
 )
 

@@ -73,7 +73,7 @@ line_length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py39"
-exclude = ["clintrials/legacy/peps2v1.py", "docs/tutorials/*.ipynb"]
+exclude = ["clintrials/legacy/", "docs/tutorials/"]
 
 [tool.ruff.lint]
 select = ["E", "F"]
@@ -86,9 +86,6 @@ ignore = [
     "E741",
     "E712",
     "E501",
-    "F821",
-    "F401",
-    "F841",
     "E713",
 ]
 

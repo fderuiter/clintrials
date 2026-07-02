@@ -1,4 +1,3 @@
-import pandas as pd
 from functools import wraps
 
 from clintrials.core.viz_interface import get_visualization_provider
@@ -6,6 +5,7 @@ from clintrials.visualization.dashboard.factory import render_accessible_chart
 
 
 def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False):
+    """Decorator to generate a standard dashboard view."""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):

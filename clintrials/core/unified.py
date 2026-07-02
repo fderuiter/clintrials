@@ -1,4 +1,3 @@
-import collections
 
 
 class SimulationResult:

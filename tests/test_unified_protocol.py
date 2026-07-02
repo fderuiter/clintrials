@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 from clintrials.core.protocol import Protocol
 from clintrials.core.unified import SimulationResult
 
