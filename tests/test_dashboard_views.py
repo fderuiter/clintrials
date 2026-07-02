@@ -81,7 +81,9 @@ def _make_winratio_streamlit_mock():
         metric=MagicMock(),
         plotly_chart=MagicMock(),
         markdown=MagicMock(),
-        expander=MagicMock()
+        expander=MagicMock(),
+        progress=MagicMock(),
+        columns=MagicMock(side_effect=lambda x: (st, st))
     )
     return st
 
@@ -273,29 +275,26 @@ def test_winratio_view_render_success(monkeypatch):
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(winratio_view)
     monkeypatch.setattr(winratio_view, "st", st_mock)
-    run_sim = MagicMock()
-    run_sim.return_value.power = 0.8
-    run_sim.return_value.average_ci = (0.1, 0.2)
-    monkeypatch.setattr(winratio_view, "WinRatioTrial", run_sim)
+    
+    mock_pool = MagicMock()
+    mock_execute = MagicMock(return_value=[(True, (0.1, 0.2))] * 800 + [(False, (0.3, 0.4))] * 200)
+    mock_pool.return_value.execute = mock_execute
+    
+    import clintrials.core.parallel
+    monkeypatch.setattr(clintrials.core.parallel, "WorkerPool", mock_pool)
 
     winratio_view.render()
 
-    run_sim.assert_called_once_with(
-        num_subjects_A=100,
-        num_subjects_B=50,
-        num_simulations=1000,
-        p_y1_A=0.5,
-        p_y1_B=0.5,
-        p_y2_A=0.75,
-        p_y2_B=0.25,
-        p_y3_A=0.43,
-        p_y3_B=0.27,
-        significance_level=0.05,
-    )
+    mock_execute.assert_called_once()
+    payload = mock_execute.call_args[0][0]
+    assert payload["module"] == "clintrials.winratio.main"
+    assert payload["func"] == "_single_iteration"
+    assert payload["kwargs"]["num_subjects_A"] == 100
+    
     st_mock.success.assert_called_once()
     st_mock.metric.assert_any_call(label="Power", value="0.8000")
     st_mock.metric.assert_any_call(
-        label="Average 95% Confidence Interval", value="(0.1000, 0.2000)"
+        label="Average 95% Confidence Interval", value="(0.1400, 0.2400)"
     )
 
 

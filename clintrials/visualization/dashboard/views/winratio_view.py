@@ -40,11 +40,48 @@ def render() -> None:
         )
 
     if create_widget(st, "button", "run_simulation_button", "Run Simulation"):
-        with st.spinner("Running simulation..."):
-            trial = WinRatioTrial(**kwargs)
-            trial.update()
-            power = trial.power
-            average_ci = trial.average_ci
+        from clintrials.core.parallel import WorkerPool
+        
+        progress_bar = st.progress(0.0)
+        
+        pool = WorkerPool(pool_size=4)
+        
+        def update_progress(p):
+            progress_bar.progress(min(p, 1.0))
+            
+        payload = {
+            "module": "clintrials.winratio.main",
+            "func": "_single_iteration",
+            "kwargs": {k: v for k, v in kwargs.items() if k != "num_simulations"}
+        }
+        
+        with st.spinner("Running simulation in background workers..."):
+            try:
+                results = pool.execute(payload, kwargs["num_simulations"], batch_size=250, on_progress=update_progress)
+            except Exception as e:
+                st.error(f"Simulation failed: {e}")
+                results = []
+            except BaseException:
+                pool.cancel()
+                raise
+            finally:
+                progress_bar.progress(1.0)
+                
+        # Aggregate manually
+        from clintrials.winratio.main import _winratio_agg_func
+        state = None
+        # We process the results through the agg function in batches or individually
+        if results:
+            state = _winratio_agg_func(None, results)
+            
+        if state is None:
+            power = 0.0
+            average_ci = (0.0, 0.0)
+        else:
+            successes, total_sims, sum_ci0, sum_ci1, ci_count = state
+            power = successes / total_sims if total_sims > 0 else 0.0
+            average_ci = (sum_ci0 / ci_count, sum_ci1 / ci_count) if ci_count > 0 else (0.0, 0.0)
+            
         st.success("Simulation complete")
         st.subheader("Results")
 
