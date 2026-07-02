@@ -26,6 +26,16 @@ def main():
     It then calls the appropriate render function based on the user's
     selection.
     """
+    st.sidebar.markdown(
+        '<nav aria-label="Settings Sidebar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;"></nav>',
+        unsafe_allow_html=True
+    )
+    
+    st.markdown(
+        '<main aria-label="Analysis Main Content" id="main-content-anchor" tabindex="-1" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;"></main>',
+        unsafe_allow_html=True
+    )
+
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Accessibility")
