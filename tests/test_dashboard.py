@@ -50,7 +50,8 @@ def fake_plotly(monkeypatch):
     px = types.SimpleNamespace()
     px.bar = MagicMock(return_value="bar_fig")
     px.line = MagicMock(return_value="line_fig")
-    plotly = types.SimpleNamespace(express=px)
+    go = types.SimpleNamespace(); plotly = types.SimpleNamespace(express=px, graph_objects=go)
+    monkeypatch.setitem(sys.modules, "plotly.graph_objects", go)
     monkeypatch.setitem(sys.modules, "plotly", plotly)
     monkeypatch.setitem(sys.modules, "plotly.express", px)
     return px
@@ -121,8 +122,9 @@ def test_crm_render_creates_plot(fake_streamlit, monkeypatch):
     monkeypatch.setattr(viz, "plot_crm_simulation_recommendation", bar_mock)
 
     class DummyPS:
-        def __init__(self, config):
-            self.config = config
+        def __init__(self, *args, **kwargs):
+            self.add = lambda *a, **k: None
+            pass
 
     monkeypatch.setattr(crm_view, "ParameterSpace", DummyPS)
 
@@ -155,8 +157,9 @@ def test_efftox_render_creates_plots(fake_streamlit, monkeypatch):
     monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
     class DummyPS:
-        def __init__(self, config):
-            self.config = config
+        def __init__(self, *args, **kwargs):
+            self.add = lambda *a, **k: None
+            pass
 
     monkeypatch.setattr(efftox_view, "ParameterSpace", DummyPS)
 
@@ -188,8 +191,9 @@ def test_crm_render_warning_branch(fake_streamlit, monkeypatch):
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
 
     class DummyPS:
-        def __init__(self, config):
-            self.config = config
+        def __init__(self, *args, **kwargs):
+            self.add = lambda *a, **k: None
+            pass
 
     monkeypatch.setattr(crm_view, "ParameterSpace", DummyPS)
     summary_df = pd.DataFrame({"N": [2]}, index=pd.Index([0.1], name="true_tox"))

@@ -33,7 +33,7 @@ def render(sims):
         "true_prob_eff": "true_prob_eff",
     }
 
-summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
+    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
 
     figures = []
     if not summary_df.empty:
