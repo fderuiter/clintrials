@@ -43,11 +43,14 @@ def _toxicity_likelihood(link_func: Any, a0: Any, beta: Any, dose: Any, tox: Any
         float: The likelihood or log-likelihood of the toxicity outcome.
     """
     p = link_func(dose, a0, beta)
+    p = np.clip(p, 1e-15, 1 - 1e-15)
+    
+    log_l = tox * np.log(p) + (1 - tox) * np.log(1 - p)
+    
     if log:
-        p = np.clip(p, 1e-15, 1 - 1e-15)
-        return tox * np.log(p) + (1 - tox) * np.log(1 - p)
+        return log_l
     else:
-        return p**tox * (1 - p) ** (1 - tox)
+        return np.exp(np.clip(log_l, -700, 700))
 
 
 def _compound_toxicity_likelihood(link_func: Any, a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False) -> Any:
@@ -75,10 +78,10 @@ def _compound_toxicity_likelihood(link_func: Any, a0: Any, beta: Any, doses: Any
             l += _toxicity_likelihood(link_func, a0, beta, dose, tox, log=True)
         return l
     else:
-        l = 1
+        l = 0
         for dose, tox in zip(doses, toxs):
-            l *= _toxicity_likelihood(link_func, a0, beta, dose, tox, log=False)
-        return l
+            l += _toxicity_likelihood(link_func, a0, beta, dose, tox, log=True)
+        return np.exp(np.clip(l, -700, 700))
 
 
 def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Any, use_quick_integration: Any = False, estimate_var: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:
