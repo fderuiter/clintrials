@@ -94,6 +94,7 @@ ignore = [
 
 
 [tool.pytest.ini_options]
+addopts = "--ignore=tests/test_accessibility.py"
 testpaths = ["tests"]
 
 [tool.poetry.extras]

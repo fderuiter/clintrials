@@ -15,6 +15,12 @@ def test_table_section():
     assert "| --- | --- |" in output
     assert "| 1.2346 | a |" in output
     assert "| 2.0000 | b |" in output
+    
+    html_output = section.html
+    assert "<strong>Data Summary: My Title</strong>" in html_output
+    assert '<th scope="col">Col A</th>' in html_output
+    assert '<td>1.2346</td>' in html_output
+    assert '<td>2.0000</td>' in html_output
 
 def test_format_label():
     assert _format_label("hello_world") == "Hello World"

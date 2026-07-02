@@ -422,6 +422,12 @@ class UniversalProtocolSimulationRunner:
 
 
 # Legacy imports for backward compatibility
+from clintrials.legacy.simulation import (
+    go_fetch_json_sims as go_fetch_json_sims,
+    filter_sims as filter_sims,
+    summarise_sims as summarise_sims,
+    invoke_map_reduce_function_map as invoke_map_reduce_function_map,
+)
 
 # Inject module-level docstring
 if __doc__:
