@@ -306,49 +306,122 @@ class UniversalProtocolSimulationRunner:
         self.outcome_generator = outcome_generator
         self.recruitment_stream = recruitment_stream
 
-    def run(self, cohort_size=1, **kwargs):
+    def run(self, mode="iterative", n_sims=1, cohort_size=1, show_progress=False, **kwargs):
         """Runs the trial simulation loop.
         
         Args:
+            mode (str): Execution mode, 'iterative' or 'vectorized'.
+            n_sims (int): Number of simulations to run. Defaults to 1.
             cohort_size (int): Number of patients per cohort. Defaults to 1.
+            show_progress (bool): Whether to show progress tracking.
             **kwargs: Additional keyword arguments passed to the outcome
                 generator and the design's update method.
         
         Returns:
-            collections.OrderedDict: The trial simulation report.
+            list: A list of individual trial simulation reports.
         """
-        design = copy.deepcopy(self.design)
-        recruitment_stream = copy.deepcopy(self.recruitment_stream) if self.recruitment_stream else None
+        if mode == "vectorized":
+            return self._run_vectorized(n_sims, **kwargs)
+            
+        try:
+            from tqdm import tqdm
+        except ImportError:
+            show_progress = False
 
-        design.reset()
-        if recruitment_stream:
-            recruitment_stream.reset()
+        results = []
+        iterator = range(n_sims)
+        if show_progress:
+            iterator = tqdm(iterator, desc="Iterative Simulation")
+            
+        for _ in iterator:
+            design = copy.deepcopy(self.design)
+            recruitment_stream = copy.deepcopy(self.recruitment_stream) if self.recruitment_stream else None
 
-        i = 0
-        max_size = design.max_size()
-
-        while i < max_size and design.has_more():
-            current_cohort_size = min(cohort_size, max_size - i)
-
+            design.reset()
             if recruitment_stream:
-                kwargs["arrival_times"] = [
-                    recruitment_stream.next() for _ in range(current_cohort_size)
-                ]
+                recruitment_stream.reset()
 
-            if self.outcome_generator:
-                cases = self.outcome_generator(
-                    design=design,
-                    current_size=i,
-                    cohort_size=current_cohort_size,
-                    **kwargs
-                )
-            else:
-                cases = []
+            i = 0
+            # Some protocols might not have max_size
+            max_size = getattr(design, "max_size", lambda: float('inf'))()
 
-            design.update(cases, **kwargs)
-            i += current_cohort_size
+            while i < max_size and design.has_more():
+                # For non-finite max_size, current_cohort_size is just cohort_size
+                current_cohort_size = min(cohort_size, max_size - i) if max_size != float('inf') else cohort_size
 
-        return design.report()
+                if recruitment_stream:
+                    kwargs["arrival_times"] = [
+                        recruitment_stream.next() for _ in range(current_cohort_size)
+                    ]
+
+                if self.outcome_generator:
+                    cases = self.outcome_generator(
+                        design=design,
+                        current_size=i,
+                        cohort_size=current_cohort_size,
+                        **kwargs
+                    )
+                else:
+                    cases = []
+                
+                # Check if update expects cases, or just passes kwargs
+                if self.outcome_generator:
+                    design.update(cases, **kwargs)
+                else:
+                    design.update(**kwargs)
+                i += current_cohort_size
+
+            results.append(design.report())
+        
+        return results if n_sims > 1 or mode == "iterative" else results[0]
+
+    def _run_vectorized(self, n_sims, **kwargs):
+        import numpy as np
+        from clintrials.validation import validate_positive_integer
+        
+        validate_positive_integer(n_sims, "Number of simulations")
+        
+        if hasattr(self.design, "efficacy_boundaries"):
+            # GSD Vectorized Logic
+            theta = kwargs.get("theta", 0.0)
+            means = theta * np.array(self.design.timing)
+            cov = np.identity(self.design.k)
+            for i in range(self.design.k):
+                for j in range(i + 1, self.design.k):
+                    corr = np.sqrt(self.design.timing[i] / self.design.timing[j])
+                    cov[i, j] = cov[j, i] = corr
+
+            simulated_z = self.design.rng.multivariate_normal(mean=means, cov=cov, size=n_sims)
+            
+            stopped_at = np.full(n_sims, self.design.k + 1, dtype=int)
+            rejected = np.zeros(n_sims, dtype=bool)
+
+            for i in range(self.design.k):
+                ongoing_trials = stopped_at == self.design.k + 1
+                stopping_now = simulated_z[:, i] >= self.design.efficacy_boundaries[i]
+                update_mask = ongoing_trials & stopping_now
+                stopped_at[update_mask] = i + 1
+                rejected[update_mask] = True
+
+            results = []
+            for s, r, z in zip(stopped_at, rejected, simulated_z):
+                s = int(s)
+                actual_s = min(s, self.design.k)
+                actual_z = z[:actual_s].tolist()
+                actual_info = list(self.design.timing[:actual_s])
+                
+                report = OrderedDict()
+                report["Stage"] = actual_s
+                report["Stopped"] = True
+                report["Rejected"] = bool(r)
+                report["ZScores"] = actual_z
+                report["Information"] = actual_info
+                results.append(report)
+            return results
+        elif hasattr(self.design, "run_bulk"):
+            return self.design.run_bulk(n_sims, **kwargs)
+        else:
+            raise NotImplementedError("Vectorized mode not supported for this protocol type.")
 
 
 

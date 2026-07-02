@@ -25,23 +25,23 @@ class WinRatioTrial(Protocol):
     """Win-Ratio simulation wrapped as a Protocol."""
 
     def __init__(self, **kwargs):
+        super().__init__()
         self.config = WinRatioSchema(**kwargs)
-        self.power = 0.0
-        self.average_ci = (0.0, 0.0)
+        self.success = False
+        self.ci = None
         self._completed = False
 
     def reset(self):
         """Reset the simulation state."""
-        self.power = 0.0
-        self.average_ci = (0.0, 0.0)
+        self.success = False
+        self.ci = None
         self._completed = False
 
     def update(self, *args, **kwargs):
-        """Run the simulation to update the state."""
-        self.power, self.average_ci = run_simulation(
+        """Run a single trial simulation to update the state."""
+        self.success, self.ci = _single_iteration(
             num_subjects_A=self.config.num_subjects_A,
             num_subjects_B=self.config.num_subjects_B,
-            num_simulations=self.config.num_simulations,
             p_y1_A=self.config.p_y1_A,
             p_y1_B=self.config.p_y1_B,
             p_y2_A=self.config.p_y2_A,
@@ -53,12 +53,12 @@ class WinRatioTrial(Protocol):
         self._completed = True
 
     def has_more(self):
-        """Check if simulation is completed."""
+        """Check if trial is completed."""
         return not self._completed
 
     def report(self):
         """Report the trial results."""
-        return OrderedDict([("power", self.power), ("average_ci", self.average_ci)])
+        return OrderedDict([("success", self.success), ("ci", self.ci)])
 
 
 def _single_iteration(
@@ -91,86 +91,6 @@ def _single_iteration(
     return p_value < significance_level, ci
 
 
-def _winratio_agg_func(current_sims, new_batch_sims):
-    if current_sims is None:
-        successes = 0
-        total_sims = 0
-        sum_ci0 = 0.0
-        sum_ci1 = 0.0
-        ci_count = 0
-    else:
-        successes, total_sims, sum_ci0, sum_ci1, ci_count = current_sims
-
-    for success, ci in new_batch_sims:
-        if success:
-            successes += 1
-        total_sims += 1
-        if ci is not None:
-            sum_ci0 += ci[0]
-            sum_ci1 += ci[1]
-            ci_count += 1
-
-    return successes, total_sims, sum_ci0, sum_ci1, ci_count
-
-
-def run_simulation(
-    num_subjects_A: int,
-    num_subjects_B: int,
-    num_simulations: int,
-    p_y1_A: float,
-    p_y1_B: float,
-    p_y2_A: float,
-    p_y2_B: float,
-    p_y3_A: float,
-    p_y3_B: float,
-    significance_level: float = 0.05,
-):
-    """
-    Run a Monte Carlo simulation to estimate win-ratio power.
-
-    Args:
-        num_subjects_A (int): The number of subjects in Group A.
-        num_subjects_B (int): The number of subjects in Group B.
-        num_simulations (int): The number of simulations to run.
-        p_y1_A (float): The probability of outcome y1=1 for Group A.
-        p_y1_B (float): The probability of outcome y1=1 for Group B.
-        p_y2_A (float): The probability of outcome y2=1 for Group A.
-        p_y2_B (float): The probability of outcome y2=1 for Group B.
-        p_y3_A (float): The probability of outcome y3=1 for Group A.
-        p_y3_B (float): The probability of outcome y3=1 for Group B.
-        significance_level (float, optional): The significance level for the
-            p-value. Defaults to 0.05.
-
-    Returns:
-        tuple[float, tuple[float, float]]: A tuple containing the estimated
-            power and the average confidence interval.
-    """
-    state = run_sims(
-        sim_func=_single_iteration,
-        n1=1,
-        n2=num_simulations,
-        agg_func=_winratio_agg_func,
-        num_subjects_A=num_subjects_A,
-        num_subjects_B=num_subjects_B,
-        p_y1_A=p_y1_A,
-        p_y1_B=p_y1_B,
-        p_y2_A=p_y2_A,
-        p_y2_B=p_y2_B,
-        p_y3_A=p_y3_A,
-        p_y3_B=p_y3_B,
-        significance_level=significance_level,
-    )
-    if state is None:
-        return 0.0, (0.0, 0.0)
-    successes, total_sims, sum_ci0, sum_ci1, ci_count = state
-    power = successes / total_sims if total_sims > 0 else 0.0
-    if ci_count > 0:
-        average_ci = (sum_ci0 / ci_count, sum_ci1 / ci_count)
-    else:
-        average_ci = (0, 0)
-    return power, average_ci
-
-
 def main() -> None:
     """Parse command-line arguments and run the simulation."""
     parser = argparse.ArgumentParser(
@@ -197,9 +117,27 @@ def main() -> None:
         kwargs["significance_level"] = kwargs.pop("significance")
 
     trial = WinRatioTrial(**kwargs)
-    trial.update()
-    power = trial.power
-    average_ci = trial.average_ci
+    
+    # Run bulk simulations via unified runner
+    results = trial.run(n_sims=trial.config.num_simulations, method="iterative")
+    
+    successes = sum(1 for r in results if r["success"])
+    total_sims = len(results)
+    
+    sum_ci0 = 0.0
+    sum_ci1 = 0.0
+    ci_count = 0
+    for r in results:
+        if r["ci"] is not None:
+            sum_ci0 += r["ci"][0]
+            sum_ci1 += r["ci"][1]
+            ci_count += 1
+            
+    power = successes / total_sims if total_sims > 0 else 0.0
+    if ci_count > 0:
+        average_ci = (sum_ci0 / ci_count, sum_ci1 / ci_count)
+    else:
+        average_ci = (0, 0)
 
     print(f"Power of the test: {power:.4f}")  # noqa: T201
     print(  # noqa: T201

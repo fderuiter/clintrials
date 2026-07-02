@@ -10,6 +10,8 @@ from typing import Dict
 from .compare import compare_subjects
 
 
+import numpy as np
+
 def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
     """
     Compare every treatment subject with every control subject.
@@ -24,17 +26,27 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
         dict[str, int]: Counts of wins, losses and ties for the treatment
             group.
     """
-    results = {"wins": 0, "losses": 0, "ties": 0}
-    for treatment_subj in treatment_group:
-        for control_subj in control_group:
-            result = compare_subjects(treatment_subj, control_subj)
-            if result == "win":
-                results["wins"] += 1
-            elif result == "loss":
-                results["losses"] += 1
-            else:
-                results["ties"] += 1
-    return results
+    t_group = np.asarray(treatment_group)
+    c_group = np.asarray(control_group)
+    
+    if t_group.size == 0 or c_group.size == 0:
+        return {"wins": 0, "losses": 0, "ties": 0}
+        
+    diff = t_group[:, np.newaxis, :] - c_group[np.newaxis, :, :]
+    
+    non_zero = diff != 0
+    has_non_zero = non_zero.any(axis=2)
+    
+    first_non_zero_idx = np.argmax(non_zero, axis=2)
+    
+    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)
+    
+    wins = np.sum((first_diff > 0) & has_non_zero)
+    losses = np.sum((first_diff < 0) & has_non_zero)
+    ties = np.sum(~has_non_zero)
+    
+    return {"wins": int(wins), "losses": int(losses), "ties": int(ties)}
+
 
 
 # Inject module-level docstring

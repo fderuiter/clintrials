@@ -209,65 +209,6 @@ class GroupSequentialDesign(Protocol):
 
         return boundaries
 
-    def run_bulk(
-        self, n_sims: int, show_progress: bool = False, theta: float = 0.0, **kwargs
-    ) -> dict:
-        """Simulates trials in bulk to estimate the operating characteristics of the design.
-
-        Args:
-            n_sims (int): The number of trials to simulate.
-            show_progress (bool): Whether to show progress tracking (not implemented for bulk gsd yet).
-            theta (float, optional): The effect size (drift parameter).
-                `theta = 0` corresponds to the null hypothesis, and the result
-                is the Type I error rate. A non-zero theta corresponds to an
-                alternative hypothesis, and the result is the power.
-                Defaults to 0.0.
-
-        Returns:
-            dict: A dictionary containing the simulation results.
-        """
-        from clintrials.validation import validate_positive_integer
-
-        validate_positive_integer(n_sims, "Number of simulations")
-
-        means = theta * np.array(self.timing)
-
-        cov = np.identity(self.k)
-        for i in range(self.k):
-            for j in range(i + 1, self.k):
-                corr = np.sqrt(self.timing[i] / self.timing[j])
-                cov[i, j] = cov[j, i] = corr
-
-        simulated_z = self.rng.multivariate_normal(mean=means, cov=cov, size=n_sims)
-
-        stopped_at = np.full(n_sims, self.k + 1, dtype=int)
-        rejected = np.zeros(n_sims, dtype=bool)
-
-        for i in range(self.k):
-            ongoing_trials = stopped_at == self.k + 1
-            stopping_now = simulated_z[:, i] >= self.efficacy_boundaries[i]
-            update_mask = ongoing_trials & stopping_now
-            stopped_at[update_mask] = i + 1
-            rejected[update_mask] = True
-
-        rejection_prob = np.mean(rejected)
-
-        stop_counts = np.bincount(stopped_at, minlength=self.k + 2)[1:]
-        stopping_dist = stop_counts / n_sims
-
-        info_at_stop = np.array(self.timing + [self.timing[-1]])
-
-        trial_stop_info = np.array(
-            [self.timing[s - 1] if s <= self.k else self.timing[-1] for s in stopped_at]
-        )
-        expected_info = np.mean(trial_stop_info)
-
-        return {
-            "rejection_prob": rejection_prob,
-            "stopping_dist": stopping_dist[: self.k],
-            "expected_info": expected_info,
-        }
-
     @deprecated(alternative="run(..., method='bulk')")
     def simulate(self, n_sims: int, theta: float = 0.0):
         """Legacy method for backward compatibility."""
