@@ -19,6 +19,29 @@ COLORBLIND_PALETTE = [
     "#000000",
 ]
 
+PATTERN_SEQUENCE = ["/", "\\", "x", "-", "|", "+", "."]
+DASH_SEQUENCE = ["solid", "dot", "dash", "longdash", "dashdot", "longdashdot"]
+SYMBOL_SEQUENCE = ["circle", "square", "diamond", "cross", "x", "triangle-up", "triangle-down"]
+
+# Consistent mapping for probability types across trial models
+LINE_DASH_MAP = {
+    "prob_accept_tox": "dash",
+    "ProbAcceptTox": "dash",
+    "Toxicity": "dash",
+    "prob_accept_eff": "solid",
+    "ProbAcceptEff": "solid",
+    "Efficacy": "solid",
+}
+
+SYMBOL_MAP = {
+    "prob_accept_tox": "x",
+    "ProbAcceptTox": "x",
+    "Toxicity": "x",
+    "prob_accept_eff": "circle",
+    "ProbAcceptEff": "circle",
+    "Efficacy": "circle",
+}
+
 
 def _format_label(label):
     if not isinstance(label, str):
@@ -51,10 +74,12 @@ def create_bar_chart(df, x, y, color, title, labels=None):
         x=x,
         y=y,
         color=color,
+        pattern_shape=color,
         barmode="group",
         title=title,
         labels=auto_labels,
         color_discrete_sequence=COLORBLIND_PALETTE,
+        pattern_shape_sequence=PATTERN_SEQUENCE,
     )
     return fig
 
@@ -74,10 +99,18 @@ def create_line_chart(df, x, y, color, title, labels=None):
         x=x,
         y=y,
         color=color,
+        line_dash=color,
+        symbol=color,
         title=title,
         labels=auto_labels,
         color_discrete_sequence=COLORBLIND_PALETTE,
+        line_dash_sequence=DASH_SEQUENCE,
+        symbol_sequence=SYMBOL_SEQUENCE,
+        line_dash_map=LINE_DASH_MAP,
+        symbol_map=SYMBOL_MAP,
     )
+    # Ensure markers are visible for the symbols to show
+    fig.update_traces(mode="lines+markers")
     return fig
 
 
