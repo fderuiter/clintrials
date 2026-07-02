@@ -133,6 +133,8 @@ def render_accessible_chart(st_module, fig, expander_label="Data Summary"):
     accessibility_mode = getattr(st_module, "session_state", {}).get("accessibility_mode", False)
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
     
+    if hasattr(fig, "layout") and hasattr(fig.layout, "meta"):
+        fig.layout.meta = None
     st_module.plotly_chart(fig)
 
     if accessibility_mode:
