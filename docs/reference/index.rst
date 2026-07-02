@@ -6,10 +6,16 @@ API Reference
 
    clintrials.core.math
    clintrials.core.numerics
+   clintrials.core.protocol
    clintrials.core.recruitment
+   clintrials.core.registry
+   clintrials.core.rng
+   clintrials.core.schema
    clintrials.core.simulation
    clintrials.core.stats
    clintrials.core.tte
+   clintrials.core.unified
+   clintrials.core.viz_interface
    clintrials.utils
    clintrials.phase2.bebop
    clintrials.dosefinding.efftox
