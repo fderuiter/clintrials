@@ -211,7 +211,7 @@ def _L_n(D: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, 
     return response
 
 
-def _get_posterior_sample(cases: Any, priors: Any, n: Any = 10**5, epsilon: Any = 1e-6, k_sd: Any = 6.0, max_iter: Any = 3, mass_threshold: Any = 0.999999) -> Any:
+def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10**5, epsilon: Any = 1e-6, k_sd: Any = 6.0, max_iter: Any = 3, mass_threshold: Any = 0.999999) -> Any:
     """Generates a posterior sample with adaptive integration limits.
 
     Args:
@@ -231,6 +231,9 @@ def _get_posterior_sample(cases: Any, priors: Any, n: Any = 10**5, epsilon: Any 
     Returns:
         ProbabilityDensitySample: The posterior sample object.
     """
+    if rng is None:
+        rng = np.random.default_rng()
+
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
 
     lik_integrand = (
@@ -248,6 +251,7 @@ def _get_posterior_sample(cases: Any, priors: Any, n: Any = 10**5, epsilon: Any 
     refined_limits, pds = adaptive_mc_integration(  # type: ignore
         lik_integrand,
         limits,
+        rng,
         n=n,
         max_iter=max_iter,
         mass_threshold=mass_threshold,
@@ -257,7 +261,7 @@ def _get_posterior_sample(cases: Any, priors: Any, n: Any = 10**5, epsilon: Any 
     return pds
 
 
-def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_cutoff: Any, eff_cutoff: Any, n: Any = 10**5, epsilon: Any = 1e-6, **kwargs: Any) -> Any:
+def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_cutoff: Any, eff_cutoff: Any, n: Any = 10**5, epsilon: Any = 1e-6, rng: Any = None, **kwargs: Any) -> Any:
     """Calculates posterior probabilities for an EffTox trial.
 
     This function uses Monte Carlo integration to evaluate the posterior
@@ -297,7 +301,7 @@ def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_c
     limit_args = {
         k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
-    pds = _get_posterior_sample(_cases, priors, n=n, epsilon=epsilon, **limit_args)
+    pds = _get_posterior_sample(_cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args)
     samp = pds._samp
 
     probs = []
@@ -316,7 +320,7 @@ def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_c
     return probs, pds
 
 
-def efftox_get_posterior_params(cases: Any, priors: Any, scaled_doses: Any, n: Any = 10**5, epsilon: Any = 1e-6, **kwargs: Any) -> Any:
+def efftox_get_posterior_params(cases: Any, priors: Any, scaled_doses: Any, n: Any = 10**5, epsilon: Any = 1e-6, rng: Any = None, **kwargs: Any) -> Any:
     """Calculates posterior parameter estimates for an EffTox trial.
 
     This function uses Monte Carlo integration to evaluate the posterior
@@ -352,7 +356,7 @@ def efftox_get_posterior_params(cases: Any, priors: Any, scaled_doses: Any, n: A
     limit_args = {
         k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
-    pds = _get_posterior_sample(_cases, priors, n=n, epsilon=epsilon, **limit_args)
+    pds = _get_posterior_sample(_cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args)
     samp = pds._samp
 
     params = []
@@ -800,8 +804,10 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 
         self.reset()
 
-    def _update_integrals(self, n: Any = None, **kwargs: Any) -> Any:
+    def _update_integrals(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
         """Recalculates integrals to update probabilities and utilities."""
+        if rng is None:
+            rng = np.random.default_rng()
         if n is None:
             n = self.num_integral_steps
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
@@ -820,6 +826,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             self.eff_cutoff,
             n,
             self.epsilon,
+            rng,
             **limit_args,
         )
         prob_tox, prob_eff, prob_acc_tox, prob_acc_eff = zip(*post_probs)
@@ -840,10 +847,10 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.utility = utility
         self.pds = _pds
 
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self, n: Any = None, **kwargs: Any) -> Any:
+    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
         if n is None:
             n = self.num_integral_steps
-        self._update_integrals(n, **kwargs)
+        self._update_integrals(n, rng, **kwargs)
         if self.treated_at_dose(self.first_dose()) > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
@@ -909,12 +916,13 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         df["Utility"] = self.utility
         return df
 
-    def posterior_params(self, n: Any = None, **kwargs: Any) -> Any:
+    def posterior_params(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
         """Gets the posterior parameter estimates.
 
         Args:
             n (int, optional): The number of points for Monte Carlo
                 integration. Defaults to `None`.
+            rng (numpy.random.Generator, optional): The random number generator.
             **kwargs: Additional arguments for limit refinement.
 
         Returns:
@@ -931,7 +939,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         }
 
         post_params, pds = efftox_get_posterior_params(
-            cases, self.priors, self._scaled_doses, n, self.epsilon, **limit_args
+            cases, self.priors, self._scaled_doses, n, self.epsilon, rng, **limit_args
         )
         return post_params
 
