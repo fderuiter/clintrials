@@ -24,7 +24,6 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
-import numpy
 
 
 def pi_e(x, theta):

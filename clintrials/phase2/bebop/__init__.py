@@ -31,7 +31,7 @@ __all__ = ["peps2v2"]
 import numpy
 import pandas as pd
 
-from clintrials.core.stats import ProbabilityDensitySample, correlation_ci
+from clintrials.core.stats import correlation_ci
 
 
 class BeBOP:

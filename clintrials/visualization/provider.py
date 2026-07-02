@@ -594,7 +594,7 @@ class DefaultVisualizationProvider(VisualizationProvider):
         """Generates an accessibility-first PDF report for trial simulations."""
         try:
             from clintrials.visualization.report import generate_pdf_report as _gen_pdf
-        except ImportError as e:
+        except ImportError:
             import warnings
             warnings.warn("PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`.")
             return None

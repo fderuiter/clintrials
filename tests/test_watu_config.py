@@ -1,7 +1,6 @@
 import numpy as np
 from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
-import pytest
 
 
 def test_watu_mc_config():
@@ -113,7 +112,7 @@ def test_watu_update_kwargs(mocker):
     mock_crm_exceeds = mocker.patch.object(
         trial.crm, "prob_tox_exceeds", return_value=np.array([0.1])
     )
-    mock_eff_exceeds = mocker.patch.object(
+    mocker.patch.object(
         trial, "prob_eff_exceeds", return_value=np.array([0.9])
     )
 

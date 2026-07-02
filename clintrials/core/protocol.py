@@ -1,5 +1,4 @@
 import abc
-from collections import OrderedDict
 
 
 class Protocol(metaclass=abc.ABCMeta):

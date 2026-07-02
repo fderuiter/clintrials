@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Any, Callable, Optional, Union, Sequence, Mapping, Dict, Tuple, List, Iterable
+from typing import Any
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 """
 An implementation of Thall & Cook's EffTox design for dose-finding in
@@ -22,7 +21,6 @@ from scipy.optimize import brentq
 from scipy.stats import norm
 
 from clintrials.core.math import inverse_logit, logit
-from clintrials.core.stats import ProbabilityDensitySample
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json, deprecated
 

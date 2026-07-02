@@ -1,7 +1,6 @@
 import numpy as np
 from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
-import pytest
 
 
 def test_watu_stage_aware_mc_config(mocker):

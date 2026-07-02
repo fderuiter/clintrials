@@ -5,9 +5,7 @@ Random Seed Strategy: {simulate_seed_strategy}
 
 from __future__ import annotations
 
-from typing import Dict
 
-from .compare import compare_subjects
 
 
 import numpy as np
