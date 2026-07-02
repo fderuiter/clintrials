@@ -779,7 +779,6 @@ __all__ = [
     "atomic_to_json",
     "iterable_to_json",
     "row_to_json",
-    # any others that might have been there, but typically __all__ is enough for linter to not delete them
 ]
 
 if __name__ == "__main__":

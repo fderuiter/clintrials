@@ -145,3 +145,14 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
         json.dump(violations_hc, f, indent=2)
         
     assert len(violations_hc) == 0, f"High-Contrast Mode Accessibility Violations: {violations_hc}"
+    
+    # Confirm application of the high-contrast palette [cite:source1][cite:source2]
+    # Check iframe contents for Plotly colors
+    found_hc_color = False
+    for frame in page.frames:
+        content_lower = frame.content().lower()
+        if "#8a5f00" in content_lower or "rgb(138, 95, 0)" in content_lower:
+            found_hc_color = True
+            break
+            
+    assert found_hc_color, "High-contrast palette color (#8A5F00) was not found in the rendered charts."
