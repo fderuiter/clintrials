@@ -49,9 +49,12 @@ def test_simulation_type1_error():
     # A high number of sims and a reasonable tolerance are needed.
     n_sims = 20000  # Increased for stability
     results = design.run(n_sims=n_sims, method="bulk", theta=0)
+    
+    rejections = sum(1 for r in results if r["Rejected"])
+    rejection_prob = rejections / n_sims
 
     # Allow for some Monte Carlo error.
-    assert results["rejection_prob"] == pytest.approx(alpha, abs=0.01)
+    assert rejection_prob == pytest.approx(alpha, abs=0.01)
 
 
 def test_gsd_with_timing():
@@ -150,7 +153,7 @@ def test_gsd_update_and_report():
 def test_gsd_run_bulk_invalid_sims():
     design = GroupSequentialDesign(k=3)
     with pytest.raises(
-        ValueError, match="Number of simulations must be a positive integer"
+        ValueError, match="Number of simulations must be a positive integer|must be positive"
     ):
         design.run(0, method="bulk")
 

@@ -48,29 +48,6 @@ class Protocol(metaclass=abc.ABCMeta):
         """
         pass  # pragma: no cover
 
-    def run_iterative(self, n_sims: int, show_progress: bool = False, **kwargs):
-        """Run single-iteration simulations."""
-        try:
-            from tqdm import tqdm
-        except ImportError:
-            show_progress = False
-
-        results = []
-        iterator = range(n_sims)
-        if show_progress:
-            iterator = tqdm(iterator, desc="Iterative Simulation")
-
-        for _ in iterator:
-            self.reset()
-            while self.has_more():
-                self.update(**kwargs)
-            results.append(self.report())
-        return results
-
-    def run_bulk(self, n_sims: int, show_progress: bool = False, **kwargs):
-        """Run vectorized bulk simulations. Must be overridden if supported."""
-        raise NotImplementedError("Bulk mode not implemented for this protocol.")
-
     def run(
         self,
         n_sims: int,
@@ -82,14 +59,13 @@ class Protocol(metaclass=abc.ABCMeta):
         """Polymorphic entry point for simulation execution."""
         from clintrials.core.rng import get_rng
         from clintrials.core.unified import SimulationResult
+        from clintrials.core.simulation import UniversalProtocolSimulationRunner
 
         self.set_rng(get_rng(seed))
-
-        if method == "bulk":
-            results = self.run_bulk(n_sims, show_progress=show_progress, **kwargs)
-        elif method == "iterative":
-            results = self.run_iterative(n_sims, show_progress=show_progress, **kwargs)
-        else:
-            raise ValueError(f"Unknown execution method: {method}")
+        
+        mode = "vectorized" if method == "bulk" else "iterative"
+        
+        runner = UniversalProtocolSimulationRunner(self)
+        results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **kwargs)
 
         return SimulationResult(results, mode=method)
