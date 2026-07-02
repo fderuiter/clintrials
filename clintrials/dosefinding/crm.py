@@ -23,7 +23,8 @@ from scipy.optimize import minimize
 from scipy.special import logsumexp
 from scipy.stats import norm
 
-from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic
+from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic, bernoulli_likelihood
+from clintrials.core.numerics import posterior_expectation_gh
 from clintrials.dosefinding import DoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json
 
@@ -43,14 +44,7 @@ def _toxicity_likelihood(link_func: Any, a0: Any, beta: Any, dose: Any, tox: Any
         float: The likelihood or log-likelihood of the toxicity outcome.
     """
     p = link_func(dose, a0, beta)
-    p = np.clip(p, 1e-15, 1 - 1e-15)
-    
-    log_l = tox * np.log(p) + (1 - tox) * np.log(1 - p)
-    
-    if log:
-        return log_l
-    else:
-        return np.exp(np.clip(log_l, -700, 700))
+    return bernoulli_likelihood(p, tox, log=log)
 
 
 def _compound_toxicity_likelihood(link_func: Any, a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False) -> Any:
@@ -661,33 +655,42 @@ class CRM(DoseFindingTrial):
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
         mu0 = self.beta_prior.mean()
         sd0 = np.sqrt(self.beta_prior.var())
-        nodes, weights = np.polynomial.hermite.hermgauss(deg)  # type: ignore
-        betas = mu0 + np.sqrt(2) * sd0 * nodes  # type: ignore
-        log_w = np.log(weights)  # type: ignore
+        
         dose_labels = [
             self.inverse_F(self.prior[d - 1], a0=self.intercept, beta=mu0)
             for d in self.doses()
         ]
-        ll = _compound_toxicity_likelihood(
-            self.F_func,
-            self.intercept,
-            betas,
-            dose_labels,
-            self.toxicities(),
-            log=True,
-        )
-        log_post = log_w + ll
-        log_denom = logsumexp(log_post)
-        post_weights = np.exp(log_post - log_denom)
+        
+        def log_likelihood_func(betas):
+            return _compound_toxicity_likelihood(
+                self.F_func,
+                self.intercept,
+                betas,
+                dose_labels,
+                self.toxicities(),
+                log=True,
+            )
+            
         labels = [
             self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
             for p in self.prior
         ]
-        out = []
-        for lab in labels:
-            tox_probs = self.F_func(lab, a0=self.intercept, beta=betas)
-            out.append(np.sum(post_weights * (tox_probs > tox_cutoff)))
-        return np.array(out)
+        
+        def f_func(betas):
+            # Evaluate for all labels (doses) and return an array of shape (num_doses, num_betas)
+            out = []
+            for lab in labels:
+                tox_probs = self.F_func(lab, a0=self.intercept, beta=betas)
+                out.append((tox_probs > tox_cutoff).astype(float))
+            return np.array(out)
+            
+        return posterior_expectation_gh(
+            log_likelihood_func=log_likelihood_func,
+            f_func=f_func,
+            prior_mean=mu0,
+            prior_sd=sd0,
+            deg=deg
+        )
 
     def prob_tox_exceeds(self, tox_cutoff: Any, backend: Any = "quadrature", n: Any = None) -> Any:
         """Calculates the posterior probability that toxicity exceeds a cutoff.

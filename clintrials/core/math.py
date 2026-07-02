@@ -11,6 +11,40 @@ import numpy as np
 from clintrials.core.registry import REGISTRY, inject_docs
 
 
+def logit(p):
+    """Calculates the logit of a probability.
+    
+    The probability is silently clipped to [1e-7, 1 - 1e-7] to prevent log(0).
+    
+    Args:
+        p (float or numpy.ndarray): The probability.
+        
+    Returns:
+        float or numpy.ndarray: The logit.
+    """
+    p = np.clip(p, 1e-7, 1 - 1e-7)
+    return np.log(p / (1 - p))
+
+
+def bernoulli_likelihood(p, y, log=False):
+    """Calculates the Bernoulli likelihood or log-likelihood.
+    
+    Args:
+        p (float or numpy.ndarray): Probability of success.
+        y (int or numpy.ndarray): Observed outcome(s) (1 or 0).
+        log (bool, optional): If True, returns the log-likelihood. Defaults to False.
+        
+    Returns:
+        float or numpy.ndarray: The likelihood or log-likelihood.
+    """
+    p = np.clip(p, 1e-15, 1 - 1e-15)
+    log_l = y * np.log(p) + (1 - y) * np.log(1 - p)
+    if log:
+        return log_l
+    else:
+        return np.exp(np.clip(log_l, -700, 700))
+
+
 def inverse_logit(x):
     """Calculates the inverse logit of a number.
 
