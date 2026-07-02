@@ -70,16 +70,54 @@ def run_sims(
         else:
             sims += sims1
         if out_file:
+            saved_to_idb = False
             try:
-                with open(out_file, "w") as outfile:
-                    output = (
-                        {"Parameters": metadata, "Simulations": sims}
-                        if metadata is not None
-                        else sims
-                    )
-                    json.dump(output, outfile)
-            except Exception as e:
-                logger.error("Error writing: %s", e)
+                import js
+                import json
+                batch_json = json.dumps(sims1)
+                metadata_json = json.dumps(metadata) if metadata else "null"
+                js_code = f"""
+                (function() {{
+                    try {{
+                        var req = window.indexedDB.open('clintrials_db', 1);
+                        req.onupgradeneeded = function(e) {{
+                            var db = e.target.result;
+                            if (!db.objectStoreNames.contains('simulations')) {{
+                                var store = db.createObjectStore('simulations', {{ keyPath: 'id', autoIncrement: true }});
+                                store.createIndex('out_file', 'out_file', {{ unique: false }});
+                            }}
+                        }};
+                        req.onsuccess = function(e) {{
+                            var db = e.target.result;
+                            var tx = db.transaction('simulations', 'readwrite');
+                            var store = tx.objectStore('simulations');
+                            store.add({{
+                                out_file: '{out_file}',
+                                metadata: {metadata_json},
+                                batch: JSON.parse({repr(batch_json)})
+                            }});
+                        }};
+                    }} catch(err) {{
+                        console.error("IDB save error", err);
+                    }}
+                }})();
+                """
+                js.eval(js_code)
+                saved_to_idb = True
+            except ImportError:
+                pass
+                
+            if not saved_to_idb:
+                try:
+                    with open(out_file, "w") as outfile:
+                        output = (
+                            {"Parameters": metadata, "Simulations": sims}
+                            if metadata is not None
+                            else sims
+                        )
+                        json.dump(output, outfile)
+                except Exception as e:
+                    logger.error("Error writing: %s", e)
         sims_len = len(sims) if isinstance(sims, list) else "agg"
         logger.info(f"{j} {datetime.now()} {sims_len}")
 
@@ -123,16 +161,54 @@ def sim_parameter_space(
         else:
             sims += sims1
         if out_file:
+            saved_to_idb = False
             try:
-                with open(out_file, "w") as outfile:
-                    output = (
-                        {"Parameters": metadata, "Simulations": sims}
-                        if metadata is not None
-                        else sims
-                    )
-                    json.dump(output, outfile)
-            except Exception as e:
-                logger.error("Error writing: %s", e)
+                import js
+                import json
+                batch_json = json.dumps(sims1)
+                metadata_json = json.dumps(metadata) if metadata else "null"
+                js_code = f"""
+                (function() {{
+                    try {{
+                        var req = window.indexedDB.open('clintrials_db', 1);
+                        req.onupgradeneeded = function(e) {{
+                            var db = e.target.result;
+                            if (!db.objectStoreNames.contains('simulations')) {{
+                                var store = db.createObjectStore('simulations', {{ keyPath: 'id', autoIncrement: true }});
+                                store.createIndex('out_file', 'out_file', {{ unique: false }});
+                            }}
+                        }};
+                        req.onsuccess = function(e) {{
+                            var db = e.target.result;
+                            var tx = db.transaction('simulations', 'readwrite');
+                            var store = tx.objectStore('simulations');
+                            store.add({{
+                                out_file: '{out_file}',
+                                metadata: {metadata_json},
+                                batch: JSON.parse({repr(batch_json)})
+                            }});
+                        }};
+                    }} catch(err) {{
+                        console.error("IDB save error", err);
+                    }}
+                }})();
+                """
+                js.eval(js_code)
+                saved_to_idb = True
+            except ImportError:
+                pass
+                
+            if not saved_to_idb:
+                try:
+                    with open(out_file, "w") as outfile:
+                        output = (
+                            {"Parameters": metadata, "Simulations": sims}
+                            if metadata is not None
+                            else sims
+                        )
+                        json.dump(output, outfile)
+                except Exception as e:
+                    logger.error("Error writing: %s", e)
         sims_len = len(sims) if isinstance(sims, list) else "agg"
         logger.info(f"{j} {datetime.now()} {sims_len}")
 
