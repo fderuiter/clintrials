@@ -1,0 +1,35 @@
+name: Accessibility Audit
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: |
+          poetry install --with dev -E viz
+      - name: Install Playwright browsers
+        run: poetry run playwright install chromium --with-deps
+      - name: Run Accessibility Tests
+        run: |
+          poetry run pytest tests/test_accessibility.py
+      - name: Upload Accessibility Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-reports
+          path: accessibility_reports/
+          retention-days: 14

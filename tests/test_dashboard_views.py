@@ -158,7 +158,7 @@ def test_crm_view_render_success(monkeypatch):
     importlib.reload(crm_view)
 
     monkeypatch.setattr(crm_view, "st", st_mock)
-    monkeypatch.setattr(crm_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(crm_view, "ParameterSpace", MagicMock())
 
     summary_df = pd.DataFrame(
         {
@@ -195,7 +195,7 @@ def test_crm_view_warns_without_recommended(monkeypatch):
     importlib.reload(crm_view)
 
     monkeypatch.setattr(crm_view, "st", st_mock)
-    monkeypatch.setattr(crm_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(crm_view, "ParameterSpace", MagicMock())
 
     summary_df = pd.DataFrame({"N": [1]}, index=pd.Index([0.1], name="true_tox"))
     monkeypatch.setattr(crm_view, "extract_sim_data", MagicMock(return_value=summary_df))
@@ -214,7 +214,7 @@ def test_efftox_view_render_success(monkeypatch):
     importlib.reload(efftox_view)
 
     monkeypatch.setattr(efftox_view, "st", st_mock)
-    monkeypatch.setattr(efftox_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(efftox_view, "ParameterSpace", MagicMock())
 
     index = pd.MultiIndex.from_tuples(
         [(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"]
@@ -257,7 +257,7 @@ def test_efftox_view_warns_when_empty(monkeypatch):
     importlib.reload(efftox_view)
 
     monkeypatch.setattr(efftox_view, "st", st_mock)
-    monkeypatch.setattr(efftox_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(efftox_view, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
         efftox_view, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
     )
@@ -311,7 +311,7 @@ def test_watu_view_render_success(monkeypatch):
     importlib.reload(watu_view)
 
     monkeypatch.setattr(watu_view, "st", st_mock)
-    monkeypatch.setattr(watu_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(watu_view, "ParameterSpace", MagicMock())
 
     index = pd.MultiIndex.from_tuples(
         [(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"]
@@ -324,7 +324,7 @@ def test_watu_view_render_success(monkeypatch):
         index=index,
     )
     monkeypatch.setattr(
-        watu_view, "summarise_sims", MagicMock(return_value=summary_df)
+        watu_view, "extract_sim_data", MagicMock(return_value=summary_df)
     )
 
     import clintrials.visualization as viz
@@ -349,9 +349,9 @@ def test_watu_view_warns_when_empty(monkeypatch):
     importlib.reload(watu_view)
 
     monkeypatch.setattr(watu_view, "st", st_mock)
-    monkeypatch.setattr(watu_view, "ParameterSpace", lambda cfg: "ps")
+    monkeypatch.setattr(watu_view, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
-        watu_view, "summarise_sims", MagicMock(return_value=pd.DataFrame())
+        watu_view, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
     )
 
     watu_view.render([{}])
