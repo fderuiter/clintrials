@@ -170,3 +170,31 @@ def test_generate_pdf_report():
     # Test None summaries
     pdf_bytes2 = generate_pdf_report(df, "CRM", text_summaries=None)
     assert pdf_bytes2 is not None
+
+def test_multiformat_summary_container_html():
+    from clintrials.visualization.models import MultiFormatSummaryContainer
+    import pandas as pd
+    
+    df = pd.DataFrame({"A": [1.23456, 2], "B": ["x", "y"]})
+    container = MultiFormatSummaryContainer(title="Test", df=df)
+    
+    html = container.html
+    assert "<strong>Data Summary: Test</strong>" in html
+    assert "1.2346" in html
+    assert "x" in html
+
+def test_text_section_str():
+    from clintrials.visualization.models import TextSection
+    ts = TextSection("hello")
+    assert str(ts) == "hello"
+
+def test_multiformat_summary_container_str():
+    from clintrials.visualization.models import MultiFormatSummaryContainer
+    import pandas as pd
+    
+    df = pd.DataFrame({"A": [1.23456, 2], "B": ["x", "y"]})
+    container = MultiFormatSummaryContainer(title="Test", df=df)
+    
+    md = str(container)
+    assert "**Data Summary: Test**" in md
+    assert "1.2346" in md
