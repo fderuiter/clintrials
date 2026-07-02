@@ -29,6 +29,10 @@ def fake_streamlit(monkeypatch):
     st.session_state = {}
     st.columns = MagicMock(return_value=(MagicMock(), MagicMock()))
     st.download_button = MagicMock()
+    st.info = MagicMock()
+    st.button = MagicMock(return_value=False)
+    st.rerun = MagicMock()
+    st.experimental_rerun = MagicMock()
     sidebar = types.SimpleNamespace()
     sidebar.header = MagicMock()
     sidebar.write = MagicMock()
@@ -37,6 +41,7 @@ def fake_streamlit(monkeypatch):
     sidebar.file_uploader = MagicMock()
     sidebar.success = MagicMock()
     sidebar.expander = MagicMock()
+    sidebar.button = MagicMock(return_value=False)
     st.sidebar = sidebar
     st.fragment = lambda func: func
     monkeypatch.setitem(sys.modules, "streamlit", st)
@@ -59,6 +64,183 @@ def reload_module(name):
         importlib.reload(sys.modules[name])
     return importlib.import_module(name)
 
+
+def test_persistence_js_loaded(fake_streamlit, fake_plotly, monkeypatch):
+    """Test that IDB data is correctly parsed when the proxy callback is triggered."""
+    js = types.SimpleNamespace()
+    js.window = types.SimpleNamespace()
+    js.window.localStorage = types.SimpleNamespace()
+    js.window.localStorage.getItem = MagicMock(side_effect=lambda x: "true" if x == "accessibility_mode" else "CRM")
+    js.eval = MagicMock()
+
+    pyodide_ffi = types.SimpleNamespace()
+    pyodide_ffi.create_proxy = lambda x: x
+
+    monkeypatch.setitem(sys.modules, "js", js)
+    monkeypatch.setitem(sys.modules, "pyodide.ffi", pyodide_ffi)
+
+    fake_streamlit.query_params = {"accessibility_mode": ["false"], "design_type": ["EffTox"]}
+
+    main = reload_module("clintrials.visualization.dashboard.main")
+    main.st = fake_streamlit
+    
+    # Run setup
+    main.setup_persistence()
+    
+    assert fake_streamlit.session_state["accessibility_mode"] is False
+    assert fake_streamlit.session_state["idb_loaded"] is False
+    
+    # Trigger JS callback
+    js.window._on_idb_load('[{"batch": [{"recommended_dose": 1}]}]')
+    assert fake_streamlit.session_state["idb_data"] == [{"recommended_dose": 1}]
+    assert fake_streamlit.session_state["idb_loaded"] is True
+    assert js.eval.called
+
+def test_persistence_js_fallback_query_params(fake_streamlit, monkeypatch):
+    js = types.SimpleNamespace()
+    js.window = types.SimpleNamespace()
+    js.window.localStorage = types.SimpleNamespace()
+    js.window.localStorage.getItem = MagicMock(return_value=None)
+    js.eval = MagicMock()
+
+    pyodide_ffi = types.SimpleNamespace()
+    pyodide_ffi.create_proxy = lambda x: x
+
+    monkeypatch.setitem(sys.modules, "js", js)
+    monkeypatch.setitem(sys.modules, "pyodide.ffi", pyodide_ffi)
+
+    if hasattr(fake_streamlit, "query_params"):
+        del fake_streamlit.query_params
+    fake_streamlit.experimental_get_query_params = MagicMock(return_value={})
+
+    main = reload_module("clintrials.visualization.dashboard.main")
+    main.st = fake_streamlit
+    
+    main.setup_persistence()
+    
+    assert fake_streamlit.session_state["accessibility_mode"] is False
+    assert "design_type" not in fake_streamlit.session_state  # should fallback or not be set here
+
+    # Trigger JS callback with dict
+    js.window._on_idb_load('[{"batch": {"Simulations": [{"recommended_dose": 2}]}}]')
+    assert fake_streamlit.session_state["idb_data"] == [{"recommended_dose": 2}]
+
+def test_persistence_js_parse_error(fake_streamlit, monkeypatch):
+    js = types.SimpleNamespace()
+    js.window = types.SimpleNamespace()
+    js.window.localStorage = types.SimpleNamespace()
+    js.window.localStorage.getItem = MagicMock(return_value="true")
+    js.eval = MagicMock()
+
+    pyodide_ffi = types.SimpleNamespace()
+    pyodide_ffi.create_proxy = lambda x: x
+
+    monkeypatch.setitem(sys.modules, "js", js)
+    monkeypatch.setitem(sys.modules, "pyodide.ffi", pyodide_ffi)
+
+    fake_streamlit.query_params = {}
+
+    main = reload_module("clintrials.visualization.dashboard.main")
+    main.st = fake_streamlit
+    
+    main.setup_persistence()
+    
+    js.window._on_idb_load('invalid_json')
+    assert fake_streamlit.session_state["idb_loaded"] is True
+
+def test_sync_state_to_storage(fake_streamlit, monkeypatch):
+    js = types.SimpleNamespace()
+    js.eval = MagicMock()
+    monkeypatch.setitem(sys.modules, "js", js)
+    
+    main = reload_module("clintrials.visualization.dashboard.main")
+    main.st = fake_streamlit
+    fake_streamlit.session_state["accessibility_mode"] = True
+    fake_streamlit.session_state["design_type"] = "EffTox"
+    
+    main.sync_state_to_storage()
+    js.eval.assert_called_once()
+    assert "true" in js.eval.call_args[0][0]
+    assert "EffTox" in js.eval.call_args[0][0]
+
+def test_sync_state_to_storage_no_js(fake_streamlit, monkeypatch):
+    monkeypatch.setitem(sys.modules, "js", None)
+    main = reload_module("clintrials.visualization.dashboard.main")
+    main.st = fake_streamlit
+    fake_streamlit.session_state["accessibility_mode"] = True
+    fake_streamlit.session_state["design_type"] = "EffTox"
+    # Should not raise
+    main.sync_state_to_storage()
+
+def test_main_clear_session_no_js(fake_streamlit, monkeypatch):
+    monkeypatch.setitem(sys.modules, "js", None)
+    fake_streamlit.sidebar.button = MagicMock(side_effect=lambda name, **kwargs: name == "Clear Session")
+    fake_streamlit.sidebar.file_uploader.return_value = None
+    fake_streamlit.rerun = MagicMock()
+    fake_streamlit.session_state = {"idb_loaded": True, "idb_data": [1, 2]}
+    
+    main = reload_module("clintrials.visualization.dashboard.main")
+    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    main.main()
+    
+    assert len(fake_streamlit.session_state) == 0
+    fake_streamlit.rerun.assert_called_once()
+
+def test_main_clear_session(fake_streamlit, monkeypatch):
+    js = types.SimpleNamespace()
+    js.eval = MagicMock()
+    monkeypatch.setitem(sys.modules, "js", js)
+    
+    fake_streamlit.sidebar.button = MagicMock(side_effect=lambda name, **kwargs: name == "Clear Session")
+    fake_streamlit.sidebar.file_uploader.return_value = None
+    fake_streamlit.rerun = MagicMock()
+    fake_streamlit.session_state = {"idb_loaded": True, "idb_data": [1, 2]}
+    
+    main = reload_module("clintrials.visualization.dashboard.main")
+    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    main.main()
+    
+    assert len(fake_streamlit.session_state) == 0
+    fake_streamlit.rerun.assert_called_once()
+    js.eval.assert_called()
+
+def test_main_refresh_persistent_data(fake_streamlit, monkeypatch):
+    fake_streamlit.sidebar.button = MagicMock(side_effect=lambda name, **kwargs: name == "Refresh Persistent Data")
+    fake_streamlit.sidebar.file_uploader.return_value = None
+    fake_streamlit.rerun = MagicMock()
+    fake_streamlit.session_state = {"idb_loaded": False}
+    
+    main = reload_module("clintrials.visualization.dashboard.main")
+    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    main.main()
+    
+    fake_streamlit.rerun.assert_called_once()
+
+def test_main_with_persistent_sims(fake_streamlit, monkeypatch):
+    fake_streamlit.sidebar.button = MagicMock(return_value=False)
+    fake_streamlit.sidebar.selectbox.return_value = "CRM"
+    fake_streamlit.sidebar.file_uploader.return_value = None
+    fake_streamlit.session_state = {"idb_loaded": True, "idb_data": [{"recommended_dose": 1}]}
+    
+    main = reload_module("clintrials.visualization.dashboard.main")
+    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    main.main()
+    
+    main.crm_view.render.assert_called_once_with([{"recommended_dose": 1}])
+
+def test_models_html_property():
+    from clintrials.visualization.models import MultiFormatSummaryContainer
+    import pandas as pd
+    
+    df = pd.DataFrame({"A_col": [1.23456, 2], "B": ["test", "val"]})
+    container = MultiFormatSummaryContainer("My Title", df)
+    
+    html = container.html
+    assert "My Title" in html
+    assert "A Col" in html
+    assert "1.2346" in html
+    assert "<table>" in html
+    assert "test" in html
 
 def test_main_dispatches_to_crm(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.selectbox.return_value = "CRM"

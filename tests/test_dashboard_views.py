@@ -34,6 +34,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         write=MagicMock(),
         json=MagicMock(),
         expander=MagicMock(),
+        button=MagicMock(return_value=False),
     )
 
     st = SimpleNamespace(
@@ -46,6 +47,10 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         plotly_chart=MagicMock(),
         expander=MagicMock(),
         markdown=MagicMock(),
+        info=MagicMock(),
+        button=MagicMock(return_value=False),
+        rerun=MagicMock(),
+        experimental_rerun=MagicMock(),
         sidebar=sidebar,
         fragment=lambda func: func,
     )
