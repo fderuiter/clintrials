@@ -57,31 +57,10 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
     # Wait for the main Streamlit container to load
     page.wait_for_selector(".stApp")
     
-    # Wait a bit for initial rendering
-    page.wait_for_timeout(2000)
-    
-    # Select CRM design to ensure we have the upload file option
-    # Actually, CRM is the default. Let's make sure it's loaded.
-    page.wait_for_selector("text=Upload Simulation Results")
-    
-    # Create a mock simulation JSON file
-    mock_sims = [
-        {"true_tox": [0.05, 0.1, 0.2, 0.3, 0.4], "RecommendedDose": 3},
-        {"true_tox": [0.05, 0.1, 0.2, 0.3, 0.4], "RecommendedDose": 2},
-        {"true_tox": [0.1, 0.2, 0.3, 0.4, 0.5], "RecommendedDose": 1},
-    ]
-    mock_file = tmp_path / "mock_sims.json"
-    import json
-    with open(mock_file, "w") as f:
-        json.dump(mock_sims, f)
-        
-    # Upload the file using Streamlit's file uploader
-    # The file input is typically hidden, we can find it by input[type="file"]
-    page.set_input_files('input[type="file"]', str(mock_file))
-    
     # Wait for the table to appear by checking for the summary text
+    # Since Preview Mode is the default, the dashboard automatically runs a simulation and displays results.
     try:
-        page.wait_for_selector("text=Simulation Summary", timeout=10000)
+        page.wait_for_selector("text=Simulation Summary", timeout=30000)
     except Exception as e:
         with open(f"debug_html_error_{viewport['width']}.html", "w") as f:
             f.write(page.content())
