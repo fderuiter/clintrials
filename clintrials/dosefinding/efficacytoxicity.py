@@ -455,6 +455,8 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
     # Do not parrot back parameters
 
     if conduct_trial:
+        if isinstance(sim_report, list):
+            sim_report = sim_report[0]
         report.update(sim_report)
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
