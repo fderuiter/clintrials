@@ -60,12 +60,8 @@ def render(sims):
                 )
                 text_summaries.append(meta_rec)
 
-                if getattr(st, "session_state", {}).get("accessibility_mode", False):
-                    st.markdown(meta_rec)
-                else:
-                    st.plotly_chart(fig_rec)
-                    with st.expander("Data Summary"):
-                        st.markdown(meta_rec)
+                from clintrials.visualization.dashboard.factory import render_accessible_chart
+                render_accessible_chart(st, fig_rec)
 
         else:
             st.warning("Summary dataframe is empty. Cannot generate plots.")

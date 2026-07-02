@@ -126,7 +126,7 @@ def test_plot_efftox_simulation_acceptability():
 
 
 def test_visualization_models():
-    from clintrials.visualization.models import TextSection, TableSection, _format_label
+    from clintrials.visualization.models import TextSection, MultiFormatSummaryContainer, _format_label
     
     # Test _format_label
     assert _format_label("some_label") == "Some Label"
@@ -136,12 +136,12 @@ def test_visualization_models():
     ts = TextSection("Hello World")
     assert str(ts) == "Hello World"
     
-    # Test TableSection
+    # Test MultiFormatSummaryContainer
     df = pd.DataFrame({
         "col_a": [1.12345, 2.5],
         "col_b": ["x", "y"]
     })
-    table = TableSection("My Title", df)
+    table = MultiFormatSummaryContainer("My Title", df)
     
     table_str = str(table)
     assert "My Title" in table_str
@@ -153,14 +153,14 @@ def test_visualization_models():
 
 def test_generate_pdf_report():
     from clintrials.visualization.report import generate_pdf_report
-    from clintrials.visualization.models import TableSection, TextSection
+    from clintrials.visualization.models import MultiFormatSummaryContainer, TextSection
     import pandas as pd
     
     df = pd.DataFrame({
         "scenario": [1, 2],
         "prob_tox": [0.1, 0.2]
     })
-    table_sec = TableSection("My Table", df)
+    table_sec = MultiFormatSummaryContainer("My Table", df)
     text_sec = TextSection("My Text")
     
     pdf_bytes = generate_pdf_report(df, "CRM", text_summaries=[text_sec, table_sec])
