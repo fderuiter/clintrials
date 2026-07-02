@@ -22,10 +22,12 @@ def render(sims):
     st.header("EffTox Simulation Results")
 
     param_space_config = {
-        "true_prob_tox": [[0.05, 0.1, 0.2, 0.3, 0.4]],
-        "true_prob_eff": [[0.2, 0.3, 0.4, 0.5, 0.6]],
+        "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
+        "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
     }
-    ps = ParameterSpace(param_space_config)
+    ps = ParameterSpace()
+    for k, v in param_space_config.items():
+        ps.add(k, v)
 
     st.sidebar.write("Parameter space for summarization:")
     st.sidebar.json(param_space_config)
@@ -40,7 +42,7 @@ def render(sims):
     }
 
     try:
-        summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, to_pandas=True)
+        summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
 
         st.subheader("Simulation Summary")
         st.write(summary_df)
