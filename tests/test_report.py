@@ -29,3 +29,69 @@ def test_generate_pdf_report():
     ]
     pdf_bytes = generate_pdf_report(df=df, design_type="My Design", text_summaries=text_summaries)
     assert isinstance(pdf_bytes, bytearray) or isinstance(pdf_bytes, bytes)
+
+from clintrials.validation import parse_pdf_structure, validate_pdf_ua_structure
+from clintrials.visualization.report import AccessiblePDF
+
+def test_pdf_structural_nesting_and_mcid():
+    """Validates that Tables, TR, TD are nested properly and MCIDs are assigned correctly."""
+    pdf = AccessiblePDF()
+    pdf.set_font("helvetica", "", 12)
+    # The output stream must not be compressed for our basic parser
+    pdf.set_compression(False)
+    
+    with pdf.accessible_table() as table:
+        row = table.row()
+        row.cell("Header 1")
+        row.cell("Header 2")
+        
+        row = table.row()
+        row.cell("Data 1")
+        row.cell("Data 2")
+        
+    pdf_bytes = pdf.output()
+    
+    # 1. Use the validation utility
+    validate_pdf_ua_structure(pdf_bytes)
+    
+    # 2. Assert structural nesting is present
+    elems = parse_pdf_structure(pdf_bytes)
+    
+    tables = [e for e in elems.values() if e['type'] == 'Table']
+    trs = [e for e in elems.values() if e['type'] == 'TR']
+    ths = [e for e in elems.values() if e['type'] == 'TH']
+    tds = [e for e in elems.values() if e['type'] == 'TD']
+    
+    assert len(tables) > 0, "PDF should contain a Table tag"
+    assert len(trs) > 0, "PDF should contain TR tags"
+    assert len(ths) > 0, "PDF should contain TH tags"
+    assert len(tds) > 0, "PDF should contain TD tags"
+    
+    # Verify parent of TR is Table
+    for tr in trs:
+        parent = elems[tr['parent']]
+        assert parent['type'] == 'Table', "TR parent must be Table"
+        assert any(str(x).startswith('MCID_') for x in tr['kids']) is False, "TR should not have MCIDs"
+        
+    # Verify parent of TH and TD is TR
+    for cell in ths + tds:
+        parent = elems[cell['parent']]
+        assert parent['type'] == 'TR', "Cell parent must be TR"
+        assert len(cell['kids']) == 1 and str(cell['kids'][0]).startswith('MCID_'), "Cells should have MCIDs"
+
+def test_artifact_tagging():
+    """Validates that decorative elements can be tagged as artifacts."""
+    pdf = AccessiblePDF()
+    pdf.set_font("helvetica", "", 12)
+    pdf.set_compression(False)
+    
+    with pdf.artifact("Layout"):
+        pdf.cell(10, 10, "Decorative Text")
+        
+    pdf_bytes = pdf.output()
+    content = pdf_bytes.decode('latin1')
+    
+    # Verify that the artifact tag is emitted properly
+    assert "/Artifact <</Type /Layout>> BDC" in content
+    assert "EMC" in content
+

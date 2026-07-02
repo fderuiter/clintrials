@@ -31,15 +31,67 @@ class AccessiblePDF(FPDF):
         self.set_lang("en-US")
         self.page_mode = PageMode.USE_OUTLINES
         self.viewer_preferences = ViewerPreferences(display_doc_title=True)
+        self.struct_stack = []
+        self.mcid_counter = {}
         self.add_page()
+        
+        # Patch the structure builder's iterator to support nested structure elements
+        def recursive_iter(builder):
+            yield builder.struct_tree_root
+            yield builder.doc_struct_elem
+            yield builder.struct_tree_root.parent_tree
+            
+            def walk(elem):
+                for kid in elem.k:
+                    if hasattr(kid, 'k'):  # Check if it's a StructElem
+                        yield kid
+                        yield from walk(kid)
+                        
+            yield from walk(builder.doc_struct_elem)
+
+        if hasattr(self, 'struct_builder'):
+            self.struct_builder.__class__.__iter__ = recursive_iter
+
+    @contextmanager
+    def artifact(self, artifact_type="Layout"):
+        """Context manager to mark content as an artifact (ignored by screen readers)."""
+        if artifact_type:
+            self._out(f"/Artifact <</Type /{artifact_type}>> BDC")
+        else:
+            self._out("/Artifact BMC")
+        yield
+        self._out("EMC")
 
     @contextmanager
     def mark_text(self, struct_type="/P"):
         """Context manager to mark text for PDF/UA structural tagging."""
-        mcid = self.struct_builder.next_mcid_for_page(self.page)
+        is_container = struct_type in ("/Table", "/TR")
+        
+        if is_container:
+            mcid = None
+        else:
+            mcid = self.mcid_counter.get(self.page, 0)
+            self.mcid_counter[self.page] = mcid + 1
+            
         struct_elem = self._add_marked_content(struct_type=struct_type, mcid=mcid)
-        self._out(f"{struct_type} <</MCID {mcid}>> BDC")
+        
+        if self.struct_stack:
+            parent = self.struct_stack[-1]
+            if struct_elem in self.struct_builder.doc_struct_elem.k:
+                self.struct_builder.doc_struct_elem.k.remove(struct_elem)
+            struct_elem.p = parent
+            parent.k.append(struct_elem)
+            
+        self.struct_stack.append(struct_elem)
+        
+        if mcid is not None:
+            self._out(f"{struct_type} <</MCID {mcid}>> BDC")
+        else:
+            self._out(f"{struct_type} BDC")
+            
         yield struct_elem
+        
+        self.struct_stack.pop()
         self._out("EMC")
 
     @contextmanager
