@@ -167,7 +167,7 @@ The repository is organized as follows:
     -   **`phase2/`**: Implementations of Phase II trial designs, including a two-stage Bayesian design and the BEBOP design.
     -   **`phase3/`**: Implementations of Phase III trial designs, including Group Sequential Designs.
     -   **`winratio/`**: Tools for win-ratio analysis.
-    -   **`dashboard/`**: The source code for the interactive web dashboard.
+    -   **`visualization/dashboard/main.py`**: The Streamlit dashboard entry point and source code for the interactive web dashboard.
 -   **`docs/`**: Documentation files, including tutorials and API reference.
 -   **`tests/`**: Unit tests for the library.
 
