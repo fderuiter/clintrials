@@ -15,9 +15,37 @@
       #root {
         height: 100vh;
       }
+      .skip-link {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .skip-link:focus {
+        width: auto;
+        height: auto;
+        padding: 10px 15px;
+        margin: 0;
+        overflow: visible;
+        clip: auto;
+        white-space: normal;
+        background-color: #496D89;
+        color: #FFFFFF;
+        z-index: 999999;
+        top: 0;
+        left: 0;
+        text-decoration: none;
+        font-family: sans-serif;
+      }
     </style>
   </head>
   <body>
+    <a href="#main-content-anchor" class="skip-link">Skip to Main Content</a>
     <div id="root"></div>
     <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.55.0/build/stlite.js"></script>
     <script>
