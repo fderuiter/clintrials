@@ -8,19 +8,21 @@ Random Seed Strategy: {winratio_view_seed_strategy}
 import pandas as pd
 import streamlit as st
 
-if not hasattr(st, "fragment"):
-    st.fragment = lambda func: func
-
 from clintrials.winratio.main import WinRatioTrial
 from clintrials.core.schema import WinRatioSchema
 from clintrials.visualization.dashboard.factory import create_widget, render_metric
-from clintrials.core.viz_interface import get_visualization_provider
+from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
+@dashboard_view(
+    title="Win Ratio Simulation",
+    model_name="Win Ratio",
+    file_prefix="winratio_simulation",
+    csv_index=False,
+    skip_summary_table=True
+)
 def render() -> None:
     """Render the Win Ratio simulation interface."""
-    st.header("Win Ratio Simulation")
-
     st.sidebar.header("Simulation Parameters")
 
     # Use schema to generate UI inputs
@@ -63,50 +65,15 @@ def render() -> None:
 
         df = pd.DataFrame([results_dict])
 
-        st.subheader("Visualizations")
         import clintrials.visualization as viz
         fig = viz.plot_winratio_power_curve(
             df,
             high_contrast=getattr(st, "session_state", {}).get("accessibility_mode", False)
         )
-        from clintrials.visualization.dashboard.factory import render_accessible_chart
-        render_accessible_chart(st, fig)
+        figures = [(None, fig)]
+        
+        extra_text_summaries = [f"Power: {power:.4f}\n95% CI: ({average_ci[0]:.4f}, {average_ci[1]:.4f})"]
 
-        st.header("Export Results")
-        if not hasattr(st, "columns"):
-            st.columns = lambda x: (st, st)
-        col1, col2 = st.columns(2)
+        return df, figures, extra_text_summaries
 
-        csv_data = df.to_csv(index=False)
-        getattr(col1, "download_button", lambda *args, **kwargs: None)(
-            label="Download CSV",
-            data=csv_data,
-            file_name="winratio_simulation.csv",
-            mime="text/csv",
-        )
-
-        viz_provider = get_visualization_provider()
-        pdf_data = viz_provider.generate_pdf_report(
-            df,
-            "Win Ratio",
-            text_summaries=[
-                f"Power: {power:.4f}\n95% CI: ({average_ci[0]:.4f}, {average_ci[1]:.4f})"
-            ],
-        ) if viz_provider else None
-
-        if pdf_data is not None:
-            getattr(col2, "download_button", lambda *args, **kwargs: None)(
-                label="Download PDF",
-                data=pdf_data,
-                file_name="winratio_simulation.pdf",
-                mime="application/pdf",
-            )
-        else:
-            col2.warning("PDF export requires the 'fpdf2' package.")
-
-
-# Inject module-level docstring
-if __doc__:
-    from clintrials.core.registry import REGISTRY
-
-    __doc__ = __doc__.format(**REGISTRY)
+    return None
