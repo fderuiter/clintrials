@@ -519,6 +519,8 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
             true_toxicities=true_toxicities,
             tolerances=tolerances
         )
+        if isinstance(sim_report, list):
+            sim_report = sim_report[0]
         report.update(sim_report)
     else:
         report.update(design.report())

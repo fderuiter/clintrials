@@ -36,6 +36,8 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         expander=MagicMock(),
         markdown=MagicMock(),
         toggle=MagicMock(return_value=False),
+        radio=MagicMock(return_value="Manual JSON Upload"),
+        number_input=MagicMock(return_value=1),
     )
 
     st = SimpleNamespace(
@@ -50,6 +52,8 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         expander=MagicMock(),
         sidebar=sidebar,
         fragment=lambda func: func,
+        cache_data=lambda **kwargs: lambda f: f,
+        spinner=MagicMock(return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())),
     )
     return st
 

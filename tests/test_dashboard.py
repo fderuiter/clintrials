@@ -39,7 +39,11 @@ def fake_streamlit(monkeypatch):
     sidebar.expander = MagicMock()
     sidebar.markdown = MagicMock()
     sidebar.toggle = MagicMock(return_value=False)
+    sidebar.radio = MagicMock(return_value="Manual JSON Upload")
+    sidebar.number_input = MagicMock(return_value=1)
     st.sidebar = sidebar
+    st.cache_data = lambda **kwargs: lambda f: f
+    st.spinner = MagicMock(return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock()))
     st.fragment = lambda func: func
     monkeypatch.setitem(sys.modules, "streamlit", st)
     return st
