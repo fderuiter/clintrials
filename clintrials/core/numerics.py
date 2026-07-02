@@ -13,6 +13,37 @@ from scipy.stats import norm
 from clintrials.core.stats import ProbabilityDensitySample
 
 
+def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, deg=20):
+    """
+    Evaluates the posterior expectation of f(theta) using Gauss-Hermite quadrature,
+    assuming a Gaussian prior N(prior_mean, prior_sd^2).
+    
+    Args:
+        log_likelihood_func (callable): A function taking a 1D array of parameter nodes
+            and returning the corresponding log-likelihoods.
+        f_func (callable): A function taking a 1D array of parameter nodes
+            and returning the values of the function to be integrated.
+            Can return an array of shape (..., num_nodes) for multiple queries.
+        prior_mean (float): The mean of the Gaussian prior.
+        prior_sd (float): The standard deviation of the Gaussian prior.
+        deg (int): The number of quadrature nodes. Defaults to 20.
+        
+    Returns:
+        float or numpy.ndarray: The computed posterior expectation(s).
+    """
+    nodes, weights = np.polynomial.hermite.hermgauss(deg)
+    theta_nodes = prior_mean + np.sqrt(2) * prior_sd * nodes
+    log_w = np.log(weights)
+    
+    ll = log_likelihood_func(theta_nodes)
+    log_post = log_w + ll
+    log_denom = logsumexp(log_post)
+    post_weights = np.exp(log_post - log_denom)
+    
+    f_vals = f_func(theta_nodes)
+    return np.sum(post_weights * f_vals, axis=-1)
+
+
 def adaptive_mc_integration(
     lik_integrand,
     initial_limits,

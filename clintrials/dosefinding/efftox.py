@@ -21,7 +21,7 @@ from collections import OrderedDict
 from scipy.optimize import brentq
 from scipy.stats import norm
 
-from clintrials.core.math import inverse_logit
+from clintrials.core.math import inverse_logit, logit
 from clintrials.core.stats import ProbabilityDensitySample
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json, deprecated
@@ -54,10 +54,6 @@ def efftox_priors_from_skeleton(real_doses: Any, prior_tox_probs: Any, prior_eff
         list[scipy.stats.norm]: A list of 6 normal distributions for the
             parameters (mu_T, beta_T, mu_E, beta1_E, beta2_E, psi).
     """
-
-    def logit(p: Any) -> Any:
-        p = np.clip(p, 1e-7, 1 - 1e-7)
-        return np.log(p / (1 - p))
 
     scaled_x = scale_doses(real_doses)
 

@@ -21,7 +21,7 @@ from numpy import trapezoid
 from scipy.integrate import quad
 from scipy.stats import beta, norm
 
-from clintrials.core.math import empiric, inverse_empiric
+from clintrials.core.math import empiric, inverse_empiric, bernoulli_likelihood
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 
@@ -45,7 +45,7 @@ def _wt_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0
     l = 1
     for dose, tox, eff in cases:
         p = F(skeleton[dose - 1], a0=a0, beta=theta)
-        l = l * p**eff * (1 - p) ** (1 - eff)
+        l = l * bernoulli_likelihood(p, eff, log=False)
     return l
 
 
@@ -66,8 +66,7 @@ def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any
     ll = 0
     for dose, tox, eff in cases:
         p = F(skeleton[dose - 1], a0=a0, beta=theta)
-        p = np.clip(p, 1e-15, 1 - 1e-15)
-        ll += eff * np.log(p) + (1 - eff) * np.log(1 - p)
+        ll += bernoulli_likelihood(p, eff, log=True)
     return ll
 
 
