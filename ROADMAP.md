@@ -17,8 +17,8 @@ This roadmap tracks structural technical debt, high-priority maintenance tasks, 
 
 ## Architecture
 
-**Status: [ ] Pending | Priority: High**
-- [ ] **Web Framework Consolidation:** Resolve web framework redundancy by consolidating the tech stack. Currently, both Dash (`clintrials/dashboard/main.py`) and Streamlit are used.
+**Status: [x] Completed | Priority: High**
+- [x] **Web Framework Consolidation:** Resolve web framework redundancy by consolidating the tech stack. The web framework has been consolidated to use Streamlit (`clintrials/visualization/dashboard/main.py`).
 
 ---
 

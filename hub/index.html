@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Trial Simulation Hub</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.55.0/build/stlite.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #root {
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.55.0/build/stlite.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(function(registration) {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }).catch(function(err) {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+      }
+
+      stlite.mount(
+        {
+          requirements: ["altair", "plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./clintrials-latest-py3-none-any.whl"],
+          entrypoint: "app.py",
+          files: {
+            ".streamlit/config.toml": `
+[theme]
+primaryColor = "#496D89"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F0F2F6"
+textColor = "#31333F"
+font = "sans serif"
+`,
+            "app.py": `
+from clintrials.visualization.dashboard.main import main
+if __name__ == "__main__":
+    main()
+`
+          },
+        },
+        document.getElementById("root")
+      );
+    </script>
+  </body>
+</html>

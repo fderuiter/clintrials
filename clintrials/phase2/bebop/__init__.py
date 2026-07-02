@@ -102,7 +102,7 @@ class BeBOP:
         """
         return [case[i] for case in self.cases]
 
-    def update(self, cases, n=10**6, epsilon=0.00001, **kwargs):
+    def update(self, cases, n=10**6, epsilon=0.00001, rng=None, **kwargs):
         """
         Update the model with new observed cases.
 
@@ -158,6 +158,10 @@ class BeBOP:
         validate_positive_integer(n, "n")
         validate_bounds(epsilon, 0, 1, "epsilon", exclusive=True)
 
+        if rng is None:
+            import numpy as np
+            rng = np.random.default_rng()
+
         self.cases.extend(cases)
         limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in self.priors]
         lik_integrand = lambda x: self._l_n(cases, x) * numpy.prod(
@@ -169,6 +173,7 @@ class BeBOP:
         refined_limits, pds = adaptive_mc_integration(
             lik_integrand,
             limits,
+            rng,
             n=n,
             max_iter=1,  # Keep non-iterative logic similar to original, but centralized
         )

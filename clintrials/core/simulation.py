@@ -9,6 +9,7 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
+import copy
 import itertools
 import json
 import logging
@@ -392,24 +393,27 @@ class UniversalProtocolSimulationRunner:
         Returns:
             collections.OrderedDict: The trial simulation report.
         """
-        self.design.reset()
-        if self.recruitment_stream:
-            self.recruitment_stream.reset()
+        design = copy.deepcopy(self.design)
+        recruitment_stream = copy.deepcopy(self.recruitment_stream) if self.recruitment_stream else None
+
+        design.reset()
+        if recruitment_stream:
+            recruitment_stream.reset()
 
         i = 0
-        max_size = self.design.max_size()
+        max_size = design.max_size()
 
-        while i < max_size and self.design.has_more():
+        while i < max_size and design.has_more():
             current_cohort_size = min(cohort_size, max_size - i)
 
-            if self.recruitment_stream:
+            if recruitment_stream:
                 kwargs["arrival_times"] = [
-                    self.recruitment_stream.next() for _ in range(current_cohort_size)
+                    recruitment_stream.next() for _ in range(current_cohort_size)
                 ]
 
             if self.outcome_generator:
                 cases = self.outcome_generator(
-                    design=self.design,
+                    design=design,
                     current_size=i,
                     cohort_size=current_cohort_size,
                     **kwargs
@@ -417,10 +421,10 @@ class UniversalProtocolSimulationRunner:
             else:
                 cases = []
 
-            self.design.update(cases, **kwargs)
+            design.update(cases, **kwargs)
             i += current_cohort_size
 
-        return self.design.report()
+        return design.report()
 
 
 

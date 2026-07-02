@@ -93,16 +93,17 @@ def correlation_ci(
         raise ValueError("method must be either 'fisher' or 'bayes'")
 
 
-def bootstrap(x):
+def bootstrap(x, rng):
     """Creates a bootstrap sample from a list of observations.
 
     Args:
         x (list): A list of sample observations.
+        rng (numpy.random.Generator): A random number generator instance.
 
     Returns:
         numpy.ndarray: A bootstrap sample of the same size as `x`.
     """
-    return np.random.choice(x, size=len(x), replace=1)
+    return rng.choice(x, size=len(x), replace=True)
 
 
 def beta_like_normal(mu, sigma):

@@ -74,8 +74,10 @@ def test_bootstrap():
     """
     Test bootstrap function.
     """
+    import numpy as np
+    rng = np.random.default_rng(123)
     x = [1, 2, 3, 4, 5]
-    boot_sample = bootstrap(x)
+    boot_sample = bootstrap(x, rng)
     assert len(boot_sample) == len(x)
     assert all(item in x for item in boot_sample)
 
