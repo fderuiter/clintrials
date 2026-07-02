@@ -15,11 +15,10 @@ class Protocol(metaclass=abc.ABCMeta):
     @property
     def rng(self):
         """Get the current RNG. If not set, raise an error to enforce injection."""
-        import numpy as np
-
         if self._rng is None:
             # Fallback to local numpy random generator but warn or just create one
-            self._rng = np.random.default_rng()
+            from clintrials.core.rng import get_rng
+            self._rng = get_rng()
         return self._rng
 
     @abc.abstractmethod

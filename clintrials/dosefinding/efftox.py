@@ -232,7 +232,8 @@ def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10*
         ProbabilityDensitySample: The posterior sample object.
     """
     if rng is None:
-        rng = np.random.default_rng()
+        from clintrials.core.rng import get_rng
+        rng = get_rng()
 
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
 
@@ -807,7 +808,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     def _update_integrals(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
         """Recalculates integrals to update probabilities and utilities."""
         if rng is None:
-            rng = np.random.default_rng()
+            rng = self.rng
         if n is None:
             n = self.num_integral_steps
         cases = list(zip(self._doses, self._toxicities, self._efficacies))

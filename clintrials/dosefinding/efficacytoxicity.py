@@ -51,6 +51,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         if first_dose > num_doses:
             raise ValueError("First dose must be no greater than number of doses.")
 
+        super().__init__()
         self._first_dose = first_dose
         self.num_doses = num_doses
         self._max_size = max_size
