@@ -135,12 +135,13 @@ def render_accessible_chart(st_module, fig, expander_label="Data Summary"):
     accessibility_mode = getattr(st_module, "session_state", {}).get("accessibility_mode", False)
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
     
+    st_module.plotly_chart(fig)
+
     if accessibility_mode:
         if hasattr(meta, "html"):
             st_module.markdown(meta.html, unsafe_allow_html=True)
         else:
             st_module.markdown(meta)
     else:
-        st_module.plotly_chart(fig)
         with st_module.expander(expander_label):
             st_module.markdown(meta)

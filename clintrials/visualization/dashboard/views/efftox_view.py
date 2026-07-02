@@ -54,7 +54,10 @@ def render(sims):
                 st.subheader("Dose Recommendation Probability")
                 import clintrials.visualization as viz
 
-                fig_rec = viz.plot_efftox_simulation_recommendation(summary_df)
+                fig_rec = viz.plot_efftox_simulation_recommendation(
+                    summary_df,
+                    high_contrast=getattr(st, "session_state", {}).get("accessibility_mode", False)
+                )
                 meta_rec = getattr(
                     getattr(fig_rec, "layout", None),
                     "meta",
@@ -72,7 +75,10 @@ def render(sims):
                 st.subheader("Acceptability Probabilities")
                 import clintrials.visualization as viz
 
-                fig_accept = viz.plot_efftox_simulation_acceptability(summary_df)
+                fig_accept = viz.plot_efftox_simulation_acceptability(
+                    summary_df,
+                    high_contrast=getattr(st, "session_state", {}).get("accessibility_mode", False)
+                )
                 meta_accept = getattr(
                     getattr(fig_accept, "layout", None),
                     "meta",

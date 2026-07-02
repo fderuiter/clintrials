@@ -19,6 +19,17 @@ COLORBLIND_PALETTE = [
     "#000000",
 ]
 
+HIGH_CONTRAST_PALETTE = [
+    "#8A5F00",  # Darkened Orange
+    "#005A8F",  # Darkened Sky Blue
+    "#005E45",  # Darkened Bluish Green
+    "#7A7200",  # Darkened Yellow
+    "#00456B",  # Darkened Blue
+    "#803800",  # Darkened Vermillion
+    "#7A4964",  # Darkened Reddish Purple
+    "#000000",  # Black
+]
+
 PATTERN_SEQUENCE = ["/", "\\", "x", "-", "|", "+", "."]
 DASH_SEQUENCE = ["solid", "dot", "dash", "longdash", "dashdot", "longdashdot"]
 SYMBOL_SEQUENCE = ["circle", "square", "diamond", "cross", "x", "triangle-up", "triangle-down"]
@@ -59,7 +70,7 @@ def _format_labels_dict(cols):
     return labels
 
 
-def create_bar_chart(df, x, y, color, title, labels=None):
+def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False):
     """Creates a centralized bar chart with accessibility standards."""
     if labels is None:
         labels = {}
@@ -68,6 +79,8 @@ def create_bar_chart(df, x, y, color, title, labels=None):
     auto_labels.update(_format_labels_dict(y))
     auto_labels.update(_format_labels_dict(color))
     auto_labels.update(labels)
+
+    palette = HIGH_CONTRAST_PALETTE if high_contrast else COLORBLIND_PALETTE
 
     fig = px.bar(
         df,
@@ -78,13 +91,13 @@ def create_bar_chart(df, x, y, color, title, labels=None):
         barmode="group",
         title=title,
         labels=auto_labels,
-        color_discrete_sequence=COLORBLIND_PALETTE,
+        color_discrete_sequence=palette,
         pattern_shape_sequence=PATTERN_SEQUENCE,
     )
     return fig
 
 
-def create_line_chart(df, x, y, color, title, labels=None):
+def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):
     """Creates a centralized line chart with accessibility standards."""
     if labels is None:
         labels = {}
@@ -93,6 +106,8 @@ def create_line_chart(df, x, y, color, title, labels=None):
     auto_labels.update(_format_labels_dict(y))
     auto_labels.update(_format_labels_dict(color))
     auto_labels.update(labels)
+
+    palette = HIGH_CONTRAST_PALETTE if high_contrast else COLORBLIND_PALETTE
 
     fig = px.line(
         df,
@@ -103,7 +118,7 @@ def create_line_chart(df, x, y, color, title, labels=None):
         symbol=color,
         title=title,
         labels=auto_labels,
-        color_discrete_sequence=COLORBLIND_PALETTE,
+        color_discrete_sequence=palette,
         line_dash_sequence=DASH_SEQUENCE,
         symbol_sequence=SYMBOL_SEQUENCE,
         line_dash_map=LINE_DASH_MAP,
@@ -120,7 +135,7 @@ def generate_text_summary(df, title):
     return MultiFormatSummaryContainer(title=title, df=df)
 
 
-def plot_dose_finding_outcomes(trial, chart_title=None):
+def plot_dose_finding_outcomes(trial, chart_title=None, high_contrast=False):
     """Plots the dose-finding trial outcomes."""
     if not chart_title:
         chart_title = "Each point represents a patient<br>A circle indicates no toxicity, a cross toxicity"
@@ -173,7 +188,7 @@ def plot_dose_finding_outcomes(trial, chart_title=None):
     return fig
 
 
-def plot_crm_toxicity_probabilities(trial, chart_title=None):
+def plot_crm_toxicity_probabilities(trial, chart_title=None, high_contrast=False):
     """Plots the CRM dose-toxicity probabilities."""
     if not chart_title:
         chart_title = "Prior (dashed) and posterior (solid) dose-toxicity curves"
@@ -271,6 +286,7 @@ def plot_efftox_utility_contours(
     util_delta=0.2,
     title="EffTox utility contours",
     custom_points_label="priors",
+    high_contrast=False,
 ):
     """Plots the EffTox utility contours."""
     eff_vals = np.linspace(0, 1, n)
@@ -360,7 +376,7 @@ def plot_efftox_utility_contours(
 
 
 def plot_efftox_density(
-    data_func, trial, x_name="", plot_title="", include_doses=None, boot_samps=1000
+    data_func, trial, x_name="", plot_title="", include_doses=None, boot_samps=1000, high_contrast=False
 ):
     """Plots the EffTox probability densities."""
     if include_doses is None:
@@ -409,7 +425,7 @@ def plot_efftox_density(
     return fig
 
 
-def plot_crm_simulation_recommendation(summary_df):
+def plot_crm_simulation_recommendation(summary_df, high_contrast=False):
     """Plots CRM simulation recommendation probabilities."""
     col_name = (
         "RecommendedDoseProb"
@@ -435,12 +451,13 @@ def plot_crm_simulation_recommendation(summary_df):
             "true_tox": "True Toxicity Scenario",
             "Probability": "Recommendation Probability",
         },
+        high_contrast=high_contrast,
     )
     fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
     return fig
 
 
-def plot_efftox_simulation_recommendation(summary_df):
+def plot_efftox_simulation_recommendation(summary_df, high_contrast=False):
     """Plots EffTox simulation recommendation probabilities."""
     col_name = (
         "RecommendedDoseProb"
@@ -462,12 +479,13 @@ def plot_efftox_simulation_recommendation(summary_df):
         y="Probability",
         color="Dose Level",
         title=title,
+        high_contrast=high_contrast,
     )
     fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
     return fig
 
 
-def plot_efftox_simulation_acceptability(summary_df):
+def plot_efftox_simulation_acceptability(summary_df, high_contrast=False):
     """Plots EffTox simulation acceptability probabilities."""
     tox_col = (
         "ProbAcceptTox" if "ProbAcceptTox" in summary_df.columns else "prob_accept_tox"
@@ -494,12 +512,13 @@ def plot_efftox_simulation_acceptability(summary_df):
         y="Probability",
         color="Probability Type",
         title=title,
+        high_contrast=high_contrast,
     )
     fig.layout.meta = generate_text_summary(accept_df_melted, title)
     return fig
 
 
-def plot_winratio_power_curve(df):
+def plot_winratio_power_curve(df, high_contrast=False):
     """Plots a Win Ratio simulation power curve."""
     title = "Win Ratio Simulation Power Curve"
     fig = create_line_chart(
@@ -508,7 +527,8 @@ def plot_winratio_power_curve(df):
         y="power",
         color=None,
         title=title,
-        labels={"num_subjects_A": "Group A Subjects", "power": "Statistical Power"}
+        labels={"num_subjects_A": "Group A Subjects", "power": "Statistical Power"},
+        high_contrast=high_contrast,
     )
     fig.layout.meta = generate_text_summary(df, title)
     return fig
@@ -520,13 +540,13 @@ from clintrials.core.viz_interface import VisualizationProvider
 class DefaultVisualizationProvider(VisualizationProvider):
     """Default visualization provider implementation."""
 
-    def plot_dose_finding_outcomes(self, trial, chart_title=None):
+    def plot_dose_finding_outcomes(self, trial, chart_title=None, high_contrast=False):
         """Plot dose finding outcomes."""
-        return plot_dose_finding_outcomes(trial, chart_title=chart_title)
+        return plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)
 
-    def plot_crm_toxicity_probabilities(self, trial, chart_title=None):
+    def plot_crm_toxicity_probabilities(self, trial, chart_title=None, high_contrast=False):
         """Plot CRM toxicity probabilities."""
-        return plot_crm_toxicity_probabilities(trial, chart_title=chart_title)
+        return plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)
 
     def plot_efftox_utility_contours(
         self,
@@ -539,6 +559,7 @@ class DefaultVisualizationProvider(VisualizationProvider):
         util_delta=0.2,
         title="EffTox utility contours",
         custom_points_label="priors",
+        high_contrast=False,
     ):
         """Plot EffTox utility contours."""
         return plot_efftox_utility_contours(
@@ -551,6 +572,7 @@ class DefaultVisualizationProvider(VisualizationProvider):
             util_delta,
             title,
             custom_points_label,
+            high_contrast,
         )
 
     def plot_efftox_density(
@@ -561,10 +583,11 @@ class DefaultVisualizationProvider(VisualizationProvider):
         plot_title="",
         include_doses=None,
         boot_samps=1000,
+        high_contrast=False,
     ):
         """Plot EffTox density."""
         return plot_efftox_density(
-            data_func, trial, x_name, plot_title, include_doses, boot_samps
+            data_func, trial, x_name, plot_title, include_doses, boot_samps, high_contrast
         )
 
     def generate_pdf_report(self, df, design_type, text_summaries=None):

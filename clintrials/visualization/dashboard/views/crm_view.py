@@ -48,7 +48,10 @@ def render(sims):
             st.subheader("Dose Recommendation Probability")
             import clintrials.visualization as viz
 
-            fig = viz.plot_crm_simulation_recommendation(summary_df)
+            fig = viz.plot_crm_simulation_recommendation(
+                summary_df,
+                high_contrast=getattr(st, "session_state", {}).get("accessibility_mode", False)
+            )
             meta = getattr(
                 getattr(fig, "layout", None), "meta", "No data summary available."
             )
