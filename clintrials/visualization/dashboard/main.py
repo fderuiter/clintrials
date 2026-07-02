@@ -20,6 +20,18 @@ from clintrials.visualization.dashboard.views import (
 
 @st.cache_data(show_spinner=False)
 def get_preview_sims(design_type, target_tox, cohort_size, max_size):
+    """
+    Run and cache default preview simulations based on the selected design type and parameters.
+    
+    Args:
+        design_type: The type of clinical trial design (e.g., 'CRM').
+        target_tox: The target toxicity level.
+        cohort_size: The number of patients per cohort.
+        max_size: The maximum total sample size for the trial.
+        
+    Returns:
+        list: A list of simulation report dictionaries.
+    """
     with st.spinner(f"Running Default Preview Simulation for {design_type}..."):
         sims = []
         if design_type == "CRM":
