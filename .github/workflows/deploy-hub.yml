@@ -44,7 +44,7 @@ jobs:
           cp dist/*.whl public/hub/clintrials-latest-py3-none-any.whl
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: public/hub
 
