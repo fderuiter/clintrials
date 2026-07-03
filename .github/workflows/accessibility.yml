@@ -28,7 +28,7 @@ jobs:
           poetry run pytest tests/test_accessibility.py
       - name: Upload Accessibility Reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: accessibility-reports
           path: accessibility_reports/
