@@ -741,6 +741,16 @@ class CRM(DoseFindingTrial):
         else:
             return True
 
+    def report(self) -> dict:
+        """Generates a standardized JSON-serializable report of the trial.
+
+        Returns:
+            collections.OrderedDict: The trial outcome report.
+        """
+        report = super().report()
+        report.update(crm_dtp_detail(self))
+        return report
+
     def optimal_decision(self, prob_tox: Sequence[float]) -> int:
         """Gets the optimal dose choice for a given dose-toxicity curve.
 

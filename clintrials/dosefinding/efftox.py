@@ -684,10 +684,10 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             .value_counts(normalize=True)
             .sort_index(),
             "prob_accept_tox": lambda s, p: pd.Series(
-                [x.get("ProbAcceptTox", 0) > 0.5 for x in s]
+                [x.get(f"ProbAccTox{x.get('RecommendedDose')}", 0) > 0.5 for x in s]
             ).mean(),
             "prob_accept_eff": lambda s, p: pd.Series(
-                [x.get("ProbAcceptEff", 0) > 0.5 for x in s]
+                [x.get(f"ProbAccEff{x.get('RecommendedDose')}", 0) > 0.5 for x in s]
             ).mean(),
         }
 
@@ -895,6 +895,16 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             bool: `True` if the trial is ongoing, `False` otherwise.
         """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
+
+    def report(self) -> dict:
+        """Generates a standardized JSON-serializable report of the trial.
+
+        Returns:
+            collections.OrderedDict: The trial outcome report.
+        """
+        report = super().report()
+        report.update(efftox_dtp_detail(self))
+        return report
 
     def tabulate(self) -> Any:
         """Returns a pandas DataFrame summarising the trial.
