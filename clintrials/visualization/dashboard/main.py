@@ -147,10 +147,9 @@ def main():
     if "accessibility_mode" not in st.session_state:
         st.session_state["accessibility_mode"] = False
 
-    toggle_fn = getattr(st.sidebar, "toggle", lambda *args, **kwargs: False)
-    st.session_state["accessibility_mode"] = toggle_fn(
+    st.sidebar.toggle(
         "Accessibility Mode",
-        value=st.session_state.get("accessibility_mode", False),
+        key="accessibility_mode",
         help="Enable high-fidelity text alternatives for screen readers.",
     )
 
