@@ -157,4 +157,4 @@ def generate_pdf_report(df, design_type, text_summaries=None):
         else:
             pdf.add_p(str(summary))
 
-    return pdf.output()
+    return bytes(pdf.output())
