@@ -30,7 +30,7 @@ def render(sims):
     func_map = CRM.get_summary_functions()
 
     summary_df = extract_sim_data(sims, ps, func_map, return_type="dataframe")
-
+    
     figures = []
     if not summary_df.empty and "recommended_dose_prob" in summary_df.columns:
         import clintrials.visualization as viz
