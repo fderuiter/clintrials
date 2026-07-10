@@ -80,7 +80,7 @@ def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False):
     auto_labels.update(_format_labels_dict(color))
     auto_labels.update(labels)
 
-    palette = HIGH_CONTRAST_PALETTE if high_contrast else COLORBLIND_PALETTE
+    palette = HIGH_CONTRAST_PALETTE
 
     fig = px.bar(
         df,
@@ -107,7 +107,7 @@ def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):
     auto_labels.update(_format_labels_dict(color))
     auto_labels.update(labels)
 
-    palette = HIGH_CONTRAST_PALETTE if high_contrast else COLORBLIND_PALETTE
+    palette = HIGH_CONTRAST_PALETTE
 
     fig = px.line(
         df,
