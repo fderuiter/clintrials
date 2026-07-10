@@ -44,7 +44,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                 [x.get("RecommendedDose") for x in s]
             )
             .value_counts(normalize=True)
-            .sort_index(),
+            .sort_index()
+            .to_dict(),
         }
 
     def __init__(

@@ -404,7 +404,8 @@ class CRM(DoseFindingTrial):
                 [x.get("RecommendedDose") for x in s]
             )
             .value_counts(normalize=True)
-            .sort_index(),
+            .sort_index()
+            .to_dict(),
         }
 
     def __init__(self, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Any = None, termination_func: Any = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, sample_size: Any = None) -> None:

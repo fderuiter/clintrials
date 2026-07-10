@@ -682,7 +682,8 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 [x.get("RecommendedDose") for x in s]
             )
             .value_counts(normalize=True)
-            .sort_index(),
+            .sort_index()
+            .to_dict(),
             "prob_accept_tox": lambda s, p: pd.Series(
                 [x.get(f"ProbAccTox{x.get('RecommendedDose')}", 0) > 0.5 for x in s]
             ).mean(),
