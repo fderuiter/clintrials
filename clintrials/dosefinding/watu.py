@@ -517,9 +517,11 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         # Separate n and mc_samples_stageX from other kwargs to avoid passing
         # them to crm.prob_tox_exceeds which doesn't support them.
-        crm_kwargs = kwargs.copy()
-        crm_kwargs.pop("mc_samples_stage1", None)
-        crm_kwargs.pop("mc_samples_stage2", None)
+        crm_kwargs = {}
+        if "backend" in kwargs:
+            crm_kwargs["backend"] = kwargs["backend"]
+        if "epsabs" in kwargs:
+            crm_kwargs["epsabs"] = kwargs["epsabs"]
         crm_kwargs["n"] = n
 
         return 1 - self.crm.prob_tox_exceeds(threshold, **crm_kwargs)
