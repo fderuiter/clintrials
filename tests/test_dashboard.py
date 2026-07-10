@@ -103,6 +103,21 @@ def test_main_dispatches_to_efftox(fake_streamlit, fake_plotly, monkeypatch):
     main.efftox_view.render.assert_called_once_with(sims)
     main.crm_view.render.assert_not_called()
 
+def test_main_dispatches_to_watu(fake_streamlit, fake_plotly, monkeypatch):
+    fake_streamlit.sidebar.selectbox.return_value = "WATU"
+    sims = [{"recommended_dose": 1}]
+
+    class DummyFile:
+        def getvalue(self):
+            return json.dumps(sims).encode("utf-8")
+
+    fake_streamlit.sidebar.file_uploader.return_value = DummyFile()
+
+    main = reload_module("clintrials.visualization.dashboard.main")
+    monkeypatch.setattr(main.watu_view, "render", MagicMock())
+    main.main()
+    main.watu_view.render.assert_called_once_with(sims)
+
 
 def test_main_dispatches_to_winratio(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.selectbox.return_value = "Win Ratio"
@@ -127,6 +142,19 @@ def test_main_preview_mode_crm(fake_streamlit, fake_plotly, monkeypatch):
     main.main()
     main.get_preview_sims.assert_called_once()
     main.crm_view.render.assert_called_once_with([{"preview": True}])
+
+def test_main_preview_mode_exception(fake_streamlit, fake_plotly, monkeypatch):
+    fake_streamlit.sidebar.selectbox.return_value = "CRM"
+    fake_streamlit.sidebar.radio.return_value = "Preview Mode"
+    
+    main = reload_module("clintrials.visualization.dashboard.main")
+    
+    def raise_err(*args, **kwargs):
+        raise ValueError("Sim error")
+        
+    monkeypatch.setattr(main, "get_preview_sims", raise_err)
+    main.main()
+    fake_streamlit.error.assert_called_once()
 
 
 def test_get_preview_sims_crm(monkeypatch):
