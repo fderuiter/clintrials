@@ -33,6 +33,13 @@ from clintrials.core.protocol import Protocol
 class EfficacyToxicityDoseFindingTrial(Protocol):
     """An abstract base class for dose-finding trials that jointly monitor
     toxicity and efficacy.
+
+    Warning:
+        Data updates are strictly incremental. Do not repeatedly pass the full
+        patient history to the `update` method, as this will append duplicates
+        to the internal records rather than replacing them. If you need to
+        reload the full history (e.g., for data corrections), use the `reset()`
+        method first.
     """
 
     def __init__(self, first_dose: int, num_doses: int, max_size: int) -> None:
@@ -243,8 +250,14 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
     def update(self, cases: List[Tuple[int, int, int]], **kwargs: Any) -> int:
         """Updates the trial with a list of new cases.
 
+        Warning:
+            This method is strictly incremental. It appends the provided cases
+            to the internal record rather than replacing existing records.
+            Calling `update()` with the full patient history repeatedly will
+            duplicate existing records.
+
         Args:
-            cases (list[tuple[int, int, int]]): A list of cases, where each
+            cases (list[tuple[int, int, int]]): A list of new cases to append, where each
                 case is a tuple of (dose, toxicity, efficacy).
             **kwargs: Additional keyword arguments for the dose calculation.
 
