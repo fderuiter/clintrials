@@ -33,7 +33,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                 if summary_df is not None and not summary_df.empty:
                     if not skip_summary_table:
                         st.subheader("Simulation Summary")
-                        st.write(summary_df)
+                        st.markdown(summary_df.to_html(), unsafe_allow_html=True)
 
                 text_summaries = []
                 if extra_text_summaries:
