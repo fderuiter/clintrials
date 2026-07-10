@@ -113,7 +113,7 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
     assert len(violations_standard) == 0, f"Standard Mode Accessibility Violations: {violations_standard}"
     
     # Toggle 'Accessibility Mode'
-    page.locator("text=Accessibility Mode").evaluate("node => node.click()")
+    page.locator("text=Accessibility Mode").evaluate("node => node.closest('label').querySelector('input').click()")
     page.wait_for_timeout(3000)
     
     # Run Axe audit for high-contrast mode
