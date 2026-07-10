@@ -117,6 +117,64 @@ def test_main_dispatches_to_winratio(fake_streamlit, fake_plotly, monkeypatch):
     main.efftox_view.render.assert_not_called()
 
 
+def test_main_preview_mode_crm(fake_streamlit, fake_plotly, monkeypatch):
+    fake_streamlit.sidebar.selectbox.return_value = "CRM"
+    fake_streamlit.sidebar.radio.return_value = "Preview Mode"
+
+    main = reload_module("clintrials.visualization.dashboard.main")
+    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    monkeypatch.setattr(main, "get_preview_sims", MagicMock(return_value=[{"preview": True}]))
+    main.main()
+    main.get_preview_sims.assert_called_once()
+    main.crm_view.render.assert_called_once_with([{"preview": True}])
+
+
+def test_get_preview_sims_crm(monkeypatch):
+    main = reload_module("clintrials.visualization.dashboard.main")
+    # Bypass the cache decorator by calling __wrapped__ if present, else call directly
+    func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
+    
+    # Mock simulate_dose_finding_trial to speed up the test
+    import clintrials.dosefinding as df
+    mock_sim = MagicMock(side_effect=lambda *args, **kwargs: {"recommended_dose": 1})
+    monkeypatch.setattr(df, "simulate_dose_finding_trial", mock_sim)
+    
+    # Call the original wrapped function
+    sims = func("CRM", target_tox=0.25, cohort_size=3, max_size=10)
+    
+    assert len(sims) == 40
+    assert mock_sim.call_count == 40
+    assert sims[0]["true_tox"] == (0.05, 0.1, 0.2, 0.3, 0.4)
+
+def test_get_preview_sims_efftox(monkeypatch):
+    main = reload_module("clintrials.visualization.dashboard.main")
+    func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
+    
+    # Mock simulate_trial
+    import clintrials.dosefinding.efficacytoxicity as et
+    mock_sim = MagicMock(side_effect=lambda *args, **kwargs: {"recommended_dose": 2})
+    monkeypatch.setattr(et, "simulate_trial", mock_sim)
+    
+    sims = func("EffTox", target_tox=0.25, cohort_size=3, max_size=10)
+    
+    assert len(sims) == 10
+    assert mock_sim.call_count == 10
+
+def test_get_preview_sims_watu(monkeypatch):
+    main = reload_module("clintrials.visualization.dashboard.main")
+    func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
+    
+    import clintrials.dosefinding.efficacytoxicity as et
+    mock_sim = MagicMock(side_effect=lambda *args, **kwargs: {"recommended_dose": 3})
+    monkeypatch.setattr(et, "simulate_trial", mock_sim)
+    
+    sims = func("WATU", target_tox=0.25, cohort_size=3, max_size=10)
+    
+    assert len(sims) == 10
+    assert mock_sim.call_count == 10
+
+
+
 def test_crm_render_creates_plot(fake_streamlit, monkeypatch):
     crm_view = reload_module("clintrials.visualization.dashboard.views.crm_view")
     monkeypatch.setattr(crm_view, "st", fake_streamlit)
