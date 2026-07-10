@@ -17,6 +17,7 @@ from random import sample
 
 from scipy.stats import beta, norm
 
+from clintrials.core.errors import ErrorTemplates
 from clintrials.core.math import empiric, inverse_empiric, bernoulli_likelihood
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
@@ -188,11 +189,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape  # type: ignore
         if self.I != len(prior_tox_probs):
-            raise ValueError("prior_tox_probs should have %s items." % self.I)
+            raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="prior_tox_probs", expected_length=self.I))
         if tox_target > tox_limit:
-            raise ValueError(
-                "tox_target is greater than tox_limit. That does not sound clever."
-            )
+            raise ValueError(ErrorTemplates.LE.format(name="tox_target", bound="tox_limit"))
         self.prior_tox_probs = np.array(prior_tox_probs)
         self.tox_limit = tox_limit
         self.eff_limit = eff_limit
@@ -205,7 +204,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.deficient_efficacy_alpha = deficient_efficacy_alpha
         if model_prior_weights is not None:
             if self.K != len(model_prior_weights):
-                raise ValueError("model_prior_weights should have %s items." % self.K)
+                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="model_prior_weights", expected_length=self.K))
             if sum(model_prior_weights) == 0:
                 raise ValueError("model_prior_weights cannot sum to zero.")
             self.model_prior_weights = model_prior_weights / sum(model_prior_weights)

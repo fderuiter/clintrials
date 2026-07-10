@@ -1,3 +1,5 @@
+from clintrials.core.errors import ErrorTemplates
+
 def validate_matching_lengths(**kwargs):
     """Validates that all provided arrays have the same length.
 
@@ -13,34 +15,43 @@ def validate_matching_lengths(**kwargs):
 
     for name, arr in iterator:
         if len(arr) != expected_len:
-            raise ValueError(f"{first_name} and {name} should be same length.")
+            raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name=first_name, name=name))
 
 
 def validate_expected_length(array, expected_length: int, name: str):
     """Validates that an array has exactly the expected length."""
     if len(array) != expected_length:
-        raise ValueError(f"{name} should have {expected_length} items.")
+        raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=name, expected_length=expected_length))
 
 
 def validate_bounds(value, lower, upper, name: str, exclusive=False):
     """Validates that a numerical value is within the specified bounds."""
     if exclusive:
-        if not (lower < value < upper):
-            raise ValueError(f"{name} must be between {lower} and {upper}.")
+        if value <= lower:
+            raise ValueError(ErrorTemplates.GT.format(name=name, bound=lower))
+        if value >= upper:
+            raise ValueError(ErrorTemplates.LT.format(name=name, bound=upper))
     else:
-        if not (lower <= value <= upper):
-            raise ValueError(f"{name} must be between {lower} and {upper}.")
+        if value < lower:
+            raise ValueError(ErrorTemplates.GE.format(name=name, bound=lower))
+        if value > upper:
+            raise ValueError(ErrorTemplates.LE.format(name=name, bound=upper))
 
 
 def validate_probability(value, name: str, exclusive=False):
     """Validates that a value is a valid probability between 0 and 1."""
-    validate_bounds(value, 0, 1, name, exclusive=exclusive)
+    if exclusive:
+        if not (0 < value < 1):
+            raise ValueError(ErrorTemplates.PROBABILITY.format(name=name))
+    else:
+        if not (0 <= value <= 1):
+            raise ValueError(ErrorTemplates.PROBABILITY.format(name=name))
 
 
 def validate_positive_integer(value, name: str):
     """Validates that a value is a positive integer."""
     if not isinstance(value, int) or value <= 0:
-        raise ValueError(f"{name} must be a positive integer.")
+        raise ValueError(ErrorTemplates.POSITIVE_INTEGER.format(name=name))
 
 import re
 

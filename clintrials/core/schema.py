@@ -1,6 +1,8 @@
 import dataclasses
 from typing import Annotated, List, Optional, Union, get_origin, get_args
 
+from clintrials.core.errors import ErrorTemplates
+
 class FieldInfo:
     def __init__(self, default=dataclasses.MISSING, description=None, ge=None, le=None, gt=None, lt=None):
         self.default = default
@@ -51,13 +53,13 @@ class BaseModel:
             
         def check_bounds(v, constraints):
             if constraints.ge is not None and v < constraints.ge:
-                raise ValueError(f"{name} must be >= {constraints.ge}")
+                raise ValueError(ErrorTemplates.GE.format(name=name, bound=constraints.ge))
             if constraints.le is not None and v > constraints.le:
-                raise ValueError(f"{name} must be <= {constraints.le}")
+                raise ValueError(ErrorTemplates.LE.format(name=name, bound=constraints.le))
             if constraints.gt is not None and v <= constraints.gt:
-                raise ValueError(f"{name} must be > {constraints.gt}")
+                raise ValueError(ErrorTemplates.GT.format(name=name, bound=constraints.gt))
             if constraints.lt is not None and v >= constraints.lt:
-                raise ValueError(f"{name} must be < {constraints.lt}")
+                raise ValueError(ErrorTemplates.LT.format(name=name, bound=constraints.lt))
 
         if isinstance(value, list):
             for item in value:
@@ -71,16 +73,28 @@ class BaseModel:
         origin = get_origin(annotation)
         if origin is Annotated:
             args = get_args(annotation)
+            is_prob = False
+            is_pos_int = False
             for arg in args[1:]:
+                if arg == "Probability":
+                    is_prob = True
+                elif arg == "PositiveInt":
+                    is_pos_int = True
+                
                 if isinstance(arg, FieldInfo):
-                    if arg.ge is not None and value < arg.ge:
-                        raise ValueError(f"{name} must be >= {arg.ge}")
-                    if arg.le is not None and value > arg.le:
-                        raise ValueError(f"{name} must be <= {arg.le}")
-                    if arg.gt is not None and value <= arg.gt:
-                        raise ValueError(f"{name} must be > {arg.gt}")
-                    if arg.lt is not None and value >= arg.lt:
-                        raise ValueError(f"{name} must be < {arg.lt}")
+                    if is_prob and (value < 0.0 or value > 1.0):
+                        raise ValueError(ErrorTemplates.PROBABILITY.format(name=name))
+                    elif is_pos_int and value <= 0:
+                        raise ValueError(ErrorTemplates.POSITIVE_INTEGER.format(name=name))
+                    else:
+                        if arg.ge is not None and value < arg.ge:
+                            raise ValueError(ErrorTemplates.GE.format(name=name, bound=arg.ge))
+                        if arg.le is not None and value > arg.le:
+                            raise ValueError(ErrorTemplates.LE.format(name=name, bound=arg.le))
+                        if arg.gt is not None and value <= arg.gt:
+                            raise ValueError(ErrorTemplates.GT.format(name=name, bound=arg.gt))
+                        if arg.lt is not None and value >= arg.lt:
+                            raise ValueError(ErrorTemplates.LT.format(name=name, bound=arg.lt))
         elif origin is list or getattr(origin, "__origin__", origin) is list:
             args = get_args(annotation)
             if args:
