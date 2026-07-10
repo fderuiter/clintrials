@@ -1112,7 +1112,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             numpy.ndarray: A matrix where element (i, j) is the
                 probability that dose i has superior utility to dose j.
         """
-        superiority_mat = np.zeros((4, 4))
+        superiority_mat = np.zeros((self.num_doses, self.num_doses))
         superiority_mat[:] = np.nan  # type: ignore
         for i in range(1, self.num_doses + 1):
             for j in range(i + 1, self.num_doses + 1):
