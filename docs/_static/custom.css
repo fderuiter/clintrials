@@ -1,0 +1,106 @@
+/* docs/_static/custom.css */
+
+/* Toggle Button */
+#hub-toggle-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 10000;
+    background-color: #496D89;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    font-size: 28px;
+}
+#hub-toggle-btn:hover {
+    background-color: #385b73;
+}
+
+/* Sidebar Container */
+#hub-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 450px;
+    min-width: 350px;
+    max-width: 80%;
+    background-color: white;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.1);
+    z-index: 9999;
+    transform: translateX(100%);
+    transition: transform 0.3s ease-in-out;
+    display: flex;
+    flex-direction: row;
+}
+
+#hub-sidebar.open {
+    transform: translateX(0);
+}
+
+/* Resizer Handle */
+#hub-resizer {
+    width: 12px;
+    background-color: #f8f9fa;
+    cursor: ew-resize;
+    height: 100%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    z-index: 10001;
+}
+
+#hub-resizer:hover {
+    background-color: #e9ecef;
+}
+
+.hub-resizer-grip {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+}
+
+.hub-resizer-line {
+    width: 2px;
+    height: 24px;
+    background-color: #adb5bd;
+}
+
+/* Iframe Container */
+#hub-iframe-container {
+    flex-grow: 1;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+#simulation-hub-iframe {
+    width: 100%;
+    border: none;
+    overflow: hidden;
+    display: block;
+}
+
+/* Pointer events disabled during dragging */
+body.hub-dragging #simulation-hub-iframe {
+    pointer-events: none;
+}
+body.hub-dragging {
+    cursor: ew-resize !important;
+}
+body.hub-dragging * {
+    user-select: none;
+}
