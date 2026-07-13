@@ -2,6 +2,7 @@ import subprocess
 import time
 import pytest
 import os
+import sys
 import urllib.request
 from playwright.sync_api import Page
 from axe_playwright_python.sync_playwright import Axe
@@ -18,7 +19,7 @@ def streamlit_server():
     env = os.environ.copy()
     
     process = subprocess.Popen(
-        ["streamlit", "run", "clintrials/visualization/dashboard/main.py", "--server.port=8502", "--server.headless=true"],
+        [sys.executable, "-m", "clintrials.visualization.dashboard.launcher", "--port", "8502", "--server.headless=true"],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE

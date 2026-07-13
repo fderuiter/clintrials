@@ -32,7 +32,7 @@ tqdm = "^4.68.3"
 fpdf2 = {version = "^2.7.9", optional = true}
 
 [tool.poetry.scripts]
-dashboard = "clintrials.visualization.dashboard.main:main"
+dashboard = "clintrials.visualization.dashboard.launcher:main"
 
 [tool.poetry.group.dev.dependencies]
 pytest = [
