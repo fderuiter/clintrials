@@ -29,6 +29,7 @@ __all__ = ["peps2v2"]
 """
 
 import numpy
+from collections.abc import Callable
 import pandas as pd
 
 from clintrials.core.stats import correlation_ci
@@ -43,9 +44,9 @@ class BeBOP:
         Args:
             theta_priors (list): List of prior distributions for elements of parameter vector, theta.
                 Each prior object should support obj.ppf(x) and obj.pdf(x).
-            efficacy_model (callable): Function with signature x, theta. Returns probability of efficacy.
-            toxicity_model (callable): Function with signature x, theta. Returns probability of toxicity.
-            joint_model (callable): Function with signature x, theta. Returns joint probability.
+            efficacy_model (Callable): Function with signature x, theta. Returns probability of efficacy.
+            toxicity_model (Callable): Function with signature x, theta. Returns probability of toxicity.
+            joint_model (Callable): Function with signature x, theta. Returns joint probability.
         """
 
         self.priors = theta_priors

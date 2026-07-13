@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections.abc import Callable
 from typing import Any, Optional, Sequence
 import numpy as np
 import numpy.typing as npt
@@ -29,7 +30,7 @@ def _toxicity_likelihood(link_func: Any, a0: Any, beta: Any, dose: Any, tox: Any
     """Calculates the likelihood of a single toxicity outcome.
 
     Args:
-        link_func (callable): The link function (e.g., logistic or empiric).
+        link_func (Callable): The link function (e.g., logistic or empiric).
         a0 (float): The intercept parameter for the link function.
         beta (float): The slope parameter for the link function.
         dose (float): The dose level.
@@ -48,7 +49,7 @@ def _compound_toxicity_likelihood(link_func: Any, a0: Any, beta: Any, doses: Any
     """Calculates the compound likelihood of multiple toxicity outcomes.
 
     Args:
-        link_func (callable): The link function.
+        link_func (Callable): The link function.
         a0 (float): The intercept parameter.
         beta (float): The slope parameter.
         doses (list[float]): A list of dose levels.
@@ -79,11 +80,11 @@ def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs:
     """Estimates the beta parameter using Bayesian inference.
 
     Args:
-        F (callable): The link function.
+        F (Callable): The link function.
         intercept (float): The intercept parameter.
         codified_doses_given (list[float]): The codified dose levels given.
         toxs (list[int]): The observed toxicity events.
-        beta_pdf (callable): The PDF of the prior distribution for beta.
+        beta_pdf (Callable): The PDF of the prior distribution for beta.
         use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
         estimate_var (bool, optional): If `True`, estimates the variance of
             beta. Defaults to `False`.
@@ -119,7 +120,7 @@ def _get_beta_hat_mle(F: Any, intercept: Any, codified_doses_given: Any, toxs: A
     """Estimates the beta parameter using maximum likelihood estimation (MLE).
 
     Args:
-        F (callable): The link function.
+        F (Callable): The link function.
         intercept (float): The intercept parameter.
         codified_doses_given (list[float]): The codified dose levels given.
         toxs (list[int]): The observed toxicity events.
@@ -169,7 +170,7 @@ def _get_beta_hat_mle_bootstrap(F: Any, intercept: Any, beta_hat: Any, codified_
     """Estimates the variance of the beta MLE using parametric bootstrap.
 
     Args:
-        F (callable): The link function.
+        F (Callable): The link function.
         intercept (float): The intercept parameter.
         beta_hat (float): The MLE of beta.
         codified_doses_given (list[float]): The codified dose levels given.
@@ -209,7 +210,7 @@ def _estimate_prob_tox_from_param(F: Any, intercept: Any, beta_hat: Any, dose_la
     """Estimates the probability of toxicity by plugging in a beta estimate.
 
     Args:
-        F (callable): The link function.
+        F (Callable): The link function.
         intercept (float): The intercept parameter.
         beta_hat (float): The estimate for beta.
         dose_labels (list[float]): The dose labels for which to estimate
@@ -226,13 +227,13 @@ def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses
     """Calculates the posterior probability of toxicity using Bayesian integration.
 
     Args:
-        F (callable): The link function.
+        F (Callable): The link function.
         intercept (float): The intercept parameter.
         dose_labels (list[float]): The dose labels for which to estimate
             the probability of toxicity.
         codified_doses_given (list[float]): The codified dose levels given.
         toxs (list[int]): The observed toxicity events.
-        beta_pdf (callable): The PDF of the prior distribution for beta.
+        beta_pdf (Callable): The PDF of the prior distribution for beta.
         use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
 
     Returns:
@@ -272,9 +273,9 @@ def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: A
             patients.
         intercept (float, optional): The intercept parameter, used with the
             logistic method. Defaults to 3.
-        F_func (callable, optional): The link function to use. Defaults to
+        F_func (Callable, optional): The link function to use. Defaults to
             `clintrials.core.math.logistic`.
-        inverse_F (callable, optional): The inverse link function. Defaults
+        inverse_F (Callable, optional): The inverse link function. Defaults
             to `clintrials.core.math.inverse_logistic`.
         beta_dist (scipy.stats.rv_continuous, optional): The prior
             distribution for the beta parameter. Defaults to a normal
@@ -417,9 +418,9 @@ class CRM(DoseFindingTrial):
             target (float): The target toxicity rate.
             first_dose (int): The starting dose level (1-based).
             max_size (int): The maximum number of patients in the trial.
-            F_func (callable, optional): The link function to use.
+            F_func (Callable, optional): The link function to use.
                 Defaults to `clintrials.core.math.empiric`.
-            inverse_F (callable, optional): The inverse link function.
+            inverse_F (Callable, optional): The inverse link function.
                 Defaults to `clintrials.core.math.inverse_empiric`.
             beta_prior (scipy.stats.rv_continuous, optional): The prior
                 distribution for the beta parameter. Defaults to a normal
@@ -447,11 +448,11 @@ class CRM(DoseFindingTrial):
             coherency_threshold (float, optional): If positive, prevents
                 escalation if the observed toxicity rate at the current dose
                 exceeds this value. Defaults to 0.0.
-            principle_escalation_func (callable, optional): An optional
+            principle_escalation_func (Callable, optional): An optional
                 function that takes the trial cases and returns the next dose
                 to be given, or `None` to use the CRM method. This allows
                 for custom escalation strategies. Defaults to `None`.
-            termination_func (callable, optional): An optional function that
+            termination_func (Callable, optional): An optional function that
                 takes the trial instance and returns `True` if the trial
                 should terminate. Defaults to `None`.
             plugin_mean (bool, optional): If `True`, plugs the beta estimate

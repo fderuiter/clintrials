@@ -10,6 +10,7 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 import logging
+from collections.abc import Callable
 from collections import OrderedDict
 
 import numpy as np
@@ -240,7 +241,7 @@ class ProbabilityDensitySample:
 
         Args:
             samp (numpy.ndarray): The sample from the distribution.
-            func (callable): A function that takes the sample and returns
+            func (Callable): A function that takes the sample and returns
                 the probabilities.
         """
         self._samp = samp

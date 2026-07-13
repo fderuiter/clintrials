@@ -6,22 +6,30 @@ Random Seed Strategy: {numerics_seed_strategy}
 """
 
 import warnings
+from collections.abc import Callable
 
 import numpy as np
 from scipy.special import logsumexp
 from scipy.stats import norm
+
 from clintrials.core.stats import ProbabilityDensitySample
 
 
-def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, deg=20):
+def posterior_expectation_gh(
+    log_likelihood_func: Callable[[np.ndarray], np.ndarray],
+    f_func: Callable[[np.ndarray], np.ndarray],
+    prior_mean: float,
+    prior_sd: float,
+    deg: int = 20,
+):
     """
     Evaluates the posterior expectation of f(theta) using Gauss-Hermite quadrature,
     assuming a Gaussian prior N(prior_mean, prior_sd^2).
-    
+
     Args:
-        log_likelihood_func (callable): A function taking a 1D array of parameter nodes
+        log_likelihood_func (Callable): A function taking a 1D array of parameter nodes
             and returning the corresponding log-likelihoods.
-        f_func (callable): A function taking a 1D array of parameter nodes
+        f_func (Callable): A function taking a 1D array of parameter nodes
             and returning the values of the function to be integrated.
             Can return an array of shape (..., num_nodes) for multiple queries.
         prior_mean (float): The mean of the Gaussian prior.
@@ -45,18 +53,18 @@ def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, 
 
 
 def adaptive_mc_integration(
-    lik_integrand,
-    initial_limits,
-    rng,
-    n=10000,
-    max_iter=5,
-    mass_threshold=0.999,
-    k_sd=3.5,
+    lik_integrand: Callable[[np.ndarray], np.ndarray],
+    initial_limits: list[tuple[float, float]],
+    rng: np.random.Generator,
+    n: int = 10000,
+    max_iter: int = 5,
+    mass_threshold: float = 0.999,
+    k_sd: float = 3.5,
 ):
     """Performs adaptive multi-dimensional Monte Carlo integration.
 
     Args:
-        lik_integrand (callable): Function taking a 2D array of samples
+        lik_integrand (Callable): Function taking a 2D array of samples
             and returning an array of evaluated likelihoods * priors.
         initial_limits (list[tuple[float, float]]): Initial integration bounds
             for each dimension.
@@ -123,27 +131,27 @@ def adaptive_mc_integration(
 
 
 def integrate_posterior_1d(
-    logpost,
-    f,
-    lo,
-    hi,
+    logpost: Callable[[np.ndarray], np.ndarray],
+    f: Callable[[np.ndarray], np.ndarray],
+    lo: float,
+    hi: float,
     *,
-    method="grid",
-    n_points=2001,
-    adaptive_limits=True,
-    edge_frac=0.02,
-    tail_mass_tol=1e-3,
-    expand_factor=1.0,
-    max_expansions=6,
-    warn_on_max=True,
-    return_diagnostics=False,
+    method: str = "grid",
+    n_points: int = 2001,
+    adaptive_limits: bool = True,
+    edge_frac: float = 0.02,
+    tail_mass_tol: float = 1e-3,
+    expand_factor: float = 1.0,
+    max_expansions: int = 6,
+    warn_on_max: bool = True,
+    return_diagnostics: bool = False,
 ):
     """Integrate a 1D posterior density with optional adaptive bounds.
 
     Args:
-        logpost (callable): Log posterior density function evaluated on a
+        logpost (Callable): Log posterior density function evaluated on a
             numpy array.
-        f (callable): Function of the parameter to integrate with respect to
+        f (Callable): Function of the parameter to integrate with respect to
             the posterior density.
         lo (float): Initial lower bound of integration.
         hi (float): Initial upper bound of integration.
@@ -216,19 +224,19 @@ def integrate_posterior_1d(
         expansions += 1
 
 def integrate_posterior_1d_adaptive(
-    logpost,
-    f,
-    lo,
-    hi,
+    logpost: Callable[[np.ndarray], np.ndarray],
+    f: Callable[[np.ndarray], np.ndarray],
+    lo: float,
+    hi: float,
     *,
-    method="grid",
-    n_points=2001,
-    edge_frac=0.02,
-    tail_mass_tol=1e-3,
-    expand_factor=1.0,
-    max_expansions=6,
-    warn_on_max=True,
-    return_diagnostics=False,
+    method: str = "grid",
+    n_points: int = 2001,
+    edge_frac: float = 0.02,
+    tail_mass_tol: float = 1e-3,
+    expand_factor: float = 1.0,
+    max_expansions: int = 6,
+    warn_on_max: bool = True,
+    return_diagnostics: bool = False,
 ):
     """Adaptive execution interface for posterior integration."""
     return integrate_posterior_1d(
@@ -245,14 +253,14 @@ def integrate_posterior_1d_adaptive(
     )
 
 def integrate_posterior_1d_nonadaptive(
-    logpost,
-    f,
-    lo,
-    hi,
+    logpost: Callable[[np.ndarray], np.ndarray],
+    f: Callable[[np.ndarray], np.ndarray],
+    lo: float,
+    hi: float,
     *,
-    method="grid",
-    n_points=2001,
-    return_diagnostics=False,
+    method: str = "grid",
+    n_points: int = 2001,
+    return_diagnostics: bool = False,
 ):
     """Legacy non-adaptive execution interface for posterior integration."""
     return integrate_posterior_1d(

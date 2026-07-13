@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections.abc import Callable
 from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
 import numpy as np
 import pandas as pd
@@ -656,7 +657,7 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
             Defaults to 1.
         cases_already_observed (list, optional): A list of cases that have
             already been observed. Defaults to an empty list.
-        custom_output_func (callable, optional): A function that takes the
+        custom_output_func (Callable, optional): A function that takes the
             trial object and returns a dictionary of extra output. Defaults
             to `None`.
         verbose (bool, optional): If `True`, prints progress information.
@@ -740,7 +741,7 @@ def get_path(x: Any, dose_label_func: Any = None) -> Any:
 
     Args:
         x (dict): A dictionary representing a single step in the DTP.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
 
     Returns:
@@ -797,7 +798,7 @@ def print_dtps(dtps: Any, indent: Any = 0, dose_label_func: Any = None) -> Any:
     Args:
         dtps (dict): A nested dictionary of DTPs.
         indent (int, optional): The indentation level. Defaults to 0.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
     """
     from clintrials.dosefinding import print_dtps as base_print_dtps
@@ -817,7 +818,7 @@ def print_dtps_verbose(dtps: Any, indent: Any = 0, dose_label_func: Any = None) 
     Args:
         dtps (dict): A nested dictionary of DTPs.
         indent (int, optional): The indentation level. Defaults to 0.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
     """
     from clintrials.dosefinding import print_dtps as base_print_dtps

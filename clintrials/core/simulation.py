@@ -10,6 +10,7 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 import copy
+from collections.abc import Callable
 import itertools
 import json
 import logging
@@ -43,13 +44,13 @@ def run_sims(
     """Runs simulations using a delegate function.
 
     Args:
-        sim_func (callable): The delegate function to be called to yield a
+        sim_func (Callable): The delegate function to be called to yield a
             single simulation.
         n1 (int, optional): The number of batches. Defaults to 1.
         n2 (int, optional): The number of iterations per batch. Defaults to 1.
         out_file (str, optional): The location of the file for incremental
             saving after each batch. Defaults to None.
-        agg_func (callable, optional): Online aggregation function to process
+        agg_func (Callable, optional): Online aggregation function to process
             incremental results. Should have the signature `agg_func(current_sims, new_batch_sims)`.
         metadata (dict, optional): Self-describing metadata headers that detail
             simulation parameters alongside results.
@@ -91,7 +92,7 @@ def sim_parameter_space(
     """Runs simulations for a parameter space.
 
     Args:
-        sim_func (callable): The function to be called to yield a single
+        sim_func (Callable): The function to be called to yield a single
             simulation. Parameters are provided via `ps` as unpacked kwargs.
         ps (clintrials.utils.ParameterSpace): The parameter space to explore.
         n1 (int, optional): The number of batches. Defaults to 1.
@@ -99,7 +100,7 @@ def sim_parameter_space(
             defaults to the size of the parameter space. Defaults to None.
         out_file (str, optional): The location of the file for incremental
             saving after each batch. Defaults to None.
-        agg_func (callable, optional): Online aggregation function to process
+        agg_func (Callable, optional): Online aggregation function to process
             incremental results.
         metadata (dict, optional): Self-describing metadata headers that detail
             simulation parameters alongside results.

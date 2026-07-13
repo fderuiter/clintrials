@@ -1,4 +1,5 @@
 from typing import Any
+from collections.abc import Callable
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
@@ -143,8 +144,8 @@ def map_reduce_files(files: Any, map_func: Any, reduce_func: Any) -> Any:
 
     Args:
         files (list[str]): A list of file paths.
-        map_func (callable): The map function to apply to each file.
-        reduce_func (callable): The reduce function to combine the results.
+        map_func (Callable): The map function to apply to each file.
+        reduce_func (Callable): The reduce function to combine the results.
 
     Returns:
         object: The final reduced result.
@@ -613,7 +614,7 @@ class Memoize:
         """Initializes a Memoize object.
 
         Args:
-            f (callable): The function to memoize.
+            f (Callable): The function to memoize.
         """
         self.f = f
         self.memo = {}
