@@ -25,28 +25,49 @@ def get_preview_sims(design_type, target_tox, cohort_size, max_size):
 
 def main():
     """Sets up the Streamlit dashboard and renders the appropriate view."""
-    st.sidebar.markdown(
-        '<nav aria-label="Settings Sidebar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;"></nav>',
-        unsafe_allow_html=True
-    )
-    
-    st.markdown(
-        '<main aria-label="Analysis Main Content" id="main-content-anchor" tabindex="-1" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;"></main>',
-        unsafe_allow_html=True
-    )
+    try:
+        import streamlit.components.v1 as components
+        components.html("""
+        <script>
+            const parentDoc = window.parent.document;
+            
+            // Fix aria-allowed-attr for sidebar
+            const sidebars = parentDoc.querySelectorAll('.stSidebar');
+            sidebars.forEach(sidebar => {
+                sidebar.removeAttribute('aria-expanded');
+                sidebar.setAttribute('role', 'navigation');
+            });
+
+            // Fix region issues by wrapping main content or adding roles
+            const mainContainer = parentDoc.querySelector('.stMain');
+            if (mainContainer) {
+                mainContainer.setAttribute('role', 'main');
+            }
+            
+            const appHeader = parentDoc.querySelector('header[data-testid="stHeader"]');
+            if (appHeader) {
+                appHeader.setAttribute('role', 'banner');
+            }
+
+            // Fix scrollable-region-focusable for JSON and code blocks
+            const scrollables = parentDoc.querySelectorAll('.stJson, .stCodeBlock');
+            scrollables.forEach(el => {
+                el.setAttribute('tabindex', '0');
+            });
+            
+            // Periodically run to catch dynamically rendered elements
+            setInterval(() => {
+                parentDoc.querySelectorAll('.stSidebar').forEach(s => s.removeAttribute('aria-expanded'));
+                parentDoc.querySelectorAll('.stJson').forEach(j => {
+                    if (!j.hasAttribute('tabindex')) j.setAttribute('tabindex', '0');
+                });
+            }, 1000);
+        </script>
+        """, height=0, width=0)
+    except ImportError:
+        pass
 
     st.title("Interactive Simulation Dashboard")
-
-    st.sidebar.header("Accessibility")
-    if "accessibility_mode" not in st.session_state:
-        st.session_state["accessibility_mode"] = False
-
-    toggle_fn = getattr(st.sidebar, "toggle", lambda *args, **kwargs: False)
-    toggle_fn(
-        "Accessibility Mode",
-        key="accessibility_mode",
-        help="Enable high-fidelity text alternatives for screen readers.",
-    )
 
     st.sidebar.header("Select Trial Design")
     available_designs = PROTOCOL_REGISTRY.get_designs()

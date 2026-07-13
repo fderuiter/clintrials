@@ -82,7 +82,7 @@ def render(sims):
             import clintrials.visualization as viz
             fig_rec = viz.plot_efftox_simulation_recommendation(
                 summary_df,
-                high_contrast=getattr(st, "session_state", {}).get("accessibility_mode", False)
+                high_contrast=False
             )
             figures.append(("Dose Recommendation Probability", fig_rec))
     else:
