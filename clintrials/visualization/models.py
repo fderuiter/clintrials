@@ -68,3 +68,6 @@ class MultiFormatSummaryContainer:
         html += "  </tbody>\n</table>"
         
         return html
+
+    def to_plotly_json(self):
+        return {"title": self.title, "markdown": self.markdown, "html": self.html}

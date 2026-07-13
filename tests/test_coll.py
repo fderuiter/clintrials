@@ -1,6 +1,6 @@
 import pytest
 
-from clintrials.legacy.utils import to_1d_list
+from clintrials.utils import to_1d_list
 
 
 @pytest.mark.parametrize(
