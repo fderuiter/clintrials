@@ -127,21 +127,15 @@ def render_metric(st_module, label, value, precision=4):
 
 def render_accessible_chart(st_module, fig, expander_label="Data Summary"):
     """
-    Shared utility to render either a Plotly chart or an accessible Markdown table
-    based on the global Accessibility Mode session state.
+    Shared utility to render a Plotly chart with an accessible Markdown table summary.
     """
-    accessibility_mode = getattr(st_module, "session_state", {}).get("accessibility_mode", False)
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
     
     if hasattr(fig, "layout") and hasattr(fig.layout, "meta"):
         fig.layout.meta = None
     st_module.plotly_chart(fig)
 
-    if accessibility_mode:
-        if hasattr(meta, "html"):
-            st_module.markdown(meta.html, unsafe_allow_html=True)
-        else:
-            st_module.markdown(meta)
+    if hasattr(meta, "html"):
+        st_module.markdown(meta.html, unsafe_allow_html=True)
     else:
-        with st_module.expander(expander_label):
-            st_module.markdown(meta)
+        st_module.markdown(meta)

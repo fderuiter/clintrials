@@ -61,7 +61,7 @@ def render(sims):
         import clintrials.visualization as viz
         fig = viz.plot_crm_simulation_recommendation(
             summary_df,
-            high_contrast=getattr(st, "session_state", {}).get("accessibility_mode", False)
+            high_contrast=False
         )
         figures.append(("Dose Recommendation Probability", fig))
     else:

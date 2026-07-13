@@ -73,31 +73,17 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
     import json
     import os
 
-    # Define elements to exclude from structural audits (Streamlit internal components)
-    axe_context = {
-        "exclude": [
-            [".stSidebar"],
-            ["[data-testid='stFileUploader']"],
-            [".stJson"],
-            ["[data-testid='stAlert']"],
-            ["[data-testid='stFileUploaderDropzoneInput']"],
-            [".stFileChip"],
-            ["div[aria-haspopup='true']"]
-        ]
-    }
-
     # Run Axe audit for standard mode
     axe = Axe()
-    results_standard = axe.run(page, context=axe_context)
+    results_standard = axe.run(page)
     
     # Strip HTML to prevent PII leakage and filter violations
     def process_violations(violations):
         processed = []
         for v in violations:
-            if v["impact"] in ["critical", "serious"]:
-                for node in v["nodes"]:
-                    node.pop("html", None)
-                processed.append(v)
+            for node in v["nodes"]:
+                node.pop("html", None)
+            processed.append(v)
         return processed
         
     violations_standard = process_violations(results_standard.response["violations"])
@@ -112,27 +98,3 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
     assert page.locator("th").count() > 0, "No <th> found in the rendered tables."
     
     assert len(violations_standard) == 0, f"Standard Mode Accessibility Violations: {violations_standard}"
-    
-    # Toggle 'Accessibility Mode'
-    page.locator("text=Accessibility Mode").evaluate("node => node.closest('label').querySelector('input').click()")
-    page.wait_for_timeout(3000)
-    
-    # Run Axe audit for high-contrast mode
-    results_hc = axe.run(page, context=axe_context)
-    violations_hc = process_violations(results_hc.response["violations"])
-    
-    with open(f"accessibility_reports/axe_hc_{viewport['width']}x{viewport['height']}.json", "w") as f:
-        json.dump(violations_hc, f, indent=2)
-        
-    assert len(violations_hc) == 0, f"High-Contrast Mode Accessibility Violations: {violations_hc}"
-    
-    # Confirm application of the high-contrast palette [cite:source1][cite:source2]
-    # Check iframe contents for Plotly colors
-    found_hc_color = False
-    for frame in page.frames:
-        content_lower = frame.content().lower()
-        if "#8a5f00" in content_lower or "rgb(138, 95, 0)" in content_lower:
-            found_hc_color = True
-            break
-            
-    assert found_hc_color, "High-contrast palette color (#8A5F00) was not found in the rendered charts."
