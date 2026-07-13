@@ -48,4 +48,7 @@ html_js_files = ["custom.js"]
 # Warnings as errors when running in CI
 if os.environ.get("SPHINX_STRICT", "0") == "1":
     nitpicky = True
-    nitpick_ignore = []
+    nitpick_ignore = [
+        ("py:class", "callable"),
+        ("py:class", "optional")
+    ]
