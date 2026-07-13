@@ -54,6 +54,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         fragment=lambda func: func,
         cache_data=lambda **kwargs: lambda f: f,
         spinner=MagicMock(return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())),
+        session_state={},
     )
     return st
 
@@ -87,7 +88,8 @@ def _make_winratio_streamlit_mock():
         metric=MagicMock(),
         plotly_chart=MagicMock(),
         markdown=MagicMock(),
-        expander=MagicMock()
+        expander=MagicMock(),
+        session_state={},
     )
     return st
 
