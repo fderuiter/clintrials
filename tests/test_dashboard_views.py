@@ -104,7 +104,7 @@ def test_dashboard_main_routes_to_crm(monkeypatch):
     def fake_render(data):
         called["data"] = data
 
-    monkeypatch.setattr(main.crm_view, "render", fake_render)
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", fake_render)
     main.main()
     assert called["data"] == [{"foo": "bar"}]
 
@@ -119,7 +119,7 @@ def test_dashboard_main_routes_to_efftox(monkeypatch):
     def fake_render(data):
         called["data"] = data
 
-    monkeypatch.setattr(main.efftox_view, "render", fake_render)
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["EffTox"], "render", fake_render)
     main.main()
     assert called["data"] == [{"foo": "bar"}]
 
@@ -134,7 +134,7 @@ def test_dashboard_main_routes_to_watu(monkeypatch):
     def fake_render(data):
         called["data"] = data
 
-    monkeypatch.setattr(main.watu_view, "render", fake_render)
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["WATU"], "render", fake_render)
     main.main()
     assert called["data"] == [{"foo": "bar"}]
 
@@ -149,7 +149,7 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):
     def fake_render():
         called["called"] = True
 
-    monkeypatch.setattr(main.winratio_view, "render", fake_render)
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["Win Ratio"], "render", fake_render)
     main.main()
     assert called["called"]
 

@@ -52,10 +52,10 @@ def test_main_preview_crm(fake_streamlit, monkeypatch):
     def mock_simulate(*args, **kwargs):
         return {"recommended_dose": 1}
     monkeypatch.setattr(main, "get_preview_sims", MagicMock(return_value=[{"recommended_dose": 1}]))
-    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())
     
     main.main()
-    main.crm_view.render.assert_called_once()
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once()
     
 def test_get_preview_sims_crm():
     main = reload_module("clintrials.visualization.dashboard.main")

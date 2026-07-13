@@ -14,6 +14,9 @@ from clintrials.visualization.dashboard.factory import create_widget, render_met
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
+from clintrials.core.registry import PROTOCOL_REGISTRY
+
+@PROTOCOL_REGISTRY.register("Win Ratio")
 @dashboard_view(
     title="Win Ratio Simulation",
     model_name="Win Ratio",

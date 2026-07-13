@@ -215,6 +215,53 @@ def integrate_posterior_1d(
         hi += expand_factor * width / 2
         expansions += 1
 
+def integrate_posterior_1d_adaptive(
+    logpost,
+    f,
+    lo,
+    hi,
+    *,
+    method="grid",
+    n_points=2001,
+    edge_frac=0.02,
+    tail_mass_tol=1e-3,
+    expand_factor=1.0,
+    max_expansions=6,
+    warn_on_max=True,
+    return_diagnostics=False,
+):
+    """Adaptive execution interface for posterior integration."""
+    return integrate_posterior_1d(
+        logpost, f, lo, hi,
+        method=method,
+        n_points=n_points,
+        adaptive_limits=True,
+        edge_frac=edge_frac,
+        tail_mass_tol=tail_mass_tol,
+        expand_factor=expand_factor,
+        max_expansions=max_expansions,
+        warn_on_max=warn_on_max,
+        return_diagnostics=return_diagnostics,
+    )
+
+def integrate_posterior_1d_nonadaptive(
+    logpost,
+    f,
+    lo,
+    hi,
+    *,
+    method="grid",
+    n_points=2001,
+    return_diagnostics=False,
+):
+    """Legacy non-adaptive execution interface for posterior integration."""
+    return integrate_posterior_1d(
+        logpost, f, lo, hi,
+        method=method,
+        n_points=n_points,
+        adaptive_limits=False,
+        return_diagnostics=return_diagnostics,
+    )
 
 # Inject module-level docstring
 if __doc__:

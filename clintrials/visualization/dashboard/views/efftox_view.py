@@ -12,6 +12,43 @@ from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
+from clintrials.core.registry import PROTOCOL_REGISTRY
+
+def efftox_preview_sims(target_tox, cohort_size, max_size):
+    from clintrials.dosefinding.efftox import EffTox, LpNormCurve
+    from clintrials.dosefinding.efficacytoxicity import simulate_trial
+    
+    real_doses = [1.0, 2.0, 3.0, 4.0, 5.0]
+    prior_tox_probs = [0.05, 0.1, 0.2, 0.3, 0.4]
+    prior_eff_probs = [0.2, 0.4, 0.6, 0.7, 0.8]
+    
+    metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
+    trial = EffTox(
+        real_doses=real_doses,
+        prior_tox_probs=prior_tox_probs,
+        prior_eff_probs=prior_eff_probs,
+        tox_cutoff=0.4,
+        eff_cutoff=0.2,
+        tox_certainty=0.8,
+        eff_certainty=0.8,
+        metric=metric,
+        max_size=max_size,
+    )
+    
+    tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
+    eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
+    
+    sims = []
+    for t_tox in tox_scenarios:
+        for t_eff in eff_scenarios:
+            for _ in range(10):
+                report = simulate_trial(trial, true_toxicities=t_tox, true_efficacies=t_eff, cohort_size=cohort_size)
+                report["true_prob_tox"] = t_tox
+                report["true_prob_eff"] = t_eff
+                sims.append(report)
+    return sims
+
+@PROTOCOL_REGISTRY.register("EffTox", preview_func=efftox_preview_sims)
 @dashboard_view(title="EffTox Simulation Results", model_name="EffTox", file_prefix="efftox_simulations")
 def render(sims):
     """Renders the EffTox simulation results view."""
