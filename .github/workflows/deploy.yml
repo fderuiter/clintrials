@@ -1,4 +1,4 @@
-name: Build & Deploy Sphinx docs to GitHub Pages
+name: Unified Atomic Deployment (Docs & Hub)
 
 on:
   push:
@@ -49,14 +49,25 @@ jobs:
       - name: Linkcheck (optional)
         run: poetry run sphinx-build -b linkcheck docs docs/_build/linkcheck
 
-      # Critical step: ensure Jekyll is bypassed so _static/* is served
-      - name: Bypass Jekyll on GitHub Pages
-        run: touch docs/_build/html/.nojekyll
+      - name: Build clintrials wheel
+        run: poetry build --format wheel
+
+      - name: Prepare unified staging directory
+        run: |
+          mkdir -p public
+          # Copy Sphinx documentation to the root of staging
+          cp -a docs/_build/html/. public/
+          # Ensure Jekyll is bypassed on GitHub Pages so _static/* is served
+          touch public/.nojekyll
+          # Setup Simulation Hub in /hub/
+          mkdir -p public/hub
+          cp -a hub/. public/hub/
+          cp dist/*.whl public/hub/clintrials-latest-py3-none-any.whl
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: docs/_build/html
+          path: public
 
   deploy:
     environment:
