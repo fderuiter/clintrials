@@ -54,12 +54,19 @@ def main():
         st.error("No trial designs registered.")
         return
 
+    import os
+    active_view = os.environ.get("ACTIVE_VIEW")
+    default_index = 0
+    if active_view and active_view in available_designs:
+        default_index = list(available_designs).index(active_view)
+
     design_type = create_widget(
         st,
         "selectbox",
         "design_type",
         "Choose the type of trial design for your simulation results:",
         tuple(available_designs),
+        index=default_index,
     )
 
     from clintrials.visualization.dashboard.factory import REGISTRY

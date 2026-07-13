@@ -43,6 +43,24 @@
         font-family: sans-serif;
       }
     </style>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const isEmbed = urlParams.get('embed') === 'true';
+      const activeView = urlParams.get('view') || '';
+      
+      if (isEmbed) {
+        const style = document.createElement('style');
+        style.innerHTML = `
+          header[data-testid="stHeader"] { display: none !important; }
+          footer { display: none !important; }
+          section[data-testid="stSidebar"] { display: none !important; }
+          .stDeployButton { display: none !important; }
+          div[data-testid="collapsedControl"] { display: none !important; }
+          .stApp { background-color: transparent !important; }
+        `;
+        document.head.appendChild(style);
+      }
+    </script>
   </head>
   <body>
     <a href="#main-content-anchor" class="skip-link">Skip to Main Content</a>
@@ -58,20 +76,38 @@
         });
       }
 
-      stlite.mount(
-        {
-          requirements: ["altair", "plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./clintrials-latest-py3-none-any.whl"],
-          entrypoint: "app.py",
-          files: {
-            ".streamlit/config.toml": `
+      let themeConfig = `
 [theme]
 primaryColor = "#496D89"
 backgroundColor = "#FFFFFF"
 secondaryBackgroundColor = "#F0F2F6"
 textColor = "#31333F"
 font = "sans serif"
-`,
+`;
+      if (isEmbed) {
+        themeConfig = `
+[theme]
+primaryColor = "#2980B9"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F3F6F6"
+textColor = "#404040"
+font = "sans serif"
+`;
+      }
+
+      stlite.mount(
+        {
+          requirements: ["altair", "plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./clintrials-latest-py3-none-any.whl"],
+          entrypoint: "app.py",
+          files: {
+            ".streamlit/config.toml": themeConfig,
             "app.py": `
+import os
+import streamlit as st
+
+os.environ['EMBED_MODE'] = '${isEmbed}'
+os.environ['ACTIVE_VIEW'] = '${activeView}'
+
 from clintrials.visualization.dashboard.main import main
 if __name__ == "__main__":
     main()
