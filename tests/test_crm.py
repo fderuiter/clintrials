@@ -279,7 +279,6 @@ class TestCRMMLEVariance:
         assert trial.beta_var > 0
 
     def test_mle_variance_bootstrap(self):
-        np.random.seed(42)
         trial = CRM(
             self.prior,
             self.target,
@@ -293,12 +292,12 @@ class TestCRMMLEVariance:
             mle_var_method="bootstrap",
             bootstrap_samples=50,  # Smaller sample for faster test
         )
+        trial.set_rng(np.random.default_rng(42))
         trial.update(list(zip(self.doses, self.tox)))
         assert trial.beta_var is not None
         assert trial.beta_var > 0
 
     def test_mle_variance_comparison(self):
-        np.random.seed(42)
         trial_hessian = CRM(
             self.prior,
             self.target,
@@ -326,6 +325,7 @@ class TestCRMMLEVariance:
             mle_var_method="bootstrap",
             bootstrap_samples=200,
         )
+        trial_bootstrap.set_rng(np.random.default_rng(42))
         trial_bootstrap.update(list(zip(self.doses, self.tox)))
 
         assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.3)
