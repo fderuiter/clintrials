@@ -1,5 +1,4 @@
 
-from unittest.mock import mock_open, patch
 from clintrials.utils import Memoize, filter_list_of_dicts, to_1d_list
 
 def test_filter_list_of_dicts():

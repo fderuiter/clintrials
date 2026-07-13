@@ -70,4 +70,5 @@ class MultiFormatSummaryContainer:
         return html
 
     def to_plotly_json(self):
+        """Serialize this object to a JSON dictionary for Plotly."""
         return {"title": self.title, "markdown": self.markdown, "html": self.html}
