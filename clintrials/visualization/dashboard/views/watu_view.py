@@ -12,6 +12,9 @@ from clintrials.visualization.dashboard.views.framework import dashboard_view
 from clintrials.core.registry import PROTOCOL_REGISTRY
 
 def watu_preview_sims(target_tox, cohort_size, max_size):
+    """
+    Generate preview simulations for the WATU model.
+    """
     from clintrials.dosefinding.watu import WATU
     from clintrials.dosefinding.efftox import LpNormCurve
     from clintrials.dosefinding.efficacytoxicity import simulate_trial

@@ -87,6 +87,9 @@ class ProtocolRegistry:
             pass
 
     def register(self, name, preview_func=None):
+        """
+        Register a protocol design with an optional preview simulation function.
+        """
         def decorator(render_func):
             if name not in self._designs:
                 self._designs[name] = {}
@@ -97,17 +100,29 @@ class ProtocolRegistry:
         return decorator
 
     def register_manual(self, name, render_func, preview_func=None):
+        """
+        Manually register a protocol design with its render and preview functions.
+        """
         self._designs[name] = {"render": render_func, "preview": preview_func}
 
     def get_designs(self):
+        """
+        Get a list of all registered protocol design names.
+        """
         self._discover()
         return list(self._designs.keys())
 
     def get_render(self, name):
+        """
+        Get the render function for a registered protocol design.
+        """
         self._discover()
         return self._designs.get(name, {}).get("render")
 
     def get_preview(self, name):
+        """
+        Get the preview function for a registered protocol design.
+        """
         self._discover()
         return self._designs.get(name, {}).get("preview")
 

@@ -15,6 +15,9 @@ from clintrials.visualization.dashboard.views.framework import dashboard_view
 from clintrials.core.registry import PROTOCOL_REGISTRY
 
 def efftox_preview_sims(target_tox, cohort_size, max_size):
+    """
+    Generate preview simulations for the EffTox model.
+    """
     from clintrials.dosefinding.efftox import EffTox, LpNormCurve
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
     

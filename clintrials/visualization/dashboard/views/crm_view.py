@@ -15,6 +15,9 @@ from clintrials.visualization.dashboard.views.framework import dashboard_view
 from clintrials.core.registry import PROTOCOL_REGISTRY
 
 def crm_preview_sims(target_tox, cohort_size, max_size):
+    """
+    Generate preview simulations for the CRM model.
+    """
     from clintrials.dosefinding.crm import CRM
     from clintrials.dosefinding import simulate_dose_finding_trial
     
