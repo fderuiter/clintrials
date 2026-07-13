@@ -1,13 +1,12 @@
 from typing import Any
 __author__ = 'Kristian Brock'
 __contact__ = 'kristian.brock@gmail.com'
-import glob
 import json
 import logging
 import warnings
 from collections import OrderedDict
 from copy import copy
-from functools import reduce, wraps
+from functools import wraps
 from itertools import product
 import numpy as np
 logger = logging.getLogger(__name__)
@@ -301,7 +300,6 @@ class _ParameterSpaceIter:
     next = __next__
 
 from collections.abc import Iterable
-import numpy as np
 
 __all__ = [
     "get_logger",
@@ -317,6 +315,7 @@ __all__ = [
 ]
 
 def to_1d_list_gen(x):
+    """Yield items of a nested list as a 1D generator."""
     if isinstance(x, list):
         for y in x:
             yield from to_1d_list_gen(y)
@@ -324,15 +323,18 @@ def to_1d_list_gen(x):
         yield x
 
 def to_1d_list(x):
+    """Convert a nested list into a 1D list."""
     return list(to_1d_list_gen(x))
 
 def atomic_to_json(obj):
+    """Convert an atomic numpy object to a JSON-serializable type."""
     if isinstance(obj, np.generic):
         return obj.item()
     else:
         return obj
 
 def iterable_to_json(obj):
+    """Convert an iterable object to a JSON-serializable list."""
     if isinstance(obj, Iterable):
         return [atomic_to_json(x) for x in obj]
     else:

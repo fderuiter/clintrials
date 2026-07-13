@@ -12,7 +12,7 @@ import json
 import logging
 from collections import OrderedDict
 from datetime import datetime
-from clintrials.utils import _open_json_local, filter_list_of_dicts, tuple_to_dataframe
+from clintrials.utils import filter_list_of_dicts, tuple_to_dataframe
 
 __all__ = [
     "run_sims",
