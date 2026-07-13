@@ -71,7 +71,7 @@ def render() -> None:
         import clintrials.visualization as viz
         fig = viz.plot_winratio_power_curve(
             df,
-            high_contrast=getattr(st, "session_state", {}).get("accessibility_mode", False)
+            high_contrast=False
         )
         figures = [(None, fig)]
         

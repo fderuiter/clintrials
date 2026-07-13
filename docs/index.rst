@@ -13,6 +13,7 @@ Welcome to **clintrials**, a Python library providing clinical trial designs and
    :glob:
 
    getting_started
+   accessibility
    tutorials/*
    tutorials/matchpoint/*
    win_ratio_simulation
