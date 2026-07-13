@@ -9,6 +9,46 @@ from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
+from clintrials.core.registry import PROTOCOL_REGISTRY
+
+def watu_preview_sims(target_tox, cohort_size, max_size):
+    from clintrials.dosefinding.watu import WATU
+    from clintrials.dosefinding.efftox import LpNormCurve
+    from clintrials.dosefinding.efficacytoxicity import simulate_trial
+    skeletons = [
+        [0.60, 0.50, 0.40, 0.30, 0.20],
+        [0.50, 0.60, 0.50, 0.40, 0.30],
+        [0.40, 0.50, 0.60, 0.50, 0.40],
+        [0.30, 0.40, 0.50, 0.60, 0.50],
+        [0.20, 0.30, 0.40, 0.50, 0.60],
+    ]
+    tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
+    metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
+    
+    watu = WATU(
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=target_tox,
+        tox_limit=0.4,
+        eff_limit=0.2,
+        metric=metric,
+        first_dose=1,
+        max_size=max_size
+    )
+    
+    tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
+    eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
+    sims = []
+    for t_tox in tox_scenarios:
+        for t_eff in eff_scenarios:
+            for _ in range(10):
+                report = simulate_trial(watu, true_toxicities=t_tox, true_efficacies=t_eff, cohort_size=cohort_size)
+                report["true_prob_tox"] = t_tox
+                report["true_prob_eff"] = t_eff
+                sims.append(report)
+    return sims
+
+@PROTOCOL_REGISTRY.register("WATU", preview_func=watu_preview_sims)
 @dashboard_view(title="WATU Simulation Results", model_name="WATU", file_prefix="watu_simulations")
 def render(sims):
     """Renders the WATU simulation results view."""

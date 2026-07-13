@@ -79,11 +79,11 @@ def test_main_dispatches_to_crm(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.file_uploader.return_value = DummyFile()
 
     main = reload_module("clintrials.visualization.dashboard.main")
-    monkeypatch.setattr(main.crm_view, "render", MagicMock())
-    monkeypatch.setattr(main.efftox_view, "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["EffTox"], "render", MagicMock())
     main.main()
-    main.crm_view.render.assert_called_once_with(sims)
-    main.efftox_view.render.assert_not_called()
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with(sims)
+    main.PROTOCOL_REGISTRY.get_render("EffTox").assert_not_called()
 
 
 def test_main_dispatches_to_efftox(fake_streamlit, fake_plotly, monkeypatch):
@@ -97,11 +97,11 @@ def test_main_dispatches_to_efftox(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.file_uploader.return_value = DummyFile()
 
     main = reload_module("clintrials.visualization.dashboard.main")
-    monkeypatch.setattr(main.crm_view, "render", MagicMock())
-    monkeypatch.setattr(main.efftox_view, "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["EffTox"], "render", MagicMock())
     main.main()
-    main.efftox_view.render.assert_called_once_with(sims)
-    main.crm_view.render.assert_not_called()
+    main.PROTOCOL_REGISTRY.get_render("EffTox").assert_called_once_with(sims)
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_not_called()
 
 def test_main_dispatches_to_watu(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.selectbox.return_value = "WATU"
@@ -114,22 +114,22 @@ def test_main_dispatches_to_watu(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.file_uploader.return_value = DummyFile()
 
     main = reload_module("clintrials.visualization.dashboard.main")
-    monkeypatch.setattr(main.watu_view, "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["WATU"], "render", MagicMock())
     main.main()
-    main.watu_view.render.assert_called_once_with(sims)
+    main.PROTOCOL_REGISTRY.get_render("WATU").assert_called_once_with(sims)
 
 
 def test_main_dispatches_to_winratio(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.selectbox.return_value = "Win Ratio"
 
     main = reload_module("clintrials.visualization.dashboard.main")
-    monkeypatch.setattr(main.crm_view, "render", MagicMock())
-    monkeypatch.setattr(main.efftox_view, "render", MagicMock())
-    monkeypatch.setattr(main.winratio_view, "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["EffTox"], "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["Win Ratio"], "render", MagicMock())
     main.main()
-    main.winratio_view.render.assert_called_once()
-    main.crm_view.render.assert_not_called()
-    main.efftox_view.render.assert_not_called()
+    main.PROTOCOL_REGISTRY.get_render("Win Ratio").assert_called_once()
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_not_called()
+    main.PROTOCOL_REGISTRY.get_render("EffTox").assert_not_called()
 
 
 def test_main_preview_mode_crm(fake_streamlit, fake_plotly, monkeypatch):
@@ -137,11 +137,11 @@ def test_main_preview_mode_crm(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.radio.return_value = "Preview Mode"
 
     main = reload_module("clintrials.visualization.dashboard.main")
-    monkeypatch.setattr(main.crm_view, "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())
     monkeypatch.setattr(main, "get_preview_sims", MagicMock(return_value=[{"preview": True}]))
     main.main()
     main.get_preview_sims.assert_called_once()
-    main.crm_view.render.assert_called_once_with([{"preview": True}])
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with([{"preview": True}])
 
 def test_main_preview_mode_exception(fake_streamlit, fake_plotly, monkeypatch):
     fake_streamlit.sidebar.selectbox.return_value = "CRM"

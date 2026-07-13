@@ -10,125 +10,21 @@ import json
 import streamlit as st
 
 from clintrials.visualization.dashboard.factory import create_widget
-from clintrials.visualization.dashboard.views import (
-    crm_view,
-    efftox_view,
-    watu_view,
-    winratio_view,
-)
-
+from clintrials.core.registry import PROTOCOL_REGISTRY
 
 @st.cache_data(show_spinner=False)
 def get_preview_sims(design_type, target_tox, cohort_size, max_size):
     """
     Run and cache default preview simulations based on the selected design type and parameters.
-    
-    Args:
-        design_type: The type of clinical trial design (e.g., 'CRM').
-        target_tox: The target toxicity level.
-        cohort_size: The number of patients per cohort.
-        max_size: The maximum total sample size for the trial.
-        
-    Returns:
-        list: A list of simulation report dictionaries.
     """
-    with st.spinner(f"Running Default Preview Simulation for {design_type}..."):
-        sims = []
-        if design_type == "CRM":
-            from clintrials.dosefinding.crm import CRM
-            from clintrials.dosefinding import simulate_dose_finding_trial
-            
-            crm = CRM(
-                prior=[0.05, 0.1, 0.2, 0.3, 0.4], 
-                target=target_tox, 
-                first_dose=1, 
-                max_size=max_size
-            )
-            scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)]
-            for true_tox in scenarios:
-                for _ in range(20):
-                    report = simulate_dose_finding_trial(crm, true_toxicities=true_tox, cohort_size=cohort_size)
-                    report["true_tox"] = true_tox
-                    sims.append(report)
-                    
-        elif design_type == "EffTox":
-            from clintrials.dosefinding.efftox import EffTox, LpNormCurve
-            from clintrials.dosefinding.efficacytoxicity import simulate_trial
-            
-            real_doses = [1.0, 2.0, 3.0, 4.0, 5.0]
-            prior_tox_probs = [0.05, 0.1, 0.2, 0.3, 0.4]
-            prior_eff_probs = [0.2, 0.4, 0.6, 0.7, 0.8]
-            
-            metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-            trial = EffTox(
-                real_doses=real_doses,
-                prior_tox_probs=prior_tox_probs,
-                prior_eff_probs=prior_eff_probs,
-                tox_cutoff=0.4,
-                eff_cutoff=0.2,
-                tox_certainty=0.8,
-                eff_certainty=0.8,
-                metric=metric,
-                max_size=max_size,
-            )
-            
-            tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
-            eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
-            
-            for t_tox in tox_scenarios:
-                for t_eff in eff_scenarios:
-                    for _ in range(10):
-                        report = simulate_trial(trial, true_toxicities=t_tox, true_efficacies=t_eff, cohort_size=cohort_size)
-                        report["true_prob_tox"] = t_tox
-                        report["true_prob_eff"] = t_eff
-                        sims.append(report)
-
-        elif design_type == "WATU":
-            from clintrials.dosefinding.watu import WATU
-            from clintrials.dosefinding.efftox import LpNormCurve
-            from clintrials.dosefinding.efficacytoxicity import simulate_trial
-            skeletons = [
-                [0.60, 0.50, 0.40, 0.30, 0.20],
-                [0.50, 0.60, 0.50, 0.40, 0.30],
-                [0.40, 0.50, 0.60, 0.50, 0.40],
-                [0.30, 0.40, 0.50, 0.60, 0.50],
-                [0.20, 0.30, 0.40, 0.50, 0.60],
-            ]
-            tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
-            metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-            
-            watu = WATU(
-                skeletons=skeletons,
-                prior_tox_probs=tox_prior,
-                tox_target=target_tox,
-                tox_limit=0.4,
-                eff_limit=0.2,
-                metric=metric,
-                first_dose=1,
-                max_size=max_size
-            )
-            
-            tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
-            eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
-            for t_tox in tox_scenarios:
-                for t_eff in eff_scenarios:
-                    for _ in range(10):
-                        report = simulate_trial(watu, true_toxicities=t_tox, true_efficacies=t_eff, cohort_size=cohort_size)
-                        report["true_prob_tox"] = t_tox
-                        report["true_prob_eff"] = t_eff
-                        sims.append(report)
-                        
-        return sims
-
+    preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
+    if preview_func:
+        with st.spinner(f"Running Default Preview Simulation for {design_type}..."):
+            return preview_func(target_tox, cohort_size, max_size)
+    return []
 
 def main():
-    """Sets up the Streamlit dashboard and renders the appropriate view.
-
-    This function creates the main layout of the dashboard, including the
-    sidebar for selecting the trial design and uploading simulation results.
-    It then calls the appropriate render function based on the user's
-    selection.
-    """
+    """Sets up the Streamlit dashboard and renders the appropriate view."""
     st.sidebar.markdown(
         '<nav aria-label="Settings Sidebar" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;"></nav>',
         unsafe_allow_html=True
@@ -153,12 +49,17 @@ def main():
     )
 
     st.sidebar.header("Select Trial Design")
+    available_designs = PROTOCOL_REGISTRY.get_designs()
+    if not available_designs:
+        st.error("No trial designs registered.")
+        return
+
     design_type = create_widget(
         st,
         "selectbox",
         "design_type",
         "Choose the type of trial design for your simulation results:",
-        ("CRM", "EffTox", "WATU", "Win Ratio"),
+        tuple(available_designs),
     )
 
     from clintrials.visualization.dashboard.factory import REGISTRY
@@ -173,12 +74,16 @@ def main():
             )
         )
 
-        if design_type == "Win Ratio":
-            from clintrials.core.schema import WinRatioSchema
-
-            for name, field in WinRatioSchema.model_fields.items():
-                if name in REGISTRY:
-                    entries.append((field.description, REGISTRY[name]))
+        preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
+        if preview_func is None:
+            # Typically Win Ratio
+            try:
+                from clintrials.core.schema import WinRatioSchema
+                for name, field in WinRatioSchema.model_fields.items():
+                    if name in REGISTRY:
+                        entries.append((field.description, REGISTRY[name]))
+            except ImportError:
+                pass
             entries.append(
                 ("Run Simulation", REGISTRY.get("run_simulation_button", ""))
             )
@@ -189,20 +94,21 @@ def main():
                     REGISTRY.get("uploaded_file", ""),
                 )
             )
-            if design_type == "CRM":
-                if "true_tox" in REGISTRY:
-                    entries.append(("true_tox", REGISTRY["true_tox"]))
-            elif design_type == "EffTox" or design_type == "WATU":
-                if "true_prob_tox" in REGISTRY:
-                    entries.append(("true_prob_tox", REGISTRY["true_prob_tox"]))
-                if "true_prob_eff" in REGISTRY:
-                    entries.append(("true_prob_eff", REGISTRY["true_prob_eff"]))
+            if "true_tox" in REGISTRY:
+                entries.append(("true_tox", REGISTRY["true_tox"]))
+            if "true_prob_tox" in REGISTRY:
+                entries.append(("true_prob_tox", REGISTRY["true_prob_tox"]))
+            if "true_prob_eff" in REGISTRY:
+                entries.append(("true_prob_eff", REGISTRY["true_prob_eff"]))
 
         for label, desc in entries:
             st.markdown(f"**{label}**: {desc}")
 
-    if design_type == "Win Ratio":
-        winratio_view.render()
+    render_func = PROTOCOL_REGISTRY.get_render(design_type)
+
+    if PROTOCOL_REGISTRY.get_preview(design_type) is None:
+        if render_func:
+            render_func()
     else:
         st.sidebar.header("Data Mode")
         data_mode = st.sidebar.radio(
@@ -225,13 +131,8 @@ def main():
                 string_data = uploaded_file.getvalue().decode("utf-8")
                 sims = json.loads(string_data)
                 st.sidebar.success(f"Successfully loaded {len(sims)} simulations.")
-
-                if design_type == "CRM":
-                    crm_view.render(sims)
-                elif design_type == "EffTox":
-                    efftox_view.render(sims)
-                elif design_type == "WATU":
-                    watu_view.render(sims)
+                if render_func:
+                    render_func(sims)
         else:
             st.sidebar.header("Preview Parameters")
             target_tox = st.sidebar.number_input("Target Toxicity", min_value=0.01, max_value=0.99, value=0.25, step=0.01)
@@ -240,12 +141,8 @@ def main():
             
             try:
                 sims = get_preview_sims(design_type, target_tox, cohort_size, max_size)
-                if design_type == "CRM":
-                    crm_view.render(sims)
-                elif design_type == "EffTox":
-                    efftox_view.render(sims)
-                elif design_type == "WATU":
-                    watu_view.render(sims)
+                if render_func:
+                    render_func(sims)
             except Exception as e:
                 st.error(f"Simulation failed with the selected parameters: {e}")
 

@@ -4,7 +4,6 @@ from clintrials.utils import (
     filter_list_of_dicts,
     invoke_map_reduce_on_list,
 )
-from clintrials.core.simulation import extract_sim_data
 
 def go_fetch_json_sims(file_pattern):
     """Fetches and combines JSON data from multiple files.
@@ -40,6 +39,7 @@ def summarise_sims(sims, ps, func_map, var_map=None, to_pandas=True):
         "summarise_sims is deprecated; use extract_sim_data instead",
         DeprecationWarning,
     )
+    from clintrials.core.simulation import extract_sim_data
     return_type = "dataframe" if to_pandas else "tuple"
     return extract_sim_data(sims, ps, func_map, var_map, return_type=return_type)
 
