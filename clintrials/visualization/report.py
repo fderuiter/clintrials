@@ -3,7 +3,6 @@ from fpdf.enums import PageMode
 from fpdf.prefs import ViewerPreferences
 from contextlib import contextmanager
 from fpdf.table import Table
-import numpy as np
 
 
 class AccessibleTable(Table):
@@ -134,12 +133,8 @@ def generate_pdf_report(df, design_type, text_summaries=None):
 
     pdf.add_h1("Simulation Data Summary")
 
-    def fmt(v):
-        if isinstance(v, (float, np.float64)):
-            return f"{v:.4f}"
-        return str(v)
-
-    from clintrials.visualization.models import MultiFormatSummaryContainer, _format_label
+    from clintrials.visualization.helpers import format_number as fmt, format_label as _format_label
+    from clintrials.visualization.models import MultiFormatSummaryContainer
 
     for summary in text_summaries:
         if isinstance(summary, MultiFormatSummaryContainer):

@@ -33,6 +33,7 @@ def fake_streamlit(monkeypatch):
     sidebar.expander = MagicMock()
     sidebar.markdown = MagicMock()
     sidebar.toggle = MagicMock(return_value=False)
+    sidebar.checkbox = MagicMock(return_value=False)
     sidebar.radio = MagicMock(return_value="Preview Mode")
     sidebar.number_input = MagicMock(return_value=10)
     st.sidebar = sidebar

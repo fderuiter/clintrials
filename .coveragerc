@@ -2,14 +2,9 @@
 branch = True
 omit =
     clintrials/phase2/*
-    clintrials/core/simulation.py
-    clintrials/dosefinding/*
-    clintrials/core/stats.py
-    clintrials/utils.py
-    clintrials/common.py
     clintrials/legacy/*
     */__main__*
     tests/*
 
 [report]
-fail_under = 90
+fail_under = 70

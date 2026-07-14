@@ -29,6 +29,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
     sidebar = SimpleNamespace(
         header=MagicMock(),
         selectbox=MagicMock(return_value=selectbox_return),
+        checkbox=MagicMock(return_value=False),
         file_uploader=MagicMock(return_value=DummyFile(file_data)),
         success=MagicMock(),
         write=MagicMock(),
