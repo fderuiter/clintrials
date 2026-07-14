@@ -1,8 +1,10 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Navigate to the project root
-cd "$(dirname "$0")/../../"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$repo_root"
+
+mkdir -p tests/fixtures
 
 echo "Building Docker image for R environment..."
 docker build -t clintrials-r-env tests/fixtures/
