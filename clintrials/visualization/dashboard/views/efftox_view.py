@@ -55,6 +55,7 @@ def efftox_preview_sims(target_tox, cohort_size, max_size):
 @dashboard_view(title="EffTox Simulation Results", model_name="EffTox", file_prefix="efftox_simulations")
 def render(sims):
     """Renders the EffTox simulation results view."""
+    st.sidebar.header("Trial Parameters")
     param_space_config = {
         "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
         "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
@@ -63,7 +64,6 @@ def render(sims):
     for k, v in param_space_config.items():
         ps.add(k, v)
 
-    st.sidebar.write("Parameter space for summarization:")
     st.sidebar.json(param_space_config)
 
     from clintrials.dosefinding.efftox import EffTox
