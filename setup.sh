@@ -11,7 +11,13 @@ if ! command -v poetry >/dev/null 2>&1; then
 fi
 
 echo "Installing project dependencies with Poetry..."
-poetry install --all-extras
+poetry install --all-extras --no-interaction
+
+echo "Installing pre-commit hooks..."
+poetry run pre-commit install
+
+echo "Running verification tests..."
+poetry run pytest -m "not slow"
 
 echo "Setup complete."
 
