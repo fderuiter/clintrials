@@ -91,7 +91,12 @@ next_dose_df <- data.frame(
 )
 
 # Write the data frames to CSV files
-write.csv(posterior_dlt_probs_df, "tests/fixtures/expected_posterior_dlt_probs.csv", row.names = FALSE)
-write.csv(next_dose_df, "tests/fixtures/next_dose_recommendations.csv", row.names = FALSE)
+out_probs <- file.path("tests", "fixtures", "expected_posterior_dlt_probs.csv")
+dir.create(dirname(out_probs), recursive = TRUE, showWarnings = FALSE)
+write.csv(posterior_dlt_probs_df, out_probs, row.names = FALSE)
+
+out_next <- file.path("tests", "fixtures", "next_dose_recommendations.csv")
+dir.create(dirname(out_next), recursive = TRUE, showWarnings = FALSE)
+write.csv(next_dose_df, out_next, row.names = FALSE)
 
 print("Fixtures generated successfully.")
