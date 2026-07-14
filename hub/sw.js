@@ -3,7 +3,10 @@ const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  'https://cdn.jsdelivr.net/npm/@stlite/mountable@0.55.0/build/stlite.css',
+  'https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.contentWindow.min.js',
+  'https://cdn.jsdelivr.net/npm/@stlite/mountable@0.55.0/build/stlite.js'
 ];
 
 self.addEventListener('install', event => {
