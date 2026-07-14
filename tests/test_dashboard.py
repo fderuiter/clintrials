@@ -39,6 +39,7 @@ def fake_streamlit(monkeypatch):
     sidebar.expander = MagicMock()
     sidebar.markdown = MagicMock()
     sidebar.toggle = MagicMock(return_value=False)
+    sidebar.checkbox = MagicMock(return_value=False)
     sidebar.radio = MagicMock(return_value="Manual JSON Upload")
     sidebar.number_input = MagicMock(return_value=1)
     st.sidebar = sidebar

@@ -69,6 +69,13 @@ def main():
 
     st.title("Interactive Simulation Dashboard")
 
+    st.sidebar.header("Accessibility Settings")
+    st.session_state["accessibility_mode"] = st.sidebar.checkbox(
+        "Enable Screen-Reader Optimized Mode", 
+        value=st.session_state.get("accessibility_mode", False),
+        help="Restructures large tables into hierarchical nested details for easier navigation."
+    )
+
     st.sidebar.header("Select Trial Design")
     available_designs = PROTOCOL_REGISTRY.get_designs()
     if not available_designs:
