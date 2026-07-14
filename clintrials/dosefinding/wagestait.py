@@ -241,6 +241,12 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.post_eff_probs = np.zeros(self.I)
         self.theta_hats = np.zeros(self.K)
 
+    def set_rng(self, rng: Any) -> None:
+        """Inject a local RNG generator for reproducible, state-free random generation."""
+        super().set_rng(rng)
+        if hasattr(self, "crm"):
+            self.crm.set_rng(rng)
+
     def dose_toxicity_lower_bound(self, dose_level: Any, alpha: Any = 0.025) -> Any:
         """Gets the lower bound of the toxicity probability for a dose level.
 

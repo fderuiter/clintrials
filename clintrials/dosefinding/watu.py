@@ -229,6 +229,12 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.utility = []  # type: ignore
         self.dose_allocation_mode = 0
 
+    def set_rng(self, rng: Any) -> None:
+        """Inject a local RNG generator for reproducible, state-free random generation."""
+        super().set_rng(rng)
+        if hasattr(self, "crm"):
+            self.crm.set_rng(rng)
+
     def model_theta_hat(self) -> Any:
         """Gets the theta estimate for the most likely model.
 
