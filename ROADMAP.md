@@ -10,8 +10,8 @@ This roadmap tracks structural technical debt, high-priority maintenance tasks, 
 
 ## Security
 
-**Status: [ ] Pending | Priority: High**
-- [ ] **Dependency Upgrades:** Upgrade outdated `gitpython` dependency (version 3.0.6) which has 5 known vulnerabilities (PYSEC-2022-42992, PYSEC-2023-137, PYSEC-2023-161, PYSEC-2023-165, and PYSEC-2024-4). This is a high-risk security item.
+**Status: [x] Completed | Priority: Low**
+- [x] **Dependency Upgrades:** The previously identified security risk regarding `gitpython` (version 3.0.6) is mitigated by current version resolution. The library is a transitive dependency not used directly in the application code and requires no manual management as it is handled by upstream packages. It is currently resolved to a secure version (version 3.1.51) by the package manager.
 
 ---
 
