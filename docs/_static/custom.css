@@ -104,3 +104,18 @@ body.hub-dragging {
 body.hub-dragging * {
     user-select: none;
 }
+
+/* Mobile Layout Corrections */
+@media screen and (max-width: 437px) {
+    #hub-sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #hub-resizer {
+        display: none !important;
+    }
+}

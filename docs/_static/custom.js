@@ -1,5 +1,27 @@
 /* docs/_static/custom.js */
 
+// 0. Global Setup: Load iframe resizer immediately and prevent ReferenceErrors on load
+if (typeof window.iFrameResize === 'undefined') {
+    window.iFrameResize = function stubIframeResize(...args) {
+        const retry = () => {
+            if (window.iFrameResize && window.iFrameResize !== stubIframeResize) {
+                window.iFrameResize(...args);
+            } else {
+                setTimeout(retry, 50);
+            }
+        };
+        setTimeout(retry, 50);
+    };
+}
+(function loadIframeResizer() {
+    if (document.getElementById('iframe-resizer-script')) return;
+    const script = document.createElement('script');
+    script.id = 'iframe-resizer-script';
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.min.js';
+    script.async = true;
+    document.head.appendChild(script);
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Inject DOM Elements
     const toggleBtn = document.createElement('button');
@@ -31,7 +53,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. State & Functions
     let isOpen = false;
-    let iframeHostScriptLoaded = false;
 
     function getHubUrl() {
         const path = window.location.pathname;
@@ -75,20 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function loadIframeResizerHostScript(callback) {
-        if (iframeHostScriptLoaded) {
-            callback();
-            return;
-        }
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.min.js';
-        script.onload = () => {
-            iframeHostScriptLoaded = true;
-            callback();
-        };
-        document.head.appendChild(script);
-    }
-
     // 3. Toggle Logic
     toggleBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -96,9 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isOpen) {
             sidebar.classList.add('open');
-            loadIframeResizerHostScript(() => {
-                createIframe();
-            });
+            createIframe();
         } else {
             sidebar.classList.remove('open');
             destroyIframe();
