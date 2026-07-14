@@ -108,9 +108,10 @@ body.hub-dragging * {
 /* Mobile Layout Corrections */
 @media screen and (max-width: 437px) {
     #hub-sidebar {
-        width: 100%;
-        min-width: 100%;
-        max-width: 100%;
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
     }
 }
 

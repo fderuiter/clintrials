@@ -2,16 +2,19 @@
 
 // 0. Global Setup: Load iframe resizer immediately and prevent ReferenceErrors on load
 if (typeof window.iFrameResize === 'undefined') {
-    window.iFrameResize = function stubIframeResize(...args) {
+    const stubIframeResize = function (...args) {
         const retry = () => {
             if (window.iFrameResize && window.iFrameResize !== stubIframeResize) {
                 window.iFrameResize(...args);
+            } else if (window.iframeResize && window.iframeResize !== stubIframeResize) {
+                window.iframeResize(...args);
             } else {
                 setTimeout(retry, 50);
             }
         };
         setTimeout(retry, 50);
     };
+    window.iFrameResize = window.iframeResize = stubIframeResize;
 }
 (function loadIframeResizer() {
     if (document.getElementById('iframe-resizer-script')) return;
@@ -50,6 +53,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.body.appendChild(sidebar);
     document.body.appendChild(toggleBtn);
+
+    // Initialize any existing iframes on the page
+    window.iFrameResize({
+        log: false,
+        checkOrigin: false,
+        heightCalculationMethod: 'lowestElement'
+    }, 'iframe');
 
     // 2. State & Functions
     let isOpen = false;
@@ -115,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let startX, startWidth;
 
     resizer.addEventListener('mousedown', (e) => {
+        if (window.innerWidth <= 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0) return;
         e.preventDefault();
         isResizing = true;
         startX = e.clientX;
