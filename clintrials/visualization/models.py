@@ -81,7 +81,6 @@ class MultiFormatSummaryContainer:
         else:
             # Fallback to first few categorical/low-cardinality columns
             grouping_cols = []
-            import pandas as pd
             cat_cols = set(self.df.select_dtypes(include=['object', 'string', 'category']).columns)
             for c in self.df.columns:
                 if c in cat_cols or self.df[c].nunique() < len(self.df) / 2:
@@ -139,12 +138,12 @@ class MultiFormatSummaryContainer:
                 
                 # ARIA disclosure pattern is handled natively by <details> and <summary> tags
                 heading_level = min(level + 2, 6) # e.g. h3, h4, h5
-                html += f'<details>\n'
+                html += '<details>\n'
                 html += f'  <summary style="cursor: pointer;"><h{heading_level} style="display: inline; margin: 0; font-size: 1em;">{_format_label(col)}: {name}</h{heading_level}> <span style="font-size: 0.9em; color: #555;">({summary_str})</span></summary>\n'
                 html += f'  <div style="margin-left: {20 * level}px; margin-top: 10px; margin-bottom: 10px;">\n'
                 html += generate_level(group.drop(columns=[col]), current_grouping_cols[1:], level + 1)
-                html += f'  </div>\n'
-                html += f'</details>\n'
+                html += '  </div>\n'
+                html += '</details>\n'
             return html
 
         html = summary + generate_level(self.df, grouping_cols)
