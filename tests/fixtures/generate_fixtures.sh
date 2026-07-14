@@ -8,6 +8,6 @@ echo "Building Docker image for R environment..."
 docker build -t clintrials-r-env tests/fixtures/
 
 echo "Generating fixtures inside Docker container..."
-docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$(pwd)/tests/fixtures:/fixtures" -w /fixtures clintrials-r-env Rscript gen_fixtures.R
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$(pwd):/app" -w /app clintrials-r-env Rscript tests/fixtures/gen_fixtures.R
 
 echo "Done! Fixtures have been updated."
