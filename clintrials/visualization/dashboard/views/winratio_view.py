@@ -26,7 +26,7 @@ from clintrials.core.registry import PROTOCOL_REGISTRY
 )
 def render() -> None:
     """Render the Win Ratio simulation interface."""
-    st.sidebar.header("Simulation Parameters")
+    st.sidebar.header("Trial Parameters")
 
     # Use schema to generate UI inputs
     kwargs = {}
