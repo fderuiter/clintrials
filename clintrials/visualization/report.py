@@ -3,7 +3,6 @@ from fpdf.enums import PageMode
 from fpdf.prefs import ViewerPreferences
 from contextlib import contextmanager
 from fpdf.table import Table
-import numpy as np
 
 
 class AccessibleTable(Table):

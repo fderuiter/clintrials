@@ -54,7 +54,6 @@ SYMBOL_MAP = {
 }
 
 
-from clintrials.visualization.helpers import format_label as _format_label
 from clintrials.visualization.helpers import format_labels_dict as _format_labels_dict
 
 
