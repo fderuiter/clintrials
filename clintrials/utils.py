@@ -8,6 +8,7 @@ from collections import OrderedDict
 from copy import copy
 from functools import wraps
 from itertools import product
+import random
 import numpy as np
 logger = logging.getLogger(__name__)
 
@@ -206,7 +207,7 @@ class ParameterSpace:
         """
         if label in self.vals_map:
             vals = self.vals_map[label]
-            return vals[np.random.choice(range(len(vals)))]
+            return random.choice(vals)
         else:
             return None
 

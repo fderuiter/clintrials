@@ -13,8 +13,6 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
-from random import sample
-
 from scipy.stats import beta, norm
 
 from clintrials.core.errors import ErrorTemplates
@@ -213,7 +211,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.use_quick_integration = use_quick_integration
         self.estimate_var = estimate_var
 
-        self.most_likely_model_index = np.random.choice(  # type: ignore
+        self.most_likely_model_index = self.rng.choice(  # type: ignore
             np.array(range(self.K))[  # type: ignore
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
@@ -358,7 +356,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         return self._next_dose
 
     def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
-        self.most_likely_model_index = sample(
+        self.most_likely_model_index = self.rng.choice(
             np.array(range(self.K))[  # type: ignore
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
@@ -415,7 +413,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 for (acc, i) in zip(acceptable_doses, range(1, self.num_doses + 1))
                 if acc
             ]
-            return np.random.choice(range(1, self.I + 1), p=prob_randomise)
+            return self.rng.choice(np.array(range(1, self.I + 1)), p=prob_randomise)
         else:
             self._status = -1
             self._admissable_set = []
