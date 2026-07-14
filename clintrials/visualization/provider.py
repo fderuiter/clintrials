@@ -54,20 +54,8 @@ SYMBOL_MAP = {
 }
 
 
-def _format_label(label):
-    if not isinstance(label, str):
-        return label
-    return label.replace("_", " ").title()
-
-
-def _format_labels_dict(cols):
-    if not isinstance(cols, list):
-        cols = [cols]
-    labels = {}
-    for col in cols:
-        if isinstance(col, str):
-            labels[col] = _format_label(col)
-    return labels
+from clintrials.visualization.helpers import format_label as _format_label
+from clintrials.visualization.helpers import format_labels_dict as _format_labels_dict
 
 
 def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False):

@@ -2,10 +2,7 @@ from dataclasses import dataclass
 import pandas as pd
 import numpy as np
 
-def _format_label(label):
-    if not isinstance(label, str):
-        return label
-    return label.replace("_", " ").title()
+from clintrials.visualization.helpers import format_label as _format_label, format_number as fmt
 
 @dataclass
 class TextSection:
@@ -25,11 +22,6 @@ class MultiFormatSummaryContainer:
         summary = f"**Data Summary: {self.title}**\n\n"
         cols = list(self.df.columns)
 
-        def fmt(v):
-            if isinstance(v, (float, np.float64)):
-                return f"{v:.4f}"
-            return str(v)
-
         header = "| " + " | ".join([_format_label(c) for c in cols]) + " |"
         sep = "| " + " | ".join(["---"] * len(cols)) + " |"
 
@@ -47,11 +39,6 @@ class MultiFormatSummaryContainer:
         """Generates an accessible HTML summary table."""
         summary = f"<strong>Data Summary: {self.title}</strong><br><br>\n"
         cols = list(self.df.columns)
-
-        def fmt(v):
-            if isinstance(v, (float, np.float64)):
-                return f"{v:.4f}"
-            return str(v)
 
         html = summary + "<table>\n"
         html += "  <thead>\n    <tr>\n"
