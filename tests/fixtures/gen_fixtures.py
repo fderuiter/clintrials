@@ -65,8 +65,6 @@ def generate_fixtures():
     
     posterior_dlt_probs_df.to_csv(out_probs, index=False)
     next_dose_df.to_csv(out_next, index=False)
-    
-    print("Fixtures generated successfully.")  # noqa: T201
 
 if __name__ == "__main__":
     generate_fixtures()
