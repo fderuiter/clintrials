@@ -169,7 +169,7 @@ def main():
         index=default_index,
     )
 
-    from clintrials.visualization.dashboard.factory import REGISTRY
+    from clintrials.visualization.dashboard.factory import UI_REGISTRY
 
     with st.sidebar.expander("View Glossary"):
         # Aggregate relevant fields for the selected view
@@ -177,7 +177,7 @@ def main():
         entries.append(
             (
                 "Choose the type of trial design for your simulation results:",
-                REGISTRY.get("design_type", ""),
+                UI_REGISTRY.get("design_type", ""),
             )
         )
 
@@ -187,26 +187,26 @@ def main():
             try:
                 from clintrials.core.schema import WinRatioSchema
                 for name, field in WinRatioSchema.model_fields.items():
-                    if name in REGISTRY:
-                        entries.append((field.description, REGISTRY[name]))
+                    if name in UI_REGISTRY:
+                        entries.append((field.description, UI_REGISTRY[name]))
             except ImportError:
                 pass
             entries.append(
-                ("Run Simulation", REGISTRY.get("run_simulation_button", ""))
+                ("Run Simulation", UI_REGISTRY.get("run_simulation_button", ""))
             )
         else:
             entries.append(
                 (
                     "Upload a JSON file with simulation results",
-                    REGISTRY.get("uploaded_file", ""),
+                    UI_REGISTRY.get("uploaded_file", ""),
                 )
             )
-            if "true_tox" in REGISTRY:
-                entries.append(("true_tox", REGISTRY["true_tox"]))
-            if "true_prob_tox" in REGISTRY:
-                entries.append(("true_prob_tox", REGISTRY["true_prob_tox"]))
-            if "true_prob_eff" in REGISTRY:
-                entries.append(("true_prob_eff", REGISTRY["true_prob_eff"]))
+            if "true_tox" in UI_REGISTRY:
+                entries.append(("true_tox", UI_REGISTRY["true_tox"]))
+            if "true_prob_tox" in UI_REGISTRY:
+                entries.append(("true_prob_tox", UI_REGISTRY["true_prob_tox"]))
+            if "true_prob_eff" in UI_REGISTRY:
+                entries.append(("true_prob_eff", UI_REGISTRY["true_prob_eff"]))
 
         for label, desc in entries:
             st.markdown(f"**{label}**: {desc}")
@@ -260,6 +260,6 @@ if __name__ == "__main__":
 
 # Inject module-level docstring
 if __doc__:
-    from clintrials.core.registry import REGISTRY
+    from clintrials.core.registry import CORE_REGISTRY
 
-    __doc__ = __doc__.format(**REGISTRY)
+    __doc__ = __doc__.format(**CORE_REGISTRY)
