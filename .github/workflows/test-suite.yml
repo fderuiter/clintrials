@@ -25,6 +25,24 @@ jobs:
       - name: Check for differences
         run: git diff --exit-code tests/fixtures/
 
+  test-notebooks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --with dev -E viz
+      - name: Test Tutorial Notebooks
+        run: |
+          find docs/tutorials -name "*.ipynb" -not -name "*draft*" -not -name "*test*" | while read nb; do
+            echo "Testing $nb"
+            PYTHONPATH=$GITHUB_WORKSPACE poetry run jupyter nbconvert --to notebook --execute "$nb" || exit 1
+          done
+
   test:
     runs-on: ubuntu-latest
     strategy:
