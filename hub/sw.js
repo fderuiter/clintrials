@@ -1,12 +1,16 @@
-const CACHE_NAME = 'sim-hub-cache-v2';
+const CACHE_NAME = 'sim-hub-cache-v3';
+
+const isSubpath = self.location.pathname.includes('/clintrials/');
+const basePath = isSubpath ? '/clintrials/hub/' : '/hub/';
+
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon.svg',
-  './vendor/stlite.css',
-  './vendor/iframeResizer.contentWindow.min.js',
-  './vendor/stlite.js'
+  basePath,
+  basePath + 'index.html',
+  basePath + 'manifest.json',
+  basePath + 'icon.svg',
+  basePath + 'vendor/stlite.css',
+  basePath + 'vendor/iframeResizer.contentWindow.min.js',
+  basePath + 'vendor/stlite.js'
 ];
 
 self.addEventListener('install', event => {
