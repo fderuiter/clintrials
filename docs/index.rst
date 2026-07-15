@@ -12,6 +12,7 @@ Welcome to **clintrials**, a Python library providing clinical trial designs and
    :hidden:
    :glob:
 
+   README
    getting_started
    accessibility
    tutorials/*
