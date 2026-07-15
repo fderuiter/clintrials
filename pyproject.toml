@@ -51,6 +51,7 @@ pytest-playwright = ">=0.4.0"
 axe-playwright-python = ">=0.1.0"
 playwright = ">=1.40.0"
 ipython = "<9.0.0"
+ipykernel = "<7"
 
 [build-system]
 requires = ["poetry-core>=1.0"]
