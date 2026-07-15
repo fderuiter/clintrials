@@ -211,7 +211,7 @@ def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10*
     Args:
         cases (list[tuple]): A list of cases (scaled_dose, tox, eff).
         priors (list): A list of 6 prior distributions.
-        rng (np.random.Generator, optional): Random number generator.
+        rng (numpy.random.Generator, optional): Random number generator.
         n (int, optional): Number of points for Monte Carlo integration.
             Defaults to 10**5.
         epsilon (float, optional): Initial quantile for limits. Defaults to
@@ -275,7 +275,7 @@ def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_c
             Defaults to 10**5.
         epsilon (float, optional): A small number to define the integration
             range. Defaults to 1e-6.
-        rng (np.random.Generator, optional): Random number generator.
+        rng (numpy.random.Generator, optional): Random number generator.
         **kwargs: Additional arguments for limit refinement.
 
     Returns:
@@ -331,7 +331,7 @@ def efftox_get_posterior_params(cases: Any, priors: Any, scaled_doses: Any, n: A
             Defaults to 10**5.
         epsilon (float, optional): A small number to define the integration
             range. Defaults to 1e-6.
-        rng (np.random.Generator, optional): Random number generator.
+        rng (numpy.random.Generator, optional): Random number generator.
         **kwargs: Additional arguments for limit refinement.
 
     Returns:

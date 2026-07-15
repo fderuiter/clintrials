@@ -10,6 +10,7 @@
    
       beta_like_normal
       bootstrap
+      calc_pearson_chi_square
       chi_squ_test
       correlation_ci
       or_test
