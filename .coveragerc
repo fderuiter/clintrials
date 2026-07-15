@@ -1,8 +1,6 @@
 [run]
 branch = True
 omit =
-    clintrials/phase2/*
-    clintrials/legacy/*
     */__main__*
     tests/*
 

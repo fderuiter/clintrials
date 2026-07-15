@@ -71,7 +71,7 @@ The `clintrials/` directory is further subdivided into logical modules, such as:
 
 *   `core/`: For core mathematical and statistical functions.
 *   `visualization/dashboard/`: For the interactive dashboard.
-*   `dosefinding/`, `phase2/`, `phase3/`: For different phases of clinical trials.
+*   `dosefinding/`, `phase3/`: For different phases of clinical trials.
 
 ### Assessment
 

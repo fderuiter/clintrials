@@ -26,12 +26,6 @@
 -   **Continual Reassessment Method (CRM):** A Bayesian design for dose-finding based on toxicity. It adapts to the observed outcomes to find the maximum tolerable dose (MTD).
 -   **Efficacy-Toxicity (EffTox) by Thall & Cook:** A design that models both efficacy and toxicity to find the optimal dose, balancing the trade-off between the two.
 -   **Efficacy-Toxicity by Wages & Tait:** An adaptive Bayesian design for seamless Phase I/II trials that models efficacy and toxicity separately, allowing for more flexible decision-making.
--   **BEBOP (Bayesian Evaluation of Bivariate Binary Outcomes with Predictive variables):** A design for trials with two binary outcomes (e.g., efficacy and toxicity) and predictive covariates, allowing for personalized dose-finding.
-
-### Phase II Designs
-
--   **Two-Stage Bayesian Design:** A design for single-arm trials with a dichotomous endpoint, allowing for an interim analysis to stop for futility.
--   **Chi-Squared Test:** For comparing two arms with binary outcomes.
 
 ### Phase III Designs
 
@@ -164,7 +158,6 @@ The repository is organized as follows:
 -   **`clintrials/`**: The main Python package.
     -   **`core/`**: Core components like math functions, numerical integration routines, patient recruitment models, simulation tools, statistical utilities, and time-to-event models.
     -   **`dosefinding/`**: Implementations of various dose-finding trial designs, including CRM, EffTox, and Wages & Tait.
-    -   **`phase2/`**: Implementations of Phase II trial designs, including a two-stage Bayesian design and the BEBOP design.
     -   **`phase3/`**: Implementations of Phase III trial designs, including Group Sequential Designs.
     -   **`winratio/`**: Tools for win-ratio analysis.
     -   **`visualization/dashboard/main.py`**: The Trial Simulation Hub entry point and source code for the interactive web dashboard.
