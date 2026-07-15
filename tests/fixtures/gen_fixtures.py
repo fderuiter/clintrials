@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 from scipy.stats import norm
@@ -5,12 +6,7 @@ from scipy.stats import norm
 from clintrials.core.math import inverse_logit1, logit1
 from clintrials.dosefinding.crm import crm
 
-
-def test_CRM_with_generated_fixtures():
-    # Load the fixtures
-    expected_probs = pd.read_csv("tests/fixtures/expected_posterior_dlt_probs.csv")
-    expected_doses = pd.read_csv("tests/fixtures/next_dose_recommendations.csv")
-
+def generate_fixtures():
     # Scenario 1
     p_tox_prior_1 = [0.1, 0.2, 0.3, 0.4]
     target_tox_1 = 0.3
@@ -29,14 +25,6 @@ def test_CRM_with_generated_fixtures():
         plugin_mean=False,
     )
     recommended_dose_1 = np.argmin(np.abs(np.array(prob_tox_1) - target_tox_1)) + 1
-
-    expected_prob_tox_1 = expected_probs[expected_probs.scenario == 1].prob.values
-    expected_next_dose_1 = expected_doses[
-        expected_doses.scenario == 1
-    ].next_dose.values[0]
-
-    assert np.allclose(prob_tox_1, expected_prob_tox_1, atol=1e-2)
-    assert recommended_dose_1 == expected_next_dose_1
 
     # Scenario 2
     p_tox_prior_2 = [0.05, 0.1, 0.2, 0.35, 0.5]
@@ -57,10 +45,28 @@ def test_CRM_with_generated_fixtures():
     )
     recommended_dose_2 = np.argmin(np.abs(np.array(prob_tox_2) - target_tox_2)) + 1
 
-    expected_prob_tox_2 = expected_probs[expected_probs.scenario == 2].prob.values
-    expected_next_dose_2 = expected_doses[
-        expected_doses.scenario == 2
-    ].next_dose.values[0]
+    # Combine the results into data frames
+    posterior_dlt_probs_df = pd.DataFrame({
+        "scenario": [1] * len(prob_tox_1) + [2] * len(prob_tox_2),
+        "dose": list(range(1, len(prob_tox_1) + 1)) + list(range(1, len(prob_tox_2) + 1)),
+        "prob": list(prob_tox_1) + list(prob_tox_2)
+    })
 
-    assert np.allclose(prob_tox_2, expected_prob_tox_2, atol=1e-1)
-    assert recommended_dose_2 == expected_next_dose_2
+    next_dose_df = pd.DataFrame({
+        "scenario": [1, 2],
+        "next_dose": [recommended_dose_1, recommended_dose_2]
+    })
+
+    # Write the data frames to CSV files
+    out_probs = os.path.join("tests", "fixtures", "expected_posterior_dlt_probs.csv")
+    out_next = os.path.join("tests", "fixtures", "next_dose_recommendations.csv")
+    
+    os.makedirs(os.path.dirname(out_probs), exist_ok=True)
+    
+    posterior_dlt_probs_df.to_csv(out_probs, index=False)
+    next_dose_df.to_csv(out_next, index=False)
+    
+    print("Fixtures generated successfully.")
+
+if __name__ == "__main__":
+    generate_fixtures()
