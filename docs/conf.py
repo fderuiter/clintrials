@@ -16,7 +16,13 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.doctest",
     "nbsphinx",
+    "myst_parser",
 ]
+
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
 
 nbsphinx_execute = "never"
 
@@ -55,3 +61,17 @@ html_js_files = ["custom.js"]
 if os.environ.get("SPHINX_STRICT", "0") == "1":
     nitpicky = True
     nitpick_ignore = []
+
+def setup(app):
+    """Register custom extensions and hooks with Sphinx."""
+    def replace_python_blocks_with_testcode(app, docname, source):
+        if docname == "README" or docname.endswith(".md") or (app.env.doc2path(docname) and app.env.doc2path(docname).endswith(".md")):
+            import re
+            def repl(match):
+                code = match.group(1)
+                return f"```{{testcode}}\n{code}```\n\n```{{testoutput}}\n:options: +ELLIPSIS\n\n...\n```"
+            source[0] = re.sub(r"^```python\s*\n(.*?)^```\s*$", repl, source[0], flags=re.MULTILINE | re.DOTALL)
+
+    app.connect('source-read', replace_python_blocks_with_testcode)
+
+

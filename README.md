@@ -85,11 +85,13 @@ trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)
 
 # Get the next recommended dose
 next_dose = trial.next_dose()
+assert next_dose == 3
 print(f"Next dose: {next_dose}")
 
 # Update the trial with new patient data
 trial.update([(3, 0), (3, 0), (3, 0)])
 next_dose = trial.next_dose()
+assert next_dose == 4
 print(f"Next dose after update: {next_dose}")
 ```
 
@@ -130,7 +132,9 @@ trial = EffTox(
 )
 
 # Get the next recommended dose
-print(f"Next dose: {trial.next_dose()}")
+next_dose = trial.next_dose()
+assert next_dose == 1
+print(f"Next dose: {next_dose}")
 ```
 
 ### Example 3: Group Sequential Design (GSD)
@@ -139,6 +143,7 @@ This example shows how to create a group sequential design with an O'Brien-Flemi
 
 ```python
 from clintrials.phase3.gsd import GroupSequentialDesign, spending_function_obrien_fleming
+import numpy as np
 
 # Create a 4-look GSD with an O'Brien-Fleming spending function
 gsd = GroupSequentialDesign(
@@ -147,7 +152,9 @@ gsd = GroupSequentialDesign(
     sfu=spending_function_obrien_fleming
 )
 
-# Print the efficacy boundaries
+# Verify the efficacy boundaries
+assert len(gsd.efficacy_boundaries) == 4
+assert np.all(np.isclose(gsd.efficacy_boundaries, [4.3326, 2.9631, 2.3591, 2.0141], atol=1e-4))
 print("Efficacy Boundaries:", gsd.efficacy_boundaries)
 ```
 
