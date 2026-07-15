@@ -40,6 +40,9 @@ jobs:
         run: |
           poetry install --all-extras
 
+      - name: Fetch Vendor Dependencies
+        run: ./fetch_vendor.sh
+
       - name: Build Sphinx HTML
         env:
           SPHINX_STRICT: "1"
