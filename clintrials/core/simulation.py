@@ -190,6 +190,9 @@ class UniversalProtocolSimulationRunner:
         Returns:
             list: A list of individual trial simulation reports.
         """
+        if cohort_size <= 0:
+            raise ValueError("cohort_size must be a positive integer.")
+
         if mode == 'vectorized':
             return self._run_vectorized(n_sims, **kwargs)
         try:
@@ -208,19 +211,29 @@ class UniversalProtocolSimulationRunner:
                 recruitment_stream.reset()
             i = 0
             max_size = getattr(design, 'max_size', lambda: float('inf'))()
+            if max_size == float('inf'):
+                # Require an explicit bound if the protocol is not self-terminating
+                if not hasattr(design, 'has_more'):
+                     raise ValueError("Explicit simulation bound required for non-terminating protocols.")
+
             while i < max_size and design.has_more():
                 current_cohort_size = min(cohort_size, max_size - i) if max_size != float('inf') else cohort_size
                 if recruitment_stream:
                     kwargs['arrival_times'] = [recruitment_stream.next() for _ in range(current_cohort_size)]
+
+                prev_i = i
                 if self.outcome_generator:
                     cases = self.outcome_generator(design=design, current_size=i, cohort_size=current_cohort_size, **kwargs)
-                else:
-                    cases = []
-                if self.outcome_generator:
                     design.update(cases, **kwargs)
                 else:
                     design.update(**kwargs)
+
                 i += current_cohort_size
+
+                # Safety check to prevent infinite loops if state doesn't change
+                if i <= prev_i:
+                    raise RuntimeError("Simulation loop failed to progress; check terminating conditions.")
+
             results.append(design.report())
         return results if n_sims > 1 or mode == 'iterative' else results[0]
 

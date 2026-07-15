@@ -70,9 +70,9 @@ def main():
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Accessibility Settings")
-    st.session_state["accessibility_mode"] = st.sidebar.checkbox(
+    st.sidebar.checkbox(
         "Enable Screen-Reader Optimized Mode",
-        value=st.session_state.get("accessibility_mode", False),
+        key="accessibility_mode",
         help="Restructures large tables into hierarchical nested details for easier navigation."
     )
 

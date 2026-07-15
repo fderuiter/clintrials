@@ -1,9 +1,12 @@
 const CACHE_NAME = 'sim-hub-cache-v1';
-const urlsToCache = [
+const localAssets = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg',
+  './icon.svg'
+];
+
+const cdnAssets = [
   'https://cdn.jsdelivr.net/npm/@stlite/mountable@0.55.0/build/stlite.css',
   'https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.contentWindow.min.js',
   'https://cdn.jsdelivr.net/npm/@stlite/mountable@0.55.0/build/stlite.js'
@@ -13,7 +16,15 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        return cache.addAll(urlsToCache);
+        // Essential local assets - must all succeed
+        const localPromise = cache.addAll(localAssets);
+        // Best-effort CDN assets - do not fail installation if CDN is down
+        const cdnPromise = Promise.allSettled(cdnAssets.map(url => {
+          return fetch(url).then(response => {
+            if (response.ok) return cache.put(url, response);
+          });
+        }));
+        return localPromise;
       })
   );
 });

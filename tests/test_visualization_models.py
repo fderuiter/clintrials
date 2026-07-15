@@ -28,8 +28,11 @@ def test_multi_format_summary_container():
     assert "<details>" not in html  # By default, should not have details
 
 def test_multi_format_summary_container_hierarchical(monkeypatch):
-    import streamlit as st
-    monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
+    import sys
+    from unittest.mock import MagicMock
+    mock_st = MagicMock()
+    mock_st.session_state = {"accessibility_mode": True}
+    monkeypatch.setitem(sys.modules, "streamlit", mock_st)
 
     df = pd.DataFrame({
         "Trial": ["T1", "T1", "T2"],
@@ -52,8 +55,11 @@ def test_multi_format_summary_container_hierarchical(monkeypatch):
     assert "Cohort: C1" in html
 
 def test_multi_format_summary_container_hierarchical_fallback(monkeypatch):
-    import streamlit as st
-    monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
+    import sys
+    from unittest.mock import MagicMock
+    mock_st = MagicMock()
+    mock_st.session_state = {"accessibility_mode": True}
+    monkeypatch.setitem(sys.modules, "streamlit", mock_st)
 
     df = pd.DataFrame({
         "Cat1": ["A", "A", "B"],
@@ -66,3 +72,22 @@ def test_multi_format_summary_container_hierarchical_fallback(monkeypatch):
     assert "<details>" in html
     assert "Cat1: A" in html
 
+def test_multi_format_summary_container_hierarchical_nulls(monkeypatch):
+    import sys
+    import numpy as np
+    from unittest.mock import MagicMock
+    mock_st = MagicMock()
+    mock_st.session_state = {"accessibility_mode": True}
+    monkeypatch.setitem(sys.modules, "streamlit", mock_st)
+
+    df = pd.DataFrame({
+        "Trial": ["T1", "T1", None],
+        "Cohort": ["C1", None, "C1"],
+        "Value": [1, 2, 3]
+    })
+    c = MultiFormatSummaryContainer("Nulls", df)
+    html_output = c.html
+
+    assert "Trial: nan" in html_output
+    assert "Cohort: nan" in html_output
+    assert "Value" in html_output
