@@ -61,7 +61,7 @@ class BaseModel:
             if constraints.lt is not None and v >= constraints.lt:
                 raise ValueError(ErrorTemplates.LT.format(name=name, bound=constraints.lt))
 
-        if isinstance(value, list):
+        if isinstance(value, (list, tuple)):
             for item in value:
                 check_bounds(item, f)
                 self._validate_annotated(name, item, f.annotation)
