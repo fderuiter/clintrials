@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable
 __author__ = 'Kristian Brock'
 __contact__ = 'kristian.brock@gmail.com'
 import json
@@ -154,11 +154,11 @@ from functools import partial
 class Memoize:
     """A class to cache function results."""
 
-    def __init__(self, f: Any) -> None:
+    def __init__(self, f: Callable) -> None:
         """Initializes a Memoize object.
 
         Args:
-            f (callable): The function to memoize.
+            f (Callable): The function to memoize.
         """
         self.f = f
         self.memo = {}

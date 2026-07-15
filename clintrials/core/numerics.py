@@ -7,6 +7,8 @@ Random Seed Strategy: {numerics_seed_strategy}
 
 import warnings
 
+from collections.abc import Callable
+
 import numpy as np
 from scipy.special import logsumexp
 from scipy.stats import norm
@@ -19,9 +21,9 @@ def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, 
     assuming a Gaussian prior N(prior_mean, prior_sd^2).
 
     Args:
-        log_likelihood_func (callable): A function taking a 1D array of parameter nodes
+        log_likelihood_func (Callable): A function taking a 1D array of parameter nodes
             and returning the corresponding log-likelihoods.
-        f_func (callable): A function taking a 1D array of parameter nodes
+        f_func (Callable): A function taking a 1D array of parameter nodes
             and returning the values of the function to be integrated.
             Can return an array of shape (..., num_nodes) for multiple queries.
         prior_mean (float): The mean of the Gaussian prior.
@@ -56,16 +58,16 @@ def adaptive_mc_integration(
     """Performs adaptive multi-dimensional Monte Carlo integration.
 
     Args:
-        lik_integrand (callable): Function taking a 2D array of samples
+        lik_integrand (Callable): Function taking a 2D array of samples
             and returning an array of evaluated likelihoods * priors.
         initial_limits (list[tuple[float, float]]): Initial integration bounds
             for each dimension.
-        rng (np.random.Generator): Random number generator.
-        n (int, optional): Number of Monte Carlo samples per iteration. Defaults to 10000.
-        max_iter (int, optional): Maximum iterations for expanding limits. Defaults to 5.
-        mass_threshold (float, optional): The target Gaussian coverage threshold
+        rng (numpy.random.Generator): Random number generator.
+        n (int): Number of Monte Carlo samples per iteration. Defaults to 10000.
+        max_iter (int): Maximum iterations for expanding limits. Defaults to 5.
+        mass_threshold (float): The target Gaussian coverage threshold
             for convergence. Defaults to 0.999.
-        k_sd (float, optional): The multiplier for the standard deviation when
+        k_sd (float): The multiplier for the standard deviation when
             expanding limits. Defaults to 3.5.
 
     Returns:
@@ -124,27 +126,27 @@ def adaptive_mc_integration(
 
 
 def integrate_posterior_1d(
-    logpost,
-    f,
-    lo,
-    hi,
+    logpost: Callable,
+    f: Callable,
+    lo: float,
+    hi: float,
     *,
-    method="grid",
-    n_points=2001,
-    adaptive_limits=True,
-    edge_frac=0.02,
-    tail_mass_tol=1e-3,
-    expand_factor=1.0,
-    max_expansions=6,
-    warn_on_max=True,
-    return_diagnostics=False,
+    method: str = "grid",
+    n_points: int = 2001,
+    adaptive_limits: bool = True,
+    edge_frac: float = 0.02,
+    tail_mass_tol: float = 1e-3,
+    expand_factor: float = 1.0,
+    max_expansions: int = 6,
+    warn_on_max: bool = True,
+    return_diagnostics: bool = False,
 ):
     """Integrate a 1D posterior density with optional adaptive bounds.
 
     Args:
-        logpost (callable): Log posterior density function evaluated on a
+        logpost (Callable): Log posterior density function evaluated on a
             numpy array.
-        f (callable): Function of the parameter to integrate with respect to
+        f (Callable): Function of the parameter to integrate with respect to
             the posterior density.
         lo (float): Initial lower bound of integration.
         hi (float): Initial upper bound of integration.

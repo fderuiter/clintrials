@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
+from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable, Callable
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
@@ -721,7 +721,7 @@ def batch_summarise_dose_finding_sims(sims: Any, label: Any, num_doses: Any, dim
         dimensions (tuple, optional): A tuple containing a dictionary mapping
             JSON variable names to parameter names and a `ParameterSpace`
             object. Defaults to `None`.
-        func1 (callable, optional): A function to apply to the summary
+        func1 (Callable, optional): A function to apply to the summary
             DataFrame. Defaults to `None`.
     """
     if dimensions is not None:
@@ -754,7 +754,7 @@ def batch_summarise_dose_finding_sims(sims: Any, label: Any, num_doses: Any, dim
         logger.info("")
 
 
-def dose_transition_pathways_to_json(trial: Any, next_dose: Any, cohort_sizes: Any, cohort_number: Any = 1, cases_already_observed: Any = [], custom_output_func: Any = None, verbose: Any = False, **kwargs: Any) -> Any:
+def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, cohort_sizes: List[int], cohort_number: int = 1, cases_already_observed: List[Tuple] = [], custom_output_func: Optional[Callable] = None, verbose: bool = False, **kwargs: Any) -> Any:
     """Calculates the dose-transition pathways of a dose-finding trial.
 
     Args:
@@ -765,7 +765,7 @@ def dose_transition_pathways_to_json(trial: Any, next_dose: Any, cohort_sizes: A
             Defaults to 1.
         cases_already_observed (list[tuple], optional): A list of previously
             observed cases. Defaults to [].
-        custom_output_func (callable, optional): A function that takes the
+        custom_output_func (Callable, optional): A function that takes the
             trial object and returns a dictionary of extra output.
             Defaults to `None`.
         verbose (bool, optional): If `True`, prints progress information.
@@ -848,15 +848,15 @@ def dose_transition_pathways_to_json(trial: Any, next_dose: Any, cohort_sizes: A
 dose_transition_pathways = dose_transition_pathways_to_json
 
 
-def print_dtps(dtps: Any, indent: Any = 0, dose_label_func: Any = None, row_formatter: Any = None, verbose: Any = False) -> Any:
+def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None, row_formatter: Optional[Callable] = None, verbose: bool = False) -> Any:
     """Prints the dose-transition pathways.
 
     Args:
         dtps (dict): A nested dictionary of DTPs.
         indent (int, optional): The indentation level. Defaults to 0.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
-        row_formatter (callable, optional): A function to format the row.
+        row_formatter (Callable, optional): A function to format the row.
         verbose (bool, optional): Whether to print verbose output.
     """
     if dose_label_func is None:
@@ -903,12 +903,12 @@ def _dtps_to_rows(dtps: Any, dose_label_func: Any = None, pre: Any = []) -> Any:
     return rows
 
 
-def dtps_to_pandas(dtps: Any, dose_label_func: Any = None) -> Any:
+def dtps_to_pandas(dtps: Any, dose_label_func: Optional[Callable] = None) -> Any:
     """Converts DTPs to a pandas DataFrame.
 
     Args:
         dtps (dict): A nested dictionary of DTPs.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
 
     Returns:

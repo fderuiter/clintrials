@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Sequence
+from typing import Any, Sequence, Callable
 import numpy as np
 import pandas as pd
 """
@@ -93,8 +93,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             max_size (int): The maximum number of patients in the trial.
             stage_one_size (int, optional): The size of the first stage of the
                 trial. Defaults to 0.
-            F_func (callable, optional): The link function. Defaults to `empiric`.
-            inverse_F (callable, optional): The inverse link function. Defaults
+            F_func (Callable, optional): The link function. Defaults to `empiric`.
+            inverse_F (Callable, optional): The inverse link function. Defaults
                 to `inverse_empiric`.
             theta_prior (scipy.stats.rv_continuous, optional): The prior for
                 theta. Defaults to a normal distribution.

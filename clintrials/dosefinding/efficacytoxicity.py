@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable
+from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable, Callable
 import numpy as np
 import pandas as pd
 """
@@ -659,7 +659,7 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
             Defaults to 1.
         cases_already_observed (list, optional): A list of cases that have
             already been observed. Defaults to an empty list.
-        custom_output_func (callable, optional): A function that takes the
+        custom_output_func (Callable, optional): A function that takes the
             trial object and returns a dictionary of extra output. Defaults
             to `None`.
         verbose (bool, optional): If `True`, prints progress information.
@@ -738,12 +738,12 @@ def efficacy_toxicity_dose_transition_pathways(*args, **kwargs):
     return dose_transition_pathways(*args, **kwargs)
 
 
-def get_path(x: Any, dose_label_func: Any = None) -> Any:
+def get_path(x: Any, dose_label_func: Optional[Callable] = None) -> Any:
     """Constructs a string representation of a dose-transition path.
 
     Args:
         x (dict): A dictionary representing a single step in the DTP.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
 
     Returns:
@@ -794,13 +794,13 @@ def _efftox_row_formatter(x: Any, dose_label_func: Any, verbose: Any = False) ->
         return template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2))
 
 
-def print_dtps(dtps: Any, indent: Any = 0, dose_label_func: Any = None) -> Any:
+def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:
     """Prints the dose-transition pathways.
 
     Args:
         dtps (dict): A nested dictionary of DTPs.
         indent (int, optional): The indentation level. Defaults to 0.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
     """
     from clintrials.dosefinding import print_dtps as base_print_dtps
@@ -814,13 +814,13 @@ def print_dtps(dtps: Any, indent: Any = 0, dose_label_func: Any = None) -> Any:
     )
 
 
-def print_dtps_verbose(dtps: Any, indent: Any = 0, dose_label_func: Any = None) -> Any:
+def print_dtps_verbose(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:
     """Prints the dose-transition pathways with verbose information.
 
     Args:
         dtps (dict): A nested dictionary of DTPs.
         indent (int, optional): The indentation level. Defaults to 0.
-        dose_label_func (callable, optional): A function to format the dose
+        dose_label_func (Callable, optional): A function to format the dose
             label. Defaults to `str`.
     """
     from clintrials.dosefinding import print_dtps as base_print_dtps
