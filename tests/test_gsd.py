@@ -49,7 +49,7 @@ def test_simulation_type1_error():
     # A high number of sims and a reasonable tolerance are needed.
     n_sims = 20000  # Increased for stability
     results = design.run(n_sims=n_sims, method="bulk", theta=0)
-    
+
     rejections = sum(1 for r in results if r["Rejected"])
     rejection_prob = rejections / n_sims
 
@@ -161,7 +161,7 @@ from unittest.mock import patch
 
 def test_gsd_brentq_fallback():
     from clintrials.phase3.gsd import GroupSequentialDesign
-    
+
     with patch("clintrials.phase3.gsd.brentq") as mock_brentq:
         mock_brentq.side_effect = [ValueError("First interval failed"), 2.0]
         design = GroupSequentialDesign(k=1, alpha=0.025)
@@ -170,7 +170,7 @@ def test_gsd_brentq_fallback():
 def test_gsd_brentq_fallback_failure():
     from clintrials.phase3.gsd import GroupSequentialDesign
     import pytest
-    
+
     with patch("clintrials.phase3.gsd.brentq") as mock_brentq:
         mock_brentq.side_effect = ValueError("Both intervals failed")
         with pytest.raises(RuntimeError, match="Could not find a valid final boundary."):

@@ -13,12 +13,12 @@ from clintrials.core.registry import REGISTRY, inject_docs
 
 def logit(p):
     """Calculates the logit of a probability.
-    
+
     The probability is silently clipped to [1e-7, 1 - 1e-7] to prevent log(0).
-    
+
     Args:
         p (float or numpy.ndarray): The probability.
-        
+
     Returns:
         float or numpy.ndarray: The logit.
     """
@@ -28,12 +28,12 @@ def logit(p):
 
 def bernoulli_likelihood(p, y, log=False):
     """Calculates the Bernoulli likelihood or log-likelihood.
-    
+
     Args:
         p (float or numpy.ndarray): Probability of success.
         y (int or numpy.ndarray): Observed outcome(s) (1 or 0).
         log (bool, optional): If True, returns the log-likelihood. Defaults to False.
-        
+
     Returns:
         float or numpy.ndarray: The likelihood or log-likelihood.
     """

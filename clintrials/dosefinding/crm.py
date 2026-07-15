@@ -87,6 +87,9 @@ def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs:
         use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
         estimate_var (bool, optional): If `True`, estimates the variance of
             beta. Defaults to `False`.
+        min_beta (float, optional): The minimum bound for beta integration.
+        max_beta (float, optional): The maximum bound for beta integration.
+        n_points (int, optional): The number of points for beta integration.
 
     Returns:
         tuple[float, float | None]: A tuple containing the posterior mean and
@@ -234,6 +237,9 @@ def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses
         toxs (list[int]): The observed toxicity events.
         beta_pdf (callable): The PDF of the prior distribution for beta.
         use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
+        min_beta (float, optional): The minimum bound for beta integration.
+        max_beta (float, optional): The maximum bound for beta integration.
+        n_points (int, optional): The number of points for beta integration.
 
     Returns:
         list[float]: A list of posterior probabilities of toxicity.
@@ -290,6 +296,10 @@ def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: A
             variance, either "hessian" or "bootstrap". Defaults to "hessian".
         bootstrap_samples (int, optional): The number of bootstrap samples to
             use if `mle_var_method` is "bootstrap". Defaults to 200.
+        min_beta (float, optional): The minimum bound for beta integration.
+        max_beta (float, optional): The maximum bound for beta integration.
+        n_points (int, optional): The number of points for beta integration.
+        rng (np.random.Generator, optional): Random number generator.
 
     Returns:
         tuple: A tuple containing the recommended dose index, the beta
@@ -464,6 +474,10 @@ class CRM(DoseFindingTrial):
             bootstrap_samples (int, optional): The number of bootstrap
                 samples to use if `mle_var_method` is "bootstrap". Defaults
                 to 200.
+            min_beta (float, optional): The minimum bound for beta integration.
+            max_beta (float, optional): The maximum bound for beta integration.
+            n_points (int, optional): The number of points for beta integration.
+            sample_size (int, optional): The sample size to draw from beta distribution.
         """
         from clintrials.core.schema import CRMSchema
 
@@ -653,12 +667,12 @@ class CRM(DoseFindingTrial):
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
         mu0 = self.beta_prior.mean()
         sd0 = np.sqrt(self.beta_prior.var())
-        
+
         dose_labels = [
             self.inverse_F(self.prior[d - 1], a0=self.intercept, beta=mu0)
             for d in self.doses()
         ]
-        
+
         def log_likelihood_func(betas):
             return _compound_toxicity_likelihood(
                 self.F_func,
@@ -668,12 +682,12 @@ class CRM(DoseFindingTrial):
                 self.toxicities(),
                 log=True,
             )
-            
+
         labels = [
             self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
             for p in self.prior
         ]
-        
+
         def f_func(betas):
             # Evaluate for all labels (doses) and return an array of shape (num_doses, num_betas)
             out = []
@@ -681,7 +695,7 @@ class CRM(DoseFindingTrial):
                 tox_probs = self.F_func(lab, a0=self.intercept, beta=betas)
                 out.append((tox_probs > tox_cutoff).astype(float))
             return np.array(out)
-            
+
         return posterior_expectation_gh(
             log_likelihood_func=log_likelihood_func,
             f_func=f_func,

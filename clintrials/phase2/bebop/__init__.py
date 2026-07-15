@@ -73,7 +73,7 @@ class BeBOP:
 
     def has_more(self):
         """Checks if the trial is ongoing."""
-        # BeBOP doesn't have an inherent max_size unless added, 
+        # BeBOP doesn't have an inherent max_size unless added,
         # but we need to return True if status >= 0
         return self._status >= 0
 
@@ -81,7 +81,7 @@ class BeBOP:
         """Generates a standardized JSON-serializable report of the trial."""
         from collections import OrderedDict
         from clintrials.utils import atomic_to_json, iterable_to_json
-        
+
         report = OrderedDict()
         report["TrialStatus"] = atomic_to_json(self._status)
         report["Doses"] = iterable_to_json(self._doses)

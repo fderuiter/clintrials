@@ -57,25 +57,25 @@ import re
 
 def parse_pdf_structure(pdf_bytes: bytes) -> dict:
     """Parses a generated PDF to extract its logical structure tree.
-    
+
     Returns a dictionary of structure elements.
     """
     content = pdf_bytes.decode('latin1', errors='ignore')
     objects = {}
-    
+
     for match in re.finditer(r'(\d+)\s+0\s+obj(.*?)endobj', content, re.DOTALL):
         obj_id = int(match.group(1))
         objects[obj_id] = match.group(2)
-        
+
     struct_elems = {}
     for obj_id, obj_content in objects.items():
         if '/Type /StructElem' in obj_content:
             s_match = re.search(r'/S\s+/(\w+)', obj_content)
             s_type = s_match.group(1) if s_match else None
-            
+
             p_match = re.search(r'/P\s+(\d+)\s+0\s+R', obj_content)
             parent_id = int(p_match.group(1)) if p_match else None
-            
+
             k_match = re.search(r'/K\s+\[(.*?)\]', obj_content, re.DOTALL)
             kids = []
             if k_match:
@@ -87,32 +87,32 @@ def parse_pdf_structure(pdf_bytes: bytes) -> dict:
                     kids_ints = re.findall(r'\b\d+\b', k_content)
                     if kids_ints:
                         kids = [f"MCID_{x}" for x in kids_ints]
-                        
+
             struct_elems[obj_id] = {
                 'id': obj_id,
                 'type': s_type,
                 'parent': parent_id,
                 'kids': kids
             }
-            
+
     return struct_elems
 
 def validate_pdf_ua_structure(pdf_bytes: bytes):
     """Validates that a PDF's structure tree is correctly nested and MCIDs are only on leaves."""
     elems = parse_pdf_structure(pdf_bytes)
-    
+
     # Validation 1: Nesting correctness
     for obj_id, elem in elems.items():
         if elem['type'] == 'TR':
             parent = elems.get(elem['parent'])
             if parent and parent['type'] not in ('Table', 'THead', 'TBody', 'TFoot'):
                 raise ValueError(f"TR (id {obj_id}) must be a child of a Table element")
-        
+
         if elem['type'] in ('TH', 'TD'):
             parent = elems.get(elem['parent'])
             if parent and parent['type'] != 'TR':
                 raise ValueError(f"{elem['type']} (id {obj_id}) must be a child of a TR element")
-                
+
         # Validation 2: MCIDs are not on structural containers
         if elem['type'] in ('Table', 'TR', 'THead', 'TBody', 'TFoot'):
             for kid in elem['kids']:

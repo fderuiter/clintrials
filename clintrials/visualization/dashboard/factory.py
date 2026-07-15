@@ -130,7 +130,7 @@ def render_accessible_chart(st_module, fig, expander_label="Data Summary"):
     Shared utility to render a Plotly chart with an accessible Markdown table summary.
     """
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
-    
+
     if hasattr(fig, "layout") and hasattr(fig.layout, "meta"):
         fig.layout.meta = None
     st_module.plotly_chart(fig)

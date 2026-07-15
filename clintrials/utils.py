@@ -16,7 +16,7 @@ def deprecated(alternative):
     """
     Decorator to mark a function, method, or class as deprecated.
     Emits a DeprecationWarning pointing to the `alternative`.
-    
+
     Args:
         alternative (str): The modern alternative function, method, or class to use.
     """

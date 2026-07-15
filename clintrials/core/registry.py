@@ -8,26 +8,26 @@ REGISTRY: Dict[str, Any] = {
     # Integration limits
     "gsd_maxpts": 1000000,
     "gsd_abseps": 1e-5,
-    
+
     # Quadrature nodes
     "crm_deg": 40,
-    
+
     # CRM Integration parameters
     "crm_min_beta": -10,
     "crm_max_beta": 10,
     "crm_n_points": 2001,
     "crm_sample_size": 1000000,
-    
+
     # Search intervals
     "gsd_brentq_first_min": -5,
     "gsd_brentq_first_max": 15,
     "gsd_brentq_second_min": -50,
     "gsd_brentq_second_max": 50,
-    
+
     # Math constants (beta clipping)
     "math_clip_beta_min": -10,
     "math_clip_beta_max": 10,
-    
+
     # Random seeds
     "gsd_multivariate_normal_seed": 42,
     "gsd_seed_strategy": "fixed seed (42)",

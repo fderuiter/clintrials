@@ -54,7 +54,7 @@ class MultiFormatSummaryContainer:
         for c in cols:
             html += f'      <th scope="col">{_format_label(c)}</th>\n'
         html += "    </tr>\n  </thead>\n"
-        
+
         html += "  <tbody>\n"
         for _, row in self.df.iterrows():
             html += "    <tr>\n"
@@ -62,19 +62,19 @@ class MultiFormatSummaryContainer:
                 html += f"      <td>{fmt(x)}</td>\n"
             html += "    </tr>\n"
         html += "  </tbody>\n</table>"
-        
+
         return html
 
     def _generate_hierarchical_html(self):
         """Generates a hierarchical accessible HTML summary table using nested details."""
         summary = f"<strong>Data Summary: {self.title}</strong><br><br>\n"
-        
+
         # Add Expand All / Collapse All buttons
         summary += """<div style="margin-bottom: 10px;">
   <button type="button" onclick="document.querySelectorAll('details').forEach(e => e.setAttribute('open', 'true'))" aria-label="Expand all data sections">Expand All</button>
   <button type="button" onclick="document.querySelectorAll('details').forEach(e => e.removeAttribute('open'))" aria-label="Collapse all data sections">Collapse All</button>
 </div>\n"""
-        
+
         # Determine grouping columns
         target_cols = [c for c in self.df.columns if c.lower() in ['trial', 'cohort', 'dose', 'group', 'arm', 'scenario']]
         if len(target_cols) > 0:
@@ -90,15 +90,15 @@ class MultiFormatSummaryContainer:
             # Ensure we don't group by all columns
             if len(grouping_cols) == len(self.df.columns):
                 grouping_cols = grouping_cols[:-1]
-                
+
         # Limit to 3 levels of nesting (4 levels total including leaf table)
         grouping_cols = grouping_cols[:3]
-        
+
         def fmt(v):
             if isinstance(v, (float, np.float64)):
                 return f"{v:.4f}"
             return str(v)
-            
+
         def _build_html_table(df):
             cols = list(df.columns)
             html = "<table>\n  <thead>\n    <tr>\n"
@@ -119,10 +119,10 @@ class MultiFormatSummaryContainer:
         def generate_level(df, current_grouping_cols, level=1):
             if not current_grouping_cols:
                 return _build_html_table(df)
-                
+
             col = current_grouping_cols[0]
             grouped = df.groupby(col)
-            
+
             html = ""
             for name, group in grouped:
                 # Calculate summaries for numeric columns
@@ -136,7 +136,7 @@ class MultiFormatSummaryContainer:
                     summary_str = " | ".join(metrics[:4]) # limit to 4 metrics to avoid verbosity
                 else:
                     summary_str = f"N={len(group)}"
-                
+
                 # ARIA disclosure pattern is handled natively by <details> and <summary> tags
                 heading_level = min(level + 2, 6) # e.g. h3, h4, h5
                 html += '<details>\n'

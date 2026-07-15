@@ -74,7 +74,7 @@ def render() -> None:
             high_contrast=False
         )
         figures = [(None, fig)]
-        
+
         extra_text_summaries = [f"Power: {power:.4f}\n95% CI: ({average_ci[0]:.4f}, {average_ci[1]:.4f})"]
 
         return df, figures, extra_text_summaries

@@ -30,7 +30,7 @@ def main():
         components.html("""
         <script>
             const parentDoc = window.parent.document;
-            
+
             // Skip-link Injection
             if (!parentDoc.getElementById('skip-link-style')) {
                 const style = parentDoc.createElement('style');
@@ -75,7 +75,7 @@ def main():
                 skipLink.innerText = 'Skip to main content';
                 parentDoc.body.insertBefore(skipLink, parentDoc.body.firstChild);
             }
-            
+
             // Fix aria-allowed-attr for sidebar
             const sidebars = parentDoc.querySelectorAll('.stSidebar');
             sidebars.forEach(sidebar => {
@@ -90,7 +90,7 @@ def main():
                 mainContainer.id = 'main-content-anchor';
                 mainContainer.setAttribute('tabindex', '-1');
             }
-            
+
             const appHeader = parentDoc.querySelector('header[data-testid="stHeader"]');
             if (appHeader) {
                 appHeader.setAttribute('role', 'banner');
@@ -101,21 +101,21 @@ def main():
             scrollables.forEach(el => {
                 el.setAttribute('tabindex', '0');
             });
-            
+
             // Periodically run to catch dynamically rendered elements
             setInterval(() => {
                 parentDoc.querySelectorAll('.stSidebar').forEach(s => s.removeAttribute('aria-expanded'));
                 parentDoc.querySelectorAll('.stJson').forEach(j => {
                     if (!j.hasAttribute('tabindex')) j.setAttribute('tabindex', '0');
                 });
-                
+
                 const mainContainer = parentDoc.querySelector('.stMain');
                 if (mainContainer) {
                     mainContainer.setAttribute('role', 'main');
                     mainContainer.id = 'main-content-anchor';
                     mainContainer.setAttribute('tabindex', '-1');
                 }
-                
+
                 if (!parentDoc.getElementById('skip-link-anchor')) {
                     const skipLink = parentDoc.createElement('a');
                     skipLink.id = 'skip-link-anchor';
@@ -134,7 +134,7 @@ def main():
 
     st.sidebar.header("Accessibility Settings")
     st.session_state["accessibility_mode"] = st.sidebar.checkbox(
-        "Enable Screen-Reader Optimized Mode", 
+        "Enable Screen-Reader Optimized Mode",
         value=st.session_state.get("accessibility_mode", False),
         help="Restructures large tables into hierarchical nested details for easier navigation."
     )
@@ -210,8 +210,8 @@ def main():
     else:
         st.sidebar.header("Data Mode")
         data_mode = st.sidebar.radio(
-            "Select Data Source", 
-            ["Preview Mode", "Manual JSON Upload"], 
+            "Select Data Source",
+            ["Preview Mode", "Manual JSON Upload"],
             help="Switch between automatically generated preview simulations and manual file upload."
         )
 
@@ -236,7 +236,7 @@ def main():
             target_tox = st.sidebar.number_input("Target Toxicity", min_value=0.01, max_value=0.99, value=0.25, step=0.01)
             cohort_size = st.sidebar.number_input("Cohort Size", min_value=1, max_value=10, value=3)
             max_size = st.sidebar.number_input("Sample Size (N)", min_value=10, max_value=100, value=60, step=10)
-            
+
             try:
                 sims = get_preview_sims(design_type, target_tox, cohort_size, max_size)
                 if render_func:

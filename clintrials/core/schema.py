@@ -23,14 +23,14 @@ class BaseModel:
         cls.model_fields = {}
         import typing
         hints = typing.get_type_hints(cls, include_extras=True)
-        
+
         for name, ann in hints.items():
             if hasattr(cls, name):
                 val = getattr(cls, name)
                 if isinstance(val, FieldInfo):
                     val.annotation = ann
                     cls.model_fields[name] = val
-                    
+
                     if val.default is dataclasses.MISSING:
                         setattr(cls, name, dataclasses.field())
                     else:
@@ -39,18 +39,18 @@ class BaseModel:
                 f = FieldInfo()
                 f.annotation = ann
                 cls.model_fields[name] = f
-                
+
         dataclasses.dataclass(cls)
-        
+
     def __post_init__(self):
         for name, f in self.model_fields.items():
             val = getattr(self, name)
             self._validate_value(name, val, f)
-            
+
     def _validate_value(self, name, value, f):
         if value is None:
             return
-            
+
         def check_bounds(v, constraints):
             if constraints.ge is not None and v < constraints.ge:
                 raise ValueError(ErrorTemplates.GE.format(name=name, bound=constraints.ge))
@@ -80,7 +80,7 @@ class BaseModel:
                     is_prob = True
                 elif arg == "PositiveInt":
                     is_pos_int = True
-                
+
                 if isinstance(arg, FieldInfo):
                     if is_prob and (value < 0.0 or value > 1.0):
                         raise ValueError(ErrorTemplates.PROBABILITY.format(name=name))

@@ -10,7 +10,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
         @wraps(func)
         def wrapper(*args, **kwargs):
             import streamlit as st
-            
+
             if not hasattr(st, "fragment"):
                 st.fragment = lambda f: f
             if not hasattr(st, "columns"):
@@ -22,7 +22,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                 result = func(*args, **kwargs)
                 if result is None:
                     return
-                
+
                 # Check if it returned 2 or 3 items
                 if isinstance(result, tuple) and len(result) == 3:
                     summary_df, figures, extra_text_summaries = result
@@ -49,7 +49,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                     for fig_title, fig in figures:
                         if fig_title:
                             st.subheader(fig_title)
-                        
+
                         meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
                         text_summaries.append(meta)
                         render_accessible_chart(st, fig)

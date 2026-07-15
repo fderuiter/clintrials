@@ -12,14 +12,14 @@ def test_format_label():
 def test_multi_format_summary_container():
     df = pd.DataFrame({"a_col": [1.123456, 2], "b_col": ["str", "other"]})
     c = MultiFormatSummaryContainer("Title", df)
-    
+
     md = c.markdown
     assert "Title" in md
     assert "A Col" in md
     assert "1.1235" in md
-    
+
     assert str(c) == md
-    
+
     html = c.html
     assert "<strong>Data Summary: Title</strong>" in html
     assert "A Col" in html
@@ -30,7 +30,7 @@ def test_multi_format_summary_container():
 def test_multi_format_summary_container_hierarchical(monkeypatch):
     import streamlit as st
     monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
-    
+
     df = pd.DataFrame({
         "Trial": ["T1", "T1", "T2"],
         "Cohort": ["C1", "C2", "C1"],
@@ -39,7 +39,7 @@ def test_multi_format_summary_container_hierarchical(monkeypatch):
     })
     c = MultiFormatSummaryContainer("Hierarchical", df)
     html = c.html
-    
+
     assert "Data Summary: Hierarchical" in html
     assert "Expand All" in html
     assert "Collapse All" in html
@@ -54,7 +54,7 @@ def test_multi_format_summary_container_hierarchical(monkeypatch):
 def test_multi_format_summary_container_hierarchical_fallback(monkeypatch):
     import streamlit as st
     monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
-    
+
     df = pd.DataFrame({
         "Cat1": ["A", "A", "B"],
         "Cat2": ["X", "Y", "X"],
@@ -62,7 +62,7 @@ def test_multi_format_summary_container_hierarchical_fallback(monkeypatch):
     })
     c = MultiFormatSummaryContainer("Fallback", df)
     html = c.html
-    
+
     assert "<details>" in html
     assert "Cat1: A" in html
 

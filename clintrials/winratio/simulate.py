@@ -26,23 +26,23 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
     """
     t_group = np.asarray(treatment_group)
     c_group = np.asarray(control_group)
-    
+
     if t_group.size == 0 or c_group.size == 0:
         return {"wins": 0, "losses": 0, "ties": 0}
-        
+
     diff = t_group[:, np.newaxis, :] - c_group[np.newaxis, :, :]
-    
+
     non_zero = diff != 0
     has_non_zero = non_zero.any(axis=2)
-    
+
     first_non_zero_idx = np.argmax(non_zero, axis=2)
-    
+
     first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)
-    
+
     wins = np.sum((first_diff > 0) & has_non_zero)
     losses = np.sum((first_diff < 0) & has_non_zero)
     ties = np.sum(~has_non_zero)
-    
+
     return {"wins": int(wins), "losses": int(losses), "ties": int(ties)}
 
 

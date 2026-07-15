@@ -433,6 +433,7 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
             cohort-by-cohort. Defaults to `True`.
         calculate_optimal_decision (bool, optional): If `True`, calculates
             the optimal dose decision. Defaults to `True`.
+        recruitment_stream (iterator, optional): An optional iterator providing recruitment times.
 
     Returns:
         collections.OrderedDict: A dictionary containing the simulation report.
@@ -532,6 +533,7 @@ def simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_
             cohort-by-cohort. Defaults to `True`.
         calculate_optimal_decision (bool, optional): If `True`, calculates
             the optimal dose decision. Defaults to `True`.
+        recruitment_stream (iterator, optional): An optional iterator providing recruitment times.
 
     Returns:
         collections.OrderedDict: A dictionary containing the simulation report.
@@ -598,6 +600,7 @@ def simulate_efficacy_toxicity_dose_finding_trials(design_map: Any, true_toxicit
             cohort-by-cohort. Defaults to `True`.
         calculate_optimal_decision (bool, optional): If `True`, calculates
             the optimal dose decision. Defaults to `True`.
+        recruitment_stream (iterator, optional): An optional iterator providing recruitment times.
 
     Returns:
         collections.OrderedDict: A dictionary of simulation reports, with

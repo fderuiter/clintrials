@@ -60,9 +60,9 @@ class Protocol(metaclass=abc.ABCMeta):
         from clintrials.core.simulation import UniversalProtocolSimulationRunner
 
         self.set_rng(get_rng(seed))
-        
+
         mode = "vectorized" if method == "bulk" else "iterative"
-        
+
         runner = UniversalProtocolSimulationRunner(self)
         results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **kwargs)
 
