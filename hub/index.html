@@ -95,13 +95,71 @@ font = "sans serif"
 `;
       }
 
-      stlite.mount(
-        {
-          requirements: ["altair", "plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./clintrials-latest-py3-none-any.whl"],
-          entrypoint: "app.py",
-          files: {
-            ".streamlit/config.toml": themeConfig,
-            "app.py": `
+      async function launchSafeMode(errorMsg) {
+        console.error("Launching Safe Mode due to:", errorMsg);
+        stlite.mount(
+          {
+            requirements: [],
+            entrypoint: "app.py",
+            files: {
+              ".streamlit/config.toml": themeConfig,
+              "app.py": `
+import streamlit as st
+
+st.set_page_config(page_title="Safe Mode Dashboard", page_icon="⚠️")
+st.title("⚠️ Safe Mode Dashboard")
+st.error("The Trial Simulation Hub encountered a critical error during initialization.")
+st.warning("You have been automatically booted into Safe Mode to prevent a total failure.")
+st.write("### Diagnostic Details")
+st.code("""${errorMsg}""")
+st.write("### Troubleshooting")
+st.write("- Please verify your internet connection.")
+st.write("- Check if the custom wheel dependency was built and published correctly.")
+`
+            },
+          },
+          document.getElementById("root")
+        );
+      }
+
+      async function initializeWorkspace() {
+        try {
+          const manifestResponse = await fetch("build-manifest.json");
+          if (!manifestResponse.ok) {
+            throw new Error(`Failed to load build-manifest.json: ${manifestResponse.status} ${manifestResponse.statusText}`);
+          }
+          const manifest = await manifestResponse.json();
+          const wheelFile = manifest.wheel;
+          if (!wheelFile) {
+            throw new Error("Invalid manifest: missing 'wheel' parameter.");
+          }
+
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          
+          let wheelResponse;
+          try {
+            wheelResponse = await fetch(wheelFile, { method: "HEAD", signal: controller.signal });
+          } catch (e) {
+            if (e.name === 'AbortError') {
+              throw new Error(`Pre-flight check timed out after 3 seconds while trying to reach ${wheelFile}`);
+            }
+            throw new Error(`Pre-flight check failed: ${e.message}`);
+          } finally {
+            clearTimeout(timeoutId);
+          }
+
+          if (!wheelResponse.ok) {
+            throw new Error(`Custom wheel dependency returned HTTP ${wheelResponse.status} for ${wheelFile}`);
+          }
+
+          stlite.mount(
+            {
+              requirements: ["altair", "plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./" + wheelFile],
+              entrypoint: "app.py",
+              files: {
+                ".streamlit/config.toml": themeConfig,
+                "app.py": `
 import os
 import streamlit as st
 
@@ -112,10 +170,17 @@ from clintrials.visualization.dashboard.main import main
 if __name__ == "__main__":
     main()
 `
-          },
-        },
-        document.getElementById("root")
-      );
+              },
+            },
+            document.getElementById("root")
+          );
+
+        } catch (error) {
+          launchSafeMode(error.message || String(error));
+        }
+      }
+
+      initializeWorkspace();
     </script>
   </body>
 </html>
