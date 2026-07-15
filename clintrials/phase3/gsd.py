@@ -10,7 +10,7 @@ import numpy as np
 from scipy.optimize import brentq
 from scipy.stats import multivariate_normal, norm
 
-from clintrials.core.registry import REGISTRY, inject_docs
+from clintrials.core.registry import CORE_REGISTRY, inject_docs
 from clintrials.utils import deprecated
 
 @inject_docs()
@@ -178,8 +178,8 @@ class GroupSequentialDesign(Protocol):
                         limits,
                         mean=np.zeros(i),
                         cov=cov,
-                        maxpts=REGISTRY["gsd_maxpts"],
-                        abseps=REGISTRY["gsd_abseps"],
+                        maxpts=CORE_REGISTRY["gsd_maxpts"],
+                        abseps=CORE_REGISTRY["gsd_abseps"],
                     )
 
             def root_func(u_i):
@@ -188,8 +188,8 @@ class GroupSequentialDesign(Protocol):
             try:
                 boundary = brentq(
                     root_func,
-                    REGISTRY["gsd_brentq_first_min"],
-                    REGISTRY["gsd_brentq_first_max"]
+                    CORE_REGISTRY["gsd_brentq_first_min"],
+                    CORE_REGISTRY["gsd_brentq_first_max"]
                 )
             except ValueError:
                 boundary = np.inf
@@ -200,8 +200,8 @@ class GroupSequentialDesign(Protocol):
             try:
                 boundary = brentq(
                     root_func,
-                    REGISTRY["gsd_brentq_second_min"],
-                    REGISTRY["gsd_brentq_second_max"]
+                    CORE_REGISTRY["gsd_brentq_second_min"],
+                    CORE_REGISTRY["gsd_brentq_second_max"]
                 )
                 boundaries[-1] = boundary
             except ValueError:
@@ -217,4 +217,4 @@ class GroupSequentialDesign(Protocol):
 
 # Inject module-level docstring
 if __doc__:
-    __doc__ = __doc__.format(**REGISTRY)
+    __doc__ = __doc__.format(**CORE_REGISTRY)
