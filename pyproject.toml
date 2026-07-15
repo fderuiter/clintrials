@@ -49,6 +49,7 @@ nbsphinx = "^0.9.8"
 pytest-playwright = ">=0.4.0"
 axe-playwright-python = ">=0.1.0"
 playwright = ">=1.40.0"
+ipython = "<9.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0"]

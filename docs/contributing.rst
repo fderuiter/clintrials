@@ -5,11 +5,11 @@ Contributions are welcome! Clone the repository and install the development depe
 
 .. code-block:: bash
 
-    pip install -e .[docs]
+    poetry install --all-extras
 
-Run the test suite with ``pytest`` and build the docs using ``make -C docs html``.
+Run the test suite with ``poetry run pytest`` and build the docs using ``poetry run make -C docs html SPHINXOPTS="-W"``.
 
-Please follow the existing code style enforced by **black**, **ruff**, and **isort**.
+Please follow the existing code style enforced by our pre-commit hooks. You can run validations locally with ``poetry run pre-commit run --all-files``.
 
 ## Promoting Features to the Public API
 
