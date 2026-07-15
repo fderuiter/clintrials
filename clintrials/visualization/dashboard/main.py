@@ -246,11 +246,15 @@ def main():
             cohort_size = st.sidebar.number_input("Cohort Size", min_value=1, max_value=10, value=3)
             max_size = st.sidebar.number_input("Sample Size (N)", min_value=10, max_value=100, value=60, step=10)
             
+            from clintrials.visualization.dashboard.utils import announce_status_locally
             try:
+                announce_status_locally("Simulation in progress", key="preview-start")
                 sims = get_preview_sims(design_type, target_tox, cohort_size, max_size)
+                announce_status_locally("Simulation completed", key="preview-complete")
                 if render_func:
                     render_func(sims)
             except Exception as e:
+                announce_status_locally("Simulation failed", key="preview-fail")
                 st.error(f"Simulation failed with the selected parameters: {e}")
 
 
