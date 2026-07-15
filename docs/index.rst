@@ -5,7 +5,7 @@ Welcome to **clintrials**, a Python library providing clinical trial designs and
 
 .. raw:: html
 
-   <iframe src="hub/index.html?embed=true&view=Win+Ratio" width="100%" height="800px" frameborder="0" style="border: none; background: transparent; overflow: hidden;" scrolling="no" onload="iFrameResize({log:false}, this)"></iframe>
+   <iframe title="Clinical Trials Simulation Hub Dashboard" src="hub/index.html?embed=true&view=Win+Ratio" width="100%" height="800px" frameborder="0" style="border: none; background: transparent; overflow: hidden;" scrolling="no" onload="iFrameResize({log:false}, this)"></iframe>
 
 .. toctree::
    :maxdepth: 2
