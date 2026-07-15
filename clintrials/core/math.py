@@ -8,7 +8,7 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 import numpy as np
-from clintrials.core.registry import REGISTRY, inject_docs
+from clintrials.core.registry import CORE_REGISTRY, inject_docs
 
 
 def logit(p):
@@ -88,7 +88,7 @@ def empiric(x, a0=None, beta=0):
         0.25
     """
 
-    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return x ** np.exp(beta)
 
 
@@ -133,7 +133,7 @@ def logistic(x, a0=0, beta=0):
         >>> logistic(0.25, -1, 1)
         0.42057106852688747
     """
-    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 
@@ -156,7 +156,7 @@ def inverse_logistic(x, a0=0, beta=0):
         >>> round(inverse_logistic(0.42057106852688747, -1, 1), 2)
         0.25
     """
-    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 
 
@@ -224,7 +224,7 @@ def logit1(x, a0=3, beta=0):
         >>> logit1(0.5, beta=1)
         0.972...
     """
-    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 
@@ -246,7 +246,7 @@ def inverse_logit1(x, a0=3, beta=0):
         >>> inverse_logit1(0.972..., beta=1)
         0.5
     """
-    beta = np.clip(beta, REGISTRY["math_clip_beta_min"], REGISTRY["math_clip_beta_max"])
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 
 
@@ -291,4 +291,4 @@ def fgm_joint_prob(a, b, p1, p2, psi):
 
 # Inject module-level docstring
 if __doc__:
-    __doc__ = __doc__.format(**REGISTRY)
+    __doc__ = __doc__.format(**CORE_REGISTRY)

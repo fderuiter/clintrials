@@ -86,7 +86,7 @@ def _build_registry():
     return registry
 
 
-REGISTRY = _build_registry()
+UI_REGISTRY = _build_registry()
 
 
 def create_widget(st_module, widget_type, var_name, *args, **kwargs):
@@ -94,8 +94,8 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):
     Factory function to create a Streamlit widget with an automatically
     applied help text based on the variable name.
     """
-    if var_name in REGISTRY:
-        kwargs["help"] = REGISTRY[var_name]
+    if var_name in UI_REGISTRY:
+        kwargs["help"] = UI_REGISTRY[var_name]
 
     if widget_type == "selectbox":
         return st_module.sidebar.selectbox(*args, **kwargs)
