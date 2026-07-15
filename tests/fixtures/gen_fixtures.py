@@ -60,9 +60,9 @@ def generate_fixtures():
     # Write the data frames to CSV files
     out_probs = os.path.join("tests", "fixtures", "expected_posterior_dlt_probs.csv")
     out_next = os.path.join("tests", "fixtures", "next_dose_recommendations.csv")
-    
+
     os.makedirs(os.path.dirname(out_probs), exist_ok=True)
-    
+
     posterior_dlt_probs_df.to_csv(out_probs, index=False)
     next_dose_df.to_csv(out_next, index=False)
 
