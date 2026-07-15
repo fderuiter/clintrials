@@ -29,91 +29,43 @@ def main():
         import streamlit.components.v1 as components
         components.html("""
         <script>
-            const parentDoc = window.parent.document;
+            try {
+                const parentDoc = window.parent.document;
 
-            // Skip-link Injection
-            if (!parentDoc.getElementById('skip-link-style')) {
-                const style = parentDoc.createElement('style');
-                style.id = 'skip-link-style';
-                style.innerHTML = `
-                .skip-link {
-                  position: absolute;
-                  width: 1px;
-                  height: 1px;
-                  padding: 0;
-                  margin: -1px;
-                  overflow: hidden;
-                  clip: rect(0, 0, 0, 0);
-                  white-space: nowrap;
-                  border: 0;
-                }
-                .skip-link:focus {
-                  width: auto;
-                  height: auto;
-                  padding: 10px 15px;
-                  margin: 0;
-                  overflow: visible;
-                  clip: auto;
-                  white-space: normal;
-                  background-color: #496D89;
-                  color: #FFFFFF;
-                  z-index: 999999;
-                  top: 0;
-                  left: 0;
-                  text-decoration: none;
-                  font-family: sans-serif;
-                }
-                `;
-                parentDoc.head.appendChild(style);
-            }
-
-            if (!parentDoc.getElementById('skip-link-anchor')) {
-                const skipLink = parentDoc.createElement('a');
-                skipLink.id = 'skip-link-anchor';
-                skipLink.className = 'skip-link';
-                skipLink.href = '#main-content-anchor';
-                skipLink.innerText = 'Skip to main content';
-                parentDoc.body.insertBefore(skipLink, parentDoc.body.firstChild);
-            }
-
-            // Fix aria-allowed-attr for sidebar
-            const sidebars = parentDoc.querySelectorAll('.stSidebar');
-            sidebars.forEach(sidebar => {
-                sidebar.removeAttribute('aria-expanded');
-                sidebar.setAttribute('role', 'navigation');
-            });
-
-            // Fix region issues by wrapping main content or adding roles
-            const mainContainer = parentDoc.querySelector('.stMain');
-            if (mainContainer) {
-                mainContainer.setAttribute('role', 'main');
-                mainContainer.id = 'main-content-anchor';
-                mainContainer.setAttribute('tabindex', '-1');
-            }
-
-            const appHeader = parentDoc.querySelector('header[data-testid="stHeader"]');
-            if (appHeader) {
-                appHeader.setAttribute('role', 'banner');
-            }
-
-            // Fix scrollable-region-focusable for JSON and code blocks
-            const scrollables = parentDoc.querySelectorAll('.stJson, .stCodeBlock');
-            scrollables.forEach(el => {
-                el.setAttribute('tabindex', '0');
-            });
-
-            // Periodically run to catch dynamically rendered elements
-            setInterval(() => {
-                parentDoc.querySelectorAll('.stSidebar').forEach(s => s.removeAttribute('aria-expanded'));
-                parentDoc.querySelectorAll('.stJson').forEach(j => {
-                    if (!j.hasAttribute('tabindex')) j.setAttribute('tabindex', '0');
-                });
-
-                const mainContainer = parentDoc.querySelector('.stMain');
-                if (mainContainer) {
-                    mainContainer.setAttribute('role', 'main');
-                    mainContainer.id = 'main-content-anchor';
-                    mainContainer.setAttribute('tabindex', '-1');
+                // Skip-link Injection
+                if (!parentDoc.getElementById('skip-link-style')) {
+                    const style = parentDoc.createElement('style');
+                    style.id = 'skip-link-style';
+                    style.innerHTML = `
+                    .skip-link {
+                      position: absolute;
+                      width: 1px;
+                      height: 1px;
+                      padding: 0;
+                      margin: -1px;
+                      overflow: hidden;
+                      clip: rect(0, 0, 0, 0);
+                      white-space: nowrap;
+                      border: 0;
+                    }
+                    .skip-link:focus {
+                      width: auto;
+                      height: auto;
+                      padding: 10px 15px;
+                      margin: 0;
+                      overflow: visible;
+                      clip: auto;
+                      white-space: normal;
+                      background-color: #496D89;
+                      color: #FFFFFF;
+                      z-index: 999999;
+                      top: 0;
+                      left: 0;
+                      text-decoration: none;
+                      font-family: sans-serif;
+                    }
+                    `;
+                    parentDoc.head.appendChild(style);
                 }
 
                 if (!parentDoc.getElementById('skip-link-anchor')) {
@@ -124,7 +76,64 @@ def main():
                     skipLink.innerText = 'Skip to main content';
                     parentDoc.body.insertBefore(skipLink, parentDoc.body.firstChild);
                 }
-            }, 1000);
+
+                // Fix aria-allowed-attr for sidebar
+                const sidebars = parentDoc.querySelectorAll('.stSidebar');
+                sidebars.forEach(sidebar => {
+                    sidebar.removeAttribute('aria-expanded');
+                    sidebar.setAttribute('role', 'navigation');
+                });
+
+                // Fix region issues by wrapping main content or adding roles
+                const mainContainer = parentDoc.querySelector('.stMain');
+                if (mainContainer) {
+                    mainContainer.setAttribute('role', 'main');
+                    mainContainer.id = 'main-content-anchor';
+                    mainContainer.setAttribute('tabindex', '-1');
+                }
+
+                const appHeader = parentDoc.querySelector('header[data-testid="stHeader"]');
+                if (appHeader) {
+                    appHeader.setAttribute('role', 'banner');
+                }
+
+                // Fix scrollable-region-focusable for JSON and code blocks
+                const scrollables = parentDoc.querySelectorAll('.stJson, .stCodeBlock');
+                scrollables.forEach(el => {
+                    el.setAttribute('tabindex', '0');
+                });
+
+                // Periodically run to catch dynamically rendered elements
+                setInterval(() => {
+                    try {
+                        const parentDoc = window.parent.document;
+                        parentDoc.querySelectorAll('.stSidebar').forEach(s => s.removeAttribute('aria-expanded'));
+                        parentDoc.querySelectorAll('.stJson').forEach(j => {
+                            if (!j.hasAttribute('tabindex')) j.setAttribute('tabindex', '0');
+                        });
+
+                        const mainContainer = parentDoc.querySelector('.stMain');
+                        if (mainContainer) {
+                            mainContainer.setAttribute('role', 'main');
+                            mainContainer.id = 'main-content-anchor';
+                            mainContainer.setAttribute('tabindex', '-1');
+                        }
+
+                        if (!parentDoc.getElementById('skip-link-anchor')) {
+                            const skipLink = parentDoc.createElement('a');
+                            skipLink.id = 'skip-link-anchor';
+                            skipLink.className = 'skip-link';
+                            skipLink.href = '#main-content-anchor';
+                            skipLink.innerText = 'Skip to main content';
+                            parentDoc.body.insertBefore(skipLink, parentDoc.body.firstChild);
+                        }
+                    } catch (e) {
+                        console.warn('Cross-origin or sandbox iframe blocked parent document access during interval:', e);
+                    }
+                }, 1000);
+            } catch (e) {
+                console.warn('Cross-origin or sandbox iframe blocked parent document access:', e);
+            }
         </script>
         """, height=0, width=0)
     except ImportError:

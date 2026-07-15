@@ -90,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const iframe = document.createElement('iframe');
         iframe.id = 'simulation-hub-iframe';
+        iframe.title = 'Clinical Trials Simulation Hub Dashboard';
         iframe.src = getHubUrl();
         iframeContainer.appendChild(iframe);
         initIframeResizer();

@@ -199,7 +199,7 @@ The full documentation, including tutorials and API reference, is hosted on GitH
 
 ## Contributing
 
-Contributions are welcome! Please see the [contributing guide](docs/contributing.md) for more details on how to get involved.
+Contributions are welcome! Please see the [contributing guide](docs/contributing.rst) for more details on how to get involved.
 
 ## Development
 
@@ -226,7 +226,7 @@ poetry run pytest -q
 To build the documentation locally with Poetry, run:
 
 ```bash
-poetry run make -C docs html
+poetry run make -C docs html SPHINXOPTS="-W"
 ```
 
 The documentation will be generated in the `docs/_build/html` directory.
