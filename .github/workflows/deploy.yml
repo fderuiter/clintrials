@@ -67,7 +67,7 @@ jobs:
           cp -a hub/. public/hub/
           cp dist/*.whl public/hub/
           VERSION=$(poetry version -s)
-          sed -i "s/clintrials-latest-py3-none-any.whl/clintrials-$VERSION-py3-none-any.whl/g" public/hub/index.html
+          echo "{\"version\": \"$VERSION\", \"wheel\": \"clintrials-$VERSION-py3-none-any.whl\"}" > public/hub/build-manifest.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
