@@ -13,17 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build R environment
-        uses: docker/build-push-action@v5
+      - uses: actions/setup-python@v6
         with:
-          context: tests/fixtures
-          push: false
-          load: true
-          tags: clintrials-r-env:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          python-version: '3.12'
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --with dev
       - name: Generate fixtures
         run: ./tests/fixtures/generate_fixtures.sh
       - name: Check for differences

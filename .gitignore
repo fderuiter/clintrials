@@ -12,3 +12,7 @@ docs/_build/
 # Coverage files
 .coverage
 coverage.txt
+
+# Vendor dependencies
+hub/vendor/
+docs/_static/vendor/

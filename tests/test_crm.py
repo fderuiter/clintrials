@@ -365,7 +365,7 @@ class TestCRMMLEVariance:
         assert len(res_no_var) == 4
 
 
-def test_CRM_class_with_bcrm_fixtures():
+def test_CRM_class_with_generated_fixtures():
     # Load the fixtures
     expected_probs = pd.read_csv("tests/fixtures/expected_posterior_dlt_probs.csv")
     expected_doses = pd.read_csv("tests/fixtures/next_dose_recommendations.csv")

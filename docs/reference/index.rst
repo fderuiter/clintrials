@@ -17,7 +17,6 @@ API Reference
    clintrials.core.unified
    clintrials.core.viz_interface
    clintrials.utils
-   clintrials.phase2.bebop
    clintrials.dosefinding.efftox
    clintrials.dosefinding.wagestait
    clintrials.dosefinding.watu

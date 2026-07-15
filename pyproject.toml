@@ -74,7 +74,7 @@ line_length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py39"
-exclude = ["clintrials/legacy/", "docs/tutorials/"]
+exclude = ["docs/tutorials/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
