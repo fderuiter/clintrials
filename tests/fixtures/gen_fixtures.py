@@ -51,6 +51,8 @@ def generate_fixtures():
         "dose": list(range(1, len(prob_tox_1) + 1)) + list(range(1, len(prob_tox_2) + 1)),
         "prob": list(prob_tox_1) + list(prob_tox_2)
     })
+    # Round to 10 decimal places for numerical stability across environments
+    posterior_dlt_probs_df["prob"] = posterior_dlt_probs_df["prob"].round(10)
 
     next_dose_df = pd.DataFrame({
         "scenario": [1, 2],
