@@ -9,6 +9,7 @@
    .. autosummary::
    
       association_to_correlation
+      bernoulli_likelihood
       empiric
       fgm_joint_prob
       hyperbolic_tan
@@ -18,5 +19,6 @@
       inverse_logit
       inverse_logit1
       logistic
+      logit
       logit1
    

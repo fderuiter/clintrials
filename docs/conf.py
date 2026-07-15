@@ -60,7 +60,22 @@ html_js_files = ["custom.js"]
 # Warnings as errors when running in CI
 if os.environ.get("SPHINX_STRICT", "0") == "1":
     nitpicky = True
-    nitpick_ignore = []
+    nitpick_ignore = [
+        ("py:class", "optional"),
+        ("py:class", "np.random.Generator"),
+        ("py:class", "scipy.stats.norm"),
+        ("py:class", "scipy.stats.rv_continuous"),
+        ("py:class", "_ParameterSpaceIter"),
+    ]
+
+    nitpick_ignore_regex = [
+        ("py:obj", r"typing\.Annotated\[.*\]"),
+        ("py:obj", r"typing\.List\[~?typing\.Annotated\[.*\]\]"),
+        ("py:obj", r"typing\.Optional\[typing\.List\[~?typing\.Annotated\[.*\]\]\]"),
+        ("py:obj", r"typing\.List\[~?typing\.Annotated\[.*\]\] \| None"),
+        ("py:obj", r"clintrials\.dosefinding\.efftox\..*"),
+        ("py:obj", r"clintrials\.utils\.deprecated"),
+    ]
 
 def setup(app):
     """Register custom extensions and hooks with Sphinx."""

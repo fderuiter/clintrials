@@ -10,4 +10,7 @@
    
       adaptive_mc_integration
       integrate_posterior_1d
+      integrate_posterior_1d_adaptive
+      integrate_posterior_1d_nonadaptive
+      posterior_expectation_gh
    

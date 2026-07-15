@@ -106,17 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initIframeResizer();
     }
 
-    function destroyIframe() {
-        const iframe = document.getElementById('simulation-hub-iframe');
-        if (iframe) {
-            if (iframe.iFrameResizer) {
-                iframe.iFrameResizer.close();
-            } else {
-                iframe.parentNode.removeChild(iframe);
-            }
-        }
-    }
-
     // 3. Toggle Logic
     toggleBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -127,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
             createIframe();
         } else {
             sidebar.classList.remove('open');
-            destroyIframe();
         }
     });
 
@@ -157,4 +145,14 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.remove('hub-dragging');
         }
     });
+
+    // 5. Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        const isSubpath = window.location.pathname.includes('/clintrials/');
+        const swUrl = isSubpath ? '/clintrials/sw.js' : '/sw.js';
+        const swScope = isSubpath ? '/clintrials/' : '/';
+        navigator.serviceWorker.register(swUrl, { scope: swScope })
+            .then(reg => console.log('SW registered on root scope:', reg.scope))
+            .catch(err => console.log('SW registration failed:', err));
+    }
 });

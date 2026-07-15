@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Sequence
+from typing import Any, Sequence, Callable
 import numpy as np
 """
 An implementation of Wages & Tait's adaptive Bayesian design for dose-finding
@@ -31,7 +31,7 @@ def _wt_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0
             case is a tuple of (dose, toxicity, efficacy).
         skeleton (list[float]): A list of prior efficacy probabilities.
         theta (float): The slope parameter.
-        F (callable, optional): The link function. Defaults to `empiric`.
+        F (Callable, optional): The link function. Defaults to `empiric`.
         a0 (float, optional): The intercept parameter. Defaults to 0.
 
     Returns:
@@ -52,7 +52,7 @@ def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any
             case is a tuple of (dose, toxicity, efficacy).
         skeleton (list[float]): A list of prior efficacy probabilities.
         theta (float): The slope parameter.
-        F (callable, optional): The link function. Defaults to `empiric`.
+        F (Callable, optional): The link function. Defaults to `empiric`.
         a0 (float, optional): The intercept parameter. Defaults to 0.
 
     Returns:
@@ -73,7 +73,7 @@ def _wt_get_theta_hat(cases: Any, skeletons: Any, theta_prior: Any, F: Any = emp
         skeletons (list[list[float]]): A list of efficacy skeletons.
         theta_prior (scipy.stats.rv_continuous): The prior distribution for
             theta.
-        F (callable, optional): The link function. Defaults to `empiric`.
+        F (Callable, optional): The link function. Defaults to `empiric`.
         use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
         estimate_var (bool, optional): If `True`, estimates the posterior
             variance of theta. Defaults to `False`.
@@ -116,7 +116,7 @@ def _get_post_eff_bayes(cases: Any, skeleton: Any, dose_labels: Any, theta_prior
         skeleton (list[float]): A list of prior efficacy probabilities.
         dose_labels (list[float]): The dose labels.
         theta_prior (scipy.stats.rv_continuous): The prior for theta.
-        F (callable, optional): The link function. Defaults to `empiric`.
+        F (Callable, optional): The link function. Defaults to `empiric`.
         use_quick_integration (bool, optional): Ignored. Included for backward compatibility.
 
     Returns:
@@ -158,8 +158,8 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             max_size (int): The maximum number of patients in the trial.
             randomisation_stage_size (int): The number of patients to randomize
                 in the first stage.
-            F_func (callable, optional): The link function. Defaults to `empiric`.
-            inverse_F (callable, optional): The inverse link function. Defaults
+            F_func (Callable, optional): The link function. Defaults to `empiric`.
+            inverse_F (Callable, optional): The inverse link function. Defaults
                 to `inverse_empiric`.
             theta_prior (scipy.stats.rv_continuous, optional): The prior for
                 theta. Defaults to a normal distribution.
