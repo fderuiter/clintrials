@@ -16,7 +16,7 @@ import logging
 import warnings
 from collections import OrderedDict
 
-from clintrials.core.registry import REGISTRY
+from clintrials.core.registry import CORE_REGISTRY
 from scipy.optimize import minimize
 from scipy.stats import norm
 
@@ -101,9 +101,9 @@ def _get_beta_hat_bayes(F: Any, intercept: Any, codified_doses_given: Any, toxs:
         )
         return ll + np.log(beta_pdf(t) + 1e-300)
 
-    min_b = min_beta if min_beta is not None else REGISTRY["crm_min_beta"]
-    max_b = max_beta if max_beta is not None else REGISTRY["crm_max_beta"]
-    n_pts = n_points if n_points is not None else REGISTRY["crm_n_points"]
+    min_b = min_beta if min_beta is not None else CORE_REGISTRY["crm_min_beta"]
+    max_b = max_beta if max_beta is not None else CORE_REGISTRY["crm_max_beta"]
+    n_pts = n_points if n_points is not None else CORE_REGISTRY["crm_n_points"]
     beta_hat = integrate_posterior_1d(logpost, lambda t: t, min_b, max_b, n_points=n_pts)  # type: ignore
 
     if estimate_var:
@@ -247,9 +247,9 @@ def _get_post_tox_bayes(F: Any, intercept: Any, dose_labels: Any, codified_doses
         return ll + np.log(beta_pdf(t) + 1e-300)
 
     post_tox = []
-    min_b = min_beta if min_beta is not None else REGISTRY["crm_min_beta"]
-    max_b = max_beta if max_beta is not None else REGISTRY["crm_max_beta"]
-    n_pts = n_points if n_points is not None else REGISTRY["crm_n_points"]
+    min_b = min_beta if min_beta is not None else CORE_REGISTRY["crm_min_beta"]
+    max_b = max_beta if max_beta is not None else CORE_REGISTRY["crm_max_beta"]
+    n_pts = n_points if n_points is not None else CORE_REGISTRY["crm_n_points"]
     for x in dose_labels:
         prob = integrate_posterior_1d(  # type: ignore
             logpost, lambda t: F(x, a0=intercept, beta=t), min_b, max_b, n_points=n_pts
@@ -540,22 +540,22 @@ class CRM(DoseFindingTrial):
     @property
     def min_beta(self):
         """Gets the minimum limit for beta integration."""
-        return self._min_beta_override if self._min_beta_override is not None else REGISTRY["crm_min_beta"]
+        return self._min_beta_override if self._min_beta_override is not None else CORE_REGISTRY["crm_min_beta"]
 
     @property
     def max_beta(self):
         """Gets the maximum limit for beta integration."""
-        return self._max_beta_override if self._max_beta_override is not None else REGISTRY["crm_max_beta"]
+        return self._max_beta_override if self._max_beta_override is not None else CORE_REGISTRY["crm_max_beta"]
 
     @property
     def n_points(self):
         """Gets the number of grid points for numeric integration."""
-        return self._n_points_override if self._n_points_override is not None else REGISTRY["crm_n_points"]
+        return self._n_points_override if self._n_points_override is not None else CORE_REGISTRY["crm_n_points"]
 
     @property
     def sample_size(self):
         """Gets the Monte Carlo sample size."""
-        return self._sample_size_override if self._sample_size_override is not None else REGISTRY["crm_sample_size"]
+        return self._sample_size_override if self._sample_size_override is not None else CORE_REGISTRY["crm_sample_size"]
 
     def _DoseFindingTrial__reset(self) -> Any:
         self.beta_hat, self.beta_var = self.beta_prior.mean(), self.beta_prior.var()
@@ -649,7 +649,7 @@ class CRM(DoseFindingTrial):
         """
         return list(self.post_tox)
 
-    def _prob_tox_exceeds_quadrature(self, tox_cutoff: Any, deg: Any = REGISTRY["crm_deg"]) -> Any:
+    def _prob_tox_exceeds_quadrature(self, tox_cutoff: Any, deg: Any = CORE_REGISTRY["crm_deg"]) -> Any:
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
         mu0 = self.beta_prior.mean()
         sd0 = np.sqrt(self.beta_prior.var())
@@ -835,4 +835,4 @@ __all__ = ["CRM", "crm", "crm_dtp_detail"]
 
 # Inject module-level docstring
 if __doc__:
-    __doc__ = __doc__.format(**REGISTRY)
+    __doc__ = __doc__.format(**CORE_REGISTRY)

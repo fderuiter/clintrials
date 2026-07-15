@@ -91,14 +91,14 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                 else:
                     raise e
 
-        # Module docstring injection with REGISTRY
+        # Module docstring injection with CORE_REGISTRY
         if func.__module__:
             import sys
             mod = sys.modules[func.__module__]
-            if mod.__doc__ and "REGISTRY" not in mod.__doc__:
+            if mod.__doc__ and "CORE_REGISTRY" not in mod.__doc__:
                 try:
-                    from clintrials.core.registry import REGISTRY
-                    mod.__doc__ = mod.__doc__.format(**REGISTRY)
+                    from clintrials.core.registry import CORE_REGISTRY
+                    mod.__doc__ = mod.__doc__.format(**CORE_REGISTRY)
                 except Exception:
                     pass
 

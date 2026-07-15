@@ -45,12 +45,20 @@ def render() -> None:
         )
 
     if create_widget(st, "button", "run_simulation_button", "Run Simulation"):
-        with st.spinner("Running simulation..."):
-            trial = WinRatioTrial(**kwargs)
-            trial.update()
-            power = trial.power
-            average_ci = trial.average_ci
-        st.success("Simulation complete")
+        from clintrials.visualization.dashboard.utils import announce_status_locally
+        announce_status_locally("Simulation in progress", key="winratio-start")
+        try:
+            with st.spinner("Running simulation..."):
+                trial = WinRatioTrial(**kwargs)
+                trial.update()
+                power = trial.power
+                average_ci = trial.average_ci
+            announce_status_locally("Simulation completed", key="winratio-complete")
+            st.success("Simulation complete")
+        except Exception as e:
+            announce_status_locally("Simulation failed", key="winratio-fail")
+            raise e
+            
         st.subheader("Results")
 
         if not hasattr(st, "columns"):
