@@ -1,17 +1,10 @@
 # Technical Debt Roadmap
 
-This roadmap tracks structural technical debt, high-priority maintenance tasks, and core architectural priorities. It categorizes technical debt into documentation, code quality, architecture, and security, providing a visible, prioritized strategy for community contribution.
+This roadmap tracks structural technical debt, high-priority maintenance tasks, and core architectural priorities. It categorizes technical debt into documentation, code quality, and architecture, providing a visible, prioritized strategy for community contribution.
 
 ## Status Tracking
 - [ ] `Pending`
 - [x] `Completed`
-
----
-
-## Security
-
-**Status: [x] Completed | Priority: Low**
-- [x] **Dependency Upgrades:** The previously identified security risk regarding `gitpython` (version 3.0.6) is mitigated by current version resolution. The library is a transitive dependency not used directly in the application code and requires no manual management as it is handled by upstream packages. It is currently resolved to a secure version (version 3.1.51) by the package manager.
 
 ---
 

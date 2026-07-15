@@ -149,10 +149,9 @@ A thorough audit of the repository's dependencies and overall security posture w
 
 ### Third-Party Dependencies Audit
 
-The project's third-party dependencies were audited for known vulnerabilities using `pip-audit`. Previous reports flagged `gitpython` (version 3.0.6) as a high-priority risk. However, current analysis confirms:
+The project's third-party dependencies were audited for known vulnerabilities using `pip-audit`. Current analysis confirms no high-priority risks or vulnerabilities in the active dependencies.
 
-*   **`gitpython`:** This library is a sub-dependency introduced by the optional visualization dashboard components (specifically `streamlit`). The project contains no direct imports or usage of the `gitpython` library in the core application code. Furthermore, the package manager successfully resolves it to a safe version (version 3.1.51).
-*   **Recommendation:** No manual action is required, as the dependency is managed by upstream packages and is already resolved at a secure version.
+*   **Recommendation:** Continue regular monitoring of dependencies and ensure package versions are kept up-to-date.
 
 ### Codebase Security Scan
 
