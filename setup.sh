@@ -19,5 +19,8 @@ poetry run pre-commit install
 echo "Running verification tests..."
 poetry run pytest -m "not slow"
 
+echo "Fetching vendor dependencies..."
+./fetch_vendor.sh
+
 echo "Setup complete."
 
