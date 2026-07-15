@@ -62,7 +62,7 @@ def test_simulation_result_list_methods():
     assert res[1] == 2
     assert list(iter(res)) == [1, 2, 3]
     assert res.to_list() == [1, 2, 3]
-    
+
     with pytest.raises(AttributeError):
         res.get("a")
     with pytest.raises(AttributeError):

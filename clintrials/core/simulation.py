@@ -165,7 +165,7 @@ def extract_sim_data(sims, ps, func_map, var_map=None, return_type='dataframe'):
 
 class UniversalProtocolSimulationRunner:
     """Universal Protocol Simulation Runner for executing trial designs.
-    
+
     This runner standardises the simulation loop across all trial types, handling
     initialisation, recruitment timing, outcome generation, and standard reporting.
     """
@@ -177,7 +177,7 @@ class UniversalProtocolSimulationRunner:
 
     def run(self, mode='iterative', n_sims=1, cohort_size=1, show_progress=False, **kwargs):
         """Runs the trial simulation loop.
-        
+
         Args:
             mode (str): Execution mode, 'iterative' or 'vectorized'.
             n_sims (int): Number of simulations to run. Defaults to 1.
@@ -185,7 +185,7 @@ class UniversalProtocolSimulationRunner:
             show_progress (bool): Whether to show progress tracking.
             **kwargs: Additional keyword arguments passed to the outcome
                 generator and the design's update method.
-        
+
         Returns:
             list: A list of individual trial simulation reports.
         """

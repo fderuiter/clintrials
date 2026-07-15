@@ -20,11 +20,11 @@ def crm_preview_sims(target_tox, cohort_size, max_size):
     """
     from clintrials.dosefinding.crm import CRM
     from clintrials.dosefinding import simulate_dose_finding_trial
-    
+
     crm = CRM(
-        prior=[0.05, 0.1, 0.2, 0.3, 0.4], 
-        target=target_tox, 
-        first_dose=1, 
+        prior=[0.05, 0.1, 0.2, 0.3, 0.4],
+        target=target_tox,
+        first_dose=1,
         max_size=max_size
     )
     scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)]
@@ -54,7 +54,7 @@ def render(sims):
     func_map = CRM.get_summary_functions()
 
     summary_df = extract_sim_data(sims, ps, func_map, return_type="dataframe")
-    
+
     figures = []
     if not summary_df.empty and "recommended_dose_prob" in summary_df.columns:
         import clintrials.visualization as viz

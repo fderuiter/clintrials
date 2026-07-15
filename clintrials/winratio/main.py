@@ -116,13 +116,13 @@ def main() -> None:
         kwargs["significance_level"] = kwargs.pop("significance")
 
     trial = WinRatioTrial(**kwargs)
-    
+
     # Run bulk simulations via unified runner
     results = trial.run(n_sims=trial.config.num_simulations, method="iterative")
-    
+
     successes = sum(1 for r in results if r["success"])
     total_sims = len(results)
-    
+
     sum_ci0 = 0.0
     sum_ci1 = 0.0
     ci_count = 0
@@ -131,7 +131,7 @@ def main() -> None:
             sum_ci0 += r["ci"][0]
             sum_ci1 += r["ci"][1]
             ci_count += 1
-            
+
     power = successes / total_sims if total_sims > 0 else 0.0
     if ci_count > 0:
         average_ci = (sum_ci0 / ci_count, sum_ci1 / ci_count)

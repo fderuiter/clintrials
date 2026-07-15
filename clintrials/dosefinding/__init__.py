@@ -250,6 +250,7 @@ class DoseFindingTrial(Protocol):
         Args:
             cases (list[tuple[int, int]]): A list of new cases to append, where each case
                 is a tuple of (dose, toxicity).
+            **kwargs (Any): Additional keyword arguments passed to the update logic.
 
         Returns:
             int: The next recommended dose level.

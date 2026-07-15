@@ -27,7 +27,7 @@ def watu_preview_sims(target_tox, cohort_size, max_size):
     ]
     tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
     metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-    
+
     watu = WATU(
         skeletons=skeletons,
         prior_tox_probs=tox_prior,
@@ -38,7 +38,7 @@ def watu_preview_sims(target_tox, cohort_size, max_size):
         first_dose=1,
         max_size=max_size
     )
-    
+
     tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
     eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
     sims = []
