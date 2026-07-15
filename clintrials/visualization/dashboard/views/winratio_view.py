@@ -58,7 +58,7 @@ def render() -> None:
         except Exception as e:
             announce_status_locally("Simulation failed", key="winratio-fail")
             raise e
-            
+
         st.subheader("Results")
 
         if not hasattr(st, "columns"):
