@@ -10,7 +10,6 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 import logging
-from collections.abc import Callable
 from collections import OrderedDict
 
 import numpy as np

@@ -10,7 +10,6 @@ import copy
 import itertools
 import json
 import logging
-from collections.abc import Callable
 from collections import OrderedDict
 from datetime import datetime
 from clintrials.utils import filter_list_of_dicts, tuple_to_dataframe
