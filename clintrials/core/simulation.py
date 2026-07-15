@@ -263,5 +263,5 @@ class UniversalProtocolSimulationRunner:
         else:
             raise NotImplementedError('Vectorized mode not supported for this protocol type.')
 if __doc__:
-    from clintrials.core.registry import REGISTRY
-    __doc__ = __doc__.format(**REGISTRY)
+    from clintrials.core.registry import CORE_REGISTRY
+    __doc__ = __doc__.format(**CORE_REGISTRY)

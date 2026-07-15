@@ -13,7 +13,7 @@ from collections import OrderedDict
 from itertools import product
 
 import numpy as np
-from scipy.stats import beta, binom, chi2
+from scipy.stats import beta, binom
 
 
 def bayesian_2stage_dich_design(
@@ -140,6 +140,8 @@ def bayesian_2stage_dich_design_df(
     return pd.DataFrame(dat)
 
 
+from clintrials.core.stats import calc_pearson_chi_square
+
 def chisqu_two_arm_comparison(p0, p1, n, alpha):
     """Performs a chi-squared test for a two-arm comparison.
 
@@ -167,8 +169,7 @@ def chisqu_two_arm_comparison(p0, p1, n, alpha):
     success = n0 + n1
     fail = 2 * n - n0 - n1
     expected = np.column_stack([success / 2.0, fail / 2.0, success / 2.0, fail / 2.0])
-    test_stat = ((observed - expected) ** 2 / expected).sum(axis=1)
-    p = 1 - chi2.cdf(test_stat, 1)
+    test_stat, p = calc_pearson_chi_square(observed, expected, 1)
     reject = (p < alpha * 2) & (n0 < n1)
     data = np.column_stack([n0, n1, lik, test_stat, p, reject])
     return sum(data[data[:, 5] == True, 2]), sum(data[data[:, 5] == False, 2])
@@ -176,5 +177,5 @@ def chisqu_two_arm_comparison(p0, p1, n, alpha):
 
 # Inject module-level docstring
 if __doc__:
-    from clintrials.core.registry import REGISTRY
-    __doc__ = __doc__.format(**REGISTRY)
+    from clintrials.core.registry import CORE_REGISTRY
+    __doc__ = __doc__.format(**CORE_REGISTRY)

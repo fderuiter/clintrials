@@ -836,5 +836,5 @@ def print_dtps_verbose(dtps: Any, indent: Any = 0, dose_label_func: Any = None) 
 
 # Inject module-level docstring
 if __doc__:
-    from clintrials.core.registry import REGISTRY
-    __doc__ = __doc__.format(**REGISTRY)
+    from clintrials.core.registry import CORE_REGISTRY
+    __doc__ = __doc__.format(**CORE_REGISTRY)

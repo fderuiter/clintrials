@@ -78,7 +78,7 @@ exclude = ["clintrials/legacy/", "docs/tutorials/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
-extend-select = ["T201", "D102", "D103", "D417"]
+extend-select = ["T201", "D102", "D103", "D417", "TID251"]
 ignore = [
     "E203",
     "E402",
@@ -95,7 +95,14 @@ convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
+"clintrials/core/stats.py" = ["TID251"]
 
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"clintrials.core.registry.REGISTRY".msg = "Namespace collision: Use CORE_REGISTRY instead."
+"clintrials.visualization.dashboard.factory.REGISTRY".msg = "Namespace collision: Use UI_REGISTRY instead."
+"scipy.stats.chi2".msg = "Redundant math: Use clintrials.core.stats.calc_pearson_chi_square instead."
+"scipy.stats.chi2.cdf".msg = "Redundant math: Use clintrials.core.stats.calc_pearson_chi_square instead."
 
 [tool.pytest.ini_options]
 addopts = "--ignore=tests/test_accessibility.py"

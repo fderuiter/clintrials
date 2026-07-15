@@ -16,6 +16,29 @@ import numpy as np
 from scipy.stats import chi2, norm
 
 
+def calc_pearson_chi_square(observed, expected, df):
+    """Calculates Pearson's chi-squared test statistics and p-values.
+
+    Args:
+        observed (numpy.ndarray): The observed frequencies.
+        expected (numpy.ndarray): The expected frequencies.
+        df (int): The degrees of freedom.
+
+    Returns:
+        tuple[float or numpy.ndarray, float or numpy.ndarray]: The test statistic(s)
+            and p-value(s).
+    """
+    test_stat = ((observed - expected) ** 2 / expected)
+    if isinstance(test_stat, np.ndarray) and test_stat.ndim > 1:
+        test_stat = test_stat.sum(axis=1)
+    elif isinstance(test_stat, np.ndarray):
+        test_stat = test_stat.sum()
+    else:
+        test_stat = np.sum(test_stat)
+    p = 1 - chi2.cdf(test_stat, df)
+    return test_stat, p
+
+
 def correlation_ci(
     r=None, n=None, samples=None, weights=None, alpha=0.05, method="fisher"
 ):
@@ -190,7 +213,8 @@ def chi_squ_test(x, y, x_positive_value=None, y_positive_value=None, ci_alpha=0.
             p-value, degrees of freedom, and odds ratio results (for 2x2
             tables).
     """
-    sum_oe = 0.0
+    obs_list = []
+    exp_list = []
     x_set = set(x)
     y_set = set(y)
     for x_case in x_set:
@@ -199,10 +223,10 @@ def chi_squ_test(x, y, x_positive_value=None, y_positive_value=None, ci_alpha=0.
             y_matches = [z == y_case for z in y]
             obs = sum(np.array(x_matches) & np.array(y_matches))
             exp = 1.0 * sum(x_matches) * sum(y_matches) / len(x)
-            oe = (obs - exp) ** 2 / exp
-            sum_oe += oe
+            obs_list.append(obs)
+            exp_list.append(exp)
     num_df = (len(x_set) - 1) * (len(y_set) - 1)
-    p = 1 - chi2.cdf(sum_oe, num_df)
+    sum_oe, p = calc_pearson_chi_square(np.array(obs_list), np.array(exp_list), num_df)
     to_return = OrderedDict([("TestStatistic", sum_oe), ("p", p), ("Df", num_df)])
 
     if len(x_set) == 2 and len(y_set) == 2:
@@ -355,5 +379,5 @@ class ProbabilityDensitySample:
 
 # Inject module-level docstring
 if __doc__:
-    from clintrials.core.registry import REGISTRY
-    __doc__ = __doc__.format(**REGISTRY)
+    from clintrials.core.registry import CORE_REGISTRY
+    __doc__ = __doc__.format(**CORE_REGISTRY)

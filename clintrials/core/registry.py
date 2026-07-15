@@ -4,7 +4,7 @@ Centralized registry for all statistical constants.
 
 from typing import Dict, Any
 
-REGISTRY: Dict[str, Any] = {
+CORE_REGISTRY: Dict[str, Any] = {
     # Integration limits
     "gsd_maxpts": 1000000,
     "gsd_abseps": 1e-5,
@@ -134,6 +134,6 @@ def inject_docs():
     """
     def decorator(obj):
         if obj.__doc__:
-            obj.__doc__ = obj.__doc__.format(**REGISTRY)
+            obj.__doc__ = obj.__doc__.format(**CORE_REGISTRY)
         return obj
     return decorator

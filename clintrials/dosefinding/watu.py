@@ -644,6 +644,6 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
 # Inject module-level docstring
 if __doc__:
-    from clintrials.core.registry import REGISTRY
+    from clintrials.core.registry import CORE_REGISTRY
 
-    __doc__ = __doc__.format(**REGISTRY)
+    __doc__ = __doc__.format(**CORE_REGISTRY)

@@ -266,5 +266,5 @@ def integrate_posterior_1d_nonadaptive(
 
 # Inject module-level docstring
 if __doc__:
-    from clintrials.core.registry import REGISTRY
-    __doc__ = __doc__.format(**REGISTRY)
+    from clintrials.core.registry import CORE_REGISTRY
+    __doc__ = __doc__.format(**CORE_REGISTRY)
