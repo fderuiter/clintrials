@@ -156,18 +156,20 @@ st.write("- Check if the custom wheel dependency was built and published correct
             throw new Error(`Custom wheel dependency returned HTTP ${wheelResponse.status} for ${wheelFile}`);
           }
 
+          const paramsObj = {};
+          for (const [key, value] of urlParams.entries()) {
+            paramsObj[key] = value;
+          }
+
           stlite.mount(
             {
               requirements: ["altair", "plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./" + wheelFile],
               entrypoint: "app.py",
               files: {
                 ".streamlit/config.toml": themeConfig,
+                "config.json": JSON.stringify(paramsObj),
                 "app.py": `
-import os
 import streamlit as st
-
-os.environ['EMBED_MODE'] = '${isEmbed}'
-os.environ['ACTIVE_VIEW'] = '${activeView}'
 
 from clintrials.visualization.dashboard.main import main
 if __name__ == "__main__":

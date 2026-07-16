@@ -163,11 +163,34 @@ def main():
         st.error("No trial designs registered.")
         return
 
-    import os
-    active_view = os.environ.get("ACTIVE_VIEW")
+    config = {}
+    try:
+        with open("config.json", "r") as f:
+            config = json.load(f)
+    except Exception:
+        pass
+
+    active_view = config.get("view", "")
     default_index = 0
     if active_view and active_view in available_designs:
         default_index = list(available_designs).index(active_view)
+
+    is_embed = str(config.get("embed", "")).lower() == "true"
+    if is_embed:
+        st.markdown(
+            """
+            <style>
+                header[data-testid="stHeader"] { display: none !important; }
+                footer { display: none !important; }
+                section[data-testid="stSidebar"] { display: none !important; }
+                .stDeployButton { display: none !important; }
+                div[data-testid="collapsedControl"] { display: none !important; }
+                .stApp { background-color: transparent !important; }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
 
     design_type = create_widget(
         st,
