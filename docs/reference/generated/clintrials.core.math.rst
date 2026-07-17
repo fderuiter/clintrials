@@ -1,4 +1,4 @@
-﻿clintrials.core.math
+clintrials.core.math
 ====================
 
 .. automodule:: clintrials.core.math

@@ -1,18 +1,18 @@
-clintrials.core.registry
+clintrials.winratio.main
 ========================
 
-.. automodule:: clintrials.core.registry
+.. automodule:: clintrials.winratio.main
 
    
    .. rubric:: Functions
 
    .. autosummary::
    
-      inject_docs
+      main
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      ProtocolRegistry
+      WinRatioTrial
    

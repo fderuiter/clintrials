@@ -1,4 +1,4 @@
-﻿clintrials.core.stats
+clintrials.core.stats
 =====================
 
 .. automodule:: clintrials.core.stats

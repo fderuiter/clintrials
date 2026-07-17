@@ -1,4 +1,4 @@
-﻿clintrials.integrate\_posterior\_1d
+clintrials.integrate\_posterior\_1d
 ===================================
 
 .. currentmodule:: clintrials

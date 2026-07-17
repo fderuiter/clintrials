@@ -1,4 +1,4 @@
-﻿clintrials.utils
+clintrials.utils
 ================
 
 .. automodule:: clintrials.utils

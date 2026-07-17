@@ -1,4 +1,4 @@
-﻿clintrials.dosefinding.efftox
+clintrials.dosefinding.efftox
 =============================
 
 .. automodule:: clintrials.dosefinding.efftox
