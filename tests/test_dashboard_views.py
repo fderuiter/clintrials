@@ -283,9 +283,12 @@ def test_winratio_view_render_success(monkeypatch):
     importlib.reload(winratio_view)
     monkeypatch.setattr(winratio_view, "st", st_mock)
     run_sim = MagicMock()
-    run_sim.return_value.power = 0.8
-    run_sim.return_value.average_ci = (0.1, 0.2)
-    monkeypatch.setattr(winratio_view, "WinRatioTrial", run_sim)
+    run_sim.return_value = {
+        "power": 0.8,
+        "average_ci": (0.1, 0.2),
+        "results": []
+    }
+    monkeypatch.setattr(winratio_view, "run_winratio_simulations", run_sim)
 
     winratio_view.render()
 

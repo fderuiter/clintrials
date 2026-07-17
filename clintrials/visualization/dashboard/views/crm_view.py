@@ -16,6 +16,8 @@ def crm_preview_sims(target_tox, cohort_size, max_size):
     """
     from clintrials.dosefinding import simulate_dose_finding_trial
     from clintrials.dosefinding.crm import CRM
+    from clintrials.core.simulation import sim_parameter_space
+    from clintrials.utils import ParameterSpace
 
     crm = CRM(
         prior=[0.05, 0.1, 0.2, 0.3, 0.4],
@@ -23,13 +25,16 @@ def crm_preview_sims(target_tox, cohort_size, max_size):
         first_dose=1,
         max_size=max_size
     )
-    scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)]
-    sims = []
-    for true_tox in scenarios:
-        for _ in range(20):
-            report = simulate_dose_finding_trial(crm, true_toxicities=true_tox, cohort_size=cohort_size)
-            report["true_tox"] = true_tox
-            sims.append(report)
+    
+    ps = ParameterSpace()
+    ps.add("true_tox", [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)])
+
+    def wrapped_sim_func(true_tox):
+        report = simulate_dose_finding_trial(crm, true_toxicities=true_tox, cohort_size=cohort_size)
+        report["true_tox"] = true_tox
+        return report
+
+    sims = sim_parameter_space(wrapped_sim_func, ps, n1=20)
     return sims
 
 @PROTOCOL_REGISTRY.register("CRM", preview_func=crm_preview_sims)

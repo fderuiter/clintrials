@@ -142,29 +142,51 @@ from functools import partial
 
 
 class Memoize:
-    """A class to cache function results."""
+    """A class to cache function results with a size limit (LRU)."""
 
-    def __init__(self, f: Callable) -> None:
+    def __init__(self, f: Callable, maxsize: int = 128) -> None:
         """Initializes a Memoize object.
 
         Args:
             f (Callable): The function to memoize.
+            maxsize (int): The maximum number of entries to keep in cache.
         """
         self.f = f
-        self.memo = {}
+        self.maxsize = maxsize
+        self.memo = OrderedDict()
 
-    def __call__(self, *args: Any) -> Any:
+    def _make_hashable(self, obj: Any) -> Any:
+        if isinstance(obj, (tuple, list)):
+            return tuple(self._make_hashable(e) for e in obj)
+        elif isinstance(obj, dict):
+            return frozenset((k, self._make_hashable(v)) for k, v in obj.items())
+        elif isinstance(obj, (int, float, str, bool, frozenset, type(None))):
+            return obj
+        elif hasattr(obj, '__dict__'):
+            return str(id(obj))
+        else:
+            return str(obj)
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """Calls the memoized function.
 
         Args:
             *args: The arguments to the function.
+            **kwargs: The keyword arguments to the function.
 
         Returns:
             The result of the function call.
         """
-        if not args in self.memo:
-            self.memo[args] = self.f(*args)
-        return self.memo[args]
+        # Create a hashable representation of the kwargs
+        cache_key = (self._make_hashable(args), self._make_hashable(kwargs))
+        if cache_key not in self.memo:
+            if len(self.memo) >= self.maxsize:
+                self.memo.popitem(last=False)
+            self.memo[cache_key] = self.f(*args, **kwargs)
+        else:
+            # Move to the end to show it was recently used
+            self.memo.move_to_end(cache_key)
+        return self.memo[cache_key]
 
     def __get__(self, instance: Any, owner: Any) -> Any:
         """Support instance methods."""

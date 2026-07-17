@@ -11,7 +11,7 @@ import logging
 from collections import OrderedDict
 from datetime import datetime
 
-from clintrials.utils import filter_list_of_dicts, tuple_to_dataframe
+from clintrials.utils import filter_list_of_dicts, tuple_to_dataframe, Memoize
 
 __all__ = [
     "run_sims",
@@ -22,6 +22,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
+@Memoize
 def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, **kwargs):
     """Runs simulations using a delegate function.
 
@@ -62,6 +63,7 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, 
         return {'Parameters': metadata, 'Simulations': sims}
     return sims
 
+@Memoize
 def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=None, metadata=None):
     """Runs simulations for a parameter space.
 
