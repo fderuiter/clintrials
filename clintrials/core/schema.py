@@ -1,7 +1,8 @@
 import dataclasses
-from typing import Annotated, List, Optional, Union, get_origin, get_args
+from typing import Annotated, List, Optional, Union, get_args, get_origin
 
 from clintrials.core.errors import ErrorTemplates
+
 
 class FieldInfo:
     def __init__(self, default=dataclasses.MISSING, description=None, ge=None, le=None, gt=None, lt=None):

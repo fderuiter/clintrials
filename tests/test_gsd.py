@@ -159,6 +159,7 @@ def test_gsd_run_bulk_invalid_sims():
 
 from unittest.mock import patch
 
+
 def test_gsd_brentq_fallback():
     from clintrials.phase3.gsd import GroupSequentialDesign
 
@@ -168,8 +169,9 @@ def test_gsd_brentq_fallback():
         assert design.efficacy_boundaries[0] == 2.0
 
 def test_gsd_brentq_fallback_failure():
-    from clintrials.phase3.gsd import GroupSequentialDesign
     import pytest
+
+    from clintrials.phase3.gsd import GroupSequentialDesign
 
     with patch("clintrials.phase3.gsd.brentq") as mock_brentq:
         mock_brentq.side_effect = ValueError("Both intervals failed")

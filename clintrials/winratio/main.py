@@ -6,6 +6,10 @@ Random Seed Strategy: {main_seed_strategy}
 from __future__ import annotations
 
 import argparse
+from collections import OrderedDict
+
+from clintrials.core.protocol import Protocol
+from clintrials.core.schema import WinRatioSchema
 
 from .data_generation import generate_data
 from .simulate import simulate_comparisons
@@ -14,10 +18,6 @@ from .statistics import (
     calculate_p_value,
     calculate_win_ratio,
 )
-
-from collections import OrderedDict
-from clintrials.core.protocol import Protocol
-from clintrials.core.schema import WinRatioSchema
 
 
 class WinRatioTrial(Protocol):

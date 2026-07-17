@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from typing import Any, Sequence
+
 import numpy as np
+
 """
 An implementation of Wages & Tait's adaptive Bayesian design for dose-finding
 in clinical trials.
@@ -16,7 +19,7 @@ __contact__ = "kristian.brock@gmail.com"
 from scipy.stats import beta, norm
 
 from clintrials.core.errors import ErrorTemplates
-from clintrials.core.math import empiric, inverse_empiric, bernoulli_likelihood
+from clintrials.core.math import bernoulli_likelihood, empiric, inverse_empiric
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 

@@ -5,14 +5,11 @@ Random Seed Strategy: {simulate_seed_strategy}
 
 from __future__ import annotations
 
-
-
-
 import numpy as np
 
+
 def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
-    """
-    Compare every treatment subject with every control subject.
+    """Compare every treatment subject with every control subject.
 
     Args:
         treatment_group (numpy.ndarray): 2D array of subjects in the

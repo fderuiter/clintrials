@@ -1,23 +1,20 @@
-"""
-Numerical integration routines for Bayesian models.
-
+"""Numerical integration routines for Bayesian models.
 
 Random Seed Strategy: {numerics_seed_strategy}
 """
 
 import warnings
-
 from collections.abc import Callable
 
 import numpy as np
 from scipy.special import logsumexp
 from scipy.stats import norm
+
 from clintrials.core.stats import ProbabilityDensitySample
 
 
 def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, deg=20):
-    """
-    Evaluates the posterior expectation of f(theta) using Gauss-Hermite quadrature,
+    """Evaluates the posterior expectation of f(theta) using Gauss-Hermite quadrature,
     assuming a Gaussian prior N(prior_mean, prior_sd^2).
 
     Args:
@@ -176,7 +173,6 @@ def integrate_posterior_1d(
             integral value and a diagnostics dictionary if `return_diagnostics`
             is `True`.
     """
-
     expansions = 0
     while True:
         xs = np.linspace(lo, hi, n_points)

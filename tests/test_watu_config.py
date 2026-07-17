@@ -1,4 +1,5 @@
 import numpy as np
+
 from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
 

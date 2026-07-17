@@ -1,10 +1,11 @@
 import pytest
+
 from clintrials.validation import (
-    validate_matching_lengths,
-    validate_expected_length,
     validate_bounds,
-    validate_probability,
+    validate_expected_length,
+    validate_matching_lengths,
     validate_positive_integer,
+    validate_probability,
 )
 
 

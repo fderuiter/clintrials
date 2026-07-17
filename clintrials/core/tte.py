@@ -1,6 +1,4 @@
-"""
-Time-to-event trial designs.
-
+"""Time-to-event trial designs.
 
 Random Seed Strategy: {tte_seed_strategy}
 """

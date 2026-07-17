@@ -1,5 +1,7 @@
 from pathlib import Path
+
 from markdown_it import MarkdownIt
+
 
 def test_all_public_modules_documented():
     # 1. Read documented modules from index.md

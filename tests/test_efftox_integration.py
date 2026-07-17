@@ -1,6 +1,8 @@
 import logging
+
 import numpy as np
 from scipy.stats import norm
+
 from clintrials.dosefinding.efftox import (
     EffTox,
     LpNormCurve,

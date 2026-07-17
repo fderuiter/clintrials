@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from typing import Any, Sequence
+
 import numpy as np
 import pandas as pd
+
 """
 Brock & Yap's novel seamless phase I/II efficacy/toxicity design, fusing
 elements of Wages & Tait's design with elements of Thall & Cook's EffTox
@@ -37,7 +40,6 @@ class WATU(EfficacyToxicityDoseFindingTrial):
     @classmethod
     def get_summary_functions(cls):
         """Get summary functions for the WATU protocol."""
-
         return {
             "N": lambda s, p: len(s),
             "recommended_dose_prob": lambda s, p: pd.Series(

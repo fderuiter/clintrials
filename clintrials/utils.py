@@ -1,20 +1,22 @@
 from typing import Any, Callable
+
 __author__ = 'Kristian Brock'
 __contact__ = 'kristian.brock@gmail.com'
 import json
 import logging
+import random
 import warnings
 from collections import OrderedDict
 from copy import copy
 from functools import wraps
 from itertools import product
-import random
+
 import numpy as np
+
 logger = logging.getLogger(__name__)
 
 def deprecated(alternative):
-    """
-    Decorator to mark a function, method, or class as deprecated.
+    """Decorator to mark a function, method, or class as deprecated.
     Emits a DeprecationWarning pointing to the `alternative`.
 
     Args:
@@ -150,6 +152,7 @@ def correlated_binary_outcomes_from_uniforms(unifs: Any, u: Any, psi: Any) -> An
     else:
         raise ValueError('unifs must be an n*3 array')
 from functools import partial
+
 
 class Memoize:
     """A class to cache function results."""

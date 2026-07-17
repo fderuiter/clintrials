@@ -1,8 +1,11 @@
 from dataclasses import dataclass
+
 import numpy as np
 import pandas as pd
 
-from clintrials.visualization.helpers import format_label as _format_label, format_number as fmt
+from clintrials.visualization.helpers import format_label as _format_label
+from clintrials.visualization.helpers import format_number as fmt
+
 
 @dataclass
 class TextSection:

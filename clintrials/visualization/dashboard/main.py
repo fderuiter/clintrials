@@ -1,6 +1,4 @@
-"""
-Main entry point for the Streamlit dashboard.
-
+"""Main entry point for the Streamlit dashboard.
 
 Random Seed Strategy: {main_seed_strategy}
 """
@@ -9,13 +7,13 @@ import json
 
 import streamlit as st
 
-from clintrials.visualization.dashboard.factory import create_widget
 from clintrials.core.registry import PROTOCOL_REGISTRY
+from clintrials.visualization.dashboard.factory import create_widget
+
 
 @st.cache_data(show_spinner=False)
 def get_preview_sims(design_type, target_tox, cohort_size, max_size):
-    """
-    Run and cache default preview simulations based on the selected design type and parameters.
+    """Run and cache default preview simulations based on the selected design type and parameters.
     """
     preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
     if preview_func:

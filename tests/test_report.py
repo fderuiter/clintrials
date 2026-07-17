@@ -1,6 +1,12 @@
 import pandas as pd
-from clintrials.visualization.models import TextSection, MultiFormatSummaryContainer, _format_label
+
+from clintrials.visualization.models import (
+    MultiFormatSummaryContainer,
+    TextSection,
+    _format_label,
+)
 from clintrials.visualization.report import generate_pdf_report
+
 
 def test_text_section():
     section = TextSection("Hello World")
@@ -37,6 +43,7 @@ def test_generate_pdf_report():
 
 from clintrials.validation import parse_pdf_structure, validate_pdf_ua_structure
 from clintrials.visualization.report import AccessiblePDF
+
 
 def test_pdf_structural_nesting_and_mcid():
     """Validates that Tables, TR, TD are nested properly and MCIDs are assigned correctly."""

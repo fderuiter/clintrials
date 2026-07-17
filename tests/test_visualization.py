@@ -1,17 +1,18 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import plotly.graph_objects as go
-from clintrials.visualization import (
-    plot_dose_finding_outcomes,
-    plot_crm_toxicity_probabilities,
-    plot_efftox_utility_contours,
-    plot_efftox_density,
-    plot_crm_simulation_recommendation,
-    plot_efftox_simulation_recommendation,
-    plot_efftox_simulation_acceptability,
-)
+
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efftox import EffTox, LpNormCurve
+from clintrials.visualization import (
+    plot_crm_simulation_recommendation,
+    plot_crm_toxicity_probabilities,
+    plot_dose_finding_outcomes,
+    plot_efftox_density,
+    plot_efftox_simulation_acceptability,
+    plot_efftox_simulation_recommendation,
+    plot_efftox_utility_contours,
+)
 
 
 def test_plot_dose_finding_outcomes():
@@ -126,7 +127,11 @@ def test_plot_efftox_simulation_acceptability():
 
 
 def test_visualization_models():
-    from clintrials.visualization.models import TextSection, MultiFormatSummaryContainer, _format_label
+    from clintrials.visualization.models import (
+        MultiFormatSummaryContainer,
+        TextSection,
+        _format_label,
+    )
 
     # Test _format_label
     assert _format_label("some_label") == "Some Label"
@@ -152,9 +157,10 @@ def test_visualization_models():
 
 
 def test_generate_pdf_report():
-    from clintrials.visualization.report import generate_pdf_report
-    from clintrials.visualization.models import MultiFormatSummaryContainer, TextSection
     import pandas as pd
+
+    from clintrials.visualization.models import MultiFormatSummaryContainer, TextSection
+    from clintrials.visualization.report import generate_pdf_report
 
     df = pd.DataFrame({
         "scenario": [1, 2],

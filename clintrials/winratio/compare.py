@@ -9,8 +9,7 @@ from typing import Iterable
 
 
 def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
-    """
-    Compare two subjects across multiple components hierarchically.
+    """Compare two subjects across multiple components hierarchically.
 
     The first differing component determines the winner. Higher values are better.
 

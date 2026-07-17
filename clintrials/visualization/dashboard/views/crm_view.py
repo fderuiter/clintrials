@@ -1,25 +1,21 @@
-"""
-Renders the CRM simulation results view in the Streamlit dashboard.
-
+"""Renders the CRM simulation results view in the Streamlit dashboard.
 
 Random Seed Strategy: {crm_view_seed_strategy}
 """
 
 import streamlit as st
 
+from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
-from clintrials.core.registry import PROTOCOL_REGISTRY
-
 def crm_preview_sims(target_tox, cohort_size, max_size):
+    """Generate preview simulations for the CRM model.
     """
-    Generate preview simulations for the CRM model.
-    """
-    from clintrials.dosefinding.crm import CRM
     from clintrials.dosefinding import simulate_dose_finding_trial
+    from clintrials.dosefinding.crm import CRM
 
     crm = CRM(
         prior=[0.05, 0.1, 0.2, 0.3, 0.4],

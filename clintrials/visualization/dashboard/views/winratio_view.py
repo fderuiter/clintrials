@@ -1,6 +1,4 @@
-"""
-Renders the Win Ratio simulation view in the Streamlit dashboard.
-
+"""Renders the Win Ratio simulation view in the Streamlit dashboard.
 
 Random Seed Strategy: {winratio_view_seed_strategy}
 """
@@ -8,13 +6,12 @@ Random Seed Strategy: {winratio_view_seed_strategy}
 import pandas as pd
 import streamlit as st
 
-from clintrials.winratio.main import WinRatioTrial
+from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.schema import WinRatioSchema
 from clintrials.visualization.dashboard.factory import create_widget, render_metric
 from clintrials.visualization.dashboard.views.framework import dashboard_view
+from clintrials.winratio.main import WinRatioTrial
 
-
-from clintrials.core.registry import PROTOCOL_REGISTRY
 
 @PROTOCOL_REGISTRY.register("Win Ratio")
 @dashboard_view(
