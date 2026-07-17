@@ -71,7 +71,6 @@ if os.environ.get("SPHINX_STRICT", "0") == "1":
         ("py:obj", r"typing\.List\[~?typing\.Annotated\[.*\]\]"),
         ("py:obj", r"typing\.Optional\[typing\.List\[~?typing\.Annotated\[.*\]\]\]"),
         ("py:obj", r"typing\.List\[~?typing\.Annotated\[.*\]\] \| None"),
-        ("py:obj", r"clintrials\.dosefinding\.efftox\..*"),
         ("py:obj", r"clintrials\.utils\.deprecated"),
     ]
 

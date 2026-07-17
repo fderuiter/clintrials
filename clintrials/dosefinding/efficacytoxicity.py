@@ -23,7 +23,6 @@ from itertools import combinations_with_replacement
 from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,
-    deprecated,
     iterable_to_json,
 )
 
@@ -511,11 +510,6 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
     return report
 
 
-@deprecated(alternative="_simulate_trial")
-def _simulate_eff_tox_trial(*args, **kwargs):
-    return _simulate_trial(*args, **kwargs)
-
-
 def simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
     """Simulates a single efficacy-toxicity dose-finding trial.
 
@@ -574,12 +568,6 @@ def simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_
         calculate_optimal_decision,
         recruitment_stream,
     )
-
-
-@deprecated(alternative="simulate_trial")
-def simulate_efficacy_toxicity_dose_finding_trial(*args, **kwargs):
-    """Deprecated alias for simulate_trial."""
-    return simulate_trial(*args, **kwargs)
 
 
 def simulate_efficacy_toxicity_dose_finding_trials(design_map: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
@@ -644,12 +632,6 @@ def simulate_efficacy_toxicity_dose_finding_trials(design_map: Any, true_toxicit
         report[label] = this_sim
 
     return report
-
-
-@deprecated(alternative="simulate_efficacy_toxicity_dose_finding_trials")
-def simulate_trials(*args, **kwargs):
-    """Deprecated alias for simulate_efficacy_toxicity_dose_finding_trials."""
-    return simulate_efficacy_toxicity_dose_finding_trials(*args, **kwargs)
 
 
 def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, cohort_number: Any = 1, cases_already_observed: Any = [], custom_output_func: Any = None, verbose: Any = False, **kwargs: Any) -> Any:
@@ -729,17 +711,6 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
             path_outputs.append(bag_o_tricks)
 
         return path_outputs
-
-
-@deprecated(alternative="dose_transition_pathways")
-def efftox_dose_transition_pathways(*args, **kwargs):
-    """Deprecated alias for dose_transition_pathways."""
-    return dose_transition_pathways(*args, **kwargs)
-
-@deprecated(alternative="dose_transition_pathways")
-def efficacy_toxicity_dose_transition_pathways(*args, **kwargs):
-    """Deprecated alias for dose_transition_pathways."""
-    return dose_transition_pathways(*args, **kwargs)
 
 
 def get_path(x: Any, dose_label_func: Optional[Callable] = None) -> Any:

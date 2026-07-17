@@ -5,6 +5,7 @@ __contact__ = "kristian.brock@gmail.com"
 
 import numpy as np
 import pandas as pd
+import pytest
 from scipy.stats import norm
 
 from clintrials.core.math import (
@@ -429,3 +430,25 @@ def test_CRM_class_with_generated_fixtures():
 
     assert np.allclose(prob_tox_2, expected_prob_tox_2, atol=1e-1)
     assert recommended_dose_2 == expected_next_dose_2
+
+
+
+
+def test_prob_tox_exceeds_bootstrap_deprecation():
+    # Instantiate CRM model
+    prior = [0.1, 0.2, 0.3, 0.4]
+    target = 0.3
+    dose_levels = [1, 2, 3]
+    toxicities = [0, 0, 1]
+
+    model = CRM(prior=prior, target=target, first_dose=1, max_size=3)
+    model.update(list(zip(dose_levels, toxicities)))
+    model.estimate_var = True
+    model.beta_hat = 0.5
+    model.beta_var = 0.1
+
+    with pytest.warns(DeprecationWarning) as record:
+        model.prob_tox_exceeds(tox_cutoff=0.4, backend="bootstrap")
+
+    assert len(record) == 1
+    assert "bootstrap backend is deprecated" in str(record[0].message)
