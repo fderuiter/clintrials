@@ -24,7 +24,6 @@ scipy = ">=1.7.0"
 statsmodels = ">=0.13.0"
 matplotlib = {version = ">=3.5.0", optional = true}
 streamlit = {version = ">=1.0.0", optional = true}
-altair = {version = ">=4.2.0", optional = true}
 plotly = {version = ">=5.0.0", optional = true}
 sphinx = {version = "^7.2.6", optional = true}
 furo = {version = ">=2024.1.29,<2026.0.0", optional = true}
@@ -145,4 +144,13 @@ testpaths = ["tests"]
 
 [tool.poetry.extras]
 docs = ["sphinx", "furo"]
-viz = ["streamlit", "altair", "plotly", "matplotlib", "fpdf2"]
+viz = ["streamlit", "plotly", "matplotlib", "fpdf2"]
+
+[tool.deptry]
+extend_exclude = ["docs/"]
+
+[tool.deptry.package_module_name_map]
+fpdf2 = ["fpdf"]
+
+[tool.deptry.per_rule_ignores]
+DEP002 = ["sphinx", "furo", "matplotlib"]
