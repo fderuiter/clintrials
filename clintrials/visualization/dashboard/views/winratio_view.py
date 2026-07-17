@@ -10,7 +10,7 @@ from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.schema import WinRatioSchema
 from clintrials.visualization.dashboard.factory import create_widget, render_metric
 from clintrials.visualization.dashboard.views.framework import dashboard_view
-from clintrials.winratio.main import WinRatioTrial
+from clintrials.winratio.main import run_winratio_simulations
 
 
 @PROTOCOL_REGISTRY.register("Win Ratio")
@@ -46,10 +46,9 @@ def render() -> None:
         announce_status_locally("Simulation in progress", key="winratio-start")
         try:
             with st.spinner("Running simulation..."):
-                trial = WinRatioTrial(**kwargs)
-                trial.update()
-                power = trial.power
-                average_ci = trial.average_ci
+                summary = run_winratio_simulations(**kwargs)
+                power = summary["power"]
+                average_ci = summary["average_ci"]
             announce_status_locally("Simulation completed", key="winratio-complete")
             st.success("Simulation complete")
         except Exception as e:
