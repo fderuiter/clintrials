@@ -61,6 +61,27 @@ class BaseModel:
             if constraints.lt is not None and v >= constraints.lt:
                 raise ValueError(ErrorTemplates.LT.format(name=name, bound=constraints.lt))
 
+        def is_list_annotation(ann):
+            if ann is None:
+                return False
+            origin = get_origin(ann)
+            if origin is Annotated:
+                return is_list_annotation(get_args(ann)[0])
+            if origin in (list, tuple):
+                return True
+            if getattr(ann, "__origin__", None) in (list, tuple):
+                return True
+            if origin is Union:
+                args = get_args(ann)
+                for arg in args:
+                    if arg is not type(None) and is_list_annotation(arg):
+                        return True
+            return False
+
+        if is_list_annotation(f.annotation):
+            if not isinstance(value, (list, tuple)):
+                raise ValueError(f"Field '{name}' must be an iterable list rather than a scalar.")
+
         if isinstance(value, (list, tuple)):
             for item in value:
                 check_bounds(item, f)
