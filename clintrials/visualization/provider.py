@@ -535,48 +535,6 @@ class DefaultVisualizationProvider(VisualizationProvider):
         """Plot CRM toxicity probabilities."""
         return plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)
 
-    def plot_efftox_utility_contours(
-        self,
-        metric,
-        prob_eff=None,
-        prob_tox=None,
-        n=100,
-        util_lower=-0.8,
-        util_upper=0.8,
-        util_delta=0.2,
-        title="EffTox utility contours",
-        custom_points_label="priors",
-        high_contrast=False,
-    ):
-        """Plot EffTox utility contours."""
-        return plot_efftox_utility_contours(
-            metric,
-            prob_eff,
-            prob_tox,
-            n,
-            util_lower,
-            util_upper,
-            util_delta,
-            title,
-            custom_points_label,
-            high_contrast,
-        )
-
-    def plot_efftox_density(
-        self,
-        data_func,
-        trial,
-        x_name="",
-        plot_title="",
-        include_doses=None,
-        boot_samps=1000,
-        high_contrast=False,
-    ):
-        """Plot EffTox density."""
-        return plot_efftox_density(
-            data_func, trial, x_name, plot_title, include_doses, boot_samps, high_contrast
-        )
-
     def generate_pdf_report(self, df, design_type, text_summaries=None):
         """Generates an accessibility-first PDF report for trial simulations."""
         try:
