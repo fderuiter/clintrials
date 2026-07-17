@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from typing import Any
+
 import numpy as np
 import pandas as pd
+
 """
 An implementation of Thall & Cook's EffTox design for dose-finding in
 clinical trials.
@@ -22,7 +25,7 @@ from scipy.stats import norm
 
 from clintrials.core.math import inverse_logit, logit
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
-from clintrials.utils import atomic_to_json, iterable_to_json, deprecated
+from clintrials.utils import atomic_to_json, deprecated, iterable_to_json
 
 
 def scale_doses(real_doses: Any) -> Any:
@@ -52,7 +55,6 @@ def efftox_priors_from_skeleton(real_doses: Any, prior_tox_probs: Any, prior_eff
         list[scipy.stats.norm]: A list of 6 normal distributions for the
             parameters (mu_T, beta_T, mu_E, beta1_E, beta2_E, psi).
     """
-
     scaled_x = scale_doses(real_doses)
 
     # Toxicity: logit(pi_T) = mu_T + beta_T * x
@@ -678,7 +680,6 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
     @classmethod
     def get_summary_functions(cls) -> Any:
         """Get summary functions for the EffTox protocol."""
-
         return {
             "N": lambda s, p: len(s),
             "recommended_dose_prob": lambda s, p: pd.Series(

@@ -1,7 +1,10 @@
 from __future__ import annotations
-from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable, Callable
+
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+
 import numpy as np
 import pandas as pd
+
 """
 Base classes and utilities for efficacy-toxicity dose-finding trials.
 
@@ -20,8 +23,8 @@ from itertools import combinations_with_replacement
 from clintrials.utils import (
     atomic_to_json,
     correlated_binary_outcomes_from_uniforms,
-    iterable_to_json,
     deprecated,
+    iterable_to_json,
 )
 
 logger = logging.getLogger(__name__)
@@ -358,6 +361,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
             collections.OrderedDict: The trial outcome report.
         """
         from collections import OrderedDict
+
         from clintrials.utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()

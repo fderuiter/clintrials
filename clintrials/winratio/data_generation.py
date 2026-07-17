@@ -18,8 +18,7 @@ def generate_data(
     p_y3_A: float,
     p_y3_B: float,
 ):
-    """
-    Generate data for treatment (A) and control (B) groups.
+    """Generate data for treatment (A) and control (B) groups.
 
     Each subject has three binary outcomes (y1, y2, y3).
 

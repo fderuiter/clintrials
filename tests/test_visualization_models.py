@@ -1,5 +1,11 @@
 import pandas as pd
-from clintrials.visualization.models import MultiFormatSummaryContainer, TextSection, _format_label
+
+from clintrials.visualization.models import (
+    MultiFormatSummaryContainer,
+    TextSection,
+    _format_label,
+)
+
 
 def test_text_section():
     ts = TextSection("Hello")

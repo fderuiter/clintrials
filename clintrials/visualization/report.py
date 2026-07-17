@@ -1,7 +1,8 @@
+from contextlib import contextmanager
+
 from fpdf import FPDF
 from fpdf.enums import PageMode
 from fpdf.prefs import ViewerPreferences
-from contextlib import contextmanager
 from fpdf.table import Table
 
 
@@ -133,7 +134,8 @@ def generate_pdf_report(df, design_type, text_summaries=None):
 
     pdf.add_h1("Simulation Data Summary")
 
-    from clintrials.visualization.helpers import format_number as fmt, format_label as _format_label
+    from clintrials.visualization.helpers import format_label as _format_label
+    from clintrials.visualization.helpers import format_number as fmt
     from clintrials.visualization.models import MultiFormatSummaryContainer
 
     for summary in text_summaries:

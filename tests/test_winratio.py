@@ -39,6 +39,7 @@ def test_statistics_helpers():
 
 
 from unittest.mock import patch
+
 from clintrials.winratio.main import WinRatioTrial, main
 
 

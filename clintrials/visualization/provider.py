@@ -3,10 +3,10 @@
 Random Seed Strategy: {provider_seed_strategy}
 """
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import numpy as np
 
 COLORBLIND_PALETTE = [
     "#E69F00",

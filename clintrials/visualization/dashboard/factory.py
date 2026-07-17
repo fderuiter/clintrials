@@ -90,8 +90,7 @@ UI_REGISTRY = _build_registry()
 
 
 def create_widget(st_module, widget_type, var_name, *args, **kwargs):
-    """
-    Factory function to create a Streamlit widget with an automatically
+    """Factory function to create a Streamlit widget with an automatically
     applied help text based on the variable name.
     """
     if var_name in UI_REGISTRY:
@@ -110,8 +109,7 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):
 
 
 def render_metric(st_module, label, value, precision=4):
-    """
-    Renders a semantic metric card with configurable numeric precision for statistical floats.
+    """Renders a semantic metric card with configurable numeric precision for statistical floats.
     """
     if isinstance(value, float):
         formatted_value = f"{value:.{precision}f}"
@@ -126,8 +124,7 @@ def render_metric(st_module, label, value, precision=4):
 
 
 def render_accessible_chart(st_module, fig, expander_label="Data Summary"):
-    """
-    Shared utility to render a Plotly chart with an accessible Markdown table summary.
+    """Shared utility to render a Plotly chart with an accessible Markdown table summary.
     """
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
 

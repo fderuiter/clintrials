@@ -1,5 +1,4 @@
-"""
-Module for Group Sequential Designs (GSDs).
+"""Module for Group Sequential Designs (GSDs).
 
 Random Seed Strategy: {gsd_seed_strategy}
 """
@@ -12,6 +11,7 @@ from scipy.stats import multivariate_normal, norm
 
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
 from clintrials.utils import deprecated
+
 
 @inject_docs()
 def spending_function_pocock(t: float, alpha: float) -> float:
@@ -84,8 +84,8 @@ class GroupSequentialDesign(Protocol):
                 sequence of length `k` ending in 1.0.
         """
         from clintrials.validation import (
-            validate_probability,
             validate_positive_integer,
+            validate_probability,
         )
 
         validate_probability(alpha, "alpha", exclusive=True)
@@ -140,6 +140,7 @@ class GroupSequentialDesign(Protocol):
     def report(self):
         """Generate a report of the trial state and results."""
         from collections import OrderedDict
+
         from clintrials.utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()

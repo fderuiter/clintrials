@@ -1,5 +1,4 @@
-"""
-Common, useful functions in the statistics and mathematics of clinical trials.
+"""Common, useful functions in the statistics and mathematics of clinical trials.
 
 Random Seed Strategy: {math_seed_strategy}
 """
@@ -8,6 +7,7 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 import numpy as np
+
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
 
 
@@ -87,7 +87,6 @@ def empiric(x, a0=None, beta=0):
         >>> empiric(0.5, beta=math.log(2))
         0.25
     """
-
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return x ** np.exp(beta)
 

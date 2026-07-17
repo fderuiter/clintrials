@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import Any, Optional, Sequence, Callable
+
+from typing import Any, Callable, Optional, Sequence
+
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+
 """
 Continual Reassessment Method (CRM) for dose-finding clinical trials.
 
@@ -16,14 +19,21 @@ import logging
 import warnings
 from collections import OrderedDict
 
-from clintrials.core.registry import CORE_REGISTRY
 from scipy.optimize import minimize
 from scipy.stats import norm
 
-from clintrials.core.math import empiric, inverse_empiric, inverse_logistic, logistic, bernoulli_likelihood
+from clintrials.core.math import (
+    bernoulli_likelihood,
+    empiric,
+    inverse_empiric,
+    inverse_logistic,
+    logistic,
+)
 from clintrials.core.numerics import posterior_expectation_gh
+from clintrials.core.registry import CORE_REGISTRY
 from clintrials.dosefinding import DoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json
+
 
 def _toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False) -> Any:
     """Calculates the likelihood of a single toxicity outcome.
@@ -407,7 +417,6 @@ class CRM(DoseFindingTrial):
     @classmethod
     def get_summary_functions(cls) -> Any:
         """Get summary functions for the CRM protocol."""
-
         return {
             "N": lambda s, p: len(s),
             "recommended_dose_prob": lambda s, p: pd.Series(

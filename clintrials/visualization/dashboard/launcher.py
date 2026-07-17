@@ -1,7 +1,8 @@
 # ruff: noqa: T201
+import argparse
 import os
 import sys
-import argparse
+
 
 def main():
     """Launch the Clinical Trials Dashboard Streamlit app programmatically."""

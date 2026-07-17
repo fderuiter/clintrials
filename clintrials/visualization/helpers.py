@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def format_label(label):
     """Format a label by replacing underscores with spaces and applying title case."""
     if not isinstance(label, str):

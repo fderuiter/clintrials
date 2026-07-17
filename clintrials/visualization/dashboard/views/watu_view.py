@@ -1,23 +1,20 @@
-"""
-Renders the WATU simulation results view in the Streamlit dashboard.
+"""Renders the WATU simulation results view in the Streamlit dashboard.
 """
 
 import streamlit as st
 
+from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
-from clintrials.core.registry import PROTOCOL_REGISTRY
-
 def watu_preview_sims(target_tox, cohort_size, max_size):
+    """Generate preview simulations for the WATU model.
     """
-    Generate preview simulations for the WATU model.
-    """
-    from clintrials.dosefinding.watu import WATU
-    from clintrials.dosefinding.efftox import LpNormCurve
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
+    from clintrials.dosefinding.efftox import LpNormCurve
+    from clintrials.dosefinding.watu import WATU
     skeletons = [
         [0.60, 0.50, 0.40, 0.30, 0.20],
         [0.50, 0.60, 0.50, 0.40, 0.30],

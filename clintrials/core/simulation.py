@@ -1,6 +1,4 @@
-"""
-Functions for running and analyzing clinical trial simulations.
-
+"""Functions for running and analyzing clinical trial simulations.
 
 Random Seed Strategy: {simulation_seed_strategy}
 """
@@ -12,6 +10,7 @@ import json
 import logging
 from collections import OrderedDict
 from datetime import datetime
+
 from clintrials.utils import filter_list_of_dicts, tuple_to_dataframe
 
 __all__ = [
@@ -225,6 +224,7 @@ class UniversalProtocolSimulationRunner:
 
     def _run_vectorized(self, n_sims, **kwargs):
         import numpy as np
+
         from clintrials.validation import validate_positive_integer
         validate_positive_integer(n_sims, 'Number of simulations')
         if hasattr(self.design, 'efficacy_boundaries'):

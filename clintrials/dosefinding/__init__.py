@@ -1,8 +1,11 @@
 from __future__ import annotations
-from typing import Any, Optional, Sequence, Dict, Tuple, List, Iterable, Callable
+
+from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
@@ -255,7 +258,6 @@ class DoseFindingTrial(Protocol):
         Returns:
             int: The next recommended dose level.
         """
-
         for dose, tox in cases:
             self._doses.append(dose)
             self._toxicities.append(tox)
@@ -329,6 +331,7 @@ class DoseFindingTrial(Protocol):
             collections.OrderedDict: The trial outcome report.
         """
         from collections import OrderedDict
+
         from clintrials.utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()

@@ -1,11 +1,12 @@
-import subprocess
-import time
-import pytest
 import os
+import subprocess
 import sys
+import time
 import urllib.request
-from playwright.sync_api import Page
+
+import pytest
 from axe_playwright_python.sync_playwright import Axe
+from playwright.sync_api import Page
 
 # Define viewports to test
 VIEWPORTS = [
