@@ -1,18 +1,19 @@
-clintrials.core.simulation
+clintrials.dosefinding.crm
 ==========================
 
-.. automodule:: clintrials.core.simulation
+.. automodule:: clintrials.dosefinding.crm
 
    
    .. rubric:: Functions
 
    .. autosummary::
    
-      extract_sim_data
+      crm
+      crm_dtp_detail
    
    .. rubric:: Classes
 
    .. autosummary::
    
-      UniversalProtocolSimulationRunner
+      CRM
    

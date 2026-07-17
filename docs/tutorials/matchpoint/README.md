@@ -46,7 +46,6 @@ Then, load a jupyter notebook session for the tutorials using:
 `jupyter notebook --notebook-dir=docs/tutorials/matchpoint`
 
 A browser window should appear and you should see the tutorials.
-"Test ggplot.ipynb" is a notebook to test whether ggplot is correctly installed. 
 
 ## Plan B
 If adding clintrials to your path by editing environment variables is not an option for you (e.g. lack of admin rights), an alternative is to copy the notebooks you want to use to the root directory that contains the folders named `docs` and `tests` and the `README.md` file.

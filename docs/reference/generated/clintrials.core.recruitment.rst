@@ -1,4 +1,4 @@
-﻿clintrials.core.recruitment
+clintrials.core.recruitment
 ===========================
 
 .. automodule:: clintrials.core.recruitment

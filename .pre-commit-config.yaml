@@ -9,6 +9,12 @@ repos:
     hooks:
     -   id: vulture
         args: ["clintrials", ".vulture_whitelist.py"]
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+    -   id: mypy
+        additional_dependencies: [numpy]
+        files: ^clintrials/
 
 -   repo: local
     hooks:
