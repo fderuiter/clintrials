@@ -1,8 +1,6 @@
-"""
-Centralized registry for all statistical constants.
-"""
+"""Centralized registry for all statistical constants."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 CORE_REGISTRY: Dict[str, Any] = {
     # Integration limits
@@ -69,8 +67,12 @@ CORE_REGISTRY: Dict[str, Any] = {
 import importlib
 import pkgutil
 
+
 class ProtocolRegistry:
+    """A registry for clinical trial protocol designs and their visualization methods."""
+
     def __init__(self):
+        """Initializes a new ProtocolRegistry instance."""
         self._designs = {}
         self._discovered = False
 
@@ -87,8 +89,15 @@ class ProtocolRegistry:
             pass
 
     def register(self, name, preview_func=None):
-        """
-        Register a protocol design with an optional preview simulation function.
+        """Register a protocol design with an optional preview simulation function.
+
+        Args:
+            name (str): The name of the protocol design.
+            preview_func (callable, optional): A function to generate a preview simulation.
+                Defaults to None.
+
+        Returns:
+            callable: A decorator function for registering the render method.
         """
         def decorator(render_func):
             if name not in self._designs:
@@ -100,28 +109,48 @@ class ProtocolRegistry:
         return decorator
 
     def register_manual(self, name, render_func, preview_func=None):
-        """
-        Manually register a protocol design with its render and preview functions.
+        """Manually register a protocol design with its render and preview functions.
+
+        Args:
+            name (str): The name of the protocol design.
+            render_func (callable): The rendering function for the design.
+            preview_func (callable, optional): A function to generate a preview simulation.
+                Defaults to None.
+
+        Returns:
+            None
         """
         self._designs[name] = {"render": render_func, "preview": preview_func}
 
     def get_designs(self):
-        """
-        Get a list of all registered protocol design names.
+        """Get a list of all registered protocol design names.
+
+        Returns:
+            list: A list containing the names of registered protocol designs.
         """
         self._discover()
         return list(self._designs.keys())
 
     def get_render(self, name):
-        """
-        Get the render function for a registered protocol design.
+        """Get the render function for a registered protocol design.
+
+        Args:
+            name (str): The name of the registered protocol design.
+
+        Returns:
+            callable or None: The render function if registered, otherwise None.
         """
         self._discover()
         return self._designs.get(name, {}).get("render")
 
     def get_preview(self, name):
-        """
-        Get the preview function for a registered protocol design.
+        """Get the preview function for a registered protocol design.
+
+        Args:
+            name (str): The name of the registered protocol design.
+
+        Returns:
+            callable or None: The preview function if registered, otherwise None.
         """
         self._discover()
         return self._designs.get(name, {}).get("preview")
@@ -129,8 +158,10 @@ class ProtocolRegistry:
 PROTOCOL_REGISTRY = ProtocolRegistry()
 
 def inject_docs():
-    """
-    Decorator to inject registry constants into docstrings.
+    """Decorator to inject registry constants into docstrings.
+
+    Returns:
+        callable: A decorator function that formats the docstring of the wrapped object.
     """
     def decorator(obj):
         if obj.__doc__:

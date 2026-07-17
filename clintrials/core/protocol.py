@@ -1,3 +1,5 @@
+"""Module containing the abstract base class Protocol and associated methods."""
+
 import abc
 
 
@@ -5,15 +7,27 @@ class Protocol(metaclass=abc.ABCMeta):
     """Unified Protocol Framework interface."""
 
     def __init__(self):
+        """Initializes a new Protocol instance."""
         self._rng = None
 
     def set_rng(self, rng):
-        """Inject a local RNG generator for reproducible, state-free random generation."""
+        """Inject a local RNG generator for reproducible, state-free random generation.
+
+        Args:
+            rng (numpy.random.Generator): The random number generator to inject.
+
+        Returns:
+            None
+        """
         self._rng = rng
 
     @property
     def rng(self):
-        """Get the current RNG. If not set, raise an error to enforce injection."""
+        """Get the current RNG. If not set, raise an error to enforce injection.
+
+        Returns:
+            numpy.random.Generator: The current random number generator.
+        """
         if self._rng is None:
             # Fallback to local numpy random generator but warn or just create one
             from clintrials.core.rng import get_rng
@@ -22,17 +36,30 @@ class Protocol(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def reset(self):
-        """Resets the trial to its initial state."""
+        """Resets the trial to its initial state.
+
+        Returns:
+            None
+        """
         pass  # pragma: no cover
 
     @abc.abstractmethod
     def update(self, *args, **kwargs):
-        """Updates the trial with new cases or a new stage."""
+        """Updates the trial with new cases or a new stage.
+
+        Args:
+            *args: Variable length argument list of updates.
+            **kwargs: Arbitrary keyword arguments representing update parameters.
+
+        Returns:
+            None
+        """
         pass  # pragma: no cover
 
     @abc.abstractmethod
     def has_more(self):
         """Checks if the trial is ongoing.
+
         Returns:
             bool: True if the trial is ongoing, False otherwise.
         """
@@ -41,6 +68,7 @@ class Protocol(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def report(self):
         """Returns a standardized, ordered, JSON-serializable report.
+
         Returns:
             collections.OrderedDict: The trial outcome report.
         """
@@ -54,10 +82,21 @@ class Protocol(metaclass=abc.ABCMeta):
         show_progress: bool = False,
         **kwargs,
     ):
-        """Polymorphic entry point for simulation execution."""
+        """Polymorphic entry point for simulation execution.
+
+        Args:
+            n_sims (int): The number of simulations to run.
+            method (str, optional): The simulation execution mode ("iterative" or "bulk"). Defaults to "iterative".
+            seed (int, optional): The random seed for reproducibility. Defaults to None.
+            show_progress (bool, optional): Whether to display a progress bar. Defaults to False.
+            **kwargs: Additional keyword arguments passed to the simulation runner.
+
+        Returns:
+            SimulationResult: A container with the results of the simulations.
+        """
         from clintrials.core.rng import get_rng
-        from clintrials.core.unified import SimulationResult
         from clintrials.core.simulation import UniversalProtocolSimulationRunner
+        from clintrials.core.unified import SimulationResult
 
         self.set_rng(get_rng(seed))
 
