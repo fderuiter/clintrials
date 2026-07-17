@@ -1,4 +1,4 @@
-﻿clintrials.dosefinding.wagestait
+clintrials.dosefinding.wagestait
 ================================
 
 .. automodule:: clintrials.dosefinding.wagestait

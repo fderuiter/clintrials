@@ -1,4 +1,4 @@
-﻿clintrials.fgm\_joint\_prob
+clintrials.fgm\_joint\_prob
 ===========================
 
 .. currentmodule:: clintrials

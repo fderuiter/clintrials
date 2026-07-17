@@ -1,4 +1,4 @@
-﻿clintrials.core.tte
+clintrials.core.tte
 ===================
 
 .. automodule:: clintrials.core.tte

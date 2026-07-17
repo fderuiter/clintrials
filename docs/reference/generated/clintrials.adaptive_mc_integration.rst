@@ -1,4 +1,4 @@
-﻿clintrials.adaptive\_mc\_integration
+clintrials.adaptive\_mc\_integration
 ====================================
 
 .. currentmodule:: clintrials
