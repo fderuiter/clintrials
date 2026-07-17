@@ -92,25 +92,26 @@ def _single_iteration(
 
 from clintrials.utils import Memoize
 
+
 @Memoize
 def run_winratio_simulations(**kwargs):
     """Run win-ratio simulation using the core runner and calculate summary metrics.
-    
+
     Returns a dictionary with 'power', 'average_ci', and the raw 'results'.
     """
     trial = WinRatioTrial(**kwargs)
-    
+
     # Run bulk simulations via unified runner
     num_simulations = getattr(trial.config, 'num_simulations', 1)
     results = trial.run(n_sims=num_simulations, method="iterative")
-    
+
     # Extract list of result dicts, depending on if SimulationResult is iterable or has a property
     # SimulationResult is iterable
     results_list = list(results)
-    
+
     successes = sum(1 for r in results_list if r.get("success", False))
     total_sims = len(results_list)
-    
+
     sum_ci0 = 0.0
     sum_ci1 = 0.0
     ci_count = 0
@@ -119,13 +120,13 @@ def run_winratio_simulations(**kwargs):
             sum_ci0 += r["ci"][0]
             sum_ci1 += r["ci"][1]
             ci_count += 1
-            
+
     power = successes / total_sims if total_sims > 0 else 0.0
     if ci_count > 0:
         average_ci = (sum_ci0 / ci_count, sum_ci1 / ci_count)
     else:
         average_ci = (0, 0)
-        
+
     return {
         "power": power,
         "average_ci": average_ci,

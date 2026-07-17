@@ -14,9 +14,9 @@ from clintrials.visualization.dashboard.views.framework import dashboard_view
 def crm_preview_sims(target_tox, cohort_size, max_size):
     """Generate preview simulations for the CRM model.
     """
+    from clintrials.core.simulation import sim_parameter_space
     from clintrials.dosefinding import simulate_dose_finding_trial
     from clintrials.dosefinding.crm import CRM
-    from clintrials.core.simulation import sim_parameter_space
     from clintrials.utils import ParameterSpace
 
     crm = CRM(
@@ -25,7 +25,7 @@ def crm_preview_sims(target_tox, cohort_size, max_size):
         first_dose=1,
         max_size=max_size
     )
-    
+
     ps = ParameterSpace()
     ps.add("true_tox", [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)])
 
