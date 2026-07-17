@@ -64,7 +64,12 @@
   </head>
   <body>
     <a href="#main-content-anchor" class="skip-link">Skip to Main Content</a>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; color: #496D89;">
+        <h2>Initializing Workspace...</h2>
+        <p>Please wait while we load the simulation environment.</p>
+      </div>
+    </div>
     <script src="vendor/iframeResizer.contentWindow.min.js"></script>
     <script src="vendor/stlite.js"></script>
     <script>
@@ -138,14 +143,14 @@ st.write("- Check if the custom wheel dependency was built and published correct
           }
 
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3000);
+          const timeoutId = setTimeout(() => controller.abort(), 15000);
           
           let wheelResponse;
           try {
             wheelResponse = await fetch(wheelFile, { method: "HEAD", signal: controller.signal });
           } catch (e) {
             if (e.name === 'AbortError') {
-              throw new Error(`Pre-flight check timed out after 3 seconds while trying to reach ${wheelFile}`);
+              throw new Error(`Pre-flight check timed out after 15 seconds while trying to reach ${wheelFile}`);
             }
             throw new Error(`Pre-flight check failed: ${e.message}`);
           } finally {
@@ -161,9 +166,14 @@ st.write("- Check if the custom wheel dependency was built and published correct
             paramsObj[key] = value;
           }
 
+          const loader = document.getElementById("initial-loading");
+          if (loader) {
+            loader.remove();
+          }
+
           stlite.mount(
             {
-              requirements: ["plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./" + wheelFile],
+              requirements: ["plotly", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./" + wheelFile],
               entrypoint: "app.py",
               files: {
                 ".streamlit/config.toml": themeConfig,
