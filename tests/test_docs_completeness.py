@@ -1,16 +1,23 @@
 from pathlib import Path
+from markdown_it import MarkdownIt
 
 def test_all_public_modules_documented():
-    # 1. Read documented modules from index.rst
-    index_path = Path("docs/reference/index.rst")
+    # 1. Read documented modules from index.md
+    index_path = Path("docs/reference/index.md")
     with open(index_path, "r") as f:
         content = f.read()
 
+    md = MarkdownIt()
+    tokens = md.parse(content)
+
     documented_modules = set()
-    for line in content.splitlines():
-        line = line.strip()
-        if line.startswith("clintrials."):
-            documented_modules.add(line)
+    for token in tokens:
+        if token.type == "inline" and token.children:
+            for child in token.children:
+                if child.type in ("code_inline", "text"):
+                    text = child.content.strip()
+                    if text.startswith("clintrials."):
+                        documented_modules.add(text)
 
     # 2. Discover all public Python files on disk
     # Exclude internal helper files, test directories, and private Python modules
