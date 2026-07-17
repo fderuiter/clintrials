@@ -79,7 +79,7 @@ target-version = "py39"
 exclude = ["docs/tutorials/"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W"]
+select = ["E", "F", "W", "I", "D"]
 extend-select = ["T201", "D102", "D103", "D417", "TID251"]
 ignore = [
     "E203",
