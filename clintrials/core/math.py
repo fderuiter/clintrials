@@ -57,7 +57,7 @@ def inverse_logit(x):
         float: The result of the inverse logit function.
 
     Examples:
-        >>> inverse_logit(0)
+        >>> float(inverse_logit(0))
         0.5
     """
     return 1 / (1 + np.exp(-x))
@@ -84,7 +84,7 @@ def empiric(x, a0=None, beta=0):
 
     Examples:
         >>> import math
-        >>> empiric(0.5, beta=math.log(2))
+        >>> float(empiric(0.5, beta=math.log(2)))
         0.25
     """
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
@@ -108,7 +108,7 @@ def inverse_empiric(x, a0=0, beta=0):
 
     Examples:
         >>> import math
-        >>> inverse_empiric(0.25, beta=math.log(2))
+        >>> float(inverse_empiric(0.25, beta=math.log(2)))
         0.5
     """
     return x ** np.exp(-beta)
@@ -129,7 +129,7 @@ def logistic(x, a0=0, beta=0):
         float: The logistic function value.
 
     Examples:
-        >>> logistic(0.25, -1, 1)
+        >>> float(logistic(0.25, -1, 1))
         0.42057106852688747
     """
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
@@ -152,7 +152,7 @@ def inverse_logistic(x, a0=0, beta=0):
         float: The inverse logistic function value.
 
     Examples:
-        >>> round(inverse_logistic(0.42057106852688747, -1, 1), 2)
+        >>> float(round(inverse_logistic(0.42057106852688747, -1, 1), 2))
         0.25
     """
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
@@ -175,8 +175,8 @@ def hyperbolic_tan(x, a0=0, beta=0):
         float: The result of the hyperbolic tangent function.
 
     Examples:
-        >>> hyperbolic_tan(0.5, beta=1)
-        0.559...
+        >>> float(round(hyperbolic_tan(0.5, beta=1), 4))
+        0.4268
     """
     return ((np.tanh(x) + 1) / 2) ** np.exp(beta)
 
@@ -197,7 +197,7 @@ def inverse_hyperbolic_tan(x, a0=0, beta=0):
         float: The result of the inverse hyperbolic tangent function.
 
     Examples:
-        >>> inverse_hyperbolic_tan(0.559..., beta=1)
+        >>> float(round(inverse_hyperbolic_tan(0.4267599709486024, beta=1), 2))
         0.5
     """
     return np.arctanh(2 * x ** np.exp(-beta) - 1)
@@ -220,8 +220,8 @@ def logit1(x, a0=3, beta=0):
         float: The logistic function value.
 
     Examples:
-        >>> logit1(0.5, beta=1)
-        0.972...
+        >>> float(round(logit1(0.5, beta=1), 4))
+        0.9874
     """
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
@@ -242,7 +242,7 @@ def inverse_logit1(x, a0=3, beta=0):
         float: The inverse logistic function value.
 
     Examples:
-        >>> inverse_logit1(0.972..., beta=1)
+        >>> float(round(inverse_logit1(0.9873721323752999, beta=1), 2))
         0.5
     """
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])

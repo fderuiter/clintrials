@@ -2,9 +2,7 @@ from typing import Any, Callable
 
 __author__ = 'Kristian Brock'
 __contact__ = 'kristian.brock@gmail.com'
-import json
 import logging
-import random
 import warnings
 from collections import OrderedDict
 from copy import copy
@@ -52,17 +50,6 @@ def get_logger(name: str=__name__) -> logging.Logger:
         logging.Logger: The logger instance.
     """
     return logging.getLogger(name)
-
-def _open_json_local(file_loc: Any) -> Any:
-    """Opens a local JSON file.
-
-    Args:
-        file_loc (str): The path to the file.
-
-    Returns:
-        dict: The loaded JSON data.
-    """
-    return json.load(open(file_loc))
 
 def filter_list_of_dicts(list_of_dicts: Any, filter_dict: Any) -> Any:
     """Filters a list of dictionaries based on a filter dictionary.
@@ -198,32 +185,6 @@ class ParameterSpace:
             values (list): A list of possible values for the parameter.
         """
         self.vals_map[label] = values
-
-    def sample(self, label: Any) -> Any:
-        """Randomly samples a value for a given parameter.
-
-        Args:
-            label (str): The name of the parameter.
-
-        Returns:
-            object: A randomly sampled value.
-        """
-        if label in self.vals_map:
-            vals = self.vals_map[label]
-            return random.choice(vals)
-        else:
-            return None
-
-    def sample_all(self) -> Any:
-        """Randomly samples a value for each parameter.
-
-        Returns:
-            dict: A dictionary mapping parameter names to sampled values.
-        """
-        sampled = {}
-        for label in self.vals_map:
-            sampled[label] = self.sample(label)
-        return sampled
 
     def get_cyclical_iterator(self, limit: Any=-1) -> Any:
         """Gets a cyclical iterator for the parameter space.
