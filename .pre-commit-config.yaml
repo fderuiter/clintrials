@@ -4,3 +4,8 @@ repos:
     hooks:
     -   id: ruff
         args: [ --fix ]
+-   repo: https://github.com/jendrikseipp/vulture
+    rev: v2.11
+    hooks:
+    -   id: vulture
+        args: ["clintrials", ".vulture_whitelist.py"]

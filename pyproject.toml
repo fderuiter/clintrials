@@ -76,7 +76,7 @@ line_length = 88
 [tool.ruff]
 line-length = 88
 target-version = "py39"
-exclude = ["docs/tutorials/"]
+exclude = ["docs/tutorials/", ".vulture_whitelist.py"]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "D"]

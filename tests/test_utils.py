@@ -32,3 +32,35 @@ def test_memoize():
     assert c.call_count == 1
     assert c.my_method(3) == 6
     assert c.call_count == 2
+
+import pytest
+
+from clintrials.utils import deprecated
+
+
+def test_deprecated_function():
+    @deprecated(alternative="new_func")
+    def old_func():
+        return 42
+
+    with pytest.warns(DeprecationWarning) as record:
+        result = old_func()
+
+    assert result == 42
+    assert len(record) == 1
+    assert "old_func is deprecated" in str(record[0].message)
+    assert "Use new_func instead" in str(record[0].message)
+
+def test_deprecated_class():
+    @deprecated(alternative="NewClass")
+    class OldClass:
+        def __init__(self, val):
+            self.val = val
+
+    with pytest.warns(DeprecationWarning) as record:
+        obj = OldClass(10)
+
+    assert obj.val == 10
+    assert len(record) == 1
+    assert "OldClass is deprecated" in str(record[0].message)
+    assert "Use NewClass instead" in str(record[0].message)

@@ -177,3 +177,16 @@ def test_gsd_brentq_fallback_failure():
         mock_brentq.side_effect = ValueError("Both intervals failed")
         with pytest.raises(RuntimeError, match="Could not find a valid final boundary."):
             GroupSequentialDesign(k=1, alpha=0.025)
+
+def test_gsd_simulate_deprecation():
+    design = GroupSequentialDesign(
+        k=2,
+        alpha=0.025,
+        sfu=spending_function_obrien_fleming
+    )
+    with pytest.warns(DeprecationWarning) as record:
+        design.simulate(n_sims=1)
+
+    assert len(record) == 1
+    assert "simulate is deprecated" in str(record[0].message)
+    assert "Use run(..., method='bulk') instead" in str(record[0].message)

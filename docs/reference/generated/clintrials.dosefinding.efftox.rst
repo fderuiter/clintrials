@@ -1,4 +1,4 @@
-﻿clintrials.dosefinding.efftox
+clintrials.dosefinding.efftox
 =============================
 
 .. automodule:: clintrials.dosefinding.efftox
@@ -29,9 +29,7 @@
 
    .. autosummary::
    
-      ABC_Curve
       EffTox
-      HingedCurve
       InverseQuadraticCurve
       LpNormCurve
    
