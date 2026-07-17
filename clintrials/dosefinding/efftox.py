@@ -176,7 +176,7 @@ def _pi_ab(scaled_dose: Any, tox: Any, eff: Any, mu_T: Any, beta_T: Any, mu_E: A
     """
     p_E = _pi_E(scaled_dose, mu_E, beta1_E, beta2_E)
     p_T = _pi_T(scaled_dose, mu_T, beta_T)
-    
+
     corr = (np.exp(psi) - 1) / (np.exp(psi) + 1)
     prob = p_E**eff * (1 - p_E) ** (1 - eff) * p_T**tox * (1 - p_T) ** (1 - tox)
     prob += (
