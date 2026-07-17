@@ -35,6 +35,5 @@
 - [`clintrials.winratio.main`](generated/clintrials.winratio.main.md)
 - [`clintrials.winratio.simulate`](generated/clintrials.winratio.simulate.md)
 - [`clintrials.winratio.statistics`](generated/clintrials.winratio.statistics.md)
-- [`clintrials.fgm_joint_prob`](generated/clintrials.fgm_joint_prob.md)
 - [`clintrials.adaptive_mc_integration`](generated/clintrials.adaptive_mc_integration.md)
 - [`clintrials.integrate_posterior_1d`](generated/clintrials.integrate_posterior_1d.md)

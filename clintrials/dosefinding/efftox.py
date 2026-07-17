@@ -174,11 +174,20 @@ def _pi_ab(scaled_dose: Any, tox: Any, eff: Any, mu_T: Any, beta_T: Any, mu_E: A
     Returns:
         float: The likelihood of the outcome.
     """
-    from clintrials.core.math import fgm_joint_prob
-
     p_E = _pi_E(scaled_dose, mu_E, beta1_E, beta2_E)
     p_T = _pi_T(scaled_dose, mu_T, beta_T)
-    return fgm_joint_prob(eff, tox, p_E, p_T, psi)  # type: ignore
+    
+    corr = (np.exp(psi) - 1) / (np.exp(psi) + 1)
+    prob = p_E**eff * (1 - p_E) ** (1 - eff) * p_T**tox * (1 - p_T) ** (1 - tox)
+    prob += (
+        (-1) ** (eff + tox)
+        * p_E
+        * (1 - p_E)
+        * p_T
+        * (1 - p_T)
+        * corr
+    )
+    return prob
 
 
 def _L_n(D: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, psi: Any) -> Any:
