@@ -11,7 +11,7 @@ import logging
 from collections import OrderedDict
 from datetime import datetime
 
-from clintrials.utils import filter_list_of_dicts, tuple_to_dataframe, Memoize
+from clintrials.utils import Memoize, filter_list_of_dicts, tuple_to_dataframe
 
 __all__ = [
     "run_sims",
