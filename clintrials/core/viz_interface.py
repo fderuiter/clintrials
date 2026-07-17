@@ -17,34 +17,6 @@ class VisualizationProvider(abc.ABC):
         """Plot CRM toxicity probabilities."""
         pass
 
-    @abc.abstractmethod
-    def plot_efftox_utility_contours(
-        self,
-        metric,
-        prob_eff=None,
-        prob_tox=None,
-        n=100,
-        util_lower=-0.8,
-        util_upper=0.8,
-        util_delta=0.2,
-        title="EffTox utility contours",
-        custom_points_label="priors",
-    ):
-        """Plot EffTox utility contours."""
-        pass
-
-    @abc.abstractmethod
-    def plot_efftox_density(
-        self,
-        data_func,
-        trial,
-        x_name="",
-        plot_title="",
-        include_doses=None,
-        boot_samps=1000,
-    ):
-        """Plot EffTox density."""
-        pass
 
     @abc.abstractmethod
     def generate_pdf_report(self, df, design_type, text_summaries=None):

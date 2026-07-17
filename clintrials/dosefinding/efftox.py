@@ -504,45 +504,6 @@ class LpNormCurve:
         a = (1 - eff) / (1 - eff0)
         return tox1 * ((1 - util) ** p - a**p) ** (1 / p)
 
-    def plot_contours(self, use_ggplot: Any = False, prob_eff: Any = None, prob_tox: Any = None, n: Any = 1000, util_lower: Any = -0.8, util_upper: Any = 0.8, util_delta: Any = 0.2, title: Any = "EffTox utility contours", custom_points_label: Any = "priors") -> Any:
-        """Plots the utility contours.
-
-        Args:
-            use_ggplot (bool, optional): Ignored. Included for backwards compatibility.
-            prob_eff (list[float], optional): A list of efficacy
-                probabilities to plot as points. Defaults to `None`.
-            prob_tox (list[float], optional): A list of toxicity
-                probabilities to plot as points. Defaults to `None`.
-            n (int, optional): The number of points per line. Defaults to 1000.
-            util_lower (float, optional): The lowest utility value to plot.
-                Defaults to -0.8.
-            util_upper (float, optional): The highest utility value to plot.
-                Defaults to 0.8.
-            util_delta (float, optional): The increment for utility contours.
-                Defaults to 0.2.
-            title (str, optional): The chart title. Defaults to "EffTox
-                utility contours".
-            custom_points_label (str, optional): The label for the custom
-                points. Defaults to "priors".
-
-        Returns:
-            A plot object.
-        """
-        from clintrials.core.viz_interface import get_visualization_provider
-
-        viz = get_visualization_provider()  # type: ignore
-
-        return viz.plot_efftox_utility_contours(
-            self,
-            prob_eff=prob_eff,
-            prob_tox=prob_tox,
-            n=n,
-            util_lower=util_lower,
-            util_upper=util_upper,
-            util_delta=util_delta,
-            title=title,
-            custom_points_label=custom_points_label,
-        )
 
 
 class InverseQuadraticCurve:
@@ -656,9 +617,6 @@ class InverseQuadraticCurve:
                 f"Utility delta {delta} is infeasible for the given probabilities."
             ) from e
 
-    def plot_contours(self, use_ggplot: Any = False, prior_eff_probs: Any = None, prior_tox_probs: Any = None, n: Any = 1000, util_lower: Any = -0.8, util_upper: Any = 0.8, util_delta: Any = 0.2, title: Any = "EffTox utility contours") -> Any:
-        """Plots the utility contours."""
-        raise NotImplementedError()
 
 
 
@@ -969,108 +927,6 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         """
         return self._scaled_doses
 
-    def _post_density_plot(self, func: Any = None, x_name: Any = "", plot_title: Any = "", include_doses: Any = None, boot_samps: Any = 1000) -> Any:
-        from clintrials.core.viz_interface import get_visualization_provider
-
-        viz = get_visualization_provider()  # type: ignore
-
-        if include_doses is None:
-            include_doses = range(1, self.num_doses + 1)
-
-        def my_func(x: Any, samp: Any) -> Any:
-            tox_probs = _pi_T(x, mu=samp[:, 0], beta=samp[:, 1])
-            eff_probs = _pi_E(x, mu=samp[:, 2], beta1=samp[:, 3], beta2=samp[:, 4])
-            u = self.metric(eff_probs, tox_probs)
-            return u
-
-        if func is None:
-            func = my_func
-
-        return viz.plot_efftox_density(
-            data_func=func,
-            trial=self,
-            x_name=x_name,
-            plot_title=plot_title,
-            include_doses=include_doses,
-            boot_samps=boot_samps,
-        )
-
-    def plot_posterior_tox_prob_density(self, include_doses: Any = None, boot_samps: Any = 1000) -> Any:
-        """Plots the posterior densities of the toxicity probabilities.
-
-        Args:
-            include_doses (list[int], optional): A list of dose levels to
-                include. Defaults to all doses.
-            boot_samps (int, optional): The number of bootstrap samples.
-                Defaults to 1000.
-
-        Returns:
-            A plot object.
-        """
-
-        def get_prob_tox(x: Any, samp: Any) -> Any:
-            tox_probs = _pi_T(x, mu=samp[:, 0], beta=samp[:, 1])
-            return tox_probs
-
-        return self._post_density_plot(
-            func=get_prob_tox,
-            x_name="Prob(Toxicity)",
-            plot_title="Posterior densities of Prob(Toxicity)",
-            include_doses=include_doses,
-            boot_samps=boot_samps,
-        )
-
-    def plot_posterior_eff_prob_density(self, include_doses: Any = None, boot_samps: Any = 1000) -> Any:
-        """Plots the posterior densities of the efficacy probabilities.
-
-        Args:
-            include_doses (list[int], optional): A list of dose levels to
-                include. Defaults to all doses.
-            boot_samps (int, optional): The number of bootstrap samples.
-                Defaults to 1000.
-
-        Returns:
-            A plot object.
-        """
-
-        def get_prob_eff(x: Any, samp: Any) -> Any:
-            eff_probs = _pi_E(x, mu=samp[:, 2], beta1=samp[:, 3], beta2=samp[:, 4])
-            return eff_probs
-
-        return self._post_density_plot(
-            func=get_prob_eff,
-            x_name="Prob(Efficacy)",
-            plot_title="Posterior densities of Prob(Efficacy)",
-            include_doses=include_doses,
-            boot_samps=boot_samps,
-        )
-
-    def plot_posterior_utility_density(self, include_doses: Any = None, boot_samps: Any = 1000) -> Any:
-        """Plots the posterior densities of the dose utilities.
-
-        Args:
-            include_doses (list[int], optional): A list of dose levels to
-                include. Defaults to all doses.
-            boot_samps (int, optional): The number of bootstrap samples.
-                Defaults to 1000.
-
-        Returns:
-            A plot object.
-        """
-
-        def get_utility(x: Any, samp: Any) -> Any:
-            tox_probs = _pi_T(x, mu=samp[:, 0], beta=samp[:, 1])
-            eff_probs = _pi_E(x, mu=samp[:, 2], beta1=samp[:, 3], beta2=samp[:, 4])
-            u = self.metric(eff_probs, tox_probs)
-            return u
-
-        return self._post_density_plot(
-            func=get_utility,
-            x_name="Utility",
-            plot_title="Posterior densities of Utility",
-            include_doses=include_doses,
-            boot_samps=boot_samps,
-        )
 
     def prob_superior_utility(self, dl1: Any, dl2: Any) -> Any:
         """Calculates the probability that one dose has superior utility over another.

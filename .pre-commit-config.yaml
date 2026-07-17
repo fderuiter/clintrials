@@ -9,3 +9,13 @@ repos:
     hooks:
     -   id: vulture
         args: ["clintrials", ".vulture_whitelist.py"]
+
+-   repo: local
+    hooks:
+    -   id: deptry
+        name: deptry
+        entry: deptry .
+        language: python
+        additional_dependencies: ["deptry==0.22.0"]
+        pass_filenames: false
+        always_run: true

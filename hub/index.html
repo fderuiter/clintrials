@@ -163,7 +163,7 @@ st.write("- Check if the custom wheel dependency was built and published correct
 
           stlite.mount(
             {
-              requirements: ["altair", "plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./" + wheelFile],
+              requirements: ["plotly", "matplotlib", "pandas", "numpy", "scipy", "statsmodels", "tqdm", "./" + wheelFile],
               entrypoint: "app.py",
               files: {
                 ".streamlit/config.toml": themeConfig,
