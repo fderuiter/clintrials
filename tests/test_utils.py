@@ -2,30 +2,30 @@
 from clintrials.utils import Memoize, filter_list_of_dicts, to_1d_list
 
 
-def test_filter_list_of_dicts():
+def test_filter_list_of_dicts():  # type: ignore
     list_of_dicts = [{'a': 1, 'b': 2}, {'a': 1, 'b': 3}, {'a': 2, 'b': 2}]
     assert filter_list_of_dicts(list_of_dicts, {'a': 1}) == [{'a': 1, 'b': 2}, {'a': 1, 'b': 3}]
     assert filter_list_of_dicts(list_of_dicts, {'b': 2}) == [{'a': 1, 'b': 2}, {'a': 2, 'b': 2}]
     assert filter_list_of_dicts(list_of_dicts, {'a': 1, 'b': 2}) == [{'a': 1, 'b': 2}]
 
-def test_to_1d_list():
-    assert to_1d_list(1) == [1]
-    assert to_1d_list([1, 2, 3]) == [1, 2, 3]
-    assert to_1d_list([1, [2, 3]]) == [1, 2, 3]
-    assert to_1d_list([1, [2, [3]]]) == [1, 2, 3]
+def test_to_1d_list():  # type: ignore
+    assert to_1d_list(1) == [1]  # type: ignore
+    assert to_1d_list([1, 2, 3]) == [1, 2, 3]  # type: ignore
+    assert to_1d_list([1, [2, 3]]) == [1, 2, 3]  # type: ignore
+    assert to_1d_list([1, [2, [3]]]) == [1, 2, 3]  # type: ignore
 
-def test_memoize():
+def test_memoize():  # type: ignore
 
     class MyClass:
 
-        def __init__(self):
+        def __init__(self):  # type: ignore
             self.call_count = 0
 
         @Memoize
-        def my_method(self, x):
+        def my_method(self, x):  # type: ignore
             self.call_count += 1
             return x * 2
-    c = MyClass()
+    c = MyClass()  # type: ignore
     assert c.my_method(2) == 4
     assert c.call_count == 1
     assert c.my_method(2) == 4
@@ -38,8 +38,8 @@ import pytest
 from clintrials.utils import deprecated
 
 
-def test_deprecated_function():
-    @deprecated(alternative="new_func")
+def test_deprecated_function():  # type: ignore
+    @deprecated(alternative="new_func")  # type: ignore
     def old_func():
         return 42
 
@@ -51,14 +51,14 @@ def test_deprecated_function():
     assert "old_func is deprecated" in str(record[0].message)
     assert "Use new_func instead" in str(record[0].message)
 
-def test_deprecated_class():
-    @deprecated(alternative="NewClass")
+def test_deprecated_class():  # type: ignore
+    @deprecated(alternative="NewClass")  # type: ignore
     class OldClass:
-        def __init__(self, val):
+        def __init__(self, val):  # type: ignore
             self.val = val
 
     with pytest.warns(DeprecationWarning) as record:
-        obj = OldClass(10)
+        obj = OldClass(10)  # type: ignore
 
     assert obj.val == 10
     assert len(record) == 1

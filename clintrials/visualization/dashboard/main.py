@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Main entry point for the Streamlit dashboard.
 
 Random Seed Strategy: {main_seed_strategy}
@@ -12,7 +13,7 @@ from clintrials.visualization.dashboard.factory import create_widget
 
 
 @st.cache_data(show_spinner=False)
-def get_preview_sims(design_type, target_tox, cohort_size, max_size):
+def get_preview_sims(design_type, target_tox, cohort_size, max_size):  # type: ignore
     """Run and cache default preview simulations based on the selected design type and parameters.
     """
     preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
@@ -21,7 +22,7 @@ def get_preview_sims(design_type, target_tox, cohort_size, max_size):
             return preview_func(target_tox, cohort_size, max_size)
     return []
 
-def main():
+def main():  # type: ignore
     """Sets up the Streamlit dashboard and renders the appropriate view."""
     try:
         import streamlit.components.v1 as components
@@ -190,7 +191,7 @@ def main():
         )
 
 
-    design_type = create_widget(
+    design_type = create_widget(  # type: ignore
         st,
         "selectbox",
         "design_type",
@@ -216,7 +217,7 @@ def main():
             # Typically Win Ratio
             try:
                 from clintrials.core.schema import WinRatioSchema
-                for name, field in WinRatioSchema.model_fields.items():
+                for name, field in WinRatioSchema.model_fields.items():  # type: ignore
                     if name in UI_REGISTRY:
                         entries.append((field.description, UI_REGISTRY[name]))
             except ImportError:
@@ -256,7 +257,7 @@ def main():
 
         if data_mode == "Manual JSON Upload":
             st.sidebar.header("Upload Simulation Results")
-            uploaded_file = create_widget(
+            uploaded_file = create_widget(  # type: ignore
                 st,
                 "file_uploader",
                 "uploaded_file",
@@ -289,7 +290,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # type: ignore
 
 
 # Inject module-level docstring

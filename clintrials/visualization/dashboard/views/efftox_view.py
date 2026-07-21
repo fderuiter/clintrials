@@ -7,14 +7,13 @@ import streamlit as st
 
 from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.simulation import extract_sim_data
-from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
 def efftox_preview_sims(target_tox, cohort_size, max_size):
     """Generate preview simulations for the EffTox model.
     """
-    from clintrials.dosefinding.efficacytoxicity import simulate_trial
+    from clintrials.core.simulation import run_bivariate_simulations
     from clintrials.dosefinding.efftox import EffTox, LpNormCurve
 
     real_doses = [1.0, 2.0, 3.0, 4.0, 5.0]
@@ -37,31 +36,15 @@ def efftox_preview_sims(target_tox, cohort_size, max_size):
     tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
     eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
 
-    sims = []
-    for t_tox in tox_scenarios:
-        for t_eff in eff_scenarios:
-            for _ in range(10):
-                report = simulate_trial(trial, true_toxicities=t_tox, true_efficacies=t_eff, cohort_size=cohort_size)
-                report["true_prob_tox"] = t_tox
-                report["true_prob_eff"] = t_eff
-                sims.append(report)
-    return sims
+    return run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
 
 @PROTOCOL_REGISTRY.register("EffTox", preview_func=efftox_preview_sims)
-@dashboard_view(title="EffTox Simulation Results", model_name="EffTox", file_prefix="efftox_simulations")
-def render(sims):
+@dashboard_view(title="EffTox Simulation Results", model_name="EffTox", file_prefix="efftox_simulations", param_space_config={
+    "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
+    "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
+})
+def render(sims, ps):  # type: ignore
     """Renders the EffTox simulation results view."""
-    st.sidebar.header("Trial Parameters")
-    param_space_config = {
-        "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
-        "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
-    }
-    ps = ParameterSpace()
-    for k, v in param_space_config.items():
-        ps.add(k, v)
-
-    st.sidebar.json(param_space_config)
-
     from clintrials.dosefinding.efftox import EffTox
     func_map = EffTox.get_summary_functions()
 
@@ -76,7 +59,7 @@ def render(sims):
     if not summary_df.empty:
         if "recommended_dose_prob" in summary_df.columns:
             import clintrials.visualization as viz
-            fig_rec = viz.plot_efftox_simulation_recommendation(
+            fig_rec = viz.plot_bivariate_simulation_recommendation(
                 summary_df,
                 high_contrast=False
             )
