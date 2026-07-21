@@ -4,11 +4,10 @@ import streamlit as st
 
 from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.simulation import extract_sim_data
-from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
-def wagestait_preview_sims(target_tox, cohort_size, max_size):
+def wagestait_preview_sims(target_tox, cohort_size, max_size):  # type: ignore
     """Generate preview simulations for the Wages & Tait model."""
     from clintrials.core.simulation import run_bivariate_simulations
     from clintrials.dosefinding.wagestait import WagesTait
@@ -22,7 +21,7 @@ def wagestait_preview_sims(target_tox, cohort_size, max_size):
     ]
     tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
 
-    wt = WagesTait(
+    wt = WagesTait(  # type: ignore
         skeletons=skeletons,
         prior_tox_probs=tox_prior,
         tox_target=target_tox,
@@ -35,7 +34,7 @@ def wagestait_preview_sims(target_tox, cohort_size, max_size):
 
     tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
     eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
-    return run_bivariate_simulations(wt, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
+    return run_bivariate_simulations(wt, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)  # type: ignore
 
 @PROTOCOL_REGISTRY.register("Wages & Tait", preview_func=wagestait_preview_sims)
 @dashboard_view(title="Wages & Tait Simulation Results", model_name="Wages & Tait", file_prefix="wagestait_simulations", param_space_config={
@@ -45,20 +44,20 @@ def wagestait_preview_sims(target_tox, cohort_size, max_size):
 def render(sims, ps):  # type: ignore
     """Renders the Wages & Tait simulation results view."""
     from clintrials.dosefinding.wagestait import WagesTait
-    func_map = WagesTait.get_summary_functions()
+    func_map = WagesTait.get_summary_functions()  # type: ignore
 
     var_map = {
         "true_prob_tox": "true_prob_tox",
         "true_prob_eff": "true_prob_eff",
     }
 
-    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
+    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")  # type: ignore
 
     figures = []
     if not summary_df.empty:
         if "recommended_dose_prob" in summary_df.columns:
             import clintrials.visualization as viz
-            fig_rec = viz.plot_bivariate_simulation_recommendation(
+            fig_rec = viz.plot_bivariate_simulation_recommendation(  # type: ignore
                 summary_df,
                 high_contrast=False
             )

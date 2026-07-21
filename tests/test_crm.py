@@ -12,10 +12,11 @@ from clintrials.core.math import (
     empiric,
     inverse_empiric,
     inverse_logistic,
+    inverse_logit1,
     logistic,
+    logit1,
 )
 from clintrials.dosefinding.crm import CRM, crm
-from clintrials.core.math import inverse_logit1, logit1
 
 
 def setup_func():  # type: ignore

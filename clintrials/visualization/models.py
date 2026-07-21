@@ -104,7 +104,7 @@ class MultiFormatSummaryContainer:
         # Limit to 3 levels of nesting (4 levels total including leaf table)
         grouping_cols = grouping_cols[:3]
 
-        def _build_html_table(df):
+        def _build_html_table(df):  # type: ignore
             cols = list(df.columns)
             html = "<table>\n  <thead>\n    <tr>\n"
             for c in cols:
@@ -113,7 +113,7 @@ class MultiFormatSummaryContainer:
             for _, row in df.iterrows():
                 html += "    <tr>\n"
                 for x in row:
-                    html += f"      <td>{fmt(x)}</td>\n"  # type: ignore
+                    html += f"      <td>{fmt(x)}</td>\n"
                 html += "    </tr>\n"
             html += "  </tbody>\n</table>\n"
             return html
@@ -137,7 +137,7 @@ class MultiFormatSummaryContainer:
                     metrics.append(f"N={len(group)}")
                     for nc in numeric_cols:
                         if nc not in grouping_cols:
-                            metrics.append(f"Mean {_format_label(nc)}: {fmt(group[nc].mean())}")  # type: ignore
+                            metrics.append(f"Mean {_format_label(nc)}: {fmt(group[nc].mean())}")
                     summary_str = " | ".join(metrics[:4]) # limit to 4 metrics to avoid verbosity
                 else:
                     summary_str = f"N={len(group)}"

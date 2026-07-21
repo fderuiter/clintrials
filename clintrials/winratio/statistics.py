@@ -1,9 +1,9 @@
-from __future__ import annotations
 """Statistical helpers for win-ratio simulations.
 
 Random Seed Strategy: {statistics_seed_strategy}
 """
 
+from __future__ import annotations
 
 import numpy as np
 

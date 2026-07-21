@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Module for Group Sequential Designs (GSDs).
 
 Random Seed Strategy: {gsd_seed_strategy}
 """
+
+from __future__ import annotations
 
 from typing import Callable, List
 

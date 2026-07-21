@@ -24,7 +24,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 @Memoize
-def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, **kwargs):
+def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, **kwargs):  # type: ignore
     """Runs simulations using a delegate function.
 
     Args:
@@ -44,13 +44,13 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, 
         list or dict: A list of simulation results, or if metadata is provided,
             a nested dict with "Parameters" and "Simulations" keys.
     """
-    sims = [] if agg_func is None else None
+    sims = [] if agg_func is None else None  # type: ignore
     for j in range(n1):
         sims1 = [sim_func(**kwargs) for i in range(n2)]
         if agg_func:
             sims = agg_func(sims, sims1)
         else:
-            sims += sims1
+            sims += sims1  # type: ignore
         if out_file:
             try:
                 with open(out_file, 'w') as outfile:
@@ -65,7 +65,7 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, 
     return sims
 
 @Memoize
-def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=None, metadata=None):
+def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=None, metadata=None):  # type: ignore
     """Runs simulations for a parameter space.
 
     Args:
@@ -88,14 +88,14 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=Non
     """
     if not n2 or n2 <= 0:
         n2 = ps.size()
-    sims = [] if agg_func is None else None
+    sims = [] if agg_func is None else None  # type: ignore
     params_iterator = ps.get_cyclical_iterator()
     for j in range(n1):
         sims1 = [sim_func(**params_iterator.next()) for i in range(n2)]
         if agg_func:
             sims = agg_func(sims, sims1)
         else:
-            sims += sims1
+            sims += sims1  # type: ignore
         if out_file:
             try:
                 with open(out_file, 'w') as outfile:
@@ -109,7 +109,7 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=Non
         return {'Parameters': metadata, 'Simulations': sims}
     return sims
 
-def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10):
+def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10):  # type: ignore
     """Shared simulation runner for bivariate trial models (EffTox/WATU)."""
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
     from clintrials.utils import ParameterSpace
@@ -118,7 +118,7 @@ def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, 
     ps.add("true_prob_tox", tox_scenarios)
     ps.add("true_prob_eff", eff_scenarios)
 
-    def wrapped_sim_func(true_prob_tox, true_prob_eff):
+    def wrapped_sim_func(true_prob_tox, true_prob_eff):  # type: ignore
         report = simulate_trial(trial, true_toxicities=true_prob_tox, true_efficacies=true_prob_eff, cohort_size=cohort_size)
         report["true_prob_tox"] = true_prob_tox
         report["true_prob_eff"] = true_prob_eff
@@ -189,12 +189,12 @@ class UniversalProtocolSimulationRunner:
     initialisation, recruitment timing, outcome generation, and standard reporting.
     """
 
-    def __init__(self, design, outcome_generator=None, recruitment_stream=None):
+    def __init__(self, design, outcome_generator=None, recruitment_stream=None):  # type: ignore
         self.design = design
         self.outcome_generator = outcome_generator
         self.recruitment_stream = recruitment_stream
 
-    def run(self, mode='iterative', n_sims=1, cohort_size=1, show_progress=False, **kwargs):
+    def run(self, mode='iterative', n_sims=1, cohort_size=1, show_progress=False, **kwargs):  # type: ignore
         """Runs the trial simulation loop.
 
         Args:
@@ -209,7 +209,7 @@ class UniversalProtocolSimulationRunner:
             list: A list of individual trial simulation reports.
         """
         if mode == 'vectorized':
-            return self._run_vectorized(n_sims, **kwargs)
+            return self._run_vectorized(n_sims, **kwargs)  # type: ignore
         try:
             from tqdm import tqdm
         except ImportError:
@@ -242,7 +242,7 @@ class UniversalProtocolSimulationRunner:
             results.append(design.report())
         return results if n_sims > 1 or mode == 'iterative' else results[0]
 
-    def _run_vectorized(self, n_sims, **kwargs):
+    def _run_vectorized(self, n_sims, **kwargs):  # type: ignore
         import numpy as np
 
         from clintrials.validation import validate_positive_integer
@@ -254,7 +254,7 @@ class UniversalProtocolSimulationRunner:
             for i in range(self.design.k):
                 for j in range(i + 1, self.design.k):
                     corr = np.sqrt(self.design.timing[i] / self.design.timing[j])
-                    cov[i, j] = cov[j, i] = corr
+                    cov[i, j] = cov[j, i] = corr  # type: ignore
             simulated_z = self.design.rng.multivariate_normal(mean=means, cov=cov, size=n_sims)
             stopped_at = np.full(n_sims, self.design.k + 1, dtype=int)
             rejected = np.zeros(n_sims, dtype=bool)

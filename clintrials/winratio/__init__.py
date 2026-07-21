@@ -1,5 +1,6 @@
-from __future__ import annotations
 """Win-ratio simulation utilities."""
+
+from __future__ import annotations
 
 from .compare import compare_subjects
 from .data_generation import generate_data

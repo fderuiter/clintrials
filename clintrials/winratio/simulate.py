@@ -1,9 +1,9 @@
-from __future__ import annotations
 """Pairwise win-ratio comparisons between treatment and control subjects.
 
 Random Seed Strategy: {simulate_seed_strategy}
 """
 
+from __future__ import annotations
 
 import numpy as np
 

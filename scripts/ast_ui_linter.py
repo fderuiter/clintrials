@@ -1,44 +1,67 @@
+"""AST Linter to prevent direct usage of Streamlit UI widgets."""
+
+import argparse
 import ast
 import sys
-import argparse
 
 RESTRICTED_WIDGETS = {
-    "button", "download_button", "link_button", "page_link", "checkbox", "toggle", 
-    "radio", "selectbox", "multiselect", "slider", "select_slider", "text_input", 
-    "number_input", "text_area", "date_input", "time_input", "file_uploader", 
-    "camera_input", "color_picker", "chat_input", "data_editor"
+    "button",
+    "download_button",
+    "link_button",
+    "page_link",
+    "checkbox",
+    "toggle",
+    "radio",
+    "selectbox",
+    "multiselect",
+    "slider",
+    "select_slider",
+    "text_input",
+    "number_input",
+    "text_area",
+    "date_input",
+    "time_input",
+    "file_uploader",
+    "camera_input",
+    "color_picker",
+    "chat_input",
+    "data_editor",
 }
 
-def get_base_name_and_attr(node):
+
+def get_base_name_and_attr(node):  # type: ignore
+    """Extract base name and attribute from an AST node."""
     if isinstance(node, ast.Name):
         return node.id, None
     elif isinstance(node, ast.Attribute):
-        base, _ = get_base_name_and_attr(node.value)
+        base, _ = get_base_name_and_attr(node.value)  # type: ignore
         return base, node.attr
     return None, None
 
-def check_file(filepath):
+
+def check_file(filepath):  # type: ignore
+    """Check a Python file for restricted Streamlit widget usage."""
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
     except Exception as e:
-        print(f"Error reading {filepath}: {e}")
+        print(f"Error reading {filepath}: {e}")  # noqa: T201
         return False
 
     try:
         tree = ast.parse(content, filename=filepath)
     except SyntaxError as e:
-        print(f"Syntax error in {filepath}: {e}")
+        print(f"Syntax error in {filepath}: {e}")  # noqa: T201
         return False
 
     st_aliases = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name == 'streamlit' or alias.name.startswith('streamlit.'):
+                if alias.name == "streamlit" or alias.name.startswith("streamlit."):
                     st_aliases.add(alias.asname or alias.name)
         elif isinstance(node, ast.ImportFrom):
-            if node.module and node.module.startswith('streamlit'):
+            if node.module and node.module.startswith("streamlit"):
                 for alias in node.names:
                     st_aliases.add(alias.asname or alias.name)
 
@@ -48,13 +71,13 @@ def check_file(filepath):
         pass
 
     errors = []
-    
+
     # Check for direct function calls if imported via ImportFrom
     # Also check Attribute calls
     for node in ast.walk(tree):
         if isinstance(node, ast.Call):
             if isinstance(node.func, ast.Attribute):
-                base, attr = get_base_name_and_attr(node.func)
+                base, attr = get_base_name_and_attr(node.func)  # type: ignore
                 if base in st_aliases and attr in RESTRICTED_WIDGETS:
                     errors.append((node.lineno, attr))
             elif isinstance(node.func, ast.Name):
@@ -65,23 +88,28 @@ def check_file(filepath):
 
     if errors:
         for lineno, attr in errors:
-            print(f"{filepath}:{lineno} - Prohibited direct widget attribute call '{attr}' detected. Use centralized widget factory.")
+            print(  # noqa: T201
+                f"{filepath}:{lineno} - Prohibited direct widget attribute call '{attr}' detected. Use centralized widget factory."
+            )
         return False
     return True
 
-def main():
+
+def main():  # type: ignore
+    """Run the linter CLI."""
     parser = argparse.ArgumentParser(description="AST-based UI Linter for Streamlit")
-    parser.add_argument('files', nargs='+', help='Files to lint')
+    parser.add_argument("files", nargs="+", help="Files to lint")
     args = parser.parse_args()
 
     all_passed = True
     for filepath in args.files:
-        if not check_file(filepath):
+        if not check_file(filepath):  # type: ignore
             all_passed = False
 
     if not all_passed:
         sys.exit(1)
     sys.exit(0)
 
+
 if __name__ == "__main__":
-    main()
+    main()  # type: ignore

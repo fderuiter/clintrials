@@ -188,7 +188,7 @@ def test_crm_view_render_success(monkeypatch):  # type: ignore
 
     sims = [{"recommended_dose": 1}, {"recommended_dose": 2}]
     render_func = PROTOCOL_REGISTRY.get_render("CRM")
-    render_func(sims)
+    render_func(sims)  # type: ignore
 
     summarise_mock.assert_called_once()
     viz.plot_crm_simulation_recommendation.assert_called_once()  # type: ignore
@@ -202,7 +202,7 @@ def test_crm_view_warns_without_recommended(monkeypatch):  # type: ignore
     import clintrials.visualization.dashboard.views.crm_view as crm_view
     from clintrials.core.registry import PROTOCOL_REGISTRY
 
-    st_mock = _make_streamlit_mock()
+    st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(crm_view)
@@ -215,7 +215,7 @@ def test_crm_view_warns_without_recommended(monkeypatch):  # type: ignore
     monkeypatch.setattr(sim, "extract_sim_data", MagicMock(return_value=summary_df))
 
     render_func = PROTOCOL_REGISTRY.get_render("CRM")
-    render_func([{}])
+    render_func([{}])  # type: ignore
     st_mock.warning.assert_called_once()
 
 
@@ -257,7 +257,7 @@ def test_efftox_view_render_success(monkeypatch):  # type: ignore
     monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
     render_func = PROTOCOL_REGISTRY.get_render("EffTox")
-    render_func([{}])
+    render_func([{}])  # type: ignore
 
     bar_mock.assert_called_once()
     line_mock.assert_called_once()
@@ -272,7 +272,7 @@ def test_efftox_view_warns_when_empty(monkeypatch):  # type: ignore
     import clintrials.visualization.dashboard.views.efftox_view as efftox_view
     from clintrials.core.registry import PROTOCOL_REGISTRY
 
-    st_mock = _make_streamlit_mock()
+    st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(efftox_view)
@@ -285,7 +285,7 @@ def test_efftox_view_warns_when_empty(monkeypatch):  # type: ignore
     )
 
     render_func = PROTOCOL_REGISTRY.get_render("EffTox")
-    render_func([{}])
+    render_func([{}])  # type: ignore
     st_mock.warning.assert_called_once()
 
 
@@ -361,7 +361,7 @@ def test_watu_view_render_success(monkeypatch):  # type: ignore
     monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", bar_mock)
 
     render_func = PROTOCOL_REGISTRY.get_render("WATU")
-    render_func([{}])
+    render_func([{}])  # type: ignore
 
     bar_mock.assert_called_once()
     # st.plotly_chart called once
@@ -375,7 +375,7 @@ def test_watu_view_warns_when_empty(monkeypatch):  # type: ignore
     import clintrials.visualization.dashboard.views.watu_view as watu_view
     from clintrials.core.registry import PROTOCOL_REGISTRY
 
-    st_mock = _make_streamlit_mock()
+    st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(watu_view)
@@ -388,7 +388,7 @@ def test_watu_view_warns_when_empty(monkeypatch):  # type: ignore
     )
 
     render_func = PROTOCOL_REGISTRY.get_render("WATU")
-    render_func([{}])
+    render_func([{}])  # type: ignore
     st_mock.warning.assert_called_once()
 
 
@@ -400,7 +400,7 @@ def test_main_preview_mode_crm(monkeypatch):  # type: ignore
     monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())  # type: ignore
     monkeypatch.setattr(main, "get_preview_sims", MagicMock(return_value=[{"preview": True}]))
     main.main()  # type: ignore
-    main.get_preview_sims.assert_called_once()
+    main.get_preview_sims.assert_called_once()  # type: ignore
     main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with([{"preview": True}])  # type: ignore
 
 

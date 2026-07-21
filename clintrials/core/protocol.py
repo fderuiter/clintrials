@@ -1,5 +1,6 @@
-from __future__ import annotations
 """Module containing the abstract base class Protocol and associated methods."""
+
+from __future__ import annotations
 
 import abc
 

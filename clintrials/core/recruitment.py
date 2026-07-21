@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Classes and functions for modelling recruitment to clinical trials.
 
 Random Seed Strategy: {recruitment_seed_strategy}
 """
+
+from __future__ import annotations
 
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
