@@ -1,4 +1,3 @@
-from __future__ import annotations
 """Centralized visualization module using Plotly.
 
 Random Seed Strategy: {provider_seed_strategy}
@@ -58,7 +57,7 @@ SYMBOL_MAP = {
 from clintrials.visualization.helpers import format_labels_dict as _format_labels_dict
 
 
-def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False):  # type: ignore
+def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False):
     """Creates a centralized bar chart with accessibility standards."""
     if labels is None:
         labels = {}
@@ -85,7 +84,7 @@ def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False): 
     return fig
 
 
-def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):  # type: ignore
+def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):
     """Creates a centralized line chart with accessibility standards."""
     if labels is None:
         labels = {}
@@ -117,13 +116,13 @@ def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):
     return fig
 
 
-def generate_text_summary(df, title):  # type: ignore
+def generate_text_summary(df, title):
     """Generates a text summary for a chart based on its dataframe."""
     from clintrials.visualization.models import MultiFormatSummaryContainer
     return MultiFormatSummaryContainer(title=title, df=df)
 
 
-def plot_dose_finding_outcomes(trial, chart_title=None, high_contrast=False):  # type: ignore
+def plot_dose_finding_outcomes(trial, chart_title=None, high_contrast=False):
     """Plots the dose-finding trial outcomes."""
     if not chart_title:
         chart_title = "Each point represents a patient<br>A circle indicates no toxicity, a cross toxicity"
@@ -161,7 +160,7 @@ def plot_dose_finding_outcomes(trial, chart_title=None, high_contrast=False):  #
             "Toxicity": [int(t) for t in toxicities],
         }
     )
-    fig.layout.meta = generate_text_summary(df_summary, chart_title)  # type: ignore
+    fig.layout.meta = generate_text_summary(df_summary, chart_title)
 
     fig.update_layout(
         title=chart_title,
@@ -176,7 +175,7 @@ def plot_dose_finding_outcomes(trial, chart_title=None, high_contrast=False):  #
     return fig
 
 
-def plot_crm_toxicity_probabilities(trial, chart_title=None, high_contrast=False):  # type: ignore
+def plot_crm_toxicity_probabilities(trial, chart_title=None, high_contrast=False):
     """Plots the CRM dose-toxicity probabilities."""
     if not chart_title:
         chart_title = "Prior (dashed) and posterior (solid) dose-toxicity curves"
@@ -249,7 +248,7 @@ def plot_crm_toxicity_probabilities(trial, chart_title=None, high_contrast=False
             "95% Quantile": post_tox_upper,
         }
     )
-    fig.layout.meta = generate_text_summary(df_summary, chart_title)  # type: ignore
+    fig.layout.meta = generate_text_summary(df_summary, chart_title)
 
     fig.update_layout(
         title=chart_title,
@@ -264,7 +263,7 @@ def plot_crm_toxicity_probabilities(trial, chart_title=None, high_contrast=False
     return fig
 
 
-def plot_efftox_utility_contours(  # type: ignore
+def plot_efftox_utility_contours(
     metric,
     prob_eff=None,
     prob_tox=None,
@@ -285,12 +284,12 @@ def plot_efftox_utility_contours(  # type: ignore
     fig = go.Figure()
 
     # Plot general contours
-    for u in util_vals:  # type: ignore
-        tox_vals = [metric.get_tox(eff=x, util=u) for x in eff_vals]  # type: ignore
+    for u in util_vals:
+        tox_vals = [metric.get_tox(eff=x, util=u) for x in eff_vals]
         # remove None or out of bounds tox values
         valid_eff = []
         valid_tox = []
-        for e, t in zip(eff_vals, tox_vals):  # type: ignore
+        for e, t in zip(eff_vals, tox_vals):
             if t is not None and 0 <= t <= 1:
                 valid_eff.append(e)
                 valid_tox.append(t)
@@ -306,7 +305,7 @@ def plot_efftox_utility_contours(  # type: ignore
             )
 
     # Add neutral utility contour
-    tox_vals = [metric.get_tox(eff=x, util=0) for x in eff_vals]  # type: ignore
+    tox_vals = [metric.get_tox(eff=x, util=0) for x in eff_vals]
     valid_eff = []
     valid_tox = []
     for e, t in zip(eff_vals, tox_vals):
@@ -363,7 +362,7 @@ def plot_efftox_utility_contours(  # type: ignore
     return fig
 
 
-def plot_efftox_density(  # type: ignore
+def plot_efftox_density(
     data_func, trial, x_name="", plot_title="", include_doses=None, boot_samps=1000, high_contrast=False
 ):
     """Plots the EffTox probability densities."""
@@ -381,7 +380,7 @@ def plot_efftox_density(  # type: ignore
         if dose_index in include_doses:
             dist = np.random.multinomial(boot_samps, p)
             samp_boot = []
-            for j, count in enumerate(dist):  # type: ignore
+            for j, count in enumerate(dist):
                 if count > 0:
                     samp_boot.extend([samp[j]] * count)
             samp_boot = np.array(samp_boot)
@@ -400,7 +399,7 @@ def plot_efftox_density(  # type: ignore
 
     fig = ff.create_distplot(hist_data, group_labels, show_hist=False, show_rug=False)
     summary_df = df.groupby("Dose")[x_name].agg(["mean", "min", "max"]).reset_index()
-    fig.layout.meta = generate_text_summary(summary_df, plot_title)  # type: ignore
+    fig.layout.meta = generate_text_summary(summary_df, plot_title)
 
     fig.update_layout(
         title=plot_title,
@@ -413,7 +412,7 @@ def plot_efftox_density(  # type: ignore
     return fig
 
 
-def plot_crm_simulation_recommendation(summary_df, high_contrast=False):  # type: ignore
+def plot_crm_simulation_recommendation(summary_df, high_contrast=False):
     """Plots CRM simulation recommendation probabilities."""
     col_name = (
         "RecommendedDoseProb"
@@ -429,7 +428,7 @@ def plot_crm_simulation_recommendation(summary_df, high_contrast=False):  # type
         value_name="Probability",
     )
     title = "Dose Recommendation Probabilities by Scenario"
-    fig = create_bar_chart(  # type: ignore
+    fig = create_bar_chart(
         rec_dose_df_melted,
         x="true_tox",
         y="Probability",
@@ -441,11 +440,11 @@ def plot_crm_simulation_recommendation(summary_df, high_contrast=False):  # type
         },
         high_contrast=high_contrast,
     )
-    fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)  # type: ignore
+    fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
     return fig
 
 
-def plot_efftox_simulation_recommendation(summary_df, high_contrast=False):  # type: ignore
+def plot_bivariate_simulation_recommendation(summary_df, high_contrast=False):  # type: ignore
     """Plots EffTox simulation recommendation probabilities."""
     col_name = (
         "RecommendedDoseProb"
@@ -461,7 +460,7 @@ def plot_efftox_simulation_recommendation(summary_df, high_contrast=False):  # t
         value_name="Probability",
     )
     title = "Dose Recommendation Probabilities"
-    fig = create_bar_chart(  # type: ignore
+    fig = create_bar_chart(
         rec_dose_df_melted,
         x=["true_prob_tox", "true_prob_eff"],
         y="Probability",
@@ -469,11 +468,11 @@ def plot_efftox_simulation_recommendation(summary_df, high_contrast=False):  # t
         title=title,
         high_contrast=high_contrast,
     )
-    fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)  # type: ignore
+    fig.layout.meta = generate_text_summary(rec_dose_df_melted, title)
     return fig
 
 
-def plot_efftox_simulation_acceptability(summary_df, high_contrast=False):  # type: ignore
+def plot_efftox_simulation_acceptability(summary_df, high_contrast=False):
     """Plots EffTox simulation acceptability probabilities."""
     tox_col = (
         "ProbAcceptTox" if "ProbAcceptTox" in summary_df.columns else "prob_accept_tox"
@@ -494,7 +493,7 @@ def plot_efftox_simulation_acceptability(summary_df, high_contrast=False):  # ty
         value_name="Probability",
     )
     title = "Probability of Acceptable Efficacy and Toxicity"
-    fig = create_line_chart(  # type: ignore
+    fig = create_line_chart(
         accept_df_melted,
         x="true_prob_tox",  # simplified axis mapping
         y="Probability",
@@ -502,14 +501,14 @@ def plot_efftox_simulation_acceptability(summary_df, high_contrast=False):  # ty
         title=title,
         high_contrast=high_contrast,
     )
-    fig.layout.meta = generate_text_summary(accept_df_melted, title)  # type: ignore
+    fig.layout.meta = generate_text_summary(accept_df_melted, title)
     return fig
 
 
-def plot_winratio_power_curve(df, high_contrast=False):  # type: ignore
+def plot_winratio_power_curve(df, high_contrast=False):
     """Plots a Win Ratio simulation power curve."""
     title = "Win Ratio Simulation Power Curve"
-    fig = create_line_chart(  # type: ignore
+    fig = create_line_chart(
         df,
         x="num_subjects_A",
         y="power",
@@ -518,7 +517,7 @@ def plot_winratio_power_curve(df, high_contrast=False):  # type: ignore
         labels={"num_subjects_A": "Group A Subjects", "power": "Statistical Power"},
         high_contrast=high_contrast,
     )
-    fig.layout.meta = generate_text_summary(df, title)  # type: ignore
+    fig.layout.meta = generate_text_summary(df, title)
     return fig
 
 
@@ -528,15 +527,15 @@ from clintrials.core.viz_interface import VisualizationProvider
 class DefaultVisualizationProvider(VisualizationProvider):
     """Default visualization provider implementation."""
 
-    def plot_dose_finding_outcomes(self, trial, chart_title=None, high_contrast=False):  # type: ignore
+    def plot_dose_finding_outcomes(self, trial, chart_title=None, high_contrast=False):
         """Plot dose finding outcomes."""
-        return plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
+        return plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)
 
-    def plot_crm_toxicity_probabilities(self, trial, chart_title=None, high_contrast=False):  # type: ignore
+    def plot_crm_toxicity_probabilities(self, trial, chart_title=None, high_contrast=False):
         """Plot CRM toxicity probabilities."""
-        return plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
+        return plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)
 
-    def generate_pdf_report(self, df, design_type, text_summaries=None):  # type: ignore
+    def generate_pdf_report(self, df, design_type, text_summaries=None):
         """Generates an accessibility-first PDF report for trial simulations."""
         try:
             from clintrials.visualization.report import generate_pdf_report as _gen_pdf
@@ -544,10 +543,10 @@ class DefaultVisualizationProvider(VisualizationProvider):
             import warnings
             warnings.warn("PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`.")
             return None
-        return _gen_pdf(df, design_type, text_summaries)  # type: ignore
+        return _gen_pdf(df, design_type, text_summaries)
 
 
-def get_default_provider():  # type: ignore
+def get_default_provider():
     """Get default visualization provider."""
     return DefaultVisualizationProvider()
 

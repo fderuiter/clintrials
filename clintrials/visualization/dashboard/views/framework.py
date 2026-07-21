@@ -1,15 +1,14 @@
-from __future__ import annotations
 from functools import wraps
 
 from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
 
 
-def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False):  # type: ignore
+def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):  # type: ignore
     """Decorator to generate a standard dashboard view."""
-    def decorator(func):  # type: ignore
+    def decorator(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):  # type: ignore
+        def wrapper(*args, **kwargs):
             import streamlit as st
 
             if not hasattr(st, "fragment"):
@@ -17,9 +16,20 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
             if not hasattr(st, "columns"):
                 st.columns = lambda x: (st, st)
 
+            ps = None
+            if param_space_config is not None:
+                st.sidebar.header("Trial Parameters")
+                from clintrials.utils import ParameterSpace
+                ps = ParameterSpace()
+                for k, v in param_space_config.items():
+                    ps.add(k, v)
+                st.sidebar.json(param_space_config)
+
             st.header(title)
 
             try:
+                if ps is not None:
+                    kwargs["ps"] = ps
                 result = func(*args, **kwargs)
                 if result is None:
                     return
@@ -53,7 +63,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
 
                         meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
                         text_summaries.append(meta)
-                        render_accessible_chart(st, fig)  # type: ignore
+                        render_accessible_chart(st, fig)
                 elif summary_df is not None and not summary_df.empty:
                     pass
 
@@ -71,7 +81,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                     mime="text/csv",
                 )
 
-                viz_provider = get_visualization_provider()  # type: ignore
+                viz_provider = get_visualization_provider()
                 pdf_data = viz_provider.generate_pdf_report(
                     summary_df, model_name, text_summaries=text_summaries
                 ) if viz_provider else None

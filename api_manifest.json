@@ -537,7 +537,7 @@
         "high_contrast"
       ]
     },
-    "plot_efftox_simulation_recommendation": {
+    "plot_bivariate_simulation_recommendation": {
       "type": "function",
       "parameters": [
         "summary_df",
