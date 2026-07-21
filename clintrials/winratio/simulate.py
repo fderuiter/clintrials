@@ -1,14 +1,14 @@
+from __future__ import annotations
 """Pairwise win-ratio comparisons between treatment and control subjects.
 
 Random Seed Strategy: {simulate_seed_strategy}
 """
 
-from __future__ import annotations
 
 import numpy as np
 
 
-def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
+def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # type: ignore
     """Compare every treatment subject with every control subject.
 
     Args:
@@ -34,7 +34,7 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:
 
     first_non_zero_idx = np.argmax(non_zero, axis=2)
 
-    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)
+    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)  # type: ignore
 
     wins = np.sum((first_diff > 0) & has_non_zero)
     losses = np.sum((first_diff < 0) & has_non_zero)

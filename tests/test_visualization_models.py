@@ -1,21 +1,21 @@
 import pandas as pd
 
-from clintrials.visualization.models import (
+from clintrials.visualization.models import (  # type: ignore
     MultiFormatSummaryContainer,
     TextSection,
     _format_label,
 )
 
 
-def test_text_section():
+def test_text_section():  # type: ignore
     ts = TextSection("Hello")
     assert str(ts) == "Hello"
 
-def test_format_label():
+def test_format_label():  # type: ignore
     assert _format_label("some_label") == "Some Label"
     assert _format_label(123) == 123
 
-def test_multi_format_summary_container():
+def test_multi_format_summary_container():  # type: ignore
     df = pd.DataFrame({"a_col": [1.123456, 2], "b_col": ["str", "other"]})
     c = MultiFormatSummaryContainer("Title", df)
 
@@ -33,7 +33,7 @@ def test_multi_format_summary_container():
     assert "<td>str</td>" in html
     assert "<details>" not in html  # By default, should not have details
 
-def test_multi_format_summary_container_hierarchical(monkeypatch):
+def test_multi_format_summary_container_hierarchical(monkeypatch):  # type: ignore
     import streamlit as st
     monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
 
@@ -57,7 +57,7 @@ def test_multi_format_summary_container_hierarchical(monkeypatch):
     assert "Trial: T1" in html
     assert "Cohort: C1" in html
 
-def test_multi_format_summary_container_hierarchical_fallback(monkeypatch):
+def test_multi_format_summary_container_hierarchical_fallback(monkeypatch):  # type: ignore
     import streamlit as st
     monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
 

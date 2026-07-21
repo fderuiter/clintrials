@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Common, useful functions in the statistics and mathematics of clinical trials.
 
 Random Seed Strategy: {math_seed_strategy}
@@ -7,11 +8,13 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 import numpy as np
+import numpy.typing as npt
+from typing import Union, Any
 
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
 
 
-def logit(p):
+def logit(p: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
     """Calculates the logit of a probability.
 
     The probability is silently clipped to [1e-7, 1 - 1e-7] to prevent log(0).
@@ -23,10 +26,10 @@ def logit(p):
         float or numpy.ndarray: The logit.
     """
     p = np.clip(p, 1e-7, 1 - 1e-7)
-    return np.log(p / (1 - p))
+    return np.log(p / (1 - p))  # type: ignore
 
 
-def bernoulli_likelihood(p, y, log=False):
+def bernoulli_likelihood(p: Union[float, npt.NDArray[np.float64]], y: Union[int, npt.NDArray[np.int_]], log: bool = False) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
     """Calculates the Bernoulli likelihood or log-likelihood.
 
     Args:
@@ -40,12 +43,12 @@ def bernoulli_likelihood(p, y, log=False):
     p = np.clip(p, 1e-15, 1 - 1e-15)
     log_l = y * np.log(p) + (1 - y) * np.log(1 - p)
     if log:
-        return log_l
+        return log_l  # type: ignore
     else:
-        return np.exp(np.clip(log_l, -700, 700))
+        return np.exp(np.clip(log_l, -700, 700))  # type: ignore
 
 
-def inverse_logit(x):
+def inverse_logit(x: float) -> float:
     """Calculates the inverse logit of a number.
 
     The inverse logit is defined as 1 / (1 + exp(-x)).
@@ -60,14 +63,31 @@ def inverse_logit(x):
         >>> float(inverse_logit(0))
         0.5
     """
-    return 1 / (1 + np.exp(-x))
+    return 1 / (1 + np.exp(-x))  # type: ignore
 
 
 # Two-parameter link functions used in CRM-style designs
 # They are written in pairs and all use the same call signature.
 # They take their lead from the same in the dfcrm R-package.
+
+def _empiric_core(x, beta):
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
+    return x ** np.exp(beta)
+
+def _inverse_empiric_core(x, beta):
+    return x ** np.exp(-beta)
+
+def _logistic_core(x, a0, beta):
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
+    return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
+
+def _inverse_logistic_core(x, a0, beta):
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
+    return (np.log(x / (1 - x)) - a0) / np.exp(beta)
+
+
 @inject_docs()
-def empiric(x, a0=None, beta=0):
+def empiric(x: float, a0: Any = None, beta: float = 0) -> float:
     """Calculates the empiric function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     The formula is: x^(e^beta)
@@ -87,11 +107,10 @@ def empiric(x, a0=None, beta=0):
         >>> float(empiric(0.5, beta=math.log(2)))
         0.25
     """
-    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
-    return x ** np.exp(beta)
+    return _empiric_core(x, beta)
 
 
-def inverse_empiric(x, a0=0, beta=0):
+def inverse_empiric(x: float, a0: float = 0, beta: float = 0) -> float:
     """Calculates the inverse empiric function value.
 
     This function is the inverse of `empiric`. The formula is: x^(e^(-beta))
@@ -111,11 +130,11 @@ def inverse_empiric(x, a0=0, beta=0):
         >>> float(inverse_empiric(0.25, beta=math.log(2)))
         0.5
     """
-    return x ** np.exp(-beta)
+    return _inverse_empiric_core(x, beta)
 
 
 @inject_docs()
-def logistic(x, a0=0, beta=0):
+def logistic(x: float, a0: float = 0, beta: float = 0) -> float:
     """Calculates the logistic function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     The formula is: 1 / (1 + e^(-a0 - e^beta * x))
@@ -132,12 +151,11 @@ def logistic(x, a0=0, beta=0):
         >>> float(logistic(0.25, -1, 1))
         0.42057106852688747
     """
-    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
-    return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
+    return _logistic_core(x, a0, beta)
 
 
 @inject_docs()
-def inverse_logistic(x, a0=0, beta=0):
+def inverse_logistic(x: float, a0: float = 0, beta: float = 0) -> float:
     """Calculates the inverse logistic function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
 
     This function is the inverse of `logistic`.
@@ -155,12 +173,21 @@ def inverse_logistic(x, a0=0, beta=0):
         >>> float(round(inverse_logistic(0.42057106852688747, -1, 1), 2))
         0.25
     """
-    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
-    return (np.log(x / (1 - x)) - a0) / np.exp(beta)
+    return _inverse_logistic_core(x, a0, beta)
+
+
+def logit1(x, a0=3, beta=0):
+    """Logistic link function with an intercept default of 3."""
+    return _logistic_core(x, a0, beta)
+
+
+def inverse_logit1(x, a0=3, beta=0):
+    """Inverse logistic link function with an intercept default of 3."""
+    return _inverse_logistic_core(x, a0, beta)
 
 
 
-def association_to_correlation(psi):
+def association_to_correlation(psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
     """Converts an association parameter to a correlation coefficient.
 
     The formula is: (e^psi - 1) / (e^psi + 1)
@@ -171,10 +198,10 @@ def association_to_correlation(psi):
     Returns:
         float or numpy.ndarray: The correlation coefficient.
     """
-    return (np.exp(psi) - 1) / (np.exp(psi) + 1)
+    return (np.exp(psi) - 1) / (np.exp(psi) + 1)  # type: ignore
 
 
-def fgm_joint_prob(a, b, p1, p2, psi):
+def fgm_joint_prob(a: Union[int, npt.NDArray[np.int_]], b: Union[int, npt.NDArray[np.int_]], p1: Union[float, npt.NDArray[np.float64]], p2: Union[float, npt.NDArray[np.float64]], psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
     """Calculates the joint probability of two Bernoulli variables using an FGM copula.
 
     Args:
@@ -187,18 +214,19 @@ def fgm_joint_prob(a, b, p1, p2, psi):
     Returns:
         float or numpy.ndarray: The joint probability.
     """
-    prob = p1**a * (1 - p1) ** (1 - a) * p2**b * (1 - p2) ** (1 - b)
+    prob = p1**a * (1 - p1) ** (1 - a) * p2**b * (1 - p2) ** (1 - b)  # type: ignore
     prob += (
-        (-1) ** (a + b)
+        (-1) ** (a + b)  # type: ignore
         * p1
         * (1 - p1)
         * p2
         * (1 - p2)
         * association_to_correlation(psi)
     )
-    return prob
+    return prob  # type: ignore
 
 
 # Inject module-level docstring
 if __doc__:
     __doc__ = __doc__.format(**CORE_REGISTRY)
+

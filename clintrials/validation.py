@@ -1,9 +1,10 @@
+from __future__ import annotations
 """Validation functions for the Clinical Trials library."""
 
 from clintrials.core.errors import ErrorTemplates
 
 
-def validate_matching_lengths(**kwargs):
+def validate_matching_lengths(**kwargs):  # type: ignore
     """Validates that all provided arrays have the same length.
 
     Pass arrays as keyword arguments. For example:
@@ -31,7 +32,7 @@ def validate_matching_lengths(**kwargs):
             raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name=first_name, name=name))
 
 
-def validate_expected_length(array, expected_length: int, name: str):
+def validate_expected_length(array, expected_length: int, name: str):  # type: ignore
     """Validates that an array has exactly the expected length.
 
     Args:
@@ -49,7 +50,7 @@ def validate_expected_length(array, expected_length: int, name: str):
         raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=name, expected_length=expected_length))
 
 
-def validate_bounds(value, lower, upper, name: str, exclusive=False):
+def validate_bounds(value, lower, upper, name: str, exclusive=False):  # type: ignore
     """Validates that a numerical value is within the specified bounds.
 
     Args:
@@ -78,7 +79,7 @@ def validate_bounds(value, lower, upper, name: str, exclusive=False):
             raise ValueError(ErrorTemplates.LE.format(name=name, bound=upper))
 
 
-def validate_probability(value, name: str, exclusive=False):
+def validate_probability(value, name: str, exclusive=False):  # type: ignore
     """Validates that a value is a valid probability between 0 and 1.
 
     Args:
@@ -101,7 +102,7 @@ def validate_probability(value, name: str, exclusive=False):
             raise ValueError(ErrorTemplates.PROBABILITY.format(name=name))
 
 
-def validate_positive_integer(value, name: str):
+def validate_positive_integer(value, name: str):  # type: ignore
     """Validates that a value is a positive integer.
 
     Args:

@@ -13,14 +13,14 @@ from clintrials.visualization.dashboard.views import (
 )
 
 
-def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
+def _make_streamlit_mock(selectbox_return="CRM", file_data=None):  # type: ignore
     """Create a minimal mock of the streamlit module."""
 
     class DummyFile:
-        def __init__(self, data):
+        def __init__(self, data):  # type: ignore
             self._data = data
 
-        def getvalue(self):
+        def getvalue(self):  # type: ignore
             return self._data
 
     if file_data is None:
@@ -30,7 +30,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         header=MagicMock(),
         selectbox=MagicMock(return_value=selectbox_return),
         checkbox=MagicMock(return_value=False),
-        file_uploader=MagicMock(return_value=DummyFile(file_data)),
+        file_uploader=MagicMock(return_value=DummyFile(file_data)),  # type: ignore
         success=MagicMock(),
         write=MagicMock(),
         json=MagicMock(),
@@ -60,7 +60,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
     return st
 
 
-def _make_winratio_streamlit_mock():
+def _make_winratio_streamlit_mock():  # type: ignore
     """Create a minimal mock for the Win Ratio view."""
 
     sidebar = SimpleNamespace(
@@ -72,10 +72,10 @@ def _make_winratio_streamlit_mock():
     )
 
     class DummySpinner:
-        def __enter__(self):
+        def __enter__(self):  # type: ignore
             return None
 
-        def __exit__(self, exc_type, exc, tb):
+        def __exit__(self, exc_type, exc, tb):  # type: ignore
             return None
 
     st = SimpleNamespace(
@@ -95,77 +95,79 @@ def _make_winratio_streamlit_mock():
     return st
 
 
-def test_dashboard_main_routes_to_crm(monkeypatch):
+def test_dashboard_main_routes_to_crm(monkeypatch):  # type: ignore
     """main() should invoke crm_view.render when CRM is selected."""
-    st_mock = _make_streamlit_mock(selectbox_return="CRM")
+    st_mock = _make_streamlit_mock(selectbox_return="CRM")  # type: ignore
     monkeypatch.setattr(main, "st", st_mock)
 
     called = {}
 
-    def fake_render(data):
+    def fake_render(data):  # type: ignore
         called["data"] = data
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", fake_render)
-    main.main()
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", fake_render)  # type: ignore
+    main.main()  # type: ignore
     assert called["data"] == [{"foo": "bar"}]
 
 
-def test_dashboard_main_routes_to_efftox(monkeypatch):
+def test_dashboard_main_routes_to_efftox(monkeypatch):  # type: ignore
     """main() should invoke efftox_view.render when EffTox is selected."""
-    st_mock = _make_streamlit_mock(selectbox_return="EffTox")
+    st_mock = _make_streamlit_mock(selectbox_return="EffTox")  # type: ignore
     monkeypatch.setattr(main, "st", st_mock)
 
     called = {}
 
-    def fake_render(data):
+    def fake_render(data):  # type: ignore
         called["data"] = data
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["EffTox"], "render", fake_render)
-    main.main()
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["EffTox"], "render", fake_render)  # type: ignore
+    main.main()  # type: ignore
     assert called["data"] == [{"foo": "bar"}]
 
 
-def test_dashboard_main_routes_to_watu(monkeypatch):
+def test_dashboard_main_routes_to_watu(monkeypatch):  # type: ignore
     """main() should invoke watu_view.render when WATU is selected."""
-    st_mock = _make_streamlit_mock(selectbox_return="WATU")
+    st_mock = _make_streamlit_mock(selectbox_return="WATU")  # type: ignore
     monkeypatch.setattr(main, "st", st_mock)
 
     called = {}
 
-    def fake_render(data):
+    def fake_render(data):  # type: ignore
         called["data"] = data
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["WATU"], "render", fake_render)
-    main.main()
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["WATU"], "render", fake_render)  # type: ignore
+    main.main()  # type: ignore
     assert called["data"] == [{"foo": "bar"}]
 
 
-def test_dashboard_main_routes_to_winratio(monkeypatch):
+def test_dashboard_main_routes_to_winratio(monkeypatch):  # type: ignore
     """main() should invoke winratio_view.render when Win Ratio is selected."""
-    st_mock = _make_streamlit_mock(selectbox_return="Win Ratio")
+    st_mock = _make_streamlit_mock(selectbox_return="Win Ratio")  # type: ignore
     monkeypatch.setattr(main, "st", st_mock)
 
     called = {}
 
-    def fake_render():
+    def fake_render():  # type: ignore
         called["called"] = True
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["Win Ratio"], "render", fake_render)
-    main.main()
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["Win Ratio"], "render", fake_render)  # type: ignore
+    main.main()  # type: ignore
     assert called["called"]
 
 
-def test_crm_view_render_success(monkeypatch):
+def test_crm_view_render_success(monkeypatch):  # type: ignore
     """render() should summarise simulations and plot results when data is valid."""
-    import importlib
     import sys
 
-    st_mock = _make_streamlit_mock()
-    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(crm_view)
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
+    st_mock = _make_streamlit_mock()  # type: ignore
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(crm_view, "st", st_mock)
-    monkeypatch.setattr(crm_view, "ParameterSpace", MagicMock())
 
     summary_df = pd.DataFrame(
         {
@@ -175,7 +177,7 @@ def test_crm_view_render_success(monkeypatch):
         index=pd.Index([0.1], name="true_tox"),
     )
     summarise_mock = MagicMock(return_value=summary_df)
-    monkeypatch.setattr(crm_view, "extract_sim_data", summarise_mock)
+    monkeypatch.setattr(sim, "extract_sim_data", summarise_mock)
 
     bar_fig = object()
     import clintrials.visualization as viz
@@ -185,43 +187,51 @@ def test_crm_view_render_success(monkeypatch):
     )
 
     sims = [{"recommended_dose": 1}, {"recommended_dose": 2}]
-    crm_view.render(sims)
+    render_func = PROTOCOL_REGISTRY.get_render("CRM")
+    render_func(sims)
 
     summarise_mock.assert_called_once()
-    viz.plot_crm_simulation_recommendation.assert_called_once()
+    viz.plot_crm_simulation_recommendation.assert_called_once()  # type: ignore
     st_mock.plotly_chart.assert_called_with(bar_fig)
 
 
-def test_crm_view_warns_without_recommended(monkeypatch):
+def test_crm_view_warns_without_recommended(monkeypatch):  # type: ignore
     """If the summary lacks recommendation information a warning is shown."""
-    import importlib
     import sys
+
+    import clintrials.visualization.dashboard.views.crm_view as crm_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    import importlib
     importlib.reload(crm_view)
-
     monkeypatch.setattr(crm_view, "st", st_mock)
-    monkeypatch.setattr(crm_view, "ParameterSpace", MagicMock())
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
 
     summary_df = pd.DataFrame({"N": [1]}, index=pd.Index([0.1], name="true_tox"))
-    monkeypatch.setattr(crm_view, "extract_sim_data", MagicMock(return_value=summary_df))
+    monkeypatch.setattr(sim, "extract_sim_data", MagicMock(return_value=summary_df))
 
-    crm_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("CRM")
+    render_func([{}])
     st_mock.warning.assert_called_once()
 
 
-def test_efftox_view_render_success(monkeypatch):
+def test_efftox_view_render_success(monkeypatch):  # type: ignore
     """EffTox view should plot recommendation and acceptability probabilities."""
-    import importlib
     import sys
 
-    st_mock = _make_streamlit_mock()
-    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(efftox_view)
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
+    st_mock = _make_streamlit_mock()  # type: ignore
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(efftox_view, "st", st_mock)
-    monkeypatch.setattr(efftox_view, "ParameterSpace", MagicMock())
 
     index = pd.MultiIndex.from_tuples(
         [(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"]
@@ -236,17 +246,18 @@ def test_efftox_view_render_success(monkeypatch):
         index=index,
     )
     monkeypatch.setattr(
-        efftox_view, "extract_sim_data", MagicMock(return_value=summary_df)
+        sim, "extract_sim_data", MagicMock(return_value=summary_df)
     )
 
     import clintrials.visualization as viz
 
     bar_mock = MagicMock(return_value="fig_bar")
     line_mock = MagicMock(return_value="fig_line")
-    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+    monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", bar_mock)
     monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
-    efftox_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("EffTox")
+    render_func([{}])
 
     bar_mock.assert_called_once()
     line_mock.assert_called_once()
@@ -254,31 +265,36 @@ def test_efftox_view_render_success(monkeypatch):
     assert st_mock.plotly_chart.call_count == 2
 
 
-def test_efftox_view_warns_when_empty(monkeypatch):
+def test_efftox_view_warns_when_empty(monkeypatch):  # type: ignore
     """If the summary dataframe is empty a warning is shown."""
-    import importlib
     import sys
+
+    import clintrials.visualization.dashboard.views.efftox_view as efftox_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    import importlib
     importlib.reload(efftox_view)
-
     monkeypatch.setattr(efftox_view, "st", st_mock)
-    monkeypatch.setattr(efftox_view, "ParameterSpace", MagicMock())
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
-        efftox_view, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
+        sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
     )
 
-    efftox_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("EffTox")
+    render_func([{}])
     st_mock.warning.assert_called_once()
 
 
-def test_winratio_view_render_success(monkeypatch):
+def test_winratio_view_render_success(monkeypatch):  # type: ignore
     """Win Ratio view should run the simulation and display results."""
     import importlib
     import sys
 
-    st_mock = _make_winratio_streamlit_mock()
+    st_mock = _make_winratio_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     importlib.reload(winratio_view)
     monkeypatch.setattr(winratio_view, "st", st_mock)
@@ -311,17 +327,19 @@ def test_winratio_view_render_success(monkeypatch):
     )
 
 
-def test_watu_view_render_success(monkeypatch):
+def test_watu_view_render_success(monkeypatch):  # type: ignore
     """WATU view should plot recommendation probabilities."""
-    import importlib
     import sys
 
-    st_mock = _make_streamlit_mock()
-    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(watu_view)
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
+    st_mock = _make_streamlit_mock()  # type: ignore
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(watu_view, "st", st_mock)
-    monkeypatch.setattr(watu_view, "ParameterSpace", MagicMock())
 
     index = pd.MultiIndex.from_tuples(
         [(0.1, 0.2)], names=["true_prob_tox", "true_prob_eff"]
@@ -334,66 +352,72 @@ def test_watu_view_render_success(monkeypatch):
         index=index,
     )
     monkeypatch.setattr(
-        watu_view, "extract_sim_data", MagicMock(return_value=summary_df)
+        sim, "extract_sim_data", MagicMock(return_value=summary_df)
     )
 
     import clintrials.visualization as viz
 
     bar_mock = MagicMock(return_value="fig_bar")
-    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+    monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", bar_mock)
 
-    watu_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("WATU")
+    render_func([{}])
 
     bar_mock.assert_called_once()
     # st.plotly_chart called once
     assert st_mock.plotly_chart.call_count == 1
 
 
-def test_watu_view_warns_when_empty(monkeypatch):
+def test_watu_view_warns_when_empty(monkeypatch):  # type: ignore
     """If the summary dataframe is empty a warning is shown."""
-    import importlib
     import sys
+
+    import clintrials.visualization.dashboard.views.watu_view as watu_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    import importlib
     importlib.reload(watu_view)
-
     monkeypatch.setattr(watu_view, "st", st_mock)
-    monkeypatch.setattr(watu_view, "ParameterSpace", MagicMock())
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
-        watu_view, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
+        sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
     )
 
-    watu_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("WATU")
+    render_func([{}])
     st_mock.warning.assert_called_once()
 
 
-def test_main_preview_mode_crm(monkeypatch):
-    st_mock = _make_streamlit_mock(selectbox_return="CRM")
+def test_main_preview_mode_crm(monkeypatch):  # type: ignore
+    st_mock = _make_streamlit_mock(selectbox_return="CRM")  # type: ignore
     st_mock.sidebar.radio.return_value = "Preview Mode"
     monkeypatch.setattr(main, "st", st_mock)
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())  # type: ignore
     monkeypatch.setattr(main, "get_preview_sims", MagicMock(return_value=[{"preview": True}]))
-    main.main()
+    main.main()  # type: ignore
     main.get_preview_sims.assert_called_once()
-    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with([{"preview": True}])
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with([{"preview": True}])  # type: ignore
 
 
-def test_main_preview_mode_exception(monkeypatch):
-    st_mock = _make_streamlit_mock(selectbox_return="CRM")
+def test_main_preview_mode_exception(monkeypatch):  # type: ignore
+    st_mock = _make_streamlit_mock(selectbox_return="CRM")  # type: ignore
     st_mock.sidebar.radio.return_value = "Preview Mode"
     monkeypatch.setattr(main, "st", st_mock)
 
-    def raise_err(*args, **kwargs):
+    def raise_err(*args, **kwargs):  # type: ignore
         raise ValueError("Sim error")
 
     monkeypatch.setattr(main, "get_preview_sims", raise_err)
-    main.main()
+    main.main()  # type: ignore
     st_mock.error.assert_called_once()
 
 
-def test_get_preview_sims_crm(monkeypatch):
+def test_get_preview_sims_crm(monkeypatch):  # type: ignore
     import clintrials.dosefinding as df
     func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
 
@@ -407,7 +431,7 @@ def test_get_preview_sims_crm(monkeypatch):
     assert sims[0]["true_tox"] == (0.05, 0.1, 0.2, 0.3, 0.4)
 
 
-def test_get_preview_sims_efftox(monkeypatch):
+def test_get_preview_sims_efftox(monkeypatch):  # type: ignore
     import clintrials.dosefinding.efficacytoxicity as et
     func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
 
@@ -420,7 +444,7 @@ def test_get_preview_sims_efftox(monkeypatch):
     assert mock_sim.call_count == 10
 
 
-def test_get_preview_sims_watu(monkeypatch):
+def test_get_preview_sims_watu(monkeypatch):  # type: ignore
     import clintrials.dosefinding.efficacytoxicity as et
     func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
 

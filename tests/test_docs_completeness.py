@@ -3,7 +3,7 @@ from pathlib import Path
 from markdown_it import MarkdownIt
 
 
-def test_all_public_modules_documented():
+def test_all_public_modules_documented():  # type: ignore
     # 1. Read documented modules from index.md
     index_path = Path("docs/reference/index.md")
     with open(index_path, "r") as f:

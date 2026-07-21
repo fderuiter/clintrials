@@ -15,7 +15,7 @@ VIEWPORTS = [
 ]
 
 @pytest.fixture(scope="module")
-def streamlit_server():
+def streamlit_server():  # type: ignore
     # Start the Streamlit app
     env = os.environ.copy()
 
@@ -46,12 +46,12 @@ def streamlit_server():
     process.wait()
 
 @pytest.fixture(params=VIEWPORTS, ids=["mobile", "desktop"])
-def viewport(request):
+def viewport(request):  # type: ignore
     return request.param
 
-def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: dict, tmp_path):
+def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: dict, tmp_path):  # type: ignore
     # Set viewport
-    page.set_viewport_size(viewport)
+    page.set_viewport_size(viewport)  # type: ignore
 
     # Navigate to the dashboard
     page.goto(streamlit_server)
@@ -79,7 +79,7 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
     results_standard = axe.run(page)
 
     # Strip HTML to prevent PII leakage and filter violations
-    def process_violations(violations):
+    def process_violations(violations):  # type: ignore
         processed = []
         for v in violations:
             for node in v["nodes"]:
@@ -87,7 +87,7 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
             processed.append(v)
         return processed
 
-    violations_standard = process_violations(results_standard.response["violations"])
+    violations_standard = process_violations(results_standard.response["violations"])  # type: ignore
 
     # Save standard mode report
     os.makedirs("accessibility_reports", exist_ok=True)

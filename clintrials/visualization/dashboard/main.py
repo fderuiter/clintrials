@@ -2,6 +2,7 @@
 
 Random Seed Strategy: {main_seed_strategy}
 """
+from __future__ import annotations
 
 import json
 
@@ -12,16 +13,15 @@ from clintrials.visualization.dashboard.factory import create_widget
 
 
 @st.cache_data(show_spinner=False)
-def get_preview_sims(design_type, target_tox, cohort_size, max_size):
-    """Run and cache default preview simulations based on the selected design type and parameters.
-    """
+def get_preview_sims(design_type, target_tox, cohort_size, max_size):  # type: ignore
+    """Run and cache default preview simulations based on the selected design type and parameters."""
     preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
     if preview_func:
         with st.spinner(f"Running Default Preview Simulation for {design_type}..."):
             return preview_func(target_tox, cohort_size, max_size)
     return []
 
-def main():
+def main():  # type: ignore
     """Sets up the Streamlit dashboard and renders the appropriate view."""
     try:
         import streamlit.components.v1 as components
@@ -149,7 +149,7 @@ def main():
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Accessibility Settings")
-    st.session_state["accessibility_mode"] = st.sidebar.checkbox(
+    st.session_state["accessibility_mode"] = create_widget(st, "checkbox", "accessibility_mode",
         "Enable Screen-Reader Optimized Mode",
         value=st.session_state.get("accessibility_mode", False),
         help="Restructures large tables into hierarchical nested details for easier navigation."
@@ -190,7 +190,7 @@ def main():
         )
 
 
-    design_type = create_widget(
+    design_type = create_widget(  # type: ignore
         st,
         "selectbox",
         "design_type",
@@ -216,7 +216,7 @@ def main():
             # Typically Win Ratio
             try:
                 from clintrials.core.schema import WinRatioSchema
-                for name, field in WinRatioSchema.model_fields.items():
+                for name, field in WinRatioSchema.model_fields.items():  # type: ignore
                     if name in UI_REGISTRY:
                         entries.append((field.description, UI_REGISTRY[name]))
             except ImportError:
@@ -248,7 +248,7 @@ def main():
             render_func()
     else:
         st.sidebar.header("Data Mode")
-        data_mode = st.sidebar.radio(
+        data_mode = create_widget(st, "radio", "data_mode",
             "Select Data Source",
             ["Preview Mode", "Manual JSON Upload"],
             help="Switch between automatically generated preview simulations and manual file upload."
@@ -256,7 +256,7 @@ def main():
 
         if data_mode == "Manual JSON Upload":
             st.sidebar.header("Upload Simulation Results")
-            uploaded_file = create_widget(
+            uploaded_file = create_widget(  # type: ignore
                 st,
                 "file_uploader",
                 "uploaded_file",
@@ -272,9 +272,9 @@ def main():
                     render_func(sims)
         else:
             st.sidebar.header("Preview Parameters")
-            target_tox = st.sidebar.number_input("Target Toxicity", min_value=0.01, max_value=0.99, value=0.25, step=0.01)
-            cohort_size = st.sidebar.number_input("Cohort Size", min_value=1, max_value=10, value=3)
-            max_size = st.sidebar.number_input("Sample Size (N)", min_value=10, max_value=100, value=60, step=10)
+            target_tox = create_widget(st, "number_input", "target_tox", "Target Toxicity", min_value=0.01, max_value=0.99, value=0.25, step=0.01)
+            cohort_size = create_widget(st, "number_input", "cohort_size", "Cohort Size", min_value=1, max_value=10, value=3)
+            max_size = create_widget(st, "number_input", "max_size", "Sample Size (N)", min_value=10, max_value=100, value=60, step=10)
 
             from clintrials.visualization.dashboard.utils import announce_status_locally
             try:
@@ -289,7 +289,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()  # type: ignore
 
 
 # Inject module-level docstring

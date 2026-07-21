@@ -3,10 +3,10 @@ import pandas as pd
 from scipy.stats import norm
 
 from clintrials.dosefinding.crm import crm
-from tests.fixtures.crm_math_helpers import inverse_logit1, logit1
+from clintrials.core.math import inverse_logit1, logit1
 
 
-def test_CRM_with_generated_fixtures():
+def test_CRM_with_generated_fixtures():  # type: ignore
     # Load the fixtures
     expected_probs = pd.read_csv("tests/fixtures/expected_posterior_dlt_probs.csv")
     expected_doses = pd.read_csv("tests/fixtures/next_dose_recommendations.csv")

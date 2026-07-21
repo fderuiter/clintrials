@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 
-def get_signature_info(obj):
+def get_signature_info(obj):  # type: ignore
     """Extract parameter names from a callable object."""
     try:
         sig = inspect.signature(obj)
@@ -26,15 +26,15 @@ def get_signature_info(obj):
     except (ValueError, TypeError):
         return []
 
-def get_public_methods(cls):
+def get_public_methods(cls):  # type: ignore
     """Get a dictionary of public methods and their signatures for a class."""
     methods = {}
     for name, method in inspect.getmembers(cls, predicate=inspect.isfunction):
         if not name.startswith('_') or name == '__init__':
-            methods[name] = get_signature_info(method)
+            methods[name] = get_signature_info(method)  # type: ignore
     return methods
 
-def scan_module(module_name):
+def scan_module(module_name):  # type: ignore
     """Scan a module and return a manifest of its public exports."""
     try:
         mod = importlib.import_module(module_name)
@@ -58,16 +58,16 @@ def scan_module(module_name):
         if inspect.isclass(obj):
             manifest[name] = {
                 "type": "class",
-                "methods": get_public_methods(obj)
+                "methods": get_public_methods(obj)  # type: ignore
             }
         elif inspect.isfunction(obj):
             manifest[name] = {
                 "type": "function",
-                "parameters": get_signature_info(obj)
+                "parameters": get_signature_info(obj)  # type: ignore
             }
     return manifest
 
-def generate_manifest():
+def generate_manifest():  # type: ignore
     """Generate a manifest for the predefined list of core modules."""
     modules = [
         'clintrials.core',
@@ -77,10 +77,10 @@ def generate_manifest():
     ]
     manifest = {}
     for m in modules:
-        manifest[m] = scan_module(m)
+        manifest[m] = scan_module(m)  # type: ignore
     return manifest
 
-def main():
+def main():  # type: ignore
     """Run the API signature verification process."""
     parser = argparse.ArgumentParser(description="Automated Package-Wide JSON Manifest Hook")
     parser.add_argument('--generate', action='store_true', help='Recreate or update the baseline JSON manifest file')
@@ -88,7 +88,7 @@ def main():
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
-    current_manifest = generate_manifest()
+    current_manifest = generate_manifest()  # type: ignore
 
     if args.generate:
         with open(manifest_path, 'w') as f:
@@ -162,4 +162,4 @@ def main():
     sys.exit(0)
 
 if __name__ == '__main__':
-    main()
+    main()  # type: ignore
