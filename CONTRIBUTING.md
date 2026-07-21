@@ -48,3 +48,4 @@ To transition a feature from an internal utility to public status, follow these 
 3. Import the newly promoted utility in the package root `clintrials/__init__.py`.
 4. Add the utility to the `__all__` list in `clintrials/__init__.py`.
 5. Update the API documentation index at `docs/reference/index.rst` to include the new top-level utility so it is discoverable by users.
+6. Run `poetry run python scripts/verify_api_signatures.py --generate` to update the `api_manifest.json` file. Commit this file along with your changes.

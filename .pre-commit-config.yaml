@@ -25,3 +25,10 @@ repos:
         additional_dependencies: ["deptry==0.22.0"]
         pass_filenames: false
         always_run: true
+
+    -   id: verify-api-signatures
+        name: verify-api-signatures
+        entry: poetry run python scripts/verify_api_signatures.py
+        language: system
+        pass_filenames: false
+        always_run: true
