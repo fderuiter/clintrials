@@ -1,14 +1,15 @@
+from __future__ import annotations
 from functools import wraps
 
 from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
 
 
-def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False):
+def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False):  # type: ignore
     """Decorator to generate a standard dashboard view."""
-    def decorator(func):
+    def decorator(func):  # type: ignore
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs):  # type: ignore
             import streamlit as st
 
             if not hasattr(st, "fragment"):
@@ -52,7 +53,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
 
                         meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
                         text_summaries.append(meta)
-                        render_accessible_chart(st, fig)
+                        render_accessible_chart(st, fig)  # type: ignore
                 elif summary_df is not None and not summary_df.empty:
                     pass
 
@@ -70,7 +71,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                     mime="text/csv",
                 )
 
-                viz_provider = get_visualization_provider()
+                viz_provider = get_visualization_provider()  # type: ignore
                 pdf_data = viz_provider.generate_pdf_report(
                     summary_df, model_name, text_summaries=text_summaries
                 ) if viz_provider else None

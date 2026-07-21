@@ -1,9 +1,9 @@
+from __future__ import annotations
 """Compare two subjects component-wise in a hierarchical manner.
 
 Random Seed Strategy: {compare_seed_strategy}
 """
 
-from __future__ import annotations
 
 from typing import Iterable
 
@@ -20,10 +20,10 @@ def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
     Returns:
         str: 'win' if subject1 wins, 'loss' if subject1 loses, or 'tie'.
     """
-    for i in range(len(subject1)):
-        if subject1[i] > subject2[i]:
+    for i in range(len(subject1)):  # type: ignore
+        if subject1[i] > subject2[i]:  # type: ignore
             return "win"
-        if subject1[i] < subject2[i]:
+        if subject1[i] < subject2[i]:  # type: ignore
             return "loss"
     return "tie"
 

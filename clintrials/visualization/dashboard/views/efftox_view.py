@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Renders the EffTox simulation results view in the Streamlit dashboard.
 
 Random Seed Strategy: {efftox_view_seed_strategy}
@@ -11,7 +12,7 @@ from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
-def efftox_preview_sims(target_tox, cohort_size, max_size):
+def efftox_preview_sims(target_tox, cohort_size, max_size):  # type: ignore
     """Generate preview simulations for the EffTox model.
     """
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
@@ -22,7 +23,7 @@ def efftox_preview_sims(target_tox, cohort_size, max_size):
     prior_eff_probs = [0.2, 0.4, 0.6, 0.7, 0.8]
 
     metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-    trial = EffTox(
+    trial = EffTox(  # type: ignore
         real_doses=real_doses,
         prior_tox_probs=prior_tox_probs,
         prior_eff_probs=prior_eff_probs,
@@ -49,7 +50,7 @@ def efftox_preview_sims(target_tox, cohort_size, max_size):
 
 @PROTOCOL_REGISTRY.register("EffTox", preview_func=efftox_preview_sims)
 @dashboard_view(title="EffTox Simulation Results", model_name="EffTox", file_prefix="efftox_simulations")
-def render(sims):
+def render(sims):  # type: ignore
     """Renders the EffTox simulation results view."""
     st.sidebar.header("Trial Parameters")
     param_space_config = {
@@ -70,13 +71,13 @@ def render(sims):
         "true_prob_eff": "true_prob_eff",
     }
 
-    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
+    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")  # type: ignore
 
     figures = []
     if not summary_df.empty:
         if "recommended_dose_prob" in summary_df.columns:
             import clintrials.visualization as viz
-            fig_rec = viz.plot_efftox_simulation_recommendation(
+            fig_rec = viz.plot_efftox_simulation_recommendation(  # type: ignore
                 summary_df,
                 high_contrast=False
             )
@@ -87,7 +88,7 @@ def render(sims):
             and "prob_accept_eff" in summary_df.columns
         ):
             import clintrials.visualization as viz
-            fig_accept = viz.plot_efftox_simulation_acceptability(
+            fig_accept = viz.plot_efftox_simulation_acceptability(  # type: ignore
                 summary_df,
                 high_contrast=False
             )

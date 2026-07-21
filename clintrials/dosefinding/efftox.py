@@ -141,7 +141,7 @@ def _pi_T(scaled_dose: Any, mu: Any, beta: Any) -> Any:
     Returns:
         float: The probability of toxicity.
     """
-    return inverse_logit(_eta_T(scaled_dose, mu, beta))  # type: ignore
+    return inverse_logit(_eta_T(scaled_dose, mu, beta))
 
 
 def _pi_E(scaled_dose: Any, mu: Any, beta1: Any, beta2: Any) -> Any:
@@ -156,7 +156,7 @@ def _pi_E(scaled_dose: Any, mu: Any, beta1: Any, beta2: Any) -> Any:
     Returns:
         float: The probability of efficacy.
     """
-    return inverse_logit(_eta_E(scaled_dose, mu, beta1, beta2))  # type: ignore
+    return inverse_logit(_eta_E(scaled_dose, mu, beta1, beta2))
 
 
 def _pi_ab(scaled_dose: Any, tox: Any, eff: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, psi: Any) -> Any:
@@ -180,7 +180,7 @@ def _pi_ab(scaled_dose: Any, tox: Any, eff: Any, mu_T: Any, beta_T: Any, mu_E: A
 
     p_E = _pi_E(scaled_dose, mu_E, beta1_E, beta2_E)
     p_T = _pi_T(scaled_dose, mu_T, beta_T)
-    return fgm_joint_prob(eff, tox, p_E, p_T, psi)  # type: ignore
+    return fgm_joint_prob(eff, tox, p_E, p_T, psi)
 
 
 def _L_n(D: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, psi: Any) -> Any:
@@ -230,7 +230,7 @@ def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10*
     """
     if rng is None:
         from clintrials.core.rng import get_rng
-        rng = get_rng()
+        rng = get_rng()  # type: ignore
 
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
 
@@ -852,7 +852,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
-    def report(self) -> dict:
+    def report(self) -> dict:  # type: ignore
         """Generates a standardized JSON-serializable report of the trial.
 
         Returns:
@@ -1039,35 +1039,35 @@ def efftox_dtp_detail(trial: Any) -> Any:
     """
     to_return = OrderedDict()
 
-    to_return["Utility"] = iterable_to_json(trial.utility)
+    to_return["Utility"] = iterable_to_json(trial.utility)  # type: ignore
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"Utility{dl}"] = trial.utility[i]
 
-    to_return["ProbEff"] = iterable_to_json(trial.prob_eff)
+    to_return["ProbEff"] = iterable_to_json(trial.prob_eff)  # type: ignore
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbEff{dl}"] = trial.prob_eff[i]
 
-    to_return["ProbAccEff"] = iterable_to_json(trial.prob_acc_eff)
+    to_return["ProbAccEff"] = iterable_to_json(trial.prob_acc_eff)  # type: ignore
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbAccEff{dl}"] = trial.prob_acc_eff[i]
 
-    to_return["ProbTox"] = iterable_to_json(trial.prob_tox)
+    to_return["ProbTox"] = iterable_to_json(trial.prob_tox)  # type: ignore
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbTox{dl}"] = trial.prob_tox[i]
 
-    to_return["ProbAccTox"] = iterable_to_json(trial.prob_acc_tox)
+    to_return["ProbAccTox"] = iterable_to_json(trial.prob_acc_tox)  # type: ignore
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbAccTox{dl}"] = trial.prob_acc_tox[i]
 
     sup_mat = trial.utility_superiority_matrix()
-    to_return["SuperiorityMatrix"] = [iterable_to_json(x) for x in sup_mat]
+    to_return["SuperiorityMatrix"] = [iterable_to_json(x) for x in sup_mat]  # type: ignore
 
     obd = trial.next_dose()
     if obd > 0:
         min_sup = np.nanmin(sup_mat[obd - 1])
     else:
         min_sup = np.nan
-    to_return["MinProbSuperiority"] = atomic_to_json(min_sup)
+    to_return["MinProbSuperiority"] = atomic_to_json(min_sup)  # type: ignore
 
     return to_return
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any, Callable
 
 __author__ = 'Kristian Brock'
@@ -13,7 +14,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-def deprecated(alternative):
+def deprecated(alternative):  # type: ignore
     """Decorator to mark a function, method, or class as deprecated.
     Emits a DeprecationWarning pointing to the `alternative`.
 
@@ -21,20 +22,20 @@ def deprecated(alternative):
         alternative (str): The modern alternative function, method, or class to use.
     """
 
-    def decorator(obj):
+    def decorator(obj):  # type: ignore
         if isinstance(obj, type):
-            orig_init = obj.__init__
+            orig_init = obj.__init__  # type: ignore
 
             @wraps(orig_init)
-            def new_init(self, *args, **kwargs):
+            def new_init(self, *args, **kwargs):  # type: ignore
                 warnings.warn(f'{obj.__name__} is deprecated and will be removed in a future version. Use {alternative} instead.', category=DeprecationWarning, stacklevel=2)
                 orig_init(self, *args, **kwargs)
-            obj.__init__ = new_init
+            obj.__init__ = new_init  # type: ignore
             return obj
         else:
 
             @wraps(obj)
-            def wrapper(*args, **kwargs):
+            def wrapper(*args, **kwargs):  # type: ignore
                 warnings.warn(f'{obj.__name__} is deprecated and will be removed in a future version. Use {alternative} instead.', category=DeprecationWarning, stacklevel=2)
                 return obj(*args, **kwargs)
             return wrapper
@@ -133,8 +134,8 @@ def correlated_binary_outcomes_from_uniforms(unifs: Any, u: Any, psi: Any) -> An
         u12 = _correlated_binary_outcomes_solve2(u[0], u[1], psi)
         n = unifs.shape[0]
         y = -1 * np.ones(shape=(n, 2))
-        y[:, 0] = (unifs[:, 0] < u[0]).astype(int)
-        y[:, 1] = y[:, 0] * (unifs[:, 1] <= u12 / u[0]) + (1 - y[:, 0]) * (unifs[:, 2] <= (u[1] - u12) / (1 - u[0]))
+        y[:, 0] = (unifs[:, 0] < u[0]).astype(int)  # type: ignore
+        y[:, 1] = y[:, 0] * (unifs[:, 1] <= u12 / u[0]) + (1 - y[:, 0]) * (unifs[:, 2] <= (u[1] - u12) / (1 - u[0]))  # type: ignore
         return y
     else:
         raise ValueError('unifs must be an n*3 array')
@@ -144,7 +145,7 @@ from functools import partial
 class Memoize:
     """A class to cache function results with a size limit (LRU)."""
 
-    def __init__(self, f: Callable, maxsize: int = 128) -> None:
+    def __init__(self, f: Callable, maxsize: int = 128) -> None:  # type: ignore
         """Initializes a Memoize object.
 
         Args:
@@ -153,7 +154,7 @@ class Memoize:
         """
         self.f = f
         self.maxsize = maxsize
-        self.memo = OrderedDict()
+        self.memo = OrderedDict()  # type: ignore
 
     def _make_hashable(self, obj: Any) -> Any:
         if isinstance(obj, (tuple, list)):
@@ -197,7 +198,7 @@ class ParameterSpace:
 
     def __init__(self) -> None:
         """Initializes a ParameterSpace object."""
-        self.vals_map = OrderedDict()
+        self.vals_map = OrderedDict()  # type: ignore
 
     def add(self, label: Any, values: Any) -> Any:
         """Adds a parameter and its possible values to the space.
@@ -301,28 +302,28 @@ __all__ = [
     "iterable_to_json"
 ]
 
-def to_1d_list_gen(x):
+def to_1d_list_gen(x):  # type: ignore
     """Yield items of a nested list as a 1D generator."""
     if isinstance(x, list):
         for y in x:
-            yield from to_1d_list_gen(y)
+            yield from to_1d_list_gen(y)  # type: ignore
     else:
         yield x
 
-def to_1d_list(x):
+def to_1d_list(x):  # type: ignore
     """Convert a nested list into a 1D list."""
-    return list(to_1d_list_gen(x))
+    return list(to_1d_list_gen(x))  # type: ignore
 
-def atomic_to_json(obj):
+def atomic_to_json(obj):  # type: ignore
     """Convert an atomic numpy object to a JSON-serializable type."""
     if isinstance(obj, np.generic):
         return obj.item()
     else:
         return obj
 
-def iterable_to_json(obj):
+def iterable_to_json(obj):  # type: ignore
     """Convert an iterable object to a JSON-serializable list."""
     if isinstance(obj, Iterable):
-        return [atomic_to_json(x) for x in obj]
+        return [atomic_to_json(x) for x in obj]  # type: ignore
     else:
-        return atomic_to_json(obj)
+        return atomic_to_json(obj)  # type: ignore

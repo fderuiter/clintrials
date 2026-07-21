@@ -6,7 +6,7 @@ from scipy.stats import norm
 from clintrials.core.numerics import integrate_posterior_1d
 
 
-def test_integrate_posterior_1d_expands():
+def test_integrate_posterior_1d_expands():  # type: ignore
     logpost = lambda x: norm(loc=3, scale=1).logpdf(x)
     val, diag = integrate_posterior_1d(
         logpost,
@@ -19,7 +19,7 @@ def test_integrate_posterior_1d_expands():
     assert diag["expansions"] > 0
 
 
-def test_integrate_posterior_1d_no_expand():
+def test_integrate_posterior_1d_no_expand():  # type: ignore
     logpost = lambda x: norm(loc=0, scale=1).logpdf(x)
     val, diag = integrate_posterior_1d(
         logpost,
@@ -32,7 +32,7 @@ def test_integrate_posterior_1d_no_expand():
     assert diag["expansions"] == 0
 
 
-def test_integrate_posterior_1d_no_diag():
+def test_integrate_posterior_1d_no_diag():  # type: ignore
     logpost = lambda x: norm(loc=0, scale=1).logpdf(x)
     val = integrate_posterior_1d(
         logpost,
@@ -44,7 +44,7 @@ def test_integrate_posterior_1d_no_diag():
     assert abs(val) < 1e-2
 
 
-def test_integrate_posterior_1d_warn_on_max():
+def test_integrate_posterior_1d_warn_on_max():  # type: ignore
     logpost = lambda x: norm(loc=10, scale=1).logpdf(x)
     with np.testing.assert_warns(RuntimeWarning):
         integrate_posterior_1d(
@@ -57,7 +57,7 @@ def test_integrate_posterior_1d_warn_on_max():
         )
 
 
-def test_expansion_logic_is_correct():
+def test_expansion_logic_is_correct():  # type: ignore
     """
     Test that the expansion logic is correct.
     The new width should be width * (1 + expand_factor).

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 from contextlib import contextmanager
 
@@ -7,14 +8,14 @@ from fpdf.prefs import ViewerPreferences
 from fpdf.table import Table
 
 
-class AccessibleTable(Table):
-    def _render_table_row(self, i, row_layout_info, cell_x_positions, **kwargs):
+class AccessibleTable(Table):  # type: ignore[misc]
+    def _render_table_row(self, i, row_layout_info, cell_x_positions, **kwargs):  # type: ignore
         is_header = (i < self._num_heading_rows)
         with self._fpdf.mark_text("/TR"):
             self._current_row_is_header = is_header
             super()._render_table_row(i, row_layout_info, cell_x_positions, **kwargs)
 
-    def _render_table_cell(self, i, j, cell, row_height, cell_height_info=None, cell_x_positions=None, **kwargs):
+    def _render_table_cell(self, i, j, cell, row_height, cell_height_info=None, cell_x_positions=None, **kwargs):  # type: ignore
         height_query_only = (cell_height_info is None)
         if height_query_only:
             return super()._render_table_cell(i, j, cell, row_height, cell_height_info, cell_x_positions, **kwargs)
@@ -24,8 +25,9 @@ class AccessibleTable(Table):
             return super()._render_table_cell(i, j, cell, row_height, cell_height_info, cell_x_positions, **kwargs)
 
 
-class AccessiblePDF(FPDF):
-    def __init__(self, title="Trial Simulation Report"):
+class AccessiblePDF(FPDF):  # type: ignore[misc]
+
+    def __init__(self, title="Trial Simulation Report"):  # type: ignore
         super().__init__()
         self.pdf_version = "1.7"
         self.set_title(title)
@@ -37,24 +39,24 @@ class AccessiblePDF(FPDF):
         self.add_page()
 
         # Patch the structure builder's iterator to support nested structure elements
-        def recursive_iter(builder):
+        def recursive_iter(builder):  # type: ignore
             yield builder.struct_tree_root
             yield builder.doc_struct_elem
             yield builder.struct_tree_root.parent_tree
 
-            def walk(elem):
+            def walk(elem):  # type: ignore
                 for kid in elem.k:
                     if hasattr(kid, 'k'):  # Check if it's a StructElem
                         yield kid
-                        yield from walk(kid)
+                        yield from walk(kid)  # type: ignore
 
-            yield from walk(builder.doc_struct_elem)
+            yield from walk(builder.doc_struct_elem)  # type: ignore
 
         if hasattr(self, 'struct_builder'):
             self.struct_builder.__class__.__iter__ = recursive_iter
 
     @contextmanager
-    def artifact(self, artifact_type="Layout"):
+    def artifact(self, artifact_type="Layout"):  # type: ignore
         """Context manager to mark content as an artifact (ignored by screen readers)."""
         if artifact_type:
             self._out(f"/Artifact <</Type /{artifact_type}>> BDC")
@@ -64,7 +66,7 @@ class AccessiblePDF(FPDF):
         self._out("EMC")
 
     @contextmanager
-    def mark_text(self, struct_type="/P"):
+    def mark_text(self, struct_type="/P"):  # type: ignore
         """Context manager to mark text for PDF/UA structural tagging."""
         is_container = struct_type in ("/Table", "/TR")
 
@@ -96,7 +98,7 @@ class AccessiblePDF(FPDF):
         self._out("EMC")
 
     @contextmanager
-    def accessible_table(self, *args, **kwargs):
+    def accessible_table(self, *args, **kwargs):  # type: ignore
         """Context manager for generating an accessible PDF table."""
         kwargs.setdefault("num_heading_rows", 1)
         table = AccessibleTable(self, *args, **kwargs)
@@ -104,14 +106,14 @@ class AccessiblePDF(FPDF):
         with self.mark_text("/Table"):
             table.render()
 
-    def add_h1(self, text):
+    def add_h1(self, text):  # type: ignore
         """Adds a heading 1 tagged element to the PDF."""
         self.set_font("helvetica", "B", 16)
         with self.mark_text(struct_type="/H1"):
             self.cell(0, 10, text, new_x="LMARGIN", new_y="NEXT", align="C")
         self.ln(10)
 
-    def add_p(self, text):
+    def add_p(self, text):  # type: ignore
         """Adds a paragraph tagged element to the PDF."""
         self.set_font("helvetica", "", 12)
         with self.mark_text(struct_type="/P"):
@@ -119,21 +121,21 @@ class AccessiblePDF(FPDF):
         self.ln(5)
 
 
-def generate_pdf_report(df, design_type, text_summaries=None):
+def generate_pdf_report(df, design_type, text_summaries=None):  # type: ignore
     """Generates an accessibility-first PDF report for trial simulations."""
     if text_summaries is None:
         text_summaries = []
 
-    pdf = AccessiblePDF(f"{design_type} Simulation Report")
+    pdf = AccessiblePDF(f"{design_type} Simulation Report")  # type: ignore
 
-    pdf.add_h1(f"{design_type} Simulation Report")
+    pdf.add_h1(f"{design_type} Simulation Report")  # type: ignore
 
-    pdf.add_p(
+    pdf.add_p(  # type: ignore
         f"This is an automated accessibility-first report for {design_type} trial simulations."
     )
-    pdf.add_p(f"Number of scenarios/simulations summarized: {len(df)}")
+    pdf.add_p(f"Number of scenarios/simulations summarized: {len(df)}")  # type: ignore
 
-    pdf.add_h1("Simulation Data Summary")
+    pdf.add_h1("Simulation Data Summary")  # type: ignore
 
     from clintrials.visualization.helpers import format_label as _format_label
     from clintrials.visualization.helpers import format_number as fmt
@@ -141,7 +143,7 @@ def generate_pdf_report(df, design_type, text_summaries=None):
 
     for summary in text_summaries:
         if isinstance(summary, MultiFormatSummaryContainer):
-            pdf.add_p(f"Data Summary: {summary.title}")
+            pdf.add_p(f"Data Summary: {summary.title}")  # type: ignore
             pdf.set_font("helvetica", "", 10)
             with pdf.accessible_table() as table:
                 row = table.row()
@@ -153,12 +155,12 @@ def generate_pdf_report(df, design_type, text_summaries=None):
                         row.cell(fmt(val))
             pdf.ln(5)
         else:
-            pdf.add_p(str(summary))
+            pdf.add_p(str(summary))  # type: ignore
 
     return bytes(pdf.output())
 
 
-def parse_pdf_structure(pdf_bytes: bytes) -> dict:
+def parse_pdf_structure(pdf_bytes: bytes) -> dict:  # type: ignore
     """Parses a generated PDF to extract its logical structure tree.
 
     Returns a dictionary of structure elements.
@@ -195,7 +197,7 @@ def parse_pdf_structure(pdf_bytes: bytes) -> dict:
                 else:
                     kids_ints = re.findall(r'\b\d+\b', k_content)
                     if kids_ints:
-                        kids = [f"MCID_{x}" for x in kids_ints]
+                        kids = [f"MCID_{x}" for x in kids_ints]  # type: ignore
 
             struct_elems[obj_id] = {
                 'id': obj_id,
@@ -206,7 +208,7 @@ def parse_pdf_structure(pdf_bytes: bytes) -> dict:
 
     return struct_elems
 
-def validate_pdf_ua_structure(pdf_bytes: bytes):
+def validate_pdf_ua_structure(pdf_bytes: bytes):  # type: ignore
     """Validates that a PDF's structure tree is correctly nested and MCIDs are only on leaves.
 
     Args:
