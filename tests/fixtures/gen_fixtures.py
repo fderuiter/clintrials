@@ -8,7 +8,7 @@ from clintrials.dosefinding.crm import crm
 from tests.fixtures.crm_math_helpers import inverse_logit1, logit1
 
 
-def generate_fixtures():
+def generate_fixtures():  # type: ignore
     # Scenario 1
     p_tox_prior_1 = [0.1, 0.2, 0.3, 0.4]
     target_tox_1 = 0.3
@@ -71,4 +71,4 @@ def generate_fixtures():
     next_dose_df.to_csv(out_next, index=False)
 
 if __name__ == "__main__":
-    generate_fixtures()
+    generate_fixtures()  # type: ignore

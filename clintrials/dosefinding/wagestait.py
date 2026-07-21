@@ -43,7 +43,7 @@ def _wt_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0
     l = 1
     for dose, tox, eff in cases:
         p = F(skeleton[dose - 1], a0=a0, beta=theta)
-        l = l * bernoulli_likelihood(p, eff, log=False)
+        l = l * bernoulli_likelihood(p, eff, log=False)  # type: ignore
     return l
 
 
@@ -64,7 +64,7 @@ def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any
     ll = 0
     for dose, tox, eff in cases:
         p = F(skeleton[dose - 1], a0=a0, beta=theta)
-        ll += bernoulli_likelihood(p, eff, log=True)
+        ll += bernoulli_likelihood(p, eff, log=True)  # type: ignore
     return ll
 
 
@@ -95,13 +95,13 @@ def _wt_get_theta_hat(cases: Any, skeletons: Any, theta_prior: Any, F: Any = emp
             ll = _wt_log_lik(cases, skeleton, t, F)
             return ll + np.log(theta_prior.pdf(t) + 1e-300)
 
-        theta_hat, diag = integrate_posterior_1d(  # type: ignore
+        theta_hat, diag = integrate_posterior_1d(
             logpost, lambda t: t, _min_theta, _max_theta, return_diagnostics=True
         )
         marginal_likelihood = diag["log_marginal"]
 
         if estimate_var:
-            exp_x2 = integrate_posterior_1d(  # type: ignore
+            exp_x2 = integrate_posterior_1d(
                 logpost, lambda t: t**2, _min_theta, _max_theta
             )
             var = exp_x2 - theta_hat**2
@@ -134,7 +134,7 @@ def _get_post_eff_bayes(cases: Any, skeleton: Any, dose_labels: Any, theta_prior
     post_eff = []
     intercept = 0
     for x in dose_labels:
-        prob = integrate_posterior_1d(  # type: ignore
+        prob = integrate_posterior_1d(
             logpost, lambda t: F(x, a0=intercept, beta=t), _min_theta, _max_theta
         )
         post_eff.append(prob)
@@ -214,7 +214,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.use_quick_integration = use_quick_integration
         self.estimate_var = estimate_var
 
-        self.most_likely_model_index = self.rng.choice(  # type: ignore
+        self.most_likely_model_index = self.rng.choice(
             np.array(range(self.K))[  # type: ignore
                 self.model_prior_weights == max(self.model_prior_weights)
             ],

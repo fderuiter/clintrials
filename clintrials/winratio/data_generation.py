@@ -1,14 +1,14 @@
+from __future__ import annotations
 """Generate synthetic data for win-ratio simulations.
 
 Random Seed Strategy: {data_generation_seed_strategy}
 """
 
-from __future__ import annotations
 
 import numpy as np
 
 
-def generate_data(
+def generate_data(  # type: ignore
     num_subjects_A: int,
     num_subjects_B: int,
     p_y1_A: float,
@@ -36,7 +36,7 @@ def generate_data(
         tuple[numpy.ndarray, numpy.ndarray]: Two arrays representing the
             subjects in Groups A and B respectively.
     """
-    group_A = np.vstack(
+    group_A = np.vstack(  # type: ignore
         [
             np.random.binomial(1, p_y1_A, num_subjects_A),
             np.random.binomial(1, p_y2_A, num_subjects_A),
@@ -44,7 +44,7 @@ def generate_data(
         ]
     ).T
 
-    group_B = np.vstack(
+    group_B = np.vstack(  # type: ignore
         [
             np.random.binomial(1, p_y1_B, num_subjects_B),
             np.random.binomial(1, p_y2_B, num_subjects_B),

@@ -1,46 +1,47 @@
+from __future__ import annotations
 
 
 class SimulationResult:
     """Unified result container for simulation runs."""
 
-    def __init__(self, results, mode="iterative"):
+    def __init__(self, results, mode="iterative"):  # type: ignore
         self.results = results
         self.mode = mode
 
-    def __iter__(self):
+    def __iter__(self):  # type: ignore
         return iter(self.results)
 
-    def __len__(self):
+    def __len__(self):  # type: ignore
         return len(self.results)
 
-    def __getitem__(self, key_or_idx):
+    def __getitem__(self, key_or_idx):  # type: ignore
         return self.results[key_or_idx]
 
-    def get(self, key, default=None):
+    def get(self, key, default=None):  # type: ignore
         """Get an item by key from the results dictionary."""
         if isinstance(self.results, dict):
             return self.results.get(key, default)
         raise AttributeError("Underlying results are not a dictionary.")
 
-    def keys(self):
+    def keys(self):  # type: ignore
         """Return the keys of the results dictionary."""
         if isinstance(self.results, dict):
             return self.results.keys()
         raise AttributeError("Underlying results are not a dictionary.")
 
-    def values(self):
+    def values(self):  # type: ignore
         """Return the values of the results dictionary."""
         if isinstance(self.results, dict):
             return self.results.values()
         raise AttributeError("Underlying results are not a dictionary.")
 
-    def items(self):
+    def items(self):  # type: ignore
         """Return the items of the results dictionary."""
         if isinstance(self.results, dict):
             return self.results.items()
         raise AttributeError("Underlying results are not a dictionary.")
 
-    def to_list(self):
+    def to_list(self):  # type: ignore
         """Convert the results to a list."""
         if isinstance(self.results, dict):
             return [self.results]

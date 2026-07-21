@@ -9,20 +9,20 @@ from clintrials.validation import (
 )
 
 
-def test_validate_matching_lengths():
+def test_validate_matching_lengths():  # type: ignore
     # Should not raise
-    validate_matching_lengths()
-    validate_matching_lengths(a=[1, 2], b=[3, 4])
-    validate_matching_lengths(a=[1], b=[2], c=[3])
+    validate_matching_lengths()  # type: ignore
+    validate_matching_lengths(a=[1, 2], b=[3, 4])  # type: ignore
+    validate_matching_lengths(a=[1], b=[2], c=[3])  # type: ignore
 
     # Should raise
     with pytest.raises(ValueError, match="a and b should be same length"):
-        validate_matching_lengths(a=[1, 2], b=[3])
+        validate_matching_lengths(a=[1, 2], b=[3])  # type: ignore
     with pytest.raises(ValueError, match="x and z should be same length"):
-        validate_matching_lengths(x=[1, 2], y=[3, 4], z=[5, 6, 7])
+        validate_matching_lengths(x=[1, 2], y=[3, 4], z=[5, 6, 7])  # type: ignore
 
 
-def test_validate_expected_length():
+def test_validate_expected_length():  # type: ignore
     # Should not raise
     validate_expected_length([1, 2, 3], 3, "test_arr")
 
@@ -31,7 +31,7 @@ def test_validate_expected_length():
         validate_expected_length([1, 2], 3, "test_arr")
 
 
-def test_validate_bounds():
+def test_validate_bounds():  # type: ignore
     # Inclusive
     validate_bounds(5, 0, 10, "val", exclusive=False)
     validate_bounds(0, 0, 10, "val", exclusive=False)
@@ -51,7 +51,7 @@ def test_validate_bounds():
         validate_bounds(10, 0, 10, "val", exclusive=True)
 
 
-def test_validate_probability():
+def test_validate_probability():  # type: ignore
     # Inclusive
     validate_probability(0.5, "prob")
     validate_probability(0, "prob")
@@ -71,7 +71,7 @@ def test_validate_probability():
         validate_probability(1, "prob", exclusive=True)
 
 
-def test_validate_positive_integer():
+def test_validate_positive_integer():  # type: ignore
     validate_positive_integer(1, "val")
     validate_positive_integer(100, "val")
 

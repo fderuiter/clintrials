@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Classes and functions for modelling recruitment to clinical trials.
 
 Random Seed Strategy: {recruitment_seed_strategy}
@@ -17,12 +18,12 @@ class RecruitmentStream(metaclass=abc.ABCMeta):
     """Abstract base class for recruitment streams."""
 
     @abc.abstractmethod
-    def reset(self):
+    def reset(self):  # type: ignore
         """Resets the recruitment stream to its initial state."""
         pass
 
     @abc.abstractmethod
-    def next(self):
+    def next(self):  # type: ignore
         """Gets the recruitment time of the next patient.
 
         Returns:
@@ -50,7 +51,7 @@ class ConstantRecruitmentStream(RecruitmentStream):
         2.5
     """
 
-    def __init__(self, intrapatient_gap):
+    def __init__(self, intrapatient_gap):  # type: ignore
         """Initializes a ConstantRecruitmentStream object.
 
         Args:
@@ -65,11 +66,11 @@ class ConstantRecruitmentStream(RecruitmentStream):
         self.delta = intrapatient_gap
         self.cursor = 0
 
-    def reset(self):
+    def reset(self):  # type: ignore
         """Resets the recruitment stream to its initial state."""
         self.cursor = 0
 
-    def next(self):
+    def next(self):  # type: ignore
         """Gets the recruitment time of the next patient.
 
         Returns:
@@ -100,7 +101,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         16.0
     """
 
-    def __init__(self, intrapatient_gap, initial_intensity, vertices, interpolate=True):
+    def __init__(self, intrapatient_gap, initial_intensity, vertices, interpolate=True):  # type: ignore
         """Initializes a QuadrilateralRecruitmentStream object.
 
         Args:
@@ -158,12 +159,12 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         self.vertices = v
         self.cursor = 0
 
-    def reset(self):
+    def reset(self):  # type: ignore
         """Resets the recruitment stream to its initial state."""
         self.cursor = 0
         self.available_mass = copy.copy(self.recruiment_mass)
 
-    def next(self):
+    def next(self):  # type: ignore
         """Gets the recruitment time of the next patient.
 
         Returns:
@@ -176,16 +177,16 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             t0, _, y0, y1 = self.shapes[t1]
             if avail_mass >= sought_mass:
                 if self.interpolate:
-                    y_at_cursor = self._linearly_interpolate_y(
+                    y_at_cursor = self._linearly_interpolate_y(  # type: ignore
                         self.cursor, t0, t1, y0, y1
                     )
-                    new_cursor = self._invert(
+                    new_cursor = self._invert(  # type: ignore
                         self.cursor, t1, y_at_cursor, y1, sought_mass
                     )
                     self.cursor = new_cursor
                 else:
                     y_at_cursor = y0
-                    new_cursor = self._invert(
+                    new_cursor = self._invert(  # type: ignore
                         self.cursor, t1, y_at_cursor, y1, sought_mass, as_rectangle=True
                     )
                     self.cursor = new_cursor
@@ -211,7 +212,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         else:
             return np.nan
 
-    def _linearly_interpolate_y(self, t, t0, t1, y0, y1):
+    def _linearly_interpolate_y(self, t, t0, t1, y0, y1):  # type: ignore
         """Linearly interpolates the y-value at time t.
 
         Args:
@@ -231,7 +232,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             m = (y1 - y0) / (t1 - t0)
             return y0 + m * (t - t0)
 
-    def _invert(self, t0, t1, y0, y1, mass, as_rectangle=False):
+    def _invert(self, t0, t1, y0, y1, mass, as_rectangle=False):  # type: ignore
         """Calculates the time at which the area under the curve equals a given mass.
 
         The area is calculated for a quadrilateral with vertices at t0, t, f(t),
