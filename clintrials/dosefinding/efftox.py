@@ -1080,6 +1080,9 @@ __all__ = [
     "solve_metrizable_efftox_scenario",
     "efftox_priors_from_skeleton",
     "validate_efftox_priors",
+    "efftox_get_posterior_params",
+    "efftox_get_posterior_probs",
+    "scale_doses",
 ]
 
 
