@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 
-from clintrials.core.math import inverse_logit1, logit1
 from clintrials.dosefinding.crm import crm
+from tests.fixtures.crm_math_helpers import inverse_logit1, logit1
 
 
 def test_CRM_with_generated_fixtures():
