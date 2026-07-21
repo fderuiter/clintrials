@@ -33,15 +33,12 @@ import abc
 import copy
 import logging
 from collections import OrderedDict
-from itertools import product
 
 from scipy.stats import uniform
 
 from clintrials.utils import (
     atomic_to_json,
-    filter_list_of_dicts,
     iterable_to_json,
-    to_1d_list,
 )
 
 logger = logging.getLogger(__name__)
