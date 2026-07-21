@@ -16,3 +16,5 @@ coverage.txt
 # Vendor dependencies
 hub/vendor/
 docs/_static/vendor/
+
+docs/reference/generated/

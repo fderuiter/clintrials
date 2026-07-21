@@ -64,14 +64,20 @@ if os.environ.get("SPHINX_STRICT", "0") == "1":
         ("py:class", "scipy.stats.norm"),
         ("py:class", "scipy.stats.rv_continuous"),
         ("py:class", "_ParameterSpaceIter"),
+        ("py:class", "NDArray"),
+        ("py:class", "numpy.int64"),
+        ("py:class", "callable"),
+        ("py:class", "iterator"),
     ]
 
     nitpick_ignore_regex = [
         ("py:obj", r"typing\.Annotated\[.*\]"),
+        ("py:obj", r"typing\.Annotated\[.*\] \| None"),
         ("py:obj", r"typing\.List\[~?typing\.Annotated\[.*\]\]"),
         ("py:obj", r"typing\.Optional\[typing\.List\[~?typing\.Annotated\[.*\]\]\]"),
         ("py:obj", r"typing\.List\[~?typing\.Annotated\[.*\]\] \| None"),
         ("py:obj", r"clintrials\.utils\.deprecated"),
+        ("py:class", r"numpy\..*"),
     ]
 
 def setup(app):  # type: ignore
