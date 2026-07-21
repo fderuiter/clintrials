@@ -1,10 +1,35 @@
 
 
 
-def _build_registry():
-    registry = {}
+class ScopedUIRegistry(dict):
+    def __init__(self):
+        super().__init__()
+        self._namespaces = {}
 
-    def extract_from_docstring(doc, aliases=None):
+    def set_help(self, namespace, var_name, desc):
+        if namespace not in self._namespaces:
+            self._namespaces[namespace] = {}
+        self._namespaces[namespace][var_name] = desc
+        # Fallback flat dict for backward compatibility
+        self[var_name] = desc
+
+    def get_help(self, var_name, design_type=None):
+        if design_type and design_type in self._namespaces:
+            if var_name in self._namespaces[design_type]:
+                return self._namespaces[design_type][var_name]
+
+        # Fallback to global namespace
+        if "global" in self._namespaces and var_name in self._namespaces["global"]:
+            return self._namespaces["global"][var_name]
+
+        # Fallback to flat dictionary
+        return self.get(var_name)
+
+
+def _build_registry():
+    registry = ScopedUIRegistry()
+
+    def extract_from_docstring(doc, namespace="global", aliases=None):
         if not doc:
             return
         lines = doc.split("\n")
@@ -26,16 +51,16 @@ def _build_registry():
                     ):
                         desc += " " + next_line
 
-                registry[var_name] = desc
+                registry.set_help(namespace, var_name, desc)
                 if aliases and var_name in aliases:
                     for alias in aliases[var_name]:
-                        registry[alias] = desc
+                        registry.set_help(namespace, alias, desc)
 
     # Extract from Win Ratio core logic
     try:
         from clintrials.winratio.main import run_simulation
 
-        extract_from_docstring(run_simulation.__doc__)
+        extract_from_docstring(run_simulation.__doc__, namespace="Win Ratio")
     except ImportError:
         pass
 
@@ -44,9 +69,10 @@ def _build_registry():
         from clintrials.dosefinding import simulate_dose_finding_trial
         from clintrials.dosefinding.crm import CRM
 
-        extract_from_docstring(CRM.__init__.__doc__)
+        extract_from_docstring(CRM.__init__.__doc__, namespace="CRM")
         extract_from_docstring(
             simulate_dose_finding_trial.__doc__,
+            namespace="CRM",
             aliases={"true_toxicities": ["true_tox"]},
         )
     except ImportError:
@@ -57,9 +83,10 @@ def _build_registry():
         from clintrials.dosefinding.efficacytoxicity import simulate_trial
         from clintrials.dosefinding.efftox import EffTox
 
-        extract_from_docstring(EffTox.__init__.__doc__)
+        extract_from_docstring(EffTox.__init__.__doc__, namespace="EffTox")
         extract_from_docstring(
             simulate_trial.__doc__,
+            namespace="EffTox",
             aliases={
                 "true_toxicities": ["true_prob_tox"],
                 "true_efficacies": ["true_prob_eff"],
@@ -72,16 +99,14 @@ def _build_registry():
     try:
         from clintrials.dosefinding.watu import WATU
 
-        extract_from_docstring(WATU.__init__.__doc__)
+        extract_from_docstring(WATU.__init__.__doc__, namespace="WATU")
     except ImportError:
         pass
 
     # Main dashboard variables (fallback if not in docstrings)
-    registry["design_type"] = "Select the type of trial design."
-    registry["uploaded_file"] = "Upload a JSON file with simulation results."
-    registry["run_simulation_button"] = (
-        "Run a Monte Carlo simulation to estimate win-ratio power."
-    )
+    registry.set_help("global", "design_type", "Select the type of trial design.")
+    registry.set_help("global", "uploaded_file", "Upload a JSON file with simulation results.")
+    registry.set_help("global", "run_simulation_button", "Run a Monte Carlo simulation to estimate win-ratio power.")
 
     return registry
 
@@ -93,8 +118,13 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):
     """Factory function to create a Streamlit widget with an automatically
     applied help text based on the variable name.
     """
-    if var_name in UI_REGISTRY:
-        kwargs["help"] = UI_REGISTRY[var_name]
+    design_type = kwargs.pop("design_type", None)
+    if not design_type and hasattr(st_module, "session_state"):
+        design_type = st_module.session_state.get("design_type")
+
+    help_text = UI_REGISTRY.get_help(var_name, design_type)
+    if help_text:
+        kwargs["help"] = help_text
 
     if widget_type == "selectbox":
         return st_module.sidebar.selectbox(*args, **kwargs)

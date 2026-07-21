@@ -65,7 +65,10 @@ CORE_REGISTRY: Dict[str, Any] = {
 }
 
 import importlib
+import logging
 import pkgutil
+
+logger = logging.getLogger(__name__)
 
 
 class ProtocolRegistry:
@@ -100,7 +103,9 @@ class ProtocolRegistry:
             callable: A decorator function for registering the render method.
         """
         def decorator(render_func):
-            if name not in self._designs:
+            if name in self._designs:
+                logger.warning(f"Duplicate registration encountered for design name: {name}")
+            else:
                 self._designs[name] = {}
             self._designs[name]["render"] = render_func
             if preview_func:
@@ -120,6 +125,8 @@ class ProtocolRegistry:
         Returns:
             None
         """
+        if name in self._designs:
+            logger.warning(f"Duplicate manual registration encountered for design name: {name}")
         self._designs[name] = {"render": render_func, "preview": preview_func}
 
     def get_designs(self):
