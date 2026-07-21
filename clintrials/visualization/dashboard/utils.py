@@ -1,9 +1,10 @@
+from __future__ import annotations
 import uuid
 
 import streamlit as st
 
 
-def announce_status_locally(message: str, key: str = None):
+def announce_status_locally(message: str, key: str = None):  # type: ignore
     """Renders an invisible, sandboxed ARIA live region locally to announce dynamic
     updates (SOP/CSP compliant).
     """

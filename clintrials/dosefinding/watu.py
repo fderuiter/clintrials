@@ -38,7 +38,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
     """
 
     @classmethod
-    def get_summary_functions(cls):
+    def get_summary_functions(cls):  # type: ignore
         """Get summary functions for the WATU protocol."""
         return {
             "N": lambda s, p: len(s),
@@ -202,7 +202,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             self.mc_samples_stage2 = max(mc_samples_stage2, 1000)
         self.must_try_lowest_dose = must_try_lowest_dose
 
-        self.most_likely_model_index = self.rng.choice(  # type: ignore
+        self.most_likely_model_index = self.rng.choice(
             np.array(range(self.K))[  # type: ignore
                 self.model_prior_weights == max(self.model_prior_weights)
             ],

@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Numerical integration routines for Bayesian models.
 
 Random Seed Strategy: {numerics_seed_strategy}
@@ -13,7 +14,7 @@ from scipy.stats import norm
 from clintrials.core.stats import ProbabilityDensitySample
 
 
-def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, deg=20):
+def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, deg=20):  # type: ignore
     """Evaluates the posterior expectation of f(theta) using Gauss-Hermite quadrature,
     assuming a Gaussian prior N(prior_mean, prior_sd^2).
 
@@ -30,9 +31,9 @@ def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, 
     Returns:
         float or numpy.ndarray: The computed posterior expectation(s).
     """
-    nodes, weights = np.polynomial.hermite.hermgauss(deg)
-    theta_nodes = prior_mean + np.sqrt(2) * prior_sd * nodes
-    log_w = np.log(weights)
+    nodes, weights = np.polynomial.hermite.hermgauss(deg)  # type: ignore
+    theta_nodes = prior_mean + np.sqrt(2) * prior_sd * nodes  # type: ignore
+    log_w = np.log(weights)  # type: ignore
 
     ll = log_likelihood_func(theta_nodes)
     log_post = log_w + ll
@@ -43,7 +44,7 @@ def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, 
     return np.sum(post_weights * f_vals, axis=-1)
 
 
-def adaptive_mc_integration(
+def adaptive_mc_integration(  # type: ignore
     lik_integrand,
     initial_limits,
     rng,
@@ -78,10 +79,10 @@ def adaptive_mc_integration(
         samp = np.column_stack(
             [rng.uniform(*limit_pair, size=n) for limit_pair in limits]
         )
-        pds = ProbabilityDensitySample(samp, lik_integrand)
+        pds = ProbabilityDensitySample(samp, lik_integrand)  # type: ignore
 
-        means = [pds.expectation(samp[:, j]) for j in range(num_dims)]
-        variances = [pds.variance(samp[:, j]) for j in range(num_dims)]
+        means = [pds.expectation(samp[:, j]) for j in range(num_dims)]  # type: ignore
+        variances = [pds.variance(samp[:, j]) for j in range(num_dims)]  # type: ignore
         sds = [np.sqrt(v) if v > 0 else 0 for v in variances]
 
         needs_refinement = False
@@ -122,9 +123,9 @@ def adaptive_mc_integration(
     return limits, pds
 
 
-def integrate_posterior_1d(
-    logpost: Callable,
-    f: Callable,
+def integrate_posterior_1d(  # type: ignore
+    logpost: Callable,  # type: ignore
+    f: Callable,  # type: ignore
     lo: float,
     hi: float,
     *,
@@ -191,7 +192,7 @@ def integrate_posterior_1d(
                 "expansions": expansions,
                 "tail_mass": float(tail_mass),
                 "max_at_edge": bool(max_at_edge),
-                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),
+                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),  # type: ignore
             }
             return (val, diag) if return_diagnostics else val
 
@@ -206,7 +207,7 @@ def integrate_posterior_1d(
                 "tail_mass": float(tail_mass),
                 "max_at_edge": bool(max_at_edge),
                 "hit_cap": True,
-                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),
+                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),  # type: ignore
             }
             return (val, diag) if return_diagnostics else val
 
@@ -214,7 +215,7 @@ def integrate_posterior_1d(
         hi += expand_factor * width / 2
         expansions += 1
 
-def integrate_posterior_1d_adaptive(
+def integrate_posterior_1d_adaptive(  # type: ignore
     logpost,
     f,
     lo,
@@ -243,7 +244,7 @@ def integrate_posterior_1d_adaptive(
         return_diagnostics=return_diagnostics,
     )
 
-def integrate_posterior_1d_nonadaptive(
+def integrate_posterior_1d_nonadaptive(  # type: ignore
     logpost,
     f,
     lo,

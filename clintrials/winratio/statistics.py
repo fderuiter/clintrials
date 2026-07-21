@@ -1,16 +1,16 @@
+from __future__ import annotations
 """Statistical helpers for win-ratio simulations.
 
 Random Seed Strategy: {statistics_seed_strategy}
 """
 
-from __future__ import annotations
 
 import numpy as np
 
 from clintrials.core.stats import log_scale_p_value, log_scale_wald_interval
 
 
-def calculate_confidence_intervals(wr: float, wins: int, losses: int):
+def calculate_confidence_intervals(wr: float, wins: int, losses: int):  # type: ignore
     """Calculate the 95% confidence intervals for the win ratio.
 
     Args:

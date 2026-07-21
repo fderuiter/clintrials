@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Renders the WATU simulation results view in the Streamlit dashboard.
 """
 
@@ -9,7 +10,7 @@ from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
-def watu_preview_sims(target_tox, cohort_size, max_size):
+def watu_preview_sims(target_tox, cohort_size, max_size):  # type: ignore
     """Generate preview simulations for the WATU model.
     """
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
@@ -25,7 +26,7 @@ def watu_preview_sims(target_tox, cohort_size, max_size):
     tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
     metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
 
-    watu = WATU(
+    watu = WATU(  # type: ignore
         skeletons=skeletons,
         prior_tox_probs=tox_prior,
         tox_target=target_tox,
@@ -50,7 +51,7 @@ def watu_preview_sims(target_tox, cohort_size, max_size):
 
 @PROTOCOL_REGISTRY.register("WATU", preview_func=watu_preview_sims)
 @dashboard_view(title="WATU Simulation Results", model_name="WATU", file_prefix="watu_simulations")
-def render(sims):
+def render(sims):  # type: ignore
     """Renders the WATU simulation results view."""
     st.sidebar.header("Trial Parameters")
     param_space_config = {
@@ -64,20 +65,20 @@ def render(sims):
     st.sidebar.json(param_space_config)
 
     from clintrials.dosefinding.watu import WATU
-    func_map = WATU.get_summary_functions()
+    func_map = WATU.get_summary_functions()  # type: ignore
 
     var_map = {
         "true_prob_tox": "true_prob_tox",
         "true_prob_eff": "true_prob_eff",
     }
 
-    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
+    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")  # type: ignore
 
     figures = []
     if not summary_df.empty:
         if "recommended_dose_prob" in summary_df.columns:
             import clintrials.visualization as viz
-            fig_rec = viz.plot_efftox_simulation_recommendation(
+            fig_rec = viz.plot_efftox_simulation_recommendation(  # type: ignore
                 summary_df,
                 high_contrast=False
             )

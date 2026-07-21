@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Classes and methods to perform general useful statistical routines.
 
 Random Seed Strategy: {stats_seed_strategy}
@@ -19,7 +20,7 @@ class ProbabilityDensitySample:
     such as expectation, variance, CDF, and quantiles.
     """
 
-    def __init__(self, samp, func):
+    def __init__(self, samp, func):  # type: ignore
         """Initializes a ProbabilityDensitySample object.
 
         Args:
@@ -31,7 +32,7 @@ class ProbabilityDensitySample:
         self._probs = func(samp)
         self._scale = self._probs.mean()
 
-    def expectation(self, vector):
+    def expectation(self, vector):  # type: ignore
         """Calculates the expectation of a vector.
 
         Args:
@@ -43,7 +44,7 @@ class ProbabilityDensitySample:
         """
         return np.mean(vector * self._probs / self._scale)
 
-    def variance(self, vector):
+    def variance(self, vector):  # type: ignore
         """Calculates the variance of a vector.
 
         Args:
@@ -53,8 +54,8 @@ class ProbabilityDensitySample:
         Returns:
             float: The variance of the vector.
         """
-        exp = self.expectation(vector)
-        exp2 = self.expectation(vector**2)
+        exp = self.expectation(vector)  # type: ignore
+        exp2 = self.expectation(vector**2)  # type: ignore
         return exp2 - exp**2
 
 

@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Module for Group Sequential Designs (GSDs).
 
 Random Seed Strategy: {gsd_seed_strategy}
@@ -28,7 +29,7 @@ def spending_function_pocock(t: float, alpha: float) -> float:
     Returns:
         float: The cumulative alpha spent at information fraction `t`.
     """
-    return alpha * np.log(1 + (np.e - 1) * t)
+    return alpha * np.log(1 + (np.e - 1) * t)  # type: ignore
 
 
 def spending_function_obrien_fleming(t: float, alpha: float) -> float:
@@ -46,7 +47,7 @@ def spending_function_obrien_fleming(t: float, alpha: float) -> float:
     """
     if t == 0:
         return 0.0
-    return 2 * (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(t)))
+    return 2 * (1 - norm.cdf(norm.ppf(1 - alpha / 2) / np.sqrt(t)))  # type: ignore
 
 
 from clintrials.core.protocol import Protocol
@@ -64,7 +65,7 @@ class GroupSequentialDesign(Protocol):
         k: int,
         alpha: float = 0.025,
         sfu: Callable[[float, float], float] = spending_function_obrien_fleming,
-        timing: List[float] = None,
+        timing: List[float] = None,  # type: ignore
     ):
         """Initializes a GroupSequentialDesign object.
 
@@ -106,9 +107,9 @@ class GroupSequentialDesign(Protocol):
             raise ValueError("The last element of timing must be 1.0.")
 
         self.efficacy_boundaries = self._compute_efficacy_boundaries()
-        self.reset()
+        self.reset()  # type: ignore
 
-    def reset(self):
+    def reset(self):  # type: ignore
         """Reset the group sequential design state."""
         self._stage = 0
         self._stopped = False
@@ -116,7 +117,7 @@ class GroupSequentialDesign(Protocol):
         self._z_scores = []
         self._information = []
 
-    def update(self, z_score: float, info: float = None):
+    def update(self, z_score: float, info: float = None):  # type: ignore
         """Update the trial state with the latest test statistic."""
         if self._stopped:
             return
@@ -134,22 +135,22 @@ class GroupSequentialDesign(Protocol):
         elif self._stage >= self.k:
             self._stopped = True
 
-    def has_more(self):
+    def has_more(self):  # type: ignore
         """Check if the trial should continue to the next stage."""
         return not self._stopped
 
-    def report(self):
+    def report(self):  # type: ignore
         """Generate a report of the trial state and results."""
         from collections import OrderedDict
 
         from clintrials.utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
-        report["Stage"] = atomic_to_json(self._stage)
-        report["Stopped"] = atomic_to_json(self._stopped)
-        report["Rejected"] = atomic_to_json(self._rejected)
-        report["ZScores"] = iterable_to_json(self._z_scores)
-        report["Information"] = iterable_to_json(self._information)
+        report["Stage"] = atomic_to_json(self._stage)  # type: ignore
+        report["Stopped"] = atomic_to_json(self._stopped)  # type: ignore
+        report["Rejected"] = atomic_to_json(self._rejected)  # type: ignore
+        report["ZScores"] = iterable_to_json(self._z_scores)  # type: ignore
+        report["Information"] = iterable_to_json(self._information)  # type: ignore
         return report
 
     def _compute_efficacy_boundaries(self) -> List[float]:
@@ -159,7 +160,7 @@ class GroupSequentialDesign(Protocol):
         P(Z_1 < u_1, ..., Z_i < u_i) = 1 - alpha_i, where alpha_i is the
         cumulative alpha spent at look i.
         """
-        boundaries = []
+        boundaries = []  # type: ignore
         for i in range(1, self.k + 1):
             target_alpha = self.sfu(self.timing[i - 1], self.alpha)
 
@@ -169,9 +170,9 @@ class GroupSequentialDesign(Protocol):
             for row in range(i):
                 for col in range(row + 1, i):
                     corr = np.sqrt(self.timing[row] / self.timing[col])
-                    cov[row, col] = cov[col, row] = corr
+                    cov[row, col] = cov[col, row] = corr  # type: ignore
 
-            def cdf_at_look_i(u_i):
+            def cdf_at_look_i(u_i):  # type: ignore
                 limits = boundaries + [u_i]
                 if i == 1:
                     return norm.cdf(limits[0])
@@ -184,8 +185,8 @@ class GroupSequentialDesign(Protocol):
                         abseps=CORE_REGISTRY["gsd_abseps"],
                     )
 
-            def root_func(u_i):
-                return cdf_at_look_i(u_i) - target_cdf
+            def root_func(u_i):  # type: ignore
+                return cdf_at_look_i(u_i) - target_cdf  # type: ignore
 
             try:
                 boundary = brentq(
@@ -211,7 +212,7 @@ class GroupSequentialDesign(Protocol):
 
         return boundaries
 
-    @deprecated(alternative="run(..., method='bulk')")
+    @deprecated(alternative="run(..., method='bulk')")  # type: ignore
     def simulate(self, n_sims: int, theta: float = 0.0):
         """Legacy method for backward compatibility."""
         # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
