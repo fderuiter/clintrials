@@ -1,0 +1,562 @@
+{
+  "clintrials.core": {
+    "Protocol": {
+      "type": "class",
+      "methods": {
+        "__init__": [
+          "self"
+        ],
+        "has_more": [
+          "self"
+        ],
+        "report": [
+          "self"
+        ],
+        "reset": [
+          "self"
+        ],
+        "run": [
+          "self",
+          "n_sims",
+          "method",
+          "seed",
+          "show_progress",
+          "kwargs"
+        ],
+        "set_rng": [
+          "self",
+          "rng"
+        ],
+        "update": [
+          "self",
+          "args",
+          "kwargs"
+        ]
+      }
+    }
+  },
+  "clintrials.dosefinding": {
+    "DoseFindingTrial": {
+      "type": "class",
+      "methods": {
+        "__init__": [
+          "self",
+          "first_dose",
+          "num_doses",
+          "max_size"
+        ],
+        "dose_levels": [
+          "self"
+        ],
+        "doses": [
+          "self"
+        ],
+        "first_dose": [
+          "self"
+        ],
+        "has_more": [
+          "self"
+        ],
+        "max_size": [
+          "self"
+        ],
+        "maximum_dose_given": [
+          "self"
+        ],
+        "minimum_dose_given": [
+          "self"
+        ],
+        "next_dose": [
+          "self"
+        ],
+        "number_of_doses": [
+          "self"
+        ],
+        "observed_toxicity_rates": [
+          "self"
+        ],
+        "optimal_decision": [
+          "self",
+          "prob_tox"
+        ],
+        "plot_outcomes": [
+          "self",
+          "chart_title",
+          "use_ggplot"
+        ],
+        "report": [
+          "self"
+        ],
+        "reset": [
+          "self"
+        ],
+        "run": [
+          "self",
+          "n_sims",
+          "method",
+          "seed",
+          "show_progress",
+          "kwargs"
+        ],
+        "set_next_dose": [
+          "self",
+          "dose"
+        ],
+        "set_rng": [
+          "self",
+          "rng"
+        ],
+        "size": [
+          "self"
+        ],
+        "status": [
+          "self"
+        ],
+        "tabulate": [
+          "self"
+        ],
+        "toxicities": [
+          "self"
+        ],
+        "toxicities_at_dose": [
+          "self",
+          "dose"
+        ],
+        "treated_at_dose": [
+          "self",
+          "dose"
+        ],
+        "update": [
+          "self",
+          "cases",
+          "kwargs"
+        ]
+      }
+    },
+    "SimpleToxicityCountingDoseEscalationTrial": {
+      "type": "class",
+      "methods": {
+        "__init__": [
+          "self",
+          "first_dose",
+          "num_doses",
+          "max_size",
+          "max_toxicities"
+        ],
+        "dose_levels": [
+          "self"
+        ],
+        "doses": [
+          "self"
+        ],
+        "first_dose": [
+          "self"
+        ],
+        "has_more": [
+          "self"
+        ],
+        "max_size": [
+          "self"
+        ],
+        "maximum_dose_given": [
+          "self"
+        ],
+        "minimum_dose_given": [
+          "self"
+        ],
+        "next_dose": [
+          "self"
+        ],
+        "number_of_doses": [
+          "self"
+        ],
+        "observed_toxicity_rates": [
+          "self"
+        ],
+        "optimal_decision": [
+          "self",
+          "prob_tox"
+        ],
+        "plot_outcomes": [
+          "self",
+          "chart_title",
+          "use_ggplot"
+        ],
+        "report": [
+          "self"
+        ],
+        "reset": [
+          "self"
+        ],
+        "run": [
+          "self",
+          "n_sims",
+          "method",
+          "seed",
+          "show_progress",
+          "kwargs"
+        ],
+        "set_next_dose": [
+          "self",
+          "dose"
+        ],
+        "set_rng": [
+          "self",
+          "rng"
+        ],
+        "size": [
+          "self"
+        ],
+        "status": [
+          "self"
+        ],
+        "tabulate": [
+          "self"
+        ],
+        "toxicities": [
+          "self"
+        ],
+        "toxicities_at_dose": [
+          "self",
+          "dose"
+        ],
+        "treated_at_dose": [
+          "self",
+          "dose"
+        ],
+        "update": [
+          "self",
+          "cases",
+          "kwargs"
+        ]
+      }
+    },
+    "ThreePlusThree": {
+      "type": "class",
+      "methods": {
+        "__init__": [
+          "self",
+          "num_doses"
+        ],
+        "dose_levels": [
+          "self"
+        ],
+        "doses": [
+          "self"
+        ],
+        "first_dose": [
+          "self"
+        ],
+        "has_more": [
+          "self"
+        ],
+        "max_size": [
+          "self"
+        ],
+        "maximum_dose_given": [
+          "self"
+        ],
+        "minimum_dose_given": [
+          "self"
+        ],
+        "next_dose": [
+          "self"
+        ],
+        "number_of_doses": [
+          "self"
+        ],
+        "observed_toxicity_rates": [
+          "self"
+        ],
+        "optimal_decision": [
+          "self",
+          "prob_tox"
+        ],
+        "plot_outcomes": [
+          "self",
+          "chart_title",
+          "use_ggplot"
+        ],
+        "report": [
+          "self"
+        ],
+        "reset": [
+          "self"
+        ],
+        "run": [
+          "self",
+          "n_sims",
+          "method",
+          "seed",
+          "show_progress",
+          "kwargs"
+        ],
+        "set_next_dose": [
+          "self",
+          "dose"
+        ],
+        "set_rng": [
+          "self",
+          "rng"
+        ],
+        "size": [
+          "self"
+        ],
+        "status": [
+          "self"
+        ],
+        "tabulate": [
+          "self"
+        ],
+        "toxicities": [
+          "self"
+        ],
+        "toxicities_at_dose": [
+          "self",
+          "dose"
+        ],
+        "treated_at_dose": [
+          "self",
+          "dose"
+        ],
+        "update": [
+          "self",
+          "cases",
+          "kwargs"
+        ]
+      }
+    },
+    "simulate_dose_finding_trial": {
+      "type": "function",
+      "parameters": [
+        "design",
+        "true_toxicities",
+        "tolerances",
+        "cohort_size",
+        "conduct_trial",
+        "calculate_optimal_decision",
+        "recruitment_stream"
+      ]
+    },
+    "simulate_dose_finding_trials": {
+      "type": "function",
+      "parameters": [
+        "design_map",
+        "true_toxicities",
+        "tolerances",
+        "cohort_size",
+        "conduct_trial",
+        "calculate_optimal_decision",
+        "recruitment_stream"
+      ]
+    },
+    "find_mtd": {
+      "type": "function",
+      "parameters": [
+        "toxicity_target",
+        "scenario",
+        "strictly_lte",
+        "verbose"
+      ]
+    },
+    "dose_transition_pathways_to_json": {
+      "type": "function",
+      "parameters": [
+        "trial",
+        "next_dose",
+        "cohort_sizes",
+        "cohort_number",
+        "cases_already_observed",
+        "custom_output_func",
+        "verbose",
+        "kwargs"
+      ]
+    },
+    "dose_transition_pathways": {
+      "type": "function",
+      "parameters": [
+        "trial",
+        "next_dose",
+        "cohort_sizes",
+        "cohort_number",
+        "cases_already_observed",
+        "custom_output_func",
+        "verbose",
+        "kwargs"
+      ]
+    },
+    "print_dtps": {
+      "type": "function",
+      "parameters": [
+        "dtps",
+        "indent",
+        "dose_label_func",
+        "row_formatter",
+        "verbose"
+      ]
+    },
+    "dtps_to_pandas": {
+      "type": "function",
+      "parameters": [
+        "dtps",
+        "dose_label_func"
+      ]
+    }
+  },
+  "clintrials.winratio": {
+    "compare_subjects": {
+      "type": "function",
+      "parameters": [
+        "subject1",
+        "subject2"
+      ]
+    },
+    "generate_data": {
+      "type": "function",
+      "parameters": [
+        "num_subjects_A",
+        "num_subjects_B",
+        "p_y1_A",
+        "p_y1_B",
+        "p_y2_A",
+        "p_y2_B",
+        "p_y3_A",
+        "p_y3_B"
+      ]
+    },
+    "simulate_comparisons": {
+      "type": "function",
+      "parameters": [
+        "treatment_group",
+        "control_group"
+      ]
+    },
+    "calculate_confidence_intervals": {
+      "type": "function",
+      "parameters": [
+        "wr",
+        "wins",
+        "losses"
+      ]
+    },
+    "calculate_p_value": {
+      "type": "function",
+      "parameters": [
+        "wr",
+        "wins",
+        "losses"
+      ]
+    },
+    "calculate_win_ratio": {
+      "type": "function",
+      "parameters": [
+        "wins",
+        "losses"
+      ]
+    }
+  },
+  "clintrials.visualization": {
+    "create_bar_chart": {
+      "type": "function",
+      "parameters": [
+        "df",
+        "x",
+        "y",
+        "color",
+        "title",
+        "labels",
+        "high_contrast"
+      ]
+    },
+    "create_line_chart": {
+      "type": "function",
+      "parameters": [
+        "df",
+        "x",
+        "y",
+        "color",
+        "title",
+        "labels",
+        "high_contrast"
+      ]
+    },
+    "generate_text_summary": {
+      "type": "function",
+      "parameters": [
+        "df",
+        "title"
+      ]
+    },
+    "plot_dose_finding_outcomes": {
+      "type": "function",
+      "parameters": [
+        "trial",
+        "chart_title",
+        "high_contrast"
+      ]
+    },
+    "plot_crm_toxicity_probabilities": {
+      "type": "function",
+      "parameters": [
+        "trial",
+        "chart_title",
+        "high_contrast"
+      ]
+    },
+    "plot_efftox_utility_contours": {
+      "type": "function",
+      "parameters": [
+        "metric",
+        "prob_eff",
+        "prob_tox",
+        "n",
+        "util_lower",
+        "util_upper",
+        "util_delta",
+        "title",
+        "custom_points_label",
+        "high_contrast"
+      ]
+    },
+    "plot_efftox_density": {
+      "type": "function",
+      "parameters": [
+        "data_func",
+        "trial",
+        "x_name",
+        "plot_title",
+        "include_doses",
+        "boot_samps",
+        "high_contrast"
+      ]
+    },
+    "plot_crm_simulation_recommendation": {
+      "type": "function",
+      "parameters": [
+        "summary_df",
+        "high_contrast"
+      ]
+    },
+    "plot_efftox_simulation_recommendation": {
+      "type": "function",
+      "parameters": [
+        "summary_df",
+        "high_contrast"
+      ]
+    },
+    "plot_efftox_simulation_acceptability": {
+      "type": "function",
+      "parameters": [
+        "summary_df",
+        "high_contrast"
+      ]
+    },
+    "plot_winratio_power_curve": {
+      "type": "function",
+      "parameters": [
+        "df",
+        "high_contrast"
+      ]
+    }
+  }
+}
