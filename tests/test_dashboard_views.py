@@ -243,7 +243,7 @@ def test_efftox_view_render_success(monkeypatch):
 
     bar_mock = MagicMock(return_value="fig_bar")
     line_mock = MagicMock(return_value="fig_line")
-    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+    monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", bar_mock)
     monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
     efftox_view.render([{}])
@@ -340,7 +340,7 @@ def test_watu_view_render_success(monkeypatch):
     import clintrials.visualization as viz
 
     bar_mock = MagicMock(return_value="fig_bar")
-    monkeypatch.setattr(viz, "plot_efftox_simulation_recommendation", bar_mock)
+    monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", bar_mock)
 
     watu_view.render([{}])
 

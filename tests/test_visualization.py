@@ -5,12 +5,12 @@ import plotly.graph_objects as go
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efftox import EffTox, LpNormCurve
 from clintrials.visualization import (
+    plot_bivariate_simulation_recommendation,
     plot_crm_simulation_recommendation,
     plot_crm_toxicity_probabilities,
     plot_dose_finding_outcomes,
     plot_efftox_density,
     plot_efftox_simulation_acceptability,
-    plot_efftox_simulation_recommendation,
     plot_efftox_utility_contours,
 )
 
@@ -93,7 +93,7 @@ def test_plot_crm_simulation_recommendation():
     assert isinstance(fig, go.Figure)
 
 
-def test_plot_efftox_simulation_recommendation():
+def test_plot_bivariate_simulation_recommendation():
     summary_df = pd.DataFrame(
         {
             "true_prob_tox": [0.1, 0.2],
@@ -101,11 +101,11 @@ def test_plot_efftox_simulation_recommendation():
             "recommended_dose_prob": [{"1": 0.5, "2": 0.5}, {"1": 0.2, "2": 0.8}],
         }
     ).set_index(["true_prob_tox", "true_prob_eff"])
-    fig = plot_efftox_simulation_recommendation(summary_df)
+    fig = plot_bivariate_simulation_recommendation(summary_df)
     assert isinstance(fig, go.Figure)
 
     empty_df = pd.DataFrame()
-    fig = plot_efftox_simulation_recommendation(empty_df)
+    fig = plot_bivariate_simulation_recommendation(empty_df)
     assert isinstance(fig, go.Figure)
 
 

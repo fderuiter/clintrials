@@ -4,7 +4,7 @@ from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
 
 
-def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False):
+def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):
     """Decorator to generate a standard dashboard view."""
     def decorator(func):
         @wraps(func)
@@ -16,9 +16,20 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
             if not hasattr(st, "columns"):
                 st.columns = lambda x: (st, st)
 
+            ps = None
+            if param_space_config is not None:
+                st.sidebar.header("Trial Parameters")
+                from clintrials.utils import ParameterSpace
+                ps = ParameterSpace()
+                for k, v in param_space_config.items():
+                    ps.add(k, v)
+                st.sidebar.json(param_space_config)
+
             st.header(title)
 
             try:
+                if ps is not None:
+                    kwargs["ps"] = ps
                 result = func(*args, **kwargs)
                 if result is None:
                     return

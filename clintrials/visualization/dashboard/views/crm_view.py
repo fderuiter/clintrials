@@ -7,7 +7,6 @@ import streamlit as st
 
 from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.simulation import extract_sim_data
-from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
@@ -38,19 +37,11 @@ def crm_preview_sims(target_tox, cohort_size, max_size):
     return sims
 
 @PROTOCOL_REGISTRY.register("CRM", preview_func=crm_preview_sims)
-@dashboard_view(title="CRM Simulation Results", model_name="CRM", file_prefix="crm_simulations")
-def render(sims):
+@dashboard_view(title="CRM Simulation Results", model_name="CRM", file_prefix="crm_simulations", param_space_config={
+    "true_tox": [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)]
+})
+def render(sims, ps):
     """Renders the CRM simulation results view."""
-    st.sidebar.header("Trial Parameters")
-    param_space_config = {
-        "true_tox": [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)]
-    }
-    ps = ParameterSpace()
-    for k, v in param_space_config.items():
-        ps.add(k, v)
-
-    st.sidebar.json(param_space_config)
-
     from clintrials.dosefinding.crm import CRM
     func_map = CRM.get_summary_functions()
 

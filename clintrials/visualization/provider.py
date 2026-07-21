@@ -444,7 +444,7 @@ def plot_crm_simulation_recommendation(summary_df, high_contrast=False):
     return fig
 
 
-def plot_efftox_simulation_recommendation(summary_df, high_contrast=False):
+def plot_bivariate_simulation_recommendation(summary_df, high_contrast=False):
     """Plots EffTox simulation recommendation probabilities."""
     col_name = (
         "RecommendedDoseProb"
