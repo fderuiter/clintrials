@@ -22,8 +22,6 @@ __all__ = [
     "simulate_dose_finding_trial",
     "simulate_dose_finding_trials",
     "find_mtd",
-    "summarise_dose_finding_sims",
-    "batch_summarise_dose_finding_sims",
     "dose_transition_pathways_to_json",
     "dose_transition_pathways",
     "print_dtps",
@@ -653,108 +651,6 @@ def find_mtd(toxicity_target: Any, scenario: Any, strictly_lte: Any = False, ver
             if verbose:
                 logger.info("Dose nearest to MTD is %s", loc)
             return loc
-
-
-def summarise_dose_finding_sims(sims: Any, label: Any, num_doses: Any, filter: Any = {}) -> Any:
-    """Summarises a list of dose-finding simulations.
-
-    .. deprecated:: 0.1.4
-       Use `clintrials.simulation` functions instead.
-
-    Args:
-        sims (list[dict]): A list of simulation results.
-        label (str): The label for the simulation set.
-        num_doses (int): The number of dose levels.
-        filter (dict, optional): A dictionary to filter the simulations.
-            Defaults to {}.
-
-    Returns:
-        tuple: A tuple containing a DataFrame of dose information, a
-            DataFrame of outcome information, an array of chosen doses, an
-            array of doses given to patients, and an array of trial end
-            statuses.
-    """
-    import pandas as pd
-
-    if len(filter):
-        sims = filter_list_of_dicts(sims, filter)
-
-    # Recommended Doses
-    doses = [x[label]["RecommendedDose"] for x in sims]
-    df_doses = pd.DataFrame(
-        {"RecN": pd.Series(doses).value_counts()}, index=range(-1, num_doses + 1)
-    )
-    df_doses.RecN[np.isnan(df_doses.RecN)] = 0
-    df_doses["Rec%"] = 1.0 * df_doses["RecN"] / df_doses["RecN"].sum()
-    # Given Doses
-    doses_given = to_1d_list([x[label]["Doses"] for x in sims])
-    df_doses = df_doses.join(
-        pd.DataFrame({"PatN": pd.Series(doses_given).value_counts()})
-    )
-    df_doses.PatN[np.isnan(df_doses.PatN)] = 0
-    df_doses["Pat%"] = 1.0 * df_doses["PatN"] / df_doses["PatN"].sum()
-    df_doses["MeanPat"] = 1.0 * df_doses["PatN"] / len(sims)
-    # Order
-    df_doses = df_doses.loc[range(-1, num_doses + 1)]
-
-    # Trial Outcomes
-    statuses = [x[label]["TrialStatus"] for x in sims]
-    df_statuses = pd.DataFrame({"N": pd.Series(statuses).value_counts()})
-    df_statuses["%"] = 1.0 * df_statuses["N"] / df_statuses["N"].sum()
-
-    return (
-        df_doses,
-        df_statuses,
-        np.array(doses),
-        np.array(doses_given),
-        np.array(statuses),
-    )
-
-
-def batch_summarise_dose_finding_sims(sims: Any, label: Any, num_doses: Any, dimensions: Any = None, func1: Any = None) -> Any:
-    """Batch summarises a list of dose-finding simulations.
-
-    .. deprecated:: 0.1.4
-       Use `clintrials.simulation` functions instead.
-
-    Args:
-        sims (list[dict]): A list of simulation results.
-        label (str): The label for the simulation set.
-        num_doses (int): The number of dose levels.
-        dimensions (tuple, optional): A tuple containing a dictionary mapping
-            JSON variable names to parameter names and a `ParameterSpace`
-            object. Defaults to `None`.
-        func1 (Callable, optional): A function to apply to the summary
-            DataFrame. Defaults to `None`.
-    """
-    if dimensions is not None:
-        var_map, params = dimensions
-        z = [(k, params[v]) for k, v in var_map.items()]
-        labels, val_arrays = zip(*z)
-        param_combinations = list(product(*val_arrays))
-        for param_combo in param_combinations:
-            for lab, vals in zip(labels, param_combo):
-                logger.info("%s: %s", lab, vals)
-            these_params = dict(zip(labels, param_combo))
-            abc = summarise_dose_finding_sims(
-                sims, label, num_doses, filter=these_params
-            )
-            if func1:
-                logger.info(func1(abc[0], these_params))
-                logger.info("")
-                logger.info("")
-            else:
-                logger.info("")
-                logger.info(abc[0])
-                logger.info("")
-                logger.info(abc[1])
-                logger.info("")
-    else:
-        abc = summarise_dose_finding_sims(sims, label, num_doses)
-        logger.info(abc[0])
-        logger.info("")
-        logger.info(abc[1])
-        logger.info("")
 
 
 def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, cohort_sizes: List[int], cohort_number: int = 1, cases_already_observed: List[Tuple] = [], custom_output_func: Optional[Callable] = None, verbose: bool = False, **kwargs: Any) -> Any:
