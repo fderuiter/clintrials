@@ -10,6 +10,7 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 import numpy as np
+from scipy.stats import norm
 
 
 class ProbabilityDensitySample:
@@ -58,6 +59,36 @@ class ProbabilityDensitySample:
         return exp2 - exp**2
 
 
+def log_scale_wald_interval(ratio: float, standard_error: float, alpha: float = 0.05) -> tuple[float, float]:
+    """Calculates the Wald confidence interval for a ratio on the log scale.
+
+    Args:
+        ratio (float): The estimated ratio.
+        standard_error (float): The standard error of the log ratio.
+        alpha (float): The significance level.
+
+    Returns:
+        tuple[float, float]: The lower and upper bounds of the confidence interval.
+    """
+    z_score = norm.ppf(1 - alpha / 2)
+    log_ratio = np.log(ratio)
+    lower_bound_log = log_ratio - z_score * standard_error
+    upper_bound_log = log_ratio + z_score * standard_error
+    return (float(np.exp(lower_bound_log)), float(np.exp(upper_bound_log)))
+
+
+def log_scale_p_value(ratio: float, standard_error: float) -> float:
+    """Calculates the two-sided p-value for a ratio using a Wald test on the log scale.
+
+    Args:
+        ratio (float): The estimated ratio.
+        standard_error (float): The standard error of the log ratio.
+
+    Returns:
+        float: The p-value.
+    """
+    observed_z = np.log(ratio) / standard_error
+    return float(2 * norm.sf(abs(observed_z)))
 
 
 # Inject module-level docstring

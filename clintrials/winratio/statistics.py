@@ -6,7 +6,8 @@ Random Seed Strategy: {statistics_seed_strategy}
 
 
 import numpy as np
-from scipy.stats import norm
+
+from clintrials.core.stats import log_scale_p_value, log_scale_wald_interval
 
 
 def calculate_confidence_intervals(wr: float, wins: int, losses: int):  # type: ignore
@@ -25,13 +26,7 @@ def calculate_confidence_intervals(wr: float, wins: int, losses: int):  # type: 
         return (0, 0)
     variance = 1 / wins + 1 / losses
     standard_error = np.sqrt(variance)
-    z_score = norm.ppf(0.975)
-    log_wr = np.log(wr)
-    lower_bound_log = log_wr - z_score * standard_error
-    upper_bound_log = log_wr + z_score * standard_error
-    lower_bound = np.exp(lower_bound_log)
-    upper_bound = np.exp(upper_bound_log)
-    return (lower_bound, upper_bound)
+    return log_scale_wald_interval(wr, standard_error)
 
 
 def calculate_p_value(wr: float, wins: int, losses: int) -> float:
@@ -47,8 +42,9 @@ def calculate_p_value(wr: float, wins: int, losses: int) -> float:
     """
     if wins == 0 or losses == 0:
         return 1.0
-    observed_z = (np.log(wr)) / np.sqrt((1 / wins) + (1 / losses))
-    return 2 * norm.sf(abs(observed_z))  # type: ignore
+    variance = 1 / wins + 1 / losses
+    standard_error = np.sqrt(variance)
+    return log_scale_p_value(wr, standard_error)
 
 
 def calculate_win_ratio(wins: int, losses: int) -> float:
