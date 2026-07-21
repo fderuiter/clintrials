@@ -41,8 +41,11 @@ def test_generate_pdf_report():
     pdf_bytes = generate_pdf_report(df=df, design_type="My Design", text_summaries=text_summaries)
     assert isinstance(pdf_bytes, bytearray) or isinstance(pdf_bytes, bytes)
 
-from clintrials.visualization.report import parse_pdf_structure, validate_pdf_ua_structure
-from clintrials.visualization.report import AccessiblePDF
+from clintrials.visualization.report import (
+    AccessiblePDF,
+    parse_pdf_structure,
+    validate_pdf_ua_structure,
+)
 
 
 def test_pdf_structural_nesting_and_mcid():
