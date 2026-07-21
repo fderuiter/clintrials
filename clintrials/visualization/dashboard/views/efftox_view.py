@@ -28,7 +28,7 @@ class EffToxView(BaseSimulationView):
     @classmethod
     def preview_sims(cls, target_tox, cohort_size, max_size):
         """Generate preview simulations for the EffTox model."""
-        from clintrials.dosefinding.efficacytoxicity import simulate_trial
+        from clintrials.core.simulation import run_bivariate_simulations
         from clintrials.dosefinding.efftox import EffTox, LpNormCurve
 
         real_doses = [1.0, 2.0, 3.0, 4.0, 5.0]
@@ -51,15 +51,7 @@ class EffToxView(BaseSimulationView):
         tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
         eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
 
-        sims = []
-        for t_tox in tox_scenarios:
-            for t_eff in eff_scenarios:
-                for _ in range(10):
-                    report = simulate_trial(trial, true_toxicities=t_tox, true_efficacies=t_eff, cohort_size=cohort_size)
-                    report["true_prob_tox"] = t_tox
-                    report["true_prob_eff"] = t_eff
-                    sims.append(report)
-        return sims
+        return run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
 
     @classmethod
     def build_figures(cls, summary_df):
@@ -68,7 +60,7 @@ class EffToxView(BaseSimulationView):
         if not summary_df.empty:
             if "recommended_dose_prob" in summary_df.columns:
                 import clintrials.visualization as viz
-                fig_rec = viz.plot_efftox_simulation_recommendation(
+                fig_rec = viz.plot_bivariate_simulation_recommendation(
                     summary_df,
                     high_contrast=False
                 )

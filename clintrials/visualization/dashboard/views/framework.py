@@ -31,6 +31,7 @@ class BaseSimulationView:
                 file_prefix=cls.file_prefix,
                 csv_index=cls.csv_index,
                 skip_summary_table=cls.skip_summary_table,
+                param_space_config=cls.param_space_config,
             )(cls._base_render)
 
             preview = None
@@ -42,18 +43,9 @@ class BaseSimulationView:
             )
 
     @classmethod
-    def _base_render(cls, sims):
+    def _base_render(cls, sims, ps=None):
         """Render the sidebar controls, parse parameter combinations, and execute the view mapping."""
-        import streamlit as st
         from clintrials.core.simulation import extract_sim_data
-        from clintrials.utils import ParameterSpace
-
-        st.sidebar.header("Trial Parameters")
-        st.sidebar.json(cls.param_space_config)
-
-        ps = ParameterSpace()
-        for k, v in cls.param_space_config.items():
-            ps.add(k, v)
 
         func_map = cls.model_class.get_summary_functions()
         summary_df = extract_sim_data(
@@ -69,7 +61,7 @@ class BaseSimulationView:
         return []
 
 
-def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False):
+def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):  # type: ignore
     """Decorator to generate a standard dashboard view."""
     def decorator(func):
         @wraps(func)
@@ -81,9 +73,20 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
             if not hasattr(st, "columns"):
                 st.columns = lambda x: (st, st)
 
+            ps = None
+            if param_space_config is not None:
+                st.sidebar.header("Trial Parameters")
+                from clintrials.utils import ParameterSpace
+                ps = ParameterSpace()
+                for k, v in param_space_config.items():
+                    ps.add(k, v)
+                st.sidebar.json(param_space_config)
+
             st.header(title)
 
             try:
+                if ps is not None:
+                    kwargs["ps"] = ps
                 result = func(*args, **kwargs)
                 if result is None:
                     return

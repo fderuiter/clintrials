@@ -4,7 +4,7 @@ from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
 
 
-def test_watu_mc_config():
+def test_watu_mc_config():  # type: ignore
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
     tox_cutoff = 0.33
     eff_cutoff = 0.05
@@ -27,7 +27,7 @@ def test_watu_mc_config():
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
 
     # Test defaults
-    trial = WATU(
+    trial = WATU(  # type: ignore
         skeletons, tox_prior, tox_target, tox_cutoff, eff_cutoff, metric, 1, 64
     )
     assert trial.mc_sample_size == 10**5
@@ -35,7 +35,7 @@ def test_watu_mc_config():
     assert trial.mc_samples_stage2 == 10**5
 
     # Test initialization with custom values
-    trial2 = WATU(
+    trial2 = WATU(  # type: ignore
         skeletons,
         tox_prior,
         tox_target,
@@ -53,7 +53,7 @@ def test_watu_mc_config():
     assert trial2.mc_samples_stage2 == 4000
 
     # Test clamping
-    trial3 = WATU(
+    trial3 = WATU(  # type: ignore
         skeletons,
         tox_prior,
         tox_target,
@@ -71,7 +71,7 @@ def test_watu_mc_config():
     assert trial3.mc_samples_stage2 == 1000
 
     # Test propagation of defaults
-    trial4 = WATU(
+    trial4 = WATU(  # type: ignore
         skeletons,
         tox_prior,
         tox_target,
@@ -87,7 +87,7 @@ def test_watu_mc_config():
     assert trial4.mc_samples_stage2 == 5000
 
 
-def test_watu_update_kwargs(mocker):
+def test_watu_update_kwargs(mocker):  # type: ignore
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
     tox_cutoff = 0.33
     eff_cutoff = 0.05
@@ -95,7 +95,7 @@ def test_watu_update_kwargs(mocker):
     skeletons = [[0.60, 0.50, 0.40, 0.30, 0.20, 0.10]]
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
 
-    trial = WATU(
+    trial = WATU(  # type: ignore
         skeletons,
         tox_prior,
         tox_target,

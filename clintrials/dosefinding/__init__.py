@@ -72,7 +72,7 @@ class DoseFindingTrial(Protocol):
         if first_dose > num_doses:
             raise ValueError("First dose must be no greater than number of doses.")
 
-        super().__init__()
+        super().__init__()  # type: ignore
         self._first_dose = first_dose
         self.num_doses = num_doses
         self._max_size = max_size
@@ -330,10 +330,10 @@ class DoseFindingTrial(Protocol):
         from clintrials.utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
-        report["RecommendedDose"] = atomic_to_json(self.next_dose())
-        report["TrialStatus"] = atomic_to_json(self.status())
-        report["Doses"] = iterable_to_json(self.doses())
-        report["Toxicities"] = iterable_to_json(self.toxicities())
+        report["RecommendedDose"] = atomic_to_json(self.next_dose())  # type: ignore
+        report["TrialStatus"] = atomic_to_json(self.status())  # type: ignore
+        report["Doses"] = iterable_to_json(self.doses())  # type: ignore
+        report["Toxicities"] = iterable_to_json(self.toxicities())  # type: ignore
         return report
 
     @abc.abstractmethod
@@ -518,7 +518,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
             )
 
     report = OrderedDict()
-    report["TrueToxicities"] = iterable_to_json(true_toxicities)
+    report["TrueToxicities"] = iterable_to_json(true_toxicities)  # type: ignore
 
     # Simulate trial
     if conduct_trial:
@@ -546,8 +546,8 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
             tox_hat = tox_horizons.mean(axis=0)  # type: ignore
 
             optimal_allocation = design.optimal_decision(tox_hat)
-            report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)
-            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)
+            report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)  # type: ignore
+            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)  # type: ignore
         except NotImplementedError:
             pass
 
@@ -588,7 +588,7 @@ def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, toleranc
             )
 
     report = OrderedDict()
-    report["TrueToxicities"] = iterable_to_json(true_toxicities)
+    report["TrueToxicities"] = iterable_to_json(true_toxicities)  # type: ignore
     for label, design in design_map.items():
         design_sim = simulate_dose_finding_trial(
             design,
@@ -650,7 +650,7 @@ def find_mtd(toxicity_target: Any, scenario: Any, strictly_lte: Any = False, ver
             return loc
 
 
-def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, cohort_sizes: List[int], cohort_number: int = 1, cases_already_observed: List[Tuple] = [], custom_output_func: Optional[Callable] = None, verbose: bool = False, **kwargs: Any) -> Any:
+def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, cohort_sizes: List[int], cohort_number: int = 1, cases_already_observed: List[Tuple] = [], custom_output_func: Optional[Callable] = None, verbose: bool = False, **kwargs: Any) -> Any:  # type: ignore
     """Calculates the dose-transition pathways of a dose-finding trial.
 
     Args:
@@ -712,10 +712,10 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
             bag_o_tricks.update(
                 OrderedDict(
                     [
-                        ("DoseGiven", atomic_to_json(next_dose)),
-                        ("RecommendedDose", atomic_to_json(mtd)),
-                        ("CohortSize", cohort_size),
-                        ("NumTox", atomic_to_json(num_dlts)),
+                        ("DoseGiven", atomic_to_json(next_dose)),  # type: ignore
+                        ("RecommendedDose", atomic_to_json(mtd)),  # type: ignore
+                        ("CohortSize", cohort_size),  # type: ignore
+                        ("NumTox", atomic_to_json(num_dlts)),  # type: ignore
                     ]
                 )
             )
@@ -744,7 +744,7 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
 dose_transition_pathways = dose_transition_pathways_to_json
 
 
-def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None, row_formatter: Optional[Callable] = None, verbose: bool = False) -> Any:
+def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None, row_formatter: Optional[Callable] = None, verbose: bool = False) -> Any:  # type: ignore
     """Prints the dose-transition pathways.
 
     Args:
@@ -799,7 +799,7 @@ def _dtps_to_rows(dtps: Any, dose_label_func: Any = None, pre: Any = []) -> Any:
     return rows
 
 
-def dtps_to_pandas(dtps: Any, dose_label_func: Optional[Callable] = None) -> Any:
+def dtps_to_pandas(dtps: Any, dose_label_func: Optional[Callable] = None) -> Any:  # type: ignore
     """Converts DTPs to a pandas DataFrame.
 
     Args:
@@ -820,6 +820,6 @@ def dtps_to_pandas(dtps: Any, dose_label_func: Optional[Callable] = None) -> Any
     cols = []
     for i in range(1, 1 + int(ncols / 2)):
         cols.extend([f"Cohort {i} DLTs", f"Cohort {i+1} Dose"])
-    df.columns = cols  # type: ignore
+    df.columns = cols
 
     return df
