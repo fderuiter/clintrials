@@ -20,7 +20,6 @@ import warnings
 from collections import OrderedDict
 
 from scipy.optimize import minimize
-from scipy.stats import norm
 
 from clintrials.core.math import (
     bernoulli_likelihood,
@@ -31,11 +30,12 @@ from clintrials.core.math import (
 )
 from clintrials.core.numerics import posterior_expectation_gh
 from clintrials.core.registry import CORE_REGISTRY
+from clintrials.core.stats import norm
 from clintrials.dosefinding import DoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json
 
 
-def _toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False) -> Any:
+def _toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False) -> Any:  # type: ignore
     """Calculates the likelihood of a single toxicity outcome.
 
     Args:
@@ -54,7 +54,7 @@ def _toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, dose: Any, tox
     return bernoulli_likelihood(p, tox, log=log)
 
 
-def _compound_toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False) -> Any:
+def _compound_toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False) -> Any:  # type: ignore
     """Calculates the compound likelihood of multiple toxicity outcomes.
 
     Args:
@@ -85,7 +85,7 @@ def _compound_toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, doses
         return np.exp(np.clip(l, -700, 700))
 
 
-def _get_beta_hat_bayes(F: Callable, intercept: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Callable, use_quick_integration: Any = False, estimate_var: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:
+def _get_beta_hat_bayes(F: Callable, intercept: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Callable, use_quick_integration: Any = False, estimate_var: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:  # type: ignore
     """Estimates the beta parameter using Bayesian inference.
 
     Args:
@@ -117,10 +117,10 @@ def _get_beta_hat_bayes(F: Callable, intercept: Any, codified_doses_given: Any, 
     min_b = min_beta if min_beta is not None else CORE_REGISTRY["crm_min_beta"]
     max_b = max_beta if max_beta is not None else CORE_REGISTRY["crm_max_beta"]
     n_pts = n_points if n_points is not None else CORE_REGISTRY["crm_n_points"]
-    beta_hat = integrate_posterior_1d(logpost, lambda t: t, min_b, max_b, n_points=n_pts)  # type: ignore
+    beta_hat = integrate_posterior_1d(logpost, lambda t: t, min_b, max_b, n_points=n_pts)
 
     if estimate_var:
-        exp_x2 = integrate_posterior_1d(logpost, lambda t: t**2, min_b, max_b, n_points=n_pts)  # type: ignore
+        exp_x2 = integrate_posterior_1d(logpost, lambda t: t**2, min_b, max_b, n_points=n_pts)
         var = exp_x2 - beta_hat**2
     else:
         var = None
@@ -128,7 +128,7 @@ def _get_beta_hat_bayes(F: Callable, intercept: Any, codified_doses_given: Any, 
     return beta_hat, var
 
 
-def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, toxs: Any, estimate_var: Any = False) -> Any:
+def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, toxs: Any, estimate_var: Any = False) -> Any:  # type: ignore
     """Estimates the beta parameter using maximum likelihood estimation (MLE).
 
     Args:
@@ -178,7 +178,7 @@ def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, to
         return np.nan, None
 
 
-def _get_beta_hat_mle_bootstrap(F: Callable, intercept: Any, beta_hat: Any, codified_doses_given: Any, B: Any = 200, rng: Any = None) -> Any:
+def _get_beta_hat_mle_bootstrap(F: Callable, intercept: Any, beta_hat: Any, codified_doses_given: Any, B: Any = 200, rng: Any = None) -> Any:  # type: ignore
     """Estimates the variance of the beta MLE using parametric bootstrap.
 
     Args:
@@ -195,7 +195,7 @@ def _get_beta_hat_mle_bootstrap(F: Callable, intercept: Any, beta_hat: Any, codi
     """
     if rng is None:
         from clintrials.core.rng import get_rng
-        rng = get_rng()
+        rng = get_rng()  # type: ignore
 
     beta_hats_boot = []
     for _ in range(B):
@@ -218,7 +218,7 @@ def _get_beta_hat_mle_bootstrap(F: Callable, intercept: Any, beta_hat: Any, codi
     return np.var(beta_hats_boot)
 
 
-def _estimate_prob_tox_from_param(F: Callable, intercept: Any, beta_hat: Any, dose_labels: Any) -> Any:
+def _estimate_prob_tox_from_param(F: Callable, intercept: Any, beta_hat: Any, dose_labels: Any) -> Any:  # type: ignore
     """Estimates the probability of toxicity by plugging in a beta estimate.
 
     Args:
@@ -235,7 +235,7 @@ def _estimate_prob_tox_from_param(F: Callable, intercept: Any, beta_hat: Any, do
     return post_tox
 
 
-def _get_post_tox_bayes(F: Callable, intercept: Any, dose_labels: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Callable, use_quick_integration: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:
+def _get_post_tox_bayes(F: Callable, intercept: Any, dose_labels: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Callable, use_quick_integration: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:  # type: ignore
     """Calculates the posterior probability of toxicity using Bayesian integration.
 
     Args:
@@ -267,7 +267,7 @@ def _get_post_tox_bayes(F: Callable, intercept: Any, dose_labels: Any, codified_
     max_b = max_beta if max_beta is not None else CORE_REGISTRY["crm_max_beta"]
     n_pts = n_points if n_points is not None else CORE_REGISTRY["crm_n_points"]
     for x in dose_labels:
-        prob = integrate_posterior_1d(  # type: ignore
+        prob = integrate_posterior_1d(
             logpost, lambda t: F(x, a0=intercept, beta=t), min_b, max_b, n_points=n_pts
         )
         post_tox.append(prob)
@@ -275,7 +275,7 @@ def _get_post_tox_bayes(F: Callable, intercept: Any, dose_labels: Any, codified_
     return post_tox
 
 
-def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Callable = logistic, inverse_F: Callable = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, rng: Any = None) -> Any:
+def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Callable = logistic, inverse_F: Callable = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, rng: Any = None) -> Any:  # type: ignore
     """Performs a Continual Reassessment Method (CRM) calculation.
 
     Args:
@@ -427,7 +427,7 @@ class CRM(DoseFindingTrial):
             .to_dict(),
         }
 
-    def __init__(self, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Callable = empiric, inverse_F: Callable = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Optional[Callable] = None, termination_func: Optional[Callable] = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, sample_size: Any = None) -> None:
+    def __init__(self, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Callable = empiric, inverse_F: Callable = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Optional[Callable] = None, termination_func: Optional[Callable] = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, sample_size: Any = None) -> None:  # type: ignore
         """Initializes a CRM trial object.
 
         Args:
@@ -561,22 +561,22 @@ class CRM(DoseFindingTrial):
 
 
     @property
-    def min_beta(self):
+    def min_beta(self):  # type: ignore
         """Gets the minimum limit for beta integration."""
         return self._min_beta_override if self._min_beta_override is not None else CORE_REGISTRY["crm_min_beta"]
 
     @property
-    def max_beta(self):
+    def max_beta(self):  # type: ignore
         """Gets the maximum limit for beta integration."""
         return self._max_beta_override if self._max_beta_override is not None else CORE_REGISTRY["crm_max_beta"]
 
     @property
-    def n_points(self):
+    def n_points(self):  # type: ignore
         """Gets the number of grid points for numeric integration."""
         return self._n_points_override if self._n_points_override is not None else CORE_REGISTRY["crm_n_points"]
 
     @property
-    def sample_size(self):
+    def sample_size(self):  # type: ignore
         """Gets the Monte Carlo sample size."""
         return self._sample_size_override if self._sample_size_override is not None else CORE_REGISTRY["crm_sample_size"]
 
@@ -629,7 +629,7 @@ class CRM(DoseFindingTrial):
                 self.inverse_F(p, a0=self.intercept, beta=self.beta_prior.mean())
                 for p in self.prior
             ]
-            beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(self.sample_size, random_state=self.rng)  # type: ignore
+            beta_sample = norm(loc=self.beta_hat, scale=np.sqrt(self.beta_var)).rvs(self.sample_size, random_state=self.rng)
             p0_sample = self.F_func(labels[0], a0=self.intercept, beta=beta_sample)
             p0_tox = np.mean(p0_sample > self.lowest_dose_too_toxic_hurdle)
 
@@ -682,7 +682,7 @@ class CRM(DoseFindingTrial):
             for d in self.doses()
         ]
 
-        def log_likelihood_func(betas):
+        def log_likelihood_func(betas):  # type: ignore
             return _compound_toxicity_likelihood(
                 self.F_func,
                 self.intercept,
@@ -697,7 +697,7 @@ class CRM(DoseFindingTrial):
             for p in self.prior
         ]
 
-        def f_func(betas):
+        def f_func(betas):  # type: ignore
             # Evaluate for all labels (doses) and return an array of shape (num_doses, num_betas)
             out = []
             for lab in labels:
@@ -705,7 +705,7 @@ class CRM(DoseFindingTrial):
                 out.append((tox_probs > tox_cutoff).astype(float))
             return np.array(out)
 
-        return posterior_expectation_gh(
+        return posterior_expectation_gh(  # type: ignore
             log_likelihood_func=log_likelihood_func,
             f_func=f_func,
             prior_mean=mu0,
@@ -765,7 +765,7 @@ class CRM(DoseFindingTrial):
         else:
             return True
 
-    def report(self) -> dict:
+    def report(self) -> dict:  # type: ignore
         """Generates a standardized JSON-serializable report of the trial.
 
         Returns:
@@ -839,14 +839,14 @@ def crm_dtp_detail(trial: Any) -> Any:
     to_return = OrderedDict()
 
     if trial.beta_hat is not None:
-        to_return["BetaHat"] = atomic_to_json(trial.beta_hat)
+        to_return["BetaHat"] = atomic_to_json(trial.beta_hat)  # type: ignore
     if trial.beta_var is not None:
-        to_return["BetaVar"] = atomic_to_json(trial.beta_var)
+        to_return["BetaVar"] = atomic_to_json(trial.beta_var)  # type: ignore
     if hasattr(trial, "beta_se") and trial.beta_se is not None:
-        to_return["BetaSE"] = atomic_to_json(trial.beta_se)
+        to_return["BetaSE"] = atomic_to_json(trial.beta_se)  # type: ignore
 
     if trial.prob_tox() is not None:
-        to_return["ProbTox"] = iterable_to_json(trial.prob_tox())
+        to_return["ProbTox"] = iterable_to_json(trial.prob_tox())  # type: ignore
         for i, dl in enumerate(trial.dose_levels()):
             to_return[f"ProbTox{dl}"] = trial.prob_tox()[i]
 

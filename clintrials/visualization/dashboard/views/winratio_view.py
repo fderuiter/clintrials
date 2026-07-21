@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Renders the Win Ratio simulation view in the Streamlit dashboard.
 
 Random Seed Strategy: {winratio_view_seed_strategy}
@@ -14,7 +15,7 @@ from clintrials.winratio.main import run_winratio_simulations
 
 
 @PROTOCOL_REGISTRY.register("Win Ratio")
-@dashboard_view(
+@dashboard_view(  # type: ignore
     title="Win Ratio Simulation",
     model_name="Win Ratio",
     file_prefix="winratio_simulation",
@@ -27,11 +28,11 @@ def render() -> None:
 
     # Use schema to generate UI inputs
     kwargs = {}
-    for name, field in WinRatioSchema.model_fields.items():
+    for name, field in WinRatioSchema.model_fields.items():  # type: ignore
         min_val = 0.0 if "Probability" in str(field.annotation) else 1
         max_val = 1.0 if "Probability" in str(field.annotation) else None
 
-        kwargs[name] = create_widget(
+        kwargs[name] = create_widget(  # type: ignore
             st,
             "number_input",
             name,
@@ -41,7 +42,7 @@ def render() -> None:
             value=field.default,
         )
 
-    if create_widget(st, "button", "run_simulation_button", "Run Simulation"):
+    if create_widget(st, "button", "run_simulation_button", "Run Simulation"):  # type: ignore
         from clintrials.visualization.dashboard.utils import announce_status_locally
         announce_status_locally("Simulation in progress", key="winratio-start")
         try:
@@ -61,8 +62,8 @@ def render() -> None:
             st.columns = lambda x: (st, st)
         met_col1, met_col2 = st.columns(2)
 
-        render_metric(met_col1, "Power", power)
-        render_metric(met_col2, "Average 95% Confidence Interval", average_ci)
+        render_metric(met_col1, "Power", power)  # type: ignore
+        render_metric(met_col2, "Average 95% Confidence Interval", average_ci)  # type: ignore
 
         # Create simple DataFrame for export
         results_dict = kwargs.copy()
@@ -73,7 +74,7 @@ def render() -> None:
         df = pd.DataFrame([results_dict])
 
         import clintrials.visualization as viz
-        fig = viz.plot_winratio_power_curve(
+        fig = viz.plot_winratio_power_curve(  # type: ignore
             df,
             high_contrast=False
         )
@@ -82,6 +83,6 @@ def render() -> None:
         from clintrials.visualization.helpers import format_number
         extra_text_summaries = [f"Power: {format_number(power)}\n95% CI: ({format_number(average_ci[0])}, {format_number(average_ci[1])})"]
 
-        return df, figures, extra_text_summaries
+        return df, figures, extra_text_summaries  # type: ignore
 
     return None

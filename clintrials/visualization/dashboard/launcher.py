@@ -1,10 +1,11 @@
+from __future__ import annotations
 # ruff: noqa: T201
 import argparse
 import os
 import sys
 
 
-def main():
+def main():  # type: ignore
     """Launch the Clinical Trials Dashboard Streamlit app programmatically."""
     parser = argparse.ArgumentParser(description="Programmatic CLI Launcher for Clinical Trials Dashboard")
     parser.add_argument("--host", "-H", type=str, default=None, help="The host address to bind the server to.")
@@ -41,4 +42,4 @@ def main():
         sys.exit(0)
 
 if __name__ == "__main__":
-    main()
+    main()  # type: ignore

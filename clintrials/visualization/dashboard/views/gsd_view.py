@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Renders the Group Sequential Design simulation view in the Streamlit dashboard."""
 
 import pandas as pd
@@ -14,7 +15,7 @@ from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
 @PROTOCOL_REGISTRY.register("Group Sequential Design")
-@dashboard_view(
+@dashboard_view(  # type: ignore
     title="Group Sequential Design Simulation",
     model_name="Group Sequential Design",
     file_prefix="gsd_simulation",
@@ -25,7 +26,7 @@ def render() -> None:
     """Render the Group Sequential Design simulation interface."""
     st.sidebar.header("Trial Parameters")
 
-    k = create_widget(
+    k = create_widget(  # type: ignore
         st,
         "number_input",
         "gsd_k",
@@ -35,7 +36,7 @@ def render() -> None:
         value=3,
     )
 
-    alpha = create_widget(
+    alpha = create_widget(  # type: ignore
         st,
         "number_input",
         "gsd_alpha",
@@ -46,7 +47,7 @@ def render() -> None:
         step=0.005,
     )
 
-    sfu_name = create_widget(
+    sfu_name = create_widget(  # type: ignore
         st,
         "selectbox",
         "gsd_sfu",
@@ -55,7 +56,7 @@ def render() -> None:
         index=0
     )
 
-    n_sims = create_widget(
+    n_sims = create_widget(  # type: ignore
         st,
         "number_input",
         "gsd_n_sims",
@@ -66,7 +67,7 @@ def render() -> None:
         step=100,
     )
 
-    theta = create_widget(
+    theta = create_widget(  # type: ignore
         st,
         "number_input",
         "gsd_theta",
@@ -77,7 +78,7 @@ def render() -> None:
         step=0.1,
     )
 
-    if create_widget(st, "button", "run_simulation_button", "Run Simulation"):
+    if create_widget(st, "button", "run_simulation_button", "Run Simulation"):  # type: ignore
         from clintrials.visualization.dashboard.utils import announce_status_locally
         announce_status_locally("Simulation in progress", key="gsd-start")
         try:
@@ -124,7 +125,7 @@ def render() -> None:
         })
 
         import clintrials.visualization as viz
-        fig = viz.create_bar_chart(
+        fig = viz.create_bar_chart(  # type: ignore
             plot_df,
             x="Stage",
             y="Count",
@@ -133,6 +134,6 @@ def render() -> None:
         )
         figures = [("Trial Progression (Stop Stages)", fig)]
 
-        return pd.DataFrame([results_dict]), figures, []
+        return pd.DataFrame([results_dict]), figures, []  # type: ignore
 
     return None

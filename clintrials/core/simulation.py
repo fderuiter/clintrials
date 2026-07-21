@@ -17,7 +17,8 @@ __all__ = [
     "run_sims",
     "sim_parameter_space",
     "extract_sim_data",
-    "UniversalProtocolSimulationRunner"
+    "UniversalProtocolSimulationRunner",
+    "run_bivariate_simulations"
 ]
 
 logger = logging.getLogger(__name__)
@@ -108,7 +109,24 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=Non
         return {'Parameters': metadata, 'Simulations': sims}
     return sims
 
-def extract_sim_data(sims, ps, func_map, var_map=None, return_type='dataframe'):
+def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10):
+    """Shared simulation runner for bivariate trial models (EffTox/WATU)."""
+    from clintrials.dosefinding.efficacytoxicity import simulate_trial
+    from clintrials.utils import ParameterSpace
+
+    ps = ParameterSpace()
+    ps.add("true_prob_tox", tox_scenarios)
+    ps.add("true_prob_eff", eff_scenarios)
+
+    def wrapped_sim_func(true_prob_tox, true_prob_eff):
+        report = simulate_trial(trial, true_toxicities=true_prob_tox, true_efficacies=true_prob_eff, cohort_size=cohort_size)
+        report["true_prob_tox"] = true_prob_tox
+        report["true_prob_eff"] = true_prob_eff
+        return report
+
+    return sim_parameter_space(wrapped_sim_func, ps, n1=n_replicates)
+
+def extract_sim_data(sims, ps, func_map, var_map=None, return_type='dataframe'):  # type: ignore
     """Extracts and summarises a list of simulations.
 
     This method partitions simulations into subsets that used the same set of

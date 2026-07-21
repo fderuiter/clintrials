@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Time-to-event trial designs.
 
 Random Seed Strategy: {tte_seed_strategy}
@@ -26,7 +27,7 @@ class BayesianTimeToEvent:
     Times in Early Phase Clinical Trials: Some Practical Issues" for details.
     """
 
-    def __init__(self, alpha_prior, beta_prior):
+    def __init__(self, alpha_prior, beta_prior):  # type: ignore
         """Initializes a BayesianTimeToEvent object.
 
         Args:
@@ -40,7 +41,7 @@ class BayesianTimeToEvent:
         self._times_to_event = []
         self._recruitment_times = []
 
-    def event_times(self):
+    def event_times(self):  # type: ignore
         """Gets the list of event times.
 
         Returns:
@@ -48,7 +49,7 @@ class BayesianTimeToEvent:
         """
         return self._times_to_event
 
-    def recruitment_times(self):
+    def recruitment_times(self):  # type: ignore
         """Gets the list of recruitment times.
 
         Returns:
@@ -57,7 +58,7 @@ class BayesianTimeToEvent:
         """
         return self._recruitment_times
 
-    def update(self, cases):
+    def update(self, cases):  # type: ignore
         """Updates the trial with new patient cases.
 
         Args:
@@ -68,7 +69,7 @@ class BayesianTimeToEvent:
             self._times_to_event.append(event_time)
             self._recruitment_times.append(recruitment_time)
 
-    def test(self, time, cutoff, probability, less_than=True):
+    def test(self, time, cutoff, probability, less_than=True):  # type: ignore
         """Tests the posterior belief about the median time-to-event.
 
         This method tests whether the median time-to-event is less than or
@@ -93,14 +94,14 @@ class BayesianTimeToEvent:
         # Filter to just patients who are registered by time
         registered_patients = recruit_time <= time
         has_failed = (
-            time - recruit_time[registered_patients] > event_time[registered_patients]
+            time - recruit_time[registered_patients] > event_time[registered_patients]  # type: ignore
         )
         survival_time = np.array(
             [
                 min(x, y)
                 for (x, y) in zip(
-                    time - recruit_time[registered_patients],
-                    event_time[registered_patients],
+                    time - recruit_time[registered_patients],  # type: ignore
+                    event_time[registered_patients],  # type: ignore
                 )
             ]
         )
@@ -133,12 +134,12 @@ class BayesianTimeToEvent:
         test_report["Cutoff"] = cutoff
         test_report["Certainty"] = probability
         test_report["Probability"] = test_probability
-        test_report["LessThan"] = atomic_to_json(less_than)
-        test_report["Stop"] = atomic_to_json(stop_trial)
+        test_report["LessThan"] = atomic_to_json(less_than)  # type: ignore
+        test_report["Stop"] = atomic_to_json(stop_trial)  # type: ignore
         return test_report
 
 
-def matrix_cohort_analysis(
+def matrix_cohort_analysis(  # type: ignore
     n_simulations,
     n_patients,
     true_median,
@@ -187,7 +188,7 @@ def matrix_cohort_analysis(
     """
     reports = []
     for i in range(n_simulations):
-        trial = BayesianTimeToEvent(alpha_prior, beta_prior)
+        trial = BayesianTimeToEvent(alpha_prior, beta_prior)  # type: ignore
         recruitment_stream.reset()
         # recruitment_times = np.arange(1, n_patients+1) / recruitment
         recruitment_times = np.array(
@@ -197,11 +198,11 @@ def matrix_cohort_analysis(
         event_times = expon(scale=true_mean).rvs(
             n_patients
         )  # Exponential survival times
-        cases = [(x, y) for (x, y) in zip(event_times, recruitment_times)]
-        trial.update(cases)
+        cases = [(x, y) for (x, y) in zip(event_times, recruitment_times)]  # type: ignore
+        trial.update(cases)  # type: ignore
         interim_analysis_times = list(
             {
-                recruitment_times[x - 1] + interim_analysis_time_delta
+                recruitment_times[x - 1] + interim_analysis_time_delta  # type: ignore
                 for x in interim_analysis_after_patients
                 if x < n_patients
             }
@@ -222,12 +223,12 @@ def matrix_cohort_analysis(
         trial_report["FinalAnalysisTimeDelta"] = final_analysis_time_delta
         # trial_report['Recruitment'] = recruitment
         # Simulated patient outcomes
-        trial_report["RecruitmentTimes"] = iterable_to_json(recruitment_times)
-        trial_report["EventTimes"] = iterable_to_json(event_times)
+        trial_report["RecruitmentTimes"] = iterable_to_json(recruitment_times)  # type: ignore
+        trial_report["EventTimes"] = iterable_to_json(event_times)  # type: ignore
         trial_report["InterimAnalyses"] = []
         # Interim analyses
         for time in interim_analysis_times:
-            interim_outcome = trial.test(
+            interim_outcome = trial.test(  # type: ignore
                 time, lower_cutoff, interim_certainty, less_than=True
             )
             trial_report["InterimAnalyses"].append(interim_outcome)
@@ -241,7 +242,7 @@ def matrix_cohort_analysis(
                 return trial_report
         # Final analysis
         final_analysis_time = max(recruitment_times) + final_analysis_time_delta
-        final_outcome = trial.test(
+        final_outcome = trial.test(  # type: ignore
             final_analysis_time, upper_cutoff, final_certainty, less_than=False
         )
         trial_report["FinalAnalysis"] = final_outcome

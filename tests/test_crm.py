@@ -18,15 +18,15 @@ from clintrials.dosefinding.crm import CRM, crm
 from clintrials.core.math import inverse_logit1, logit1
 
 
-def setup_func():
+def setup_func():  # type: ignore
     pass
 
 
-def teardown_func():
+def teardown_func():  # type: ignore
     pass
 
 
-def test_CRM_bayes():
+def test_CRM_bayes():  # type: ignore
 
     # Test that Bayesian CRM works by reproducing Table 3.2 on p.26 of Cheung's book:
     # Dose Finding By The Continual Reassessment Method, (Chapman & Hall/CRC Biostatistics Series)
@@ -94,7 +94,7 @@ def test_CRM_bayes():
     beta_prior = norm(loc=0, scale=np.sqrt(1.34))
 
     # Our trial object
-    crm = CRM(
+    crm = CRM(  # type: ignore
         prior,
         toxicity_target,
         first_dose,
@@ -118,7 +118,7 @@ def test_CRM_bayes():
         assert abs(crm.beta_hat - beta_hats[patient_no - 1]) <= beta_hat_epsilon
 
 
-def test_CRM_mle():
+def test_CRM_mle():  # type: ignore
 
     # Test that MLE CRM works by reproducing an example in Python that can be verified in R
     # using Cheung's dfcrm package.
@@ -156,7 +156,7 @@ def test_CRM_mle():
     beta_prior = norm(loc=0, scale=np.sqrt(1.34))
 
     # Our trial object
-    crm = CRM(
+    crm = CRM(  # type: ignore
         prior,
         toxicity_target,
         first_dose,
@@ -181,13 +181,13 @@ def test_CRM_mle():
     # This is all verifiable in R.
 
 
-def test_CRM_bayes_again():
+def test_CRM_bayes_again():  # type: ignore
     prior = [0.1, 0.2, 0.4, 0.6]
     target = 0.4
     doses = [1, 1, 1, 2, 2, 2]
     tox = [0, 0, 0, 1, 0, 1]
     cases = list(zip(doses, tox))
-    trial_plugin_1 = CRM(
+    trial_plugin_1 = CRM(  # type: ignore
         prior,
         target,
         1,
@@ -197,7 +197,7 @@ def test_CRM_bayes_again():
         use_quick_integration=False,
         plugin_mean=True,
     )
-    trial_plugin_2 = CRM(
+    trial_plugin_2 = CRM(  # type: ignore
         prior,
         target,
         1,
@@ -207,7 +207,7 @@ def test_CRM_bayes_again():
         use_quick_integration=True,
         plugin_mean=True,
     )
-    trial_plugin_3 = CRM(
+    trial_plugin_3 = CRM(  # type: ignore
         prior,
         target,
         1,
@@ -217,7 +217,7 @@ def test_CRM_bayes_again():
         use_quick_integration=False,
         plugin_mean=True,
     )
-    trial_plugin_4 = CRM(
+    trial_plugin_4 = CRM(  # type: ignore
         prior,
         target,
         1,
@@ -233,26 +233,26 @@ def test_CRM_bayes_again():
     trial_plugin_4.update(cases)
 
     assert np.all(
-        np.array(trial_plugin_1.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])
+        np.array(trial_plugin_1.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])  # type: ignore
         < 0.001
     )
     assert np.all(
-        np.array(trial_plugin_2.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])
+        np.array(trial_plugin_2.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])  # type: ignore
         < 0.001
     )
     assert np.all(
-        np.array(trial_plugin_3.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])
+        np.array(trial_plugin_3.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])  # type: ignore
         < 0.001
     )
     assert np.all(
-        np.array(trial_plugin_4.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])
+        np.array(trial_plugin_4.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])  # type: ignore
         < 0.001
     )
     # These are verifiable in R
 
 
 class TestCRMMLEVariance:
-    def setup_method(self):
+    def setup_method(self):  # type: ignore
         self.prior = [0.05, 0.12, 0.25, 0.40, 0.55]
         self.target = 0.25
         self.F_func = logistic
@@ -261,8 +261,8 @@ class TestCRMMLEVariance:
         self.doses = [3, 3, 1, 2, 2, 3, 3, 2, 3, 2, 1, 2, 1, 1, 1, 2, 2]
         self.tox = [0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0]
 
-    def test_mle_variance_hessian(self):
-        trial = CRM(
+    def test_mle_variance_hessian(self):  # type: ignore
+        trial = CRM(  # type: ignore
             self.prior,
             self.target,
             first_dose=3,
@@ -278,8 +278,8 @@ class TestCRMMLEVariance:
         assert trial.beta_var is not None
         assert trial.beta_var > 0
 
-    def test_mle_variance_bootstrap(self):
-        trial = CRM(
+    def test_mle_variance_bootstrap(self):  # type: ignore
+        trial = CRM(  # type: ignore
             self.prior,
             self.target,
             first_dose=3,
@@ -292,13 +292,13 @@ class TestCRMMLEVariance:
             mle_var_method="bootstrap",
             bootstrap_samples=50,  # Smaller sample for faster test
         )
-        trial.set_rng(np.random.default_rng(42))
+        trial.set_rng(np.random.default_rng(42))  # type: ignore
         trial.update(list(zip(self.doses, self.tox)))
         assert trial.beta_var is not None
         assert trial.beta_var > 0
 
-    def test_mle_variance_comparison(self):
-        trial_hessian = CRM(
+    def test_mle_variance_comparison(self):  # type: ignore
+        trial_hessian = CRM(  # type: ignore
             self.prior,
             self.target,
             first_dose=3,
@@ -312,7 +312,7 @@ class TestCRMMLEVariance:
         )
         trial_hessian.update(list(zip(self.doses, self.tox)))
 
-        trial_bootstrap = CRM(
+        trial_bootstrap = CRM(  # type: ignore
             self.prior,
             self.target,
             first_dose=3,
@@ -325,7 +325,7 @@ class TestCRMMLEVariance:
             mle_var_method="bootstrap",
             bootstrap_samples=200,
         )
-        trial_bootstrap.set_rng(np.random.default_rng(42))
+        trial_bootstrap.set_rng(np.random.default_rng(42))  # type: ignore
         trial_bootstrap.update(list(zip(self.doses, self.tox)))
 
         assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.3)
@@ -334,7 +334,7 @@ class TestCRMMLEVariance:
         assert np.isclose(trial_hessian.beta_se, np.sqrt(trial_hessian.beta_var))
         assert np.isclose(trial_bootstrap.beta_se, np.sqrt(trial_bootstrap.beta_var))
 
-    def test_crm_function_se_return(self):
+    def test_crm_function_se_return(self):  # type: ignore
         # Test that crm() returns 5 elements when estimate_var=True
         res = crm(
             self.prior,
@@ -365,7 +365,7 @@ class TestCRMMLEVariance:
         assert len(res_no_var) == 4
 
 
-def test_CRM_class_with_generated_fixtures():
+def test_CRM_class_with_generated_fixtures():  # type: ignore
     # Load the fixtures
     expected_probs = pd.read_csv("tests/fixtures/expected_posterior_dlt_probs.csv")
     expected_doses = pd.read_csv("tests/fixtures/next_dose_recommendations.csv")
@@ -377,7 +377,7 @@ def test_CRM_class_with_generated_fixtures():
     dlt_1 = [0, 0, 0, 1, 1, 1]
     cases_1 = list(zip(doses_1, dlt_1))
 
-    trial1 = CRM(
+    trial1 = CRM(  # type: ignore
         prior=p_tox_prior_1,
         target=target_tox_1,
         first_dose=1,
@@ -407,7 +407,7 @@ def test_CRM_class_with_generated_fixtures():
     dlt_2 = [0, 0, 0, 0, 0, 0]
     cases_2 = list(zip(doses_2, dlt_2))
 
-    trial2 = CRM(
+    trial2 = CRM(  # type: ignore
         prior=p_tox_prior_2,
         target=target_tox_2,
         first_dose=1,
@@ -433,14 +433,14 @@ def test_CRM_class_with_generated_fixtures():
 
 
 
-def test_prob_tox_exceeds_bootstrap_deprecation():
+def test_prob_tox_exceeds_bootstrap_deprecation():  # type: ignore
     # Instantiate CRM model
     prior = [0.1, 0.2, 0.3, 0.4]
     target = 0.3
     dose_levels = [1, 2, 3]
     toxicities = [0, 0, 1]
 
-    model = CRM(prior=prior, target=target, first_dose=1, max_size=3)
+    model = CRM(prior=prior, target=target, first_dose=1, max_size=3)  # type: ignore
     model.update(list(zip(dose_levels, toxicities)))
     model.estimate_var = True
     model.beta_hat = 0.5
