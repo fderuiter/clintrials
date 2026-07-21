@@ -914,7 +914,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         Returns:
             int: The optimal biological dose.
         """
-        admiss, u, u_star, obd, u_cushion = solve_metrizable_efftox_scenario(
+        admiss, u, _, obd, _ = solve_metrizable_efftox_scenario(
             prob_tox, prob_eff, self.metric, self.tox_cutoff, self.eff_cutoff
         )
         return obd
@@ -1026,88 +1026,6 @@ def solve_metrizable_efftox_scenario(prob_tox: Any, prob_eff: Any, metric: Any, 
             return conform, util, u1, obd, np.nan
 
     return conform, util, np.nan, -1, np.nan
-
-
-def get_obd(tox_curve: Any, eff_curve: Any, metric: Any, tox_cutoff: Any, eff_cutoff: Any) -> Any:
-    """Gets the optimal biologically-effective dose (OBD)."""
-    X = solve_metrizable_efftox_scenario(
-        tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff
-    )
-    conform, util, u_star, obd, u_cushion = X
-    return obd
-
-
-def get_conformative_doses(tox_curve: Any, eff_curve: Any, metric: Any, tox_cutoff: Any, eff_cutoff: Any) -> Any:
-    """Gets the set of conformative doses."""
-    X = solve_metrizable_efftox_scenario(
-        tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff
-    )
-    conform, util, u_star, obd, u_cushion = X
-    return [int(x) for x in conform]
-
-
-def get_util(tox_curve: Any, eff_curve: Any, metric: Any, tox_cutoff: Any, eff_cutoff: Any) -> Any:
-    """Gets the utilities of the doses."""
-    X = solve_metrizable_efftox_scenario(
-        tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff
-    )
-    conform, util, u_star, obd, u_cushion = X
-    return np.round(util, 2)
-
-
-def classify_problem(delta: Any, prob_tox: Any, prob_eff: Any, metric: Any, tox_cutoff: Any, eff_cutoff: Any, text_label: Any = True) -> Any:
-    """Classifies the dose-finding problem."""
-    X = solve_metrizable_efftox_scenario(
-        prob_tox, prob_eff, metric, tox_cutoff, eff_cutoff
-    )
-    conform, util, u_star, obd, u_cushion = X
-    dose_within_delta = np.array([u >= (1 - delta) * u_star for u in util])
-    if obd == -1:
-        return "Stop" if text_label else 1
-    elif sum(dose_within_delta) == 1:
-        return "Optimal" if text_label else 2
-    else:
-        return "Desirable" if text_label else 3
-
-
-def get_problem_class(delta: Any, tox_curve: Any, eff_curve: Any, metric: Any, tox_cutoff: Any, eff_cutoff: Any) -> Any:
-    """Gets the class of the dose-finding problem."""
-    return classify_problem(delta, tox_curve, eff_curve, metric, tox_cutoff, eff_cutoff)
-
-
-def classify_tox_class(prob_tox: Any, tox_cutoff: Any, text_label: Any = True) -> Any:
-    """Classifies the toxicity profile."""
-    prob_tox = np.array(prob_tox)
-    if sum(prob_tox < tox_cutoff) == len(prob_tox):
-        return "Tolerable" if text_label else 1
-    elif sum(prob_tox > tox_cutoff) == len(prob_tox):
-        return "Toxic" if text_label else 2
-    else:
-        return "Mixed" if text_label else 3
-
-
-def get_tox_class(tox_curve: Any, tox_cutoff: Any) -> Any:
-    """Gets the toxicity class."""
-    return classify_tox_class(tox_curve, tox_cutoff)
-
-
-def classify_eff_class(prob_eff: Any, eff_cutoff: Any, text_label: Any = True) -> Any:
-    """Classifies the efficacy profile."""
-    prob_eff = np.array(prob_eff)
-    max_eff = np.max(prob_eff)
-    if np.all([prob_eff[i] > prob_eff[i - 1] for i in range(1, len(prob_eff))]):
-        return "Monotonic" if text_label else 1
-    elif sum(prob_eff == max_eff) == 1:
-        return "Unimodal" if text_label else 2
-    elif sum(prob_eff == max_eff) > 1:
-        return "Plateau" if text_label else 3
-    else:
-        return "Weird" if text_label else 4
-
-
-def get_eff_class(eff_curve: Any, eff_cutoff: Any) -> Any:
-    """Gets the efficacy class."""
-    return classify_eff_class(eff_curve, eff_cutoff)
 
 
 def efftox_dtp_detail(trial: Any) -> Any:

@@ -349,7 +349,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         Returns:
             int: The optimal biological dose.
         """
-        admiss, u, u_star, obd, u_cushtion = solve_metrizable_efftox_scenario(
+        admiss, u, _, obd, _ = solve_metrizable_efftox_scenario(
             prob_tox, prob_eff, self.metric, self.tox_limit, self.eff_limit
         )
         return obd  # type: ignore
