@@ -1,13 +1,17 @@
+"""Widget factories and UI components for the dashboard."""
 from __future__ import annotations
 
 
-
 class ScopedUIRegistry(dict):
+    """Registry for scoping UI help text to specific designs."""
+
     def __init__(self):
+        """Initialize the ScopedUIRegistry."""
         super().__init__()
         self._namespaces = {}
 
     def set_help(self, namespace, var_name, desc):
+        """Set help text for a specific namespace and variable name."""
         if namespace not in self._namespaces:
             self._namespaces[namespace] = {}
         self._namespaces[namespace][var_name] = desc
@@ -15,6 +19,7 @@ class ScopedUIRegistry(dict):
         self[var_name] = desc
 
     def get_help(self, var_name, design_type=None):
+        """Get help text for a variable name, optionally scoped by design type."""
         if design_type and design_type in self._namespaces:
             if var_name in self._namespaces[design_type]:
                 return self._namespaces[design_type][var_name]
@@ -116,8 +121,9 @@ UI_REGISTRY = _build_registry()  # type: ignore
 
 
 def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: ignore
-    """Factory function to create a Streamlit widget with an automatically
-    applied help text based on the variable name.
+    """Factory function to create a Streamlit widget.
+
+    It automatically applies help text based on the variable name.
     """
     design_type = kwargs.pop("design_type", None)
     if not design_type and hasattr(st_module, "session_state"):
@@ -135,13 +141,16 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: i
         return st_module.sidebar.number_input(*args, **kwargs)
     elif widget_type == "button":
         return st_module.sidebar.button(*args, **kwargs)
+    elif widget_type == "checkbox":
+        return st_module.sidebar.checkbox(*args, **kwargs)
+    elif widget_type == "radio":
+        return st_module.sidebar.radio(*args, **kwargs)
     else:
         raise ValueError(f"Unsupported widget type: {widget_type}")
 
 
 def render_metric(st_module, label, value, precision=4):  # type: ignore
-    """Renders a semantic metric card with configurable numeric precision for statistical floats.
-    """
+    """Renders a semantic metric card with configurable numeric precision for statistical floats."""
     from clintrials.visualization.helpers import format_number
     if isinstance(value, float):
         formatted_value = format_number(value)
@@ -156,8 +165,7 @@ def render_metric(st_module, label, value, precision=4):  # type: ignore
 
 
 def render_accessible_chart(st_module, fig, expander_label="Data Summary"):  # type: ignore
-    """Shared utility to render a Plotly chart with an accessible Markdown table summary.
-    """
+    """Shared utility to render a Plotly chart with an accessible Markdown table summary."""
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
 
     if hasattr(fig, "layout") and hasattr(fig.layout, "meta"):

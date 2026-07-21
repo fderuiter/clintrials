@@ -1,3 +1,4 @@
+"""Reporting module for generating accessible PDF summaries."""
 from __future__ import annotations
 import re
 from contextlib import contextmanager

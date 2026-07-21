@@ -1,3 +1,4 @@
+"""Helper visualization utilities."""
 from __future__ import annotations
 import numpy as np
 from typing import Union, List, Dict, Any
@@ -23,4 +24,3 @@ def format_number(v: float | int | Any) -> str:
     if isinstance(v, (float, np.float64)):
         return f"{v:.4f}"
     return str(v)
-

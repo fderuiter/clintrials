@@ -157,13 +157,16 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):  # type: ignore
 
 def test_crm_view_render_success(monkeypatch):  # type: ignore
     """render() should summarise simulations and plot results when data is valid."""
-    import importlib
     import sys
+
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(crm_view)
 
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(crm_view, "st", st_mock)
 
     summary_df = pd.DataFrame(
@@ -174,7 +177,7 @@ def test_crm_view_render_success(monkeypatch):  # type: ignore
         index=pd.Index([0.1], name="true_tox"),
     )
     summarise_mock = MagicMock(return_value=summary_df)
-    monkeypatch.setattr(crm_view, "extract_sim_data", summarise_mock)
+    monkeypatch.setattr(sim, "extract_sim_data", summarise_mock)
 
     bar_fig = object()
     import clintrials.visualization as viz
@@ -184,7 +187,8 @@ def test_crm_view_render_success(monkeypatch):  # type: ignore
     )
 
     sims = [{"recommended_dose": 1}, {"recommended_dose": 2}]
-    crm_view.render(sims)
+    render_func = PROTOCOL_REGISTRY.get_render("CRM")
+    render_func(sims)
 
     summarise_mock.assert_called_once()
     viz.plot_crm_simulation_recommendation.assert_called_once()  # type: ignore
@@ -193,31 +197,40 @@ def test_crm_view_render_success(monkeypatch):  # type: ignore
 
 def test_crm_view_warns_without_recommended(monkeypatch):  # type: ignore
     """If the summary lacks recommendation information a warning is shown."""
-    import importlib
     import sys
 
-    st_mock = _make_streamlit_mock()  # type: ignore
-    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(crm_view)
+    import clintrials.visualization.dashboard.views.crm_view as crm_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
+    st_mock = _make_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    import importlib
+    importlib.reload(crm_view)
     monkeypatch.setattr(crm_view, "st", st_mock)
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
 
     summary_df = pd.DataFrame({"N": [1]}, index=pd.Index([0.1], name="true_tox"))
-    monkeypatch.setattr(crm_view, "extract_sim_data", MagicMock(return_value=summary_df))
+    monkeypatch.setattr(sim, "extract_sim_data", MagicMock(return_value=summary_df))
 
-    crm_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("CRM")
+    render_func([{}])
     st_mock.warning.assert_called_once()
 
 
 def test_efftox_view_render_success(monkeypatch):  # type: ignore
     """EffTox view should plot recommendation and acceptability probabilities."""
-    import importlib
     import sys
+
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(efftox_view)
 
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(efftox_view, "st", st_mock)
 
     index = pd.MultiIndex.from_tuples(
@@ -233,7 +246,7 @@ def test_efftox_view_render_success(monkeypatch):  # type: ignore
         index=index,
     )
     monkeypatch.setattr(
-        efftox_view, "extract_sim_data", MagicMock(return_value=summary_df)
+        sim, "extract_sim_data", MagicMock(return_value=summary_df)
     )
 
     import clintrials.visualization as viz
@@ -243,7 +256,8 @@ def test_efftox_view_render_success(monkeypatch):  # type: ignore
     monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", bar_mock)
     monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", line_mock)
 
-    efftox_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("EffTox")
+    render_func([{}])
 
     bar_mock.assert_called_once()
     line_mock.assert_called_once()
@@ -253,19 +267,25 @@ def test_efftox_view_render_success(monkeypatch):  # type: ignore
 
 def test_efftox_view_warns_when_empty(monkeypatch):  # type: ignore
     """If the summary dataframe is empty a warning is shown."""
-    import importlib
     import sys
 
-    st_mock = _make_streamlit_mock()  # type: ignore
-    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(efftox_view)
+    import clintrials.visualization.dashboard.views.efftox_view as efftox_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
+    st_mock = _make_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    import importlib
+    importlib.reload(efftox_view)
     monkeypatch.setattr(efftox_view, "st", st_mock)
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
-        efftox_view, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
+        sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
     )
 
-    efftox_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("EffTox")
+    render_func([{}])
     st_mock.warning.assert_called_once()
 
 
@@ -309,13 +329,16 @@ def test_winratio_view_render_success(monkeypatch):  # type: ignore
 
 def test_watu_view_render_success(monkeypatch):  # type: ignore
     """WATU view should plot recommendation probabilities."""
-    import importlib
     import sys
+
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(watu_view)
 
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(watu_view, "st", st_mock)
 
     index = pd.MultiIndex.from_tuples(
@@ -329,7 +352,7 @@ def test_watu_view_render_success(monkeypatch):  # type: ignore
         index=index,
     )
     monkeypatch.setattr(
-        watu_view, "extract_sim_data", MagicMock(return_value=summary_df)
+        sim, "extract_sim_data", MagicMock(return_value=summary_df)
     )
 
     import clintrials.visualization as viz
@@ -337,7 +360,8 @@ def test_watu_view_render_success(monkeypatch):  # type: ignore
     bar_mock = MagicMock(return_value="fig_bar")
     monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", bar_mock)
 
-    watu_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("WATU")
+    render_func([{}])
 
     bar_mock.assert_called_once()
     # st.plotly_chart called once
@@ -346,19 +370,25 @@ def test_watu_view_render_success(monkeypatch):  # type: ignore
 
 def test_watu_view_warns_when_empty(monkeypatch):  # type: ignore
     """If the summary dataframe is empty a warning is shown."""
-    import importlib
     import sys
 
-    st_mock = _make_streamlit_mock()  # type: ignore
-    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
-    importlib.reload(watu_view)
+    import clintrials.visualization.dashboard.views.watu_view as watu_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
+    st_mock = _make_streamlit_mock()
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+    import importlib
+    importlib.reload(watu_view)
     monkeypatch.setattr(watu_view, "st", st_mock)
+    import clintrials.core.simulation as sim
+    import clintrials.utils as utils
+    monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
-        watu_view, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
+        sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
     )
 
-    watu_view.render([{}])
+    render_func = PROTOCOL_REGISTRY.get_render("WATU")
+    render_func([{}])
     st_mock.warning.assert_called_once()
 
 

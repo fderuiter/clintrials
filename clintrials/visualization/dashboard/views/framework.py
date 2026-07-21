@@ -1,7 +1,64 @@
+"""Framework tools for declarative and reusable simulation dashboard views."""
+
 from functools import wraps
 
 from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
+
+
+class BaseSimulationView:
+    """Base declarative view class for trial design simulation dashboards."""
+
+    model_name = ""
+    title = ""
+    file_prefix = ""
+    param_space_config = {}
+    model_class = None
+    var_map = None
+    csv_index = True
+    skip_summary_table = False
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        """Register the view automatically on subclassing."""
+        super().__init_subclass__(**kwargs)
+        if cls.model_name:
+            from clintrials.core.registry import PROTOCOL_REGISTRY
+
+            decorated_render = dashboard_view(
+                title=cls.title,
+                model_name=cls.model_name,
+                file_prefix=cls.file_prefix,
+                csv_index=cls.csv_index,
+                skip_summary_table=cls.skip_summary_table,
+                param_space_config=cls.param_space_config,
+            )(cls._base_render)
+
+            preview = None
+            if "preview_sims" in cls.__dict__:
+                preview = cls.preview_sims
+
+            PROTOCOL_REGISTRY.register_manual(
+                cls.model_name, render_func=decorated_render, preview_func=preview
+            )
+
+    @classmethod
+    def _base_render(cls, sims, ps=None):
+        """Render the sidebar controls, parse parameter combinations, and execute the view mapping."""
+        from clintrials.core.simulation import extract_sim_data
+
+        func_map = cls.model_class.get_summary_functions()
+        summary_df = extract_sim_data(
+            sims, ps, func_map, var_map=cls.var_map, return_type="dataframe"
+        )
+
+        figures = cls.build_figures(summary_df)
+        return summary_df, figures
+
+    @classmethod
+    def build_figures(cls, summary_df):
+        """Build figures from the simulation summary dataframe. Should be overridden."""
+        return []
 
 
 from clintrials.utils import ParameterSpace

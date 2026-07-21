@@ -1,3 +1,4 @@
+"""Dashboard CLI launcher."""
 from __future__ import annotations
 # ruff: noqa: T201
 import argparse
