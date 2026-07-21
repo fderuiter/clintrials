@@ -2,6 +2,7 @@ import dataclasses
 from typing import Annotated, List, Optional, Union, get_args, get_origin
 
 from clintrials.core.errors import ErrorTemplates
+from clintrials.validation import validate_bounds, validate_probability, validate_positive_integer
 
 
 class FieldInfo:
@@ -53,14 +54,10 @@ class BaseModel:
             return
 
         def check_bounds(v, constraints):
-            if constraints.ge is not None and v < constraints.ge:
-                raise ValueError(ErrorTemplates.GE.format(name=name, bound=constraints.ge))
-            if constraints.le is not None and v > constraints.le:
-                raise ValueError(ErrorTemplates.LE.format(name=name, bound=constraints.le))
-            if constraints.gt is not None and v <= constraints.gt:
-                raise ValueError(ErrorTemplates.GT.format(name=name, bound=constraints.gt))
-            if constraints.lt is not None and v >= constraints.lt:
-                raise ValueError(ErrorTemplates.LT.format(name=name, bound=constraints.lt))
+            if constraints.ge is not None or constraints.le is not None:
+                validate_bounds(v, lower=constraints.ge, upper=constraints.le, name=name, exclusive=False)
+            if constraints.gt is not None or constraints.lt is not None:
+                validate_bounds(v, lower=constraints.gt, upper=constraints.lt, name=name, exclusive=True)
 
         def is_list_annotation(ann):
             if ann is None:
@@ -104,19 +101,15 @@ class BaseModel:
                     is_pos_int = True
 
                 if isinstance(arg, FieldInfo):
-                    if is_prob and (value < 0.0 or value > 1.0):
-                        raise ValueError(ErrorTemplates.PROBABILITY.format(name=name))
-                    elif is_pos_int and value <= 0:
-                        raise ValueError(ErrorTemplates.POSITIVE_INTEGER.format(name=name))
+                    if is_prob:
+                        validate_probability(value, name)
+                    elif is_pos_int:
+                        validate_positive_integer(value, name)
                     else:
-                        if arg.ge is not None and value < arg.ge:
-                            raise ValueError(ErrorTemplates.GE.format(name=name, bound=arg.ge))
-                        if arg.le is not None and value > arg.le:
-                            raise ValueError(ErrorTemplates.LE.format(name=name, bound=arg.le))
-                        if arg.gt is not None and value <= arg.gt:
-                            raise ValueError(ErrorTemplates.GT.format(name=name, bound=arg.gt))
-                        if arg.lt is not None and value >= arg.lt:
-                            raise ValueError(ErrorTemplates.LT.format(name=name, bound=arg.lt))
+                        if arg.ge is not None or arg.le is not None:
+                            validate_bounds(value, lower=arg.ge, upper=arg.le, name=name, exclusive=False)
+                        if arg.gt is not None or arg.lt is not None:
+                            validate_bounds(value, lower=arg.gt, upper=arg.lt, name=name, exclusive=True)
         elif origin is list or getattr(origin, "__origin__", origin) is list:
             args = get_args(annotation)
             if args:
