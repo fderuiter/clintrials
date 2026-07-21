@@ -20,6 +20,6 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: Install dependencies
-        run: poetry install --with dev
+        run: poetry install --with dev -E viz
       - name: Run pre-commit
         run: poetry run pre-commit run --all-files --show-diff-on-failure
