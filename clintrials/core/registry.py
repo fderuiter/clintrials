@@ -66,8 +66,11 @@ CORE_REGISTRY: Dict[str, Any] = {
 }
 
 import importlib
+import logging
 import pkgutil
 from typing import Any, Dict, Callable, Optional, List, TYPE_CHECKING
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     import clintrials.visualization.dashboard.views as views
@@ -109,7 +112,9 @@ class ProtocolRegistry:
             callable: A decorator function for registering the render method.
         """
         def decorator(render_func: Callable) -> Callable:  # type: ignore
-            if name not in self._designs:
+            if name in self._designs:
+                logger.warning(f"Duplicate registration encountered for design name: {name}")
+            else:
                 self._designs[name] = {}
             self._designs[name]["render"] = render_func
             if preview_func:
@@ -119,6 +124,8 @@ class ProtocolRegistry:
 
     def register_manual(self, name: str, render_func: Callable, preview_func: Optional[Callable] = None) -> None:  # type: ignore
         """Manually register a protocol design with its render and preview functions."""
+        if name in self._designs:
+            logger.warning(f"Duplicate manual registration encountered for design name: {name}")
         self._designs[name] = {"render": render_func, "preview": preview_func}
 
     def get_designs(self) -> List[str]:
