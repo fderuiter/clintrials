@@ -4,6 +4,21 @@ from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
 
 
+from clintrials.utils import ParameterSpace
+
+
+def render_sidebar_config(param_space_config: dict) -> ParameterSpace:
+    """Render the sidebar configuration and return the parameter space."""
+    import streamlit as st
+
+    st.sidebar.header("Trial Parameters")
+    ps = ParameterSpace()
+    for k, v in param_space_config.items():
+        ps.add(k, v)
+    st.sidebar.json(param_space_config)
+    return ps
+
+
 def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):  # type: ignore
     """Decorator to generate a standard dashboard view."""
     def decorator(func):
@@ -18,12 +33,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
 
             ps = None
             if param_space_config is not None:
-                st.sidebar.header("Trial Parameters")
-                from clintrials.utils import ParameterSpace
-                ps = ParameterSpace()
-                for k, v in param_space_config.items():
-                    ps.add(k, v)
-                st.sidebar.json(param_space_config)
+                ps = render_sidebar_config(param_space_config)
 
             st.header(title)
 

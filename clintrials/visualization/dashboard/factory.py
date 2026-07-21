@@ -142,12 +142,13 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: i
 def render_metric(st_module, label, value, precision=4):  # type: ignore
     """Renders a semantic metric card with configurable numeric precision for statistical floats.
     """
+    from clintrials.visualization.helpers import format_number
     if isinstance(value, float):
-        formatted_value = f"{value:.{precision}f}"
+        formatted_value = format_number(value)
     elif isinstance(value, (list, tuple)) and all(
         isinstance(x, (int, float)) for x in value
     ):
-        formatted_value = "(" + ", ".join(f"{x:.{precision}f}" for x in value) + ")"
+        formatted_value = "(" + ", ".join(format_number(x) for x in value) + ")"
     else:
         formatted_value = str(value)
 

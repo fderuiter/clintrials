@@ -99,7 +99,8 @@ def render() -> None:
         rejected = [sim.get("Rejected", False) for sim in sims]
         power = sum(rejected) / len(rejected) if rejected else 0.0
 
-        st.write(f"Empirical Power / Type I Error: {power:.4f}")
+        from clintrials.visualization.helpers import format_number
+        st.write(f"Empirical Power / Type I Error: {format_number(power)}")
 
         results_dict = {
             "k": k,
