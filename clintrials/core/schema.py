@@ -1,8 +1,11 @@
 import dataclasses
 from typing import Annotated, List, Optional, Union, get_args, get_origin
 
-from clintrials.core.errors import ErrorTemplates
-from clintrials.validation import validate_bounds, validate_probability, validate_positive_integer
+from clintrials.validation import (
+    validate_bounds,
+    validate_positive_integer,
+    validate_probability,
+)
 
 
 class FieldInfo:
