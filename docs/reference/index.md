@@ -28,6 +28,8 @@
 - [`clintrials.visualization.dashboard.views.crm_view`](generated/clintrials.visualization.dashboard.views.crm_view.rst)
 - [`clintrials.visualization.dashboard.views.efftox_view`](generated/clintrials.visualization.dashboard.views.efftox_view.rst)
 - [`clintrials.visualization.dashboard.views.framework`](generated/clintrials.visualization.dashboard.views.framework.rst)
+- [`clintrials.visualization.dashboard.views.gsd_view`](generated/clintrials.visualization.dashboard.views.gsd_view.rst)
+- [`clintrials.visualization.dashboard.views.wagestait_view`](generated/clintrials.visualization.dashboard.views.wagestait_view.rst)
 - [`clintrials.visualization.dashboard.views.watu_view`](generated/clintrials.visualization.dashboard.views.watu_view.rst)
 - [`clintrials.visualization.dashboard.views.winratio_view`](generated/clintrials.visualization.dashboard.views.winratio_view.rst)
 - [`clintrials.winratio.compare`](generated/clintrials.winratio.compare.rst)
