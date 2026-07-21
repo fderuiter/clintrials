@@ -914,7 +914,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         Returns:
             int: The optimal biological dose.
         """
-        admiss, u, u_star, obd, u_cushion = solve_metrizable_efftox_scenario(
+        admiss, u, _, obd, _ = solve_metrizable_efftox_scenario(
             prob_tox, prob_eff, self.metric, self.tox_cutoff, self.eff_cutoff
         )
         return obd

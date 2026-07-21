@@ -29,7 +29,6 @@ _._EfficacyToxicityDoseFindingTrial__reset  # unused method (clintrials/dosefind
 _.dose_allocation_mode  # unused attribute (clintrials/dosefinding/watu.py:232)
 _._EfficacyToxicityDoseFindingTrial__calculate_next_dose  # unused method (clintrials/dosefinding/watu.py:265)
 _._EfficacyToxicityDoseFindingTrial__reset  # unused method (clintrials/dosefinding/watu.py:319)
-u_cushtion  # unused variable (clintrials/dosefinding/watu.py:352)
 spending_function_pocock  # unused function (clintrials/phase3/gsd.py:16)
 _.simulate  # unused method (clintrials/phase3/gsd.py:213)
 owner  # unused variable (clintrials/utils.py:191)
