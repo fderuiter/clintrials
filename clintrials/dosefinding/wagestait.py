@@ -16,10 +16,11 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
-from scipy.stats import beta, norm
+from scipy.stats import beta
 
 from clintrials.core.errors import ErrorTemplates
 from clintrials.core.math import bernoulli_likelihood, empiric, inverse_empiric
+from clintrials.core.stats import norm
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 

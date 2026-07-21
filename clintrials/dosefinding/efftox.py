@@ -21,9 +21,9 @@ import logging
 from collections import OrderedDict
 
 from scipy.optimize import brentq
-from scipy.stats import norm
 
 from clintrials.core.math import inverse_logit, logit
+from clintrials.core.stats import norm
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json
 
