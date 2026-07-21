@@ -149,7 +149,7 @@ def main():  # type: ignore
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Accessibility Settings")
-    st.session_state["accessibility_mode"] = create_widget(st, "checkbox", "accessibility_mode", 
+    st.session_state["accessibility_mode"] = create_widget(st, "checkbox", "accessibility_mode",
         "Enable Screen-Reader Optimized Mode",
         value=st.session_state.get("accessibility_mode", False),
         help="Restructures large tables into hierarchical nested details for easier navigation."
@@ -248,7 +248,7 @@ def main():  # type: ignore
             render_func()
     else:
         st.sidebar.header("Data Mode")
-        data_mode = create_widget(st, "radio", "data_mode", 
+        data_mode = create_widget(st, "radio", "data_mode",
             "Select Data Source",
             ["Preview Mode", "Manual JSON Upload"],
             help="Switch between automatically generated preview simulations and manual file upload."

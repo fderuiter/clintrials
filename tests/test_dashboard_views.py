@@ -158,13 +158,14 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):  # type: ignore
 def test_crm_view_render_success(monkeypatch):  # type: ignore
     """render() should summarise simulations and plot results when data is valid."""
     import sys
+
     from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
 
-    import clintrials.utils as utils
     import clintrials.core.simulation as sim
+    import clintrials.utils as utils
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(crm_view, "st", st_mock)
 
@@ -197,16 +198,17 @@ def test_crm_view_render_success(monkeypatch):  # type: ignore
 def test_crm_view_warns_without_recommended(monkeypatch):  # type: ignore
     """If the summary lacks recommendation information a warning is shown."""
     import sys
-    from clintrials.core.registry import PROTOCOL_REGISTRY
+
     import clintrials.visualization.dashboard.views.crm_view as crm_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(crm_view)
     monkeypatch.setattr(crm_view, "st", st_mock)
-    import clintrials.utils as utils
     import clintrials.core.simulation as sim
+    import clintrials.utils as utils
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
 
     summary_df = pd.DataFrame({"N": [1]}, index=pd.Index([0.1], name="true_tox"))
@@ -220,13 +222,14 @@ def test_crm_view_warns_without_recommended(monkeypatch):  # type: ignore
 def test_efftox_view_render_success(monkeypatch):  # type: ignore
     """EffTox view should plot recommendation and acceptability probabilities."""
     import sys
+
     from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
 
-    import clintrials.utils as utils
     import clintrials.core.simulation as sim
+    import clintrials.utils as utils
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(efftox_view, "st", st_mock)
 
@@ -265,16 +268,17 @@ def test_efftox_view_render_success(monkeypatch):  # type: ignore
 def test_efftox_view_warns_when_empty(monkeypatch):  # type: ignore
     """If the summary dataframe is empty a warning is shown."""
     import sys
-    from clintrials.core.registry import PROTOCOL_REGISTRY
+
     import clintrials.visualization.dashboard.views.efftox_view as efftox_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(efftox_view)
     monkeypatch.setattr(efftox_view, "st", st_mock)
-    import clintrials.utils as utils
     import clintrials.core.simulation as sim
+    import clintrials.utils as utils
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
         sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
@@ -326,13 +330,14 @@ def test_winratio_view_render_success(monkeypatch):  # type: ignore
 def test_watu_view_render_success(monkeypatch):  # type: ignore
     """WATU view should plot recommendation probabilities."""
     import sys
+
     from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
 
-    import clintrials.utils as utils
     import clintrials.core.simulation as sim
+    import clintrials.utils as utils
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(watu_view, "st", st_mock)
 
@@ -366,16 +371,17 @@ def test_watu_view_render_success(monkeypatch):  # type: ignore
 def test_watu_view_warns_when_empty(monkeypatch):  # type: ignore
     """If the summary dataframe is empty a warning is shown."""
     import sys
-    from clintrials.core.registry import PROTOCOL_REGISTRY
+
     import clintrials.visualization.dashboard.views.watu_view as watu_view
+    from clintrials.core.registry import PROTOCOL_REGISTRY
 
     st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(watu_view)
     monkeypatch.setattr(watu_view, "st", st_mock)
-    import clintrials.utils as utils
     import clintrials.core.simulation as sim
+    import clintrials.utils as utils
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(
         sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())

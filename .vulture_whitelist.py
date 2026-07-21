@@ -44,3 +44,8 @@ _.page_mode  # unused attribute (clintrials/visualization/report.py:32)
 _.viewer_preferences  # unused attribute (clintrials/visualization/report.py:33)
 _.__iter__  # unused attribute (clintrials/visualization/report.py:53)
 _.artifact  # unused method (clintrials/visualization/report.py:55)
+CRMView = None
+EffToxView = None
+WATUView = None
+precision = None
+

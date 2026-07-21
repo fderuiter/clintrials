@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 
-
 class ScopedUIRegistry(dict):
+    """Registry for scoping UI help text to specific designs."""
+
     def __init__(self):
+        """Initialize the ScopedUIRegistry."""
         super().__init__()
         self._namespaces = {}
 
     def set_help(self, namespace, var_name, desc):
+        """Set help text for a specific namespace and variable name."""
         if namespace not in self._namespaces:
             self._namespaces[namespace] = {}
         self._namespaces[namespace][var_name] = desc
@@ -16,6 +19,7 @@ class ScopedUIRegistry(dict):
         self[var_name] = desc
 
     def get_help(self, var_name, design_type=None):
+        """Get help text for a variable name, optionally scoped by design type."""
         if design_type and design_type in self._namespaces:
             if var_name in self._namespaces[design_type]:
                 return self._namespaces[design_type][var_name]
@@ -118,7 +122,7 @@ UI_REGISTRY = _build_registry()  # type: ignore
 
 def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: ignore
     """Factory function to create a Streamlit widget.
-    
+
     It automatically applies help text based on the variable name.
     """
     design_type = kwargs.pop("design_type", None)
