@@ -1,13 +1,17 @@
-"""Renders the Group Sequential Design simulation view in the Streamlit dashboard.
-"""
+"""Renders the Group Sequential Design simulation view in the Streamlit dashboard."""
 
 import pandas as pd
 import streamlit as st
 
 from clintrials.core.registry import PROTOCOL_REGISTRY
+from clintrials.phase3.gsd import (
+    GroupSequentialDesign,
+    spending_function_obrien_fleming,
+    spending_function_pocock,
+)
 from clintrials.visualization.dashboard.factory import create_widget
 from clintrials.visualization.dashboard.views.framework import dashboard_view
-from clintrials.phase3.gsd import GroupSequentialDesign, spending_function_pocock, spending_function_obrien_fleming
+
 
 @PROTOCOL_REGISTRY.register("Group Sequential Design")
 @dashboard_view(
@@ -108,26 +112,26 @@ def render() -> None:
         from collections import Counter
         stop_stages = [sim.get("Stage", k) for sim in sims]
         stage_counts = Counter(stop_stages)
-        
+
         stages = list(range(1, k + 1))
         counts = [stage_counts.get(s, 0) for s in stages]
-        
+
         plot_df = pd.DataFrame({
             "Stage": stages,
             "Count": counts,
             "Outcome": ["Stop" for _ in stages]
         })
-        
+
         import clintrials.visualization as viz
         fig = viz.create_bar_chart(
-            plot_df, 
-            x="Stage", 
-            y="Count", 
-            color="Outcome", 
+            plot_df,
+            x="Stage",
+            y="Count",
+            color="Outcome",
             title="Trial Progression (Stop Stages)"
         )
         figures = [("Trial Progression (Stop Stages)", fig)]
-        
-        return df, figures, []
+
+        return pd.DataFrame([results_dict]), figures, []
 
     return None

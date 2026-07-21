@@ -1,5 +1,4 @@
-"""Renders the Wages & Tait simulation results view in the Streamlit dashboard.
-"""
+"""Renders the Wages & Tait simulation results view in the Streamlit dashboard."""
 
 import streamlit as st
 
@@ -8,9 +7,9 @@ from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
+
 def wagestait_preview_sims(target_tox, cohort_size, max_size):
-    """Generate preview simulations for the Wages & Tait model.
-    """
+    """Generate preview simulations for the Wages & Tait model."""
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
     from clintrials.dosefinding.wagestait import WagesTait
     skeletons = [
