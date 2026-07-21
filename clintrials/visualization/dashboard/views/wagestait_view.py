@@ -5,7 +5,7 @@ import streamlit as st
 from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.core.simulation import extract_sim_data
 from clintrials.utils import ParameterSpace
-from clintrials.visualization.dashboard.views.framework import dashboard_view
+from clintrials.visualization.dashboard.views.framework import dashboard_view, render_sidebar_config
 
 
 def wagestait_preview_sims(target_tox, cohort_size, max_size):
@@ -48,16 +48,11 @@ def wagestait_preview_sims(target_tox, cohort_size, max_size):
 @dashboard_view(title="Wages & Tait Simulation Results", model_name="Wages & Tait", file_prefix="wagestait_simulations")
 def render(sims):
     """Renders the Wages & Tait simulation results view."""
-    st.sidebar.header("Trial Parameters")
     param_space_config = {
         "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
         "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
     }
-    ps = ParameterSpace()
-    for k, v in param_space_config.items():
-        ps.add(k, v)
-
-    st.sidebar.json(param_space_config)
+    ps = render_sidebar_config(param_space_config)
 
     from clintrials.dosefinding.wagestait import WagesTait
     func_map = WagesTait.get_summary_functions()
