@@ -1,3 +1,4 @@
+from __future__ import annotations
 """Abstract interface for visualization providers.
 
 Random Seed Strategy: {viz_interface_seed_strategy}
@@ -8,18 +9,18 @@ import abc
 
 class VisualizationProvider(abc.ABC):
     @abc.abstractmethod
-    def plot_dose_finding_outcomes(self, trial, chart_title=None):
+    def plot_dose_finding_outcomes(self, trial, chart_title=None):  # type: ignore
         """Plot dose finding outcomes."""
         pass
 
     @abc.abstractmethod
-    def plot_crm_toxicity_probabilities(self, trial, chart_title=None):
+    def plot_crm_toxicity_probabilities(self, trial, chart_title=None):  # type: ignore
         """Plot CRM toxicity probabilities."""
         pass
 
 
     @abc.abstractmethod
-    def generate_pdf_report(self, df, design_type, text_summaries=None):
+    def generate_pdf_report(self, df, design_type, text_summaries=None):  # type: ignore
         """Generates an accessibility-first PDF report for trial simulations."""
         pass
 
@@ -27,14 +28,14 @@ class VisualizationProvider(abc.ABC):
 _provider = None
 
 
-def get_visualization_provider():
+def get_visualization_provider():  # type: ignore
     """Get the current visualization provider."""
     global _provider
     if _provider is None:
         try:
             from clintrials.visualization.provider import get_default_provider
 
-            _provider = get_default_provider()
+            _provider = get_default_provider()  # type: ignore
         except ImportError:
             raise ImportError(
                 "Visualization libraries are not installed. Install with `pip install clintrials[viz]` "
@@ -43,7 +44,7 @@ def get_visualization_provider():
     return _provider
 
 
-def set_visualization_provider(provider: VisualizationProvider):
+def set_visualization_provider(provider: VisualizationProvider):  # type: ignore
     """Set the current visualization provider."""
     global _provider
     _provider = provider

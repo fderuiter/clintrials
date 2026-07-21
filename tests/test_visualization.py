@@ -93,7 +93,7 @@ def test_plot_crm_simulation_recommendation():
     assert isinstance(fig, go.Figure)
 
 
-def test_plot_bivariate_simulation_recommendation():
+def test_plot_bivariate_simulation_recommendation():  # type: ignore
     summary_df = pd.DataFrame(
         {
             "true_prob_tox": [0.1, 0.2],

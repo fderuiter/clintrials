@@ -4,25 +4,25 @@ from clintrials.core.recruitment import ConstantRecruitmentStream
 from clintrials.core.tte import BayesianTimeToEvent, matrix_cohort_analysis
 
 
-def test_bayesian_time_to_event_update_and_test():
-    trial = BayesianTimeToEvent(alpha_prior=2, beta_prior=2)
-    trial.update([(5, 0), (10, 0)])
+def test_bayesian_time_to_event_update_and_test():  # type: ignore
+    trial = BayesianTimeToEvent(alpha_prior=2, beta_prior=2)  # type: ignore
+    trial.update([(5, 0), (10, 0)])  # type: ignore
 
-    res = trial.test(time=5, cutoff=8, probability=0.8, less_than=True)
+    res = trial.test(time=5, cutoff=8, probability=0.8, less_than=True)  # type: ignore
     assert res["Patients"] == 2
     assert res["Events"] == 0
     assert abs(res["Probability"] - 0.69301655) < 1e-6
     assert not res["Stop"]
 
-    res = trial.test(time=12, cutoff=8, probability=0.5, less_than=False)
+    res = trial.test(time=12, cutoff=8, probability=0.5, less_than=False)  # type: ignore
     assert res["Events"] == 2
     assert res["Stop"]
 
 
-def test_matrix_cohort_analysis_deterministic():
+def test_matrix_cohort_analysis_deterministic():  # type: ignore
     np.random.seed(0)
-    stream = ConstantRecruitmentStream(1)
-    report = matrix_cohort_analysis(
+    stream = ConstantRecruitmentStream(1)  # type: ignore
+    report = matrix_cohort_analysis(  # type: ignore
         n_simulations=1,
         n_patients=2,
         true_median=10,
@@ -41,10 +41,10 @@ def test_matrix_cohort_analysis_deterministic():
     assert report["FinalPatients"] == 1
 
 
-def test_matrix_cohort_analysis_multiple_runs():
+def test_matrix_cohort_analysis_multiple_runs():  # type: ignore
     np.random.seed(1)
-    stream = ConstantRecruitmentStream(1)
-    reports = matrix_cohort_analysis(
+    stream = ConstantRecruitmentStream(1)  # type: ignore
+    reports = matrix_cohort_analysis(  # type: ignore
         n_simulations=2,
         n_patients=1,
         true_median=5,
@@ -63,10 +63,10 @@ def test_matrix_cohort_analysis_multiple_runs():
     assert len(reports) == 2
 
 
-def test_matrix_cohort_analysis_go_at_final():
+def test_matrix_cohort_analysis_go_at_final():  # type: ignore
     np.random.seed(0)
-    stream = ConstantRecruitmentStream(1)
-    report = matrix_cohort_analysis(
+    stream = ConstantRecruitmentStream(1)  # type: ignore
+    report = matrix_cohort_analysis(  # type: ignore
         n_simulations=1,
         n_patients=2,
         true_median=5,

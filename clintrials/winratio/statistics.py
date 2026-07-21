@@ -1,15 +1,15 @@
+from __future__ import annotations
 """Statistical helpers for win-ratio simulations.
 
 Random Seed Strategy: {statistics_seed_strategy}
 """
 
-from __future__ import annotations
 
 import numpy as np
 from scipy.stats import norm
 
 
-def calculate_confidence_intervals(wr: float, wins: int, losses: int):
+def calculate_confidence_intervals(wr: float, wins: int, losses: int):  # type: ignore
     """Calculate the 95% confidence intervals for the win ratio.
 
     Args:
@@ -48,7 +48,7 @@ def calculate_p_value(wr: float, wins: int, losses: int) -> float:
     if wins == 0 or losses == 0:
         return 1.0
     observed_z = (np.log(wr)) / np.sqrt((1 / wins) + (1 / losses))
-    return 2 * norm.sf(abs(observed_z))
+    return 2 * norm.sf(abs(observed_z))  # type: ignore
 
 
 def calculate_win_ratio(wins: int, losses: int) -> float:

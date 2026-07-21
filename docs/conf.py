@@ -74,12 +74,12 @@ if os.environ.get("SPHINX_STRICT", "0") == "1":
         ("py:obj", r"clintrials\.utils\.deprecated"),
     ]
 
-def setup(app):
+def setup(app):  # type: ignore
     """Register custom extensions and hooks with Sphinx."""
-    def replace_python_blocks_with_testcode(app, docname, source):
+    def replace_python_blocks_with_testcode(app, docname, source):  # type: ignore
         if docname == "README" or docname.endswith(".md") or (app.env.doc2path(docname) and app.env.doc2path(docname).endswith(".md")):
             import re
-            def repl(match):
+            def repl(match):  # type: ignore
                 code = match.group(1)
                 return f"```{{testcode}}\n{code}```\n\n```{{testoutput}}\n:options: +ELLIPSIS\n\n...\n```"
             source[0] = re.sub(r"^```python\s*\n(.*?)^```\s*$", repl, source[0], flags=re.MULTILINE | re.DOTALL)

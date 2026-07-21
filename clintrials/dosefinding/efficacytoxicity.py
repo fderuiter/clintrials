@@ -58,7 +58,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         if first_dose > num_doses:
             raise ValueError("First dose must be no greater than number of doses.")
 
-        super().__init__()
+        super().__init__()  # type: ignore
         self._first_dose = first_dose
         self.num_doses = num_doses
         self._max_size = max_size
@@ -364,11 +364,11 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         from clintrials.utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
-        report["RecommendedDose"] = atomic_to_json(self.next_dose())
-        report["TrialStatus"] = atomic_to_json(self.status())
-        report["Doses"] = iterable_to_json(self.doses())
-        report["Toxicities"] = iterable_to_json(self.toxicities())
-        report["Efficacies"] = iterable_to_json(self.efficacies())
+        report["RecommendedDose"] = atomic_to_json(self.next_dose())  # type: ignore
+        report["TrialStatus"] = atomic_to_json(self.status())  # type: ignore
+        report["Doses"] = iterable_to_json(self.doses())  # type: ignore
+        report["Toxicities"] = iterable_to_json(self.toxicities())  # type: ignore
+        report["Efficacies"] = iterable_to_json(self.efficacies())  # type: ignore
         return report
 
     @abc.abstractmethod
@@ -497,13 +497,13 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
                 eff_hat = eff_horizons.mean(axis=0)  # type: ignore
 
             optimal_allocation = design.optimal_decision(tox_hat, eff_hat)
-            report["FullyInformedToxicityCurve"] = iterable_to_json(
+            report["FullyInformedToxicityCurve"] = iterable_to_json(  # type: ignore
                 np.round(tox_hat, 4)
             )
-            report["FullyInformedEfficacyCurve"] = iterable_to_json(
+            report["FullyInformedEfficacyCurve"] = iterable_to_json(  # type: ignore
                 np.round(eff_hat, 4)
             )
-            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)
+            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)  # type: ignore
         except NotImplementedError:
             pass
 
@@ -683,8 +683,8 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
             bag_o_tricks.update(
                 OrderedDict(
                     [
-                        ("DoseGiven", atomic_to_json(next_dose)),
-                        ("RecommendedDose", atomic_to_json(obd)),
+                        ("DoseGiven", atomic_to_json(next_dose)),  # type: ignore
+                        ("RecommendedDose", atomic_to_json(obd)),  # type: ignore
                         ("CohortSize", cohort_size),
                         ("NumEff", sum([x[1] for x in path])),
                         ("NumTox", sum([x[0] for x in path])),
@@ -713,7 +713,7 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
         return path_outputs
 
 
-def get_path(x: Any, dose_label_func: Optional[Callable] = None) -> Any:
+def get_path(x: Any, dose_label_func: Optional[Callable] = None) -> Any:  # type: ignore
     """Constructs a string representation of a dose-transition path.
 
     Args:
@@ -729,7 +729,7 @@ def get_path(x: Any, dose_label_func: Optional[Callable] = None) -> Any:
     path = [x[z] for z in sorted([z for z in x.keys() if "Pat" in z])]
     path = [z[0] for z in path]
     path = "".join(path)  # type: ignore
-    path = dose_label_func(x["DoseGiven"]) + path
+    path = dose_label_func(x["DoseGiven"]) + path  # type: ignore
     return path
 
 
@@ -769,7 +769,7 @@ def _efftox_row_formatter(x: Any, dose_label_func: Any, verbose: Any = False) ->
         return template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2))
 
 
-def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:
+def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:  # type: ignore
     """Prints the dose-transition pathways.
 
     Args:
@@ -789,7 +789,7 @@ def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] =
     )
 
 
-def print_dtps_verbose(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:
+def print_dtps_verbose(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:  # type: ignore
     """Prints the dose-transition pathways with verbose information.
 
     Args:

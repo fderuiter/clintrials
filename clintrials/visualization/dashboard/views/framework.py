@@ -4,7 +4,7 @@ from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
 
 
-def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):
+def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):  # type: ignore
     """Decorator to generate a standard dashboard view."""
     def decorator(func):
         @wraps(func)

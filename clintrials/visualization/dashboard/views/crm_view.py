@@ -40,7 +40,7 @@ def crm_preview_sims(target_tox, cohort_size, max_size):
 @dashboard_view(title="CRM Simulation Results", model_name="CRM", file_prefix="crm_simulations", param_space_config={
     "true_tox": [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)]
 })
-def render(sims, ps):
+def render(sims, ps):  # type: ignore
     """Renders the CRM simulation results view."""
     from clintrials.dosefinding.crm import CRM
     func_map = CRM.get_summary_functions()

@@ -32,3 +32,10 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+
+    -   id: ast-ui-linter
+        name: ast-ui-linter
+        entry: poetry run python scripts/ast_ui_linter.py
+        language: system
+        files: ^clintrials/visualization/dashboard/views/
+        pass_filenames: true

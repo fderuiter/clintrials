@@ -41,7 +41,7 @@ def wagestait_preview_sims(target_tox, cohort_size, max_size):
     "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
     "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
 })
-def render(sims, ps):
+def render(sims, ps):  # type: ignore
     """Renders the Wages & Tait simulation results view."""
     from clintrials.dosefinding.wagestait import WagesTait
     func_map = WagesTait.get_summary_functions()

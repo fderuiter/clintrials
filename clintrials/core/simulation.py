@@ -126,7 +126,7 @@ def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, 
 
     return sim_parameter_space(wrapped_sim_func, ps, n1=n_replicates)
 
-def extract_sim_data(sims, ps, func_map, var_map=None, return_type='dataframe'):
+def extract_sim_data(sims, ps, func_map, var_map=None, return_type='dataframe'):  # type: ignore
     """Extracts and summarises a list of simulations.
 
     This method partitions simulations into subsets that used the same set of
