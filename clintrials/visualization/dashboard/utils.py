@@ -1,11 +1,14 @@
+"""Utility functions for dashboard interactions and accessibility."""
+
 import uuid
 
 import streamlit as st
 
 
 def announce_status_locally(message: str, key: str = None):
-    """Renders an invisible, sandboxed ARIA live region locally to announce dynamic
-    updates (SOP/CSP compliant).
+    """Renders an invisible, sandboxed ARIA live region locally to announce dynamic updates.
+    
+    This is SOP/CSP compliant.
     """
     if not st.session_state.get("accessibility_mode", False):
         return

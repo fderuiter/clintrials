@@ -13,8 +13,7 @@ from clintrials.visualization.dashboard.factory import create_widget
 
 @st.cache_data(show_spinner=False)
 def get_preview_sims(design_type, target_tox, cohort_size, max_size):
-    """Run and cache default preview simulations based on the selected design type and parameters.
-    """
+    """Run and cache default preview simulations based on the selected design type and parameters."""
     preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
     if preview_func:
         with st.spinner(f"Running Default Preview Simulation for {design_type}..."):

@@ -1,3 +1,4 @@
+"""Dashboard CLI launcher."""
 # ruff: noqa: T201
 import argparse
 import os

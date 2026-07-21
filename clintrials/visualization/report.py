@@ -1,3 +1,5 @@
+"""Reporting module for generating accessible PDF summaries."""
+
 import re
 from contextlib import contextmanager
 
@@ -8,6 +10,7 @@ from fpdf.table import Table
 
 
 class AccessibleTable(Table):
+    """An accessible table representation for PDF rendering."""
     def _render_table_row(self, i, row_layout_info, cell_x_positions, **kwargs):
         is_header = (i < self._num_heading_rows)
         with self._fpdf.mark_text("/TR"):
@@ -25,7 +28,9 @@ class AccessibleTable(Table):
 
 
 class AccessiblePDF(FPDF):
+    """An accessible PDF generation wrapper around FPDF."""
     def __init__(self, title="Trial Simulation Report"):
+        """Initializes the accessible PDF with metadata and accessibility features."""
         super().__init__()
         self.pdf_version = "1.7"
         self.set_title(title)

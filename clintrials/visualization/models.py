@@ -1,3 +1,5 @@
+"""Data structures and models for simulation visualization components."""
+
 from dataclasses import dataclass
 
 import numpy as np
@@ -9,13 +11,16 @@ from clintrials.visualization.helpers import format_number as fmt
 
 @dataclass
 class TextSection:
+    """Represents a simple text section for reports."""
     text: str
 
     def __str__(self):
+        """Returns the text content."""
         return self.text
 
 @dataclass
 class MultiFormatSummaryContainer:
+    """A container for tabular data that exports to Markdown and HTML."""
     title: str
     df: pd.DataFrame
 
@@ -35,6 +40,7 @@ class MultiFormatSummaryContainer:
         return summary + "\n".join([header, sep] + rows)
 
     def __str__(self):
+        """Returns the markdown representation of the summary."""
         return self.markdown
 
     @property
