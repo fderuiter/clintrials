@@ -163,7 +163,7 @@ def test_crm_view_render_success(monkeypatch):  # type: ignore
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
 
-import clintrials.utils as utils
+    import clintrials.utils as utils
     import clintrials.core.simulation as sim
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(crm_view, "st", st_mock)
@@ -200,7 +200,7 @@ def test_crm_view_warns_without_recommended(monkeypatch):  # type: ignore
     from clintrials.core.registry import PROTOCOL_REGISTRY
     import clintrials.visualization.dashboard.views.crm_view as crm_view
 
-st_mock = _make_streamlit_mock()
+    st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(crm_view)
@@ -225,7 +225,7 @@ def test_efftox_view_render_success(monkeypatch):  # type: ignore
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
 
-import clintrials.utils as utils
+    import clintrials.utils as utils
     import clintrials.core.simulation as sim
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(efftox_view, "st", st_mock)
@@ -268,7 +268,7 @@ def test_efftox_view_warns_when_empty(monkeypatch):  # type: ignore
     from clintrials.core.registry import PROTOCOL_REGISTRY
     import clintrials.visualization.dashboard.views.efftox_view as efftox_view
 
-st_mock = _make_streamlit_mock()
+    st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(efftox_view)
@@ -331,7 +331,7 @@ def test_watu_view_render_success(monkeypatch):  # type: ignore
     st_mock = _make_streamlit_mock()  # type: ignore
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
 
-import clintrials.utils as utils
+    import clintrials.utils as utils
     import clintrials.core.simulation as sim
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(watu_view, "st", st_mock)
@@ -369,7 +369,7 @@ def test_watu_view_warns_when_empty(monkeypatch):  # type: ignore
     from clintrials.core.registry import PROTOCOL_REGISTRY
     import clintrials.visualization.dashboard.views.watu_view as watu_view
 
-st_mock = _make_streamlit_mock()
+    st_mock = _make_streamlit_mock()
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
     importlib.reload(watu_view)

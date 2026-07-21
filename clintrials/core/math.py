@@ -69,6 +69,23 @@ def inverse_logit(x: float) -> float:
 # Two-parameter link functions used in CRM-style designs
 # They are written in pairs and all use the same call signature.
 # They take their lead from the same in the dfcrm R-package.
+
+def _empiric_core(x, beta):
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
+    return x ** np.exp(beta)
+
+def _inverse_empiric_core(x, beta):
+    return x ** np.exp(-beta)
+
+def _logistic_core(x, a0, beta):
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
+    return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
+
+def _inverse_logistic_core(x, a0, beta):
+    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
+    return (np.log(x / (1 - x)) - a0) / np.exp(beta)
+
+
 @inject_docs()
 def empiric(x: float, a0: Any = None, beta: float = 0) -> float:
     """Calculates the empiric function value. Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
@@ -90,8 +107,7 @@ def empiric(x: float, a0: Any = None, beta: float = 0) -> float:
         >>> float(empiric(0.5, beta=math.log(2)))
         0.25
     """
-    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
-    return x ** np.exp(beta)  # type: ignore
+    return _empiric_core(x, beta)
 
 
 def inverse_empiric(x: float, a0: float = 0, beta: float = 0) -> float:
@@ -114,7 +130,7 @@ def inverse_empiric(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(inverse_empiric(0.25, beta=math.log(2)))
         0.5
     """
-    return x ** np.exp(-beta)  # type: ignore
+    return _inverse_empiric_core(x, beta)
 
 
 @inject_docs()
@@ -135,8 +151,7 @@ def logistic(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(logistic(0.25, -1, 1))
         0.42057106852688747
     """
-    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
-    return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))  # type: ignore
+    return _logistic_core(x, a0, beta)
 
 
 @inject_docs()
@@ -158,8 +173,17 @@ def inverse_logistic(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(round(inverse_logistic(0.42057106852688747, -1, 1), 2))
         0.25
     """
-    beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
-    return (np.log(x / (1 - x)) - a0) / np.exp(beta)  # type: ignore
+    return _inverse_logistic_core(x, a0, beta)
+
+
+def logit1(x, a0=3, beta=0):
+    """Logistic link function with an intercept default of 3."""
+    return _logistic_core(x, a0, beta)
+
+
+def inverse_logit1(x, a0=3, beta=0):
+    """Inverse logistic link function with an intercept default of 3."""
+    return _inverse_logistic_core(x, a0, beta)
 
 
 

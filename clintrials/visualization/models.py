@@ -103,12 +103,7 @@ class MultiFormatSummaryContainer:
         # Limit to 3 levels of nesting (4 levels total including leaf table)
         grouping_cols = grouping_cols[:3]
 
-        def fmt(v):  # type: ignore
-            if isinstance(v, (float, np.float64)):
-                return f"{v:.4f}"
-            return str(v)
-
-        def _build_html_table(df):  # type: ignore
+        def _build_html_table(df):
             cols = list(df.columns)
             html = "<table>\n  <thead>\n    <tr>\n"
             for c in cols:
