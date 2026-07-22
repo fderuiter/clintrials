@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let startX, startWidth;
 
     resizer.addEventListener('mousedown', (e) => {
-        if (window.innerWidth <= 768 || ('ontouchstart' in window) || navigator.maxTouchPoints > 0) return;
+        if (window.innerWidth <= 768) return;
         e.preventDefault();
         isResizing = true;
         startX = e.clientX;
@@ -135,7 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousemove', (e) => {
         if (!isResizing) return;
         const dx = startX - e.clientX;
-        const newWidth = startWidth + dx;
+        let newWidth = startWidth + dx;
+        
+        const minWidth = 350;
+        const maxWidth = window.innerWidth * 0.8;
+        
+        if (newWidth < minWidth) newWidth = minWidth;
+        if (newWidth > maxWidth) newWidth = maxWidth;
+        
         sidebar.style.width = `${newWidth}px`;
     });
 
