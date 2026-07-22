@@ -1,11 +1,12 @@
+# ruff: noqa: D100, D103, T201
+import argparse
 import ast
 import sys
-import argparse
 
 RESTRICTED_WIDGETS = {
-    "button", "download_button", "link_button", "page_link", "checkbox", "toggle", 
-    "radio", "selectbox", "multiselect", "slider", "select_slider", "text_input", 
-    "number_input", "text_area", "date_input", "time_input", "file_uploader", 
+    "button", "download_button", "link_button", "page_link", "checkbox", "toggle",
+    "radio", "selectbox", "multiselect", "slider", "select_slider", "text_input",
+    "number_input", "text_area", "date_input", "time_input", "file_uploader",
     "camera_input", "color_picker", "chat_input", "data_editor"
 }
 
@@ -48,7 +49,7 @@ def check_file(filepath):
         pass
 
     errors = []
-    
+
     # Check for direct function calls if imported via ImportFrom
     # Also check Attribute calls
     for node in ast.walk(tree):

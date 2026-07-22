@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Any, Callable
 
 __author__ = 'Kristian Brock'

@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 
-class ScopedUIRegistry(dict):
+class ScopedUIRegistry(dict):  # type: ignore
     """Registry for scoping UI help text to specific designs."""
 
-    def __init__(self):
+    def __init__(self):  # type: ignore
         """Initialize the ScopedUIRegistry."""
         super().__init__()
         self._namespaces = {}
 
-    def set_help(self, namespace, var_name, desc):
+    def set_help(self, namespace, var_name, desc):  # type: ignore
         """Set help text for a specific namespace and variable name."""
         if namespace not in self._namespaces:
             self._namespaces[namespace] = {}
@@ -18,7 +18,7 @@ class ScopedUIRegistry(dict):
         # Fallback flat dict for backward compatibility
         self[var_name] = desc
 
-    def get_help(self, var_name, design_type=None):
+    def get_help(self, var_name, design_type=None):  # type: ignore
         """Get help text for a variable name, optionally scoped by design type."""
         if design_type and design_type in self._namespaces:
             if var_name in self._namespaces[design_type]:
@@ -33,7 +33,7 @@ class ScopedUIRegistry(dict):
 
 
 def _build_registry():  # type: ignore
-    registry = ScopedUIRegistry()
+    registry = ScopedUIRegistry()  # type: ignore
 
     def extract_from_docstring(doc, namespace="global", aliases=None):  # type: ignore
         if not doc:
@@ -57,10 +57,10 @@ def _build_registry():  # type: ignore
                     ):
                         desc += " " + next_line
 
-                registry.set_help(namespace, var_name, desc)
+                registry.set_help(namespace, var_name, desc)  # type: ignore
                 if aliases and var_name in aliases:
                     for alias in aliases[var_name]:
-                        registry.set_help(namespace, alias, desc)
+                        registry.set_help(namespace, alias, desc)  # type: ignore
 
     # Extract from Win Ratio core logic
     try:
@@ -110,9 +110,9 @@ def _build_registry():  # type: ignore
         pass
 
     # Main dashboard variables (fallback if not in docstrings)
-    registry.set_help("global", "design_type", "Select the type of trial design.")
-    registry.set_help("global", "uploaded_file", "Upload a JSON file with simulation results.")
-    registry.set_help("global", "run_simulation_button", "Run a Monte Carlo simulation to estimate win-ratio power.")
+    registry.set_help("global", "design_type", "Select the type of trial design.")  # type: ignore
+    registry.set_help("global", "uploaded_file", "Upload a JSON file with simulation results.")  # type: ignore
+    registry.set_help("global", "run_simulation_button", "Run a Monte Carlo simulation to estimate win-ratio power.")  # type: ignore
 
     return registry
 

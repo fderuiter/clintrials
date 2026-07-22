@@ -1,5 +1,6 @@
-from __future__ import annotations
 """Validation functions for the Clinical Trials library."""
+
+from __future__ import annotations
 
 from clintrials.core.errors import ErrorTemplates
 

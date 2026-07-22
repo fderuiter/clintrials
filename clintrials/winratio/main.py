@@ -1,9 +1,9 @@
-from __future__ import annotations
 """Command-line entry point for win-ratio power simulations.
 
 Random Seed Strategy: {main_seed_strategy}
 """
 
+from __future__ import annotations
 
 import argparse
 from collections import OrderedDict

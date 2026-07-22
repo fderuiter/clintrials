@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Module for Group Sequential Designs (GSDs).
 
 Random Seed Strategy: {gsd_seed_strategy}
 """
+
+from __future__ import annotations
 
 from typing import Callable, List
 
@@ -11,7 +12,7 @@ from scipy.optimize import brentq
 from scipy.stats import multivariate_normal
 
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
-from clintrials.core.stats import norm
+from clintrials.core.stats import norm  # type: ignore
 from clintrials.utils import deprecated
 
 

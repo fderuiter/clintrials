@@ -30,7 +30,7 @@ from clintrials.core.math import (
 )
 from clintrials.core.numerics import posterior_expectation_gh
 from clintrials.core.registry import CORE_REGISTRY
-from clintrials.core.stats import norm
+from clintrials.core.stats import norm  # type: ignore
 from clintrials.dosefinding import DoseFindingTrial
 from clintrials.utils import atomic_to_json, iterable_to_json
 

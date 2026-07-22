@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Classes and methods to perform general useful statistical routines.
 
 Random Seed Strategy: {stats_seed_strategy}
 """
+
+from __future__ import annotations
 
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"

@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+
 class ErrorTemplates:
     # Probability validation template
     PROBABILITY = "{name} must be between 0.0 and 1.0"

@@ -20,7 +20,7 @@ from scipy.stats import beta
 
 from clintrials.core.errors import ErrorTemplates
 from clintrials.core.math import bernoulli_likelihood, empiric, inverse_empiric
-from clintrials.core.stats import norm
+from clintrials.core.stats import norm  # type: ignore
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 

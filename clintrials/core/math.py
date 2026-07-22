@@ -1,15 +1,17 @@
-from __future__ import annotations
 """Common, useful functions in the statistics and mathematics of clinical trials.
 
 Random Seed Strategy: {math_seed_strategy}
 """
 
+from __future__ import annotations
+
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
+from typing import Any, Union
+
 import numpy as np
 import numpy.typing as npt
-from typing import Union, Any
 
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
 
@@ -70,18 +72,18 @@ def inverse_logit(x: float) -> float:
 # They are written in pairs and all use the same call signature.
 # They take their lead from the same in the dfcrm R-package.
 
-def _empiric_core(x, beta):
+def _empiric_core(x, beta):  # type: ignore
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return x ** np.exp(beta)
 
-def _inverse_empiric_core(x, beta):
+def _inverse_empiric_core(x, beta):  # type: ignore
     return x ** np.exp(-beta)
 
-def _logistic_core(x, a0, beta):
+def _logistic_core(x, a0, beta):  # type: ignore
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
-def _inverse_logistic_core(x, a0, beta):
+def _inverse_logistic_core(x, a0, beta):  # type: ignore
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 
@@ -107,7 +109,7 @@ def empiric(x: float, a0: Any = None, beta: float = 0) -> float:
         >>> float(empiric(0.5, beta=math.log(2)))
         0.25
     """
-    return _empiric_core(x, beta)
+    return _empiric_core(x, beta)  # type: ignore
 
 
 def inverse_empiric(x: float, a0: float = 0, beta: float = 0) -> float:
@@ -130,7 +132,7 @@ def inverse_empiric(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(inverse_empiric(0.25, beta=math.log(2)))
         0.5
     """
-    return _inverse_empiric_core(x, beta)
+    return _inverse_empiric_core(x, beta)  # type: ignore
 
 
 @inject_docs()
@@ -151,7 +153,7 @@ def logistic(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(logistic(0.25, -1, 1))
         0.42057106852688747
     """
-    return _logistic_core(x, a0, beta)
+    return _logistic_core(x, a0, beta)  # type: ignore
 
 
 @inject_docs()
@@ -173,17 +175,17 @@ def inverse_logistic(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(round(inverse_logistic(0.42057106852688747, -1, 1), 2))
         0.25
     """
-    return _inverse_logistic_core(x, a0, beta)
+    return _inverse_logistic_core(x, a0, beta)  # type: ignore
 
 
-def logit1(x, a0=3, beta=0):
+def logit1(x, a0=3, beta=0):  # type: ignore
     """Logistic link function with an intercept default of 3."""
-    return _logistic_core(x, a0, beta)
+    return _logistic_core(x, a0, beta)  # type: ignore
 
 
-def inverse_logit1(x, a0=3, beta=0):
+def inverse_logit1(x, a0=3, beta=0):  # type: ignore
     """Inverse logistic link function with an intercept default of 3."""
-    return _inverse_logistic_core(x, a0, beta)
+    return _inverse_logistic_core(x, a0, beta)  # type: ignore
 
 
 

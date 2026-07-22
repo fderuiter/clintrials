@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Numerical integration routines for Bayesian models.
 
 Random Seed Strategy: {numerics_seed_strategy}
 """
+
+from __future__ import annotations
 
 import warnings
 from collections.abc import Callable

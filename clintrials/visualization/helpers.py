@@ -1,7 +1,10 @@
 """Helper visualization utilities."""
 from __future__ import annotations
+
+from typing import Any, Dict, List
+
 import numpy as np
-from typing import Union, List, Dict, Any
+
 
 def format_label(label: str | Any) -> str | Any:
     """Format a label by replacing underscores with spaces and applying title case."""
