@@ -1,0 +1,33 @@
+name: TDD Timeline Auditor
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  audit-tdd:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run TDD Timeline Audit
+        run: |
+          # Fetch origin/main so we have a valid base ref
+          git fetch origin main
+          # Get base and head SHAs
+          BASE_SHA=${{ github.event.pull_request.base.sha }}
+          HEAD_SHA=${{ github.event.pull_request.head.sha }}
+          
+          # Run the auditor script
+          python scripts/audit_timeline.py $BASE_SHA $HEAD_SHA
+        env:
+          GITHUB_HEAD_REF: ${{ github.head_ref }}
