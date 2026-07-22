@@ -1,3 +1,5 @@
+"""Script to serialize Python dataclass schemas into a JSON contract for the frontend."""
+
 import json
 import os
 import sys
@@ -5,18 +7,21 @@ import sys
 # Add the project root to sys.path so we can import clintrials
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from clintrials.core.schema import WinRatioSchema, CRMSchema, EffToxSchema, FieldInfo
-from typing import get_args, get_origin, Annotated
+from typing import Annotated, get_args, get_origin
+
+from clintrials.core.schema import CRMSchema, EffToxSchema, FieldInfo, WinRatioSchema
+
 
 def get_field_type_info(annotation, field_info):
+    """Extract JSON Schema type and constraints from a Python type annotation."""
     info = {"type": "string"}
-    
+
     origin = get_origin(annotation)
-    
+
     if origin is Annotated:
         args = get_args(annotation)
         base_type = args[0]
-        
+
         # Check for our specific Annotated aliases
         is_prob = False
         is_pos_int = False
@@ -25,19 +30,19 @@ def get_field_type_info(annotation, field_info):
                 is_prob = True
             elif arg == "PositiveInt":
                 is_pos_int = True
-                
+
         if base_type is int or is_pos_int:
             info["type"] = "integer"
         elif base_type is float or is_prob:
             info["type"] = "number"
-            
+
         if is_prob:
             info["minimum"] = 0.0
             info["maximum"] = 1.0
-            
+
         if is_pos_int:
             info["exclusiveMinimum"] = 0
-            
+
     elif origin in (list, tuple) or getattr(origin, "__origin__", None) in (list, tuple):
         info["type"] = "array"
         args = get_args(annotation)
@@ -55,7 +60,7 @@ def get_field_type_info(annotation, field_info):
         info["type"] = "number"
     elif annotation is bool:
         info["type"] = "boolean"
-        
+
     # Apply field info constraints
     if field_info:
         if field_info.ge is not None:
@@ -68,23 +73,24 @@ def get_field_type_info(annotation, field_info):
             info["exclusiveMaximum"] = field_info.lt
         if field_info.description is not None:
             info["description"] = field_info.description
-            
+
     return info
 
 def generate_schema_for_class(cls):
+    """Generate a JSON schema representation for a given dataclass or Pydantic model."""
     schema = {
         "type": "object",
         "properties": {},
         "required": []
     }
-    
+
     for name, field_info in cls.model_fields.items():
         prop = get_field_type_info(field_info.annotation, field_info)
-        
+
         import dataclasses
         if field_info.default is not dataclasses.MISSING and field_info.default is not None:
             prop["default"] = field_info.default
-            
+
         # If it doesn't have a default and it's not Optional, it might be required
         if field_info.default is dataclasses.MISSING:
             origin = get_origin(field_info.annotation)
@@ -95,23 +101,24 @@ def generate_schema_for_class(cls):
                     is_optional = True
             if not is_optional:
                 schema["required"].append(name)
-                
+
         schema["properties"][name] = prop
-        
+
     return schema
 
 def main():
+    """Serialize the core simulation schemas to hub/schema.json."""
     schemas = {
         "WinRatioSchema": generate_schema_for_class(WinRatioSchema),
         "CRMSchema": generate_schema_for_class(CRMSchema),
         "EffToxSchema": generate_schema_for_class(EffToxSchema)
     }
-    
+
     out_path = os.path.join(os.path.dirname(__file__), "..", "hub", "schema.json")
     with open(out_path, "w") as f:
         json.dump(schemas, f, indent=2)
-        
-    print(f"Serialized schemas to {out_path}")
+
+    print(f"Serialized schemas to {out_path}")  # noqa: T201
 
 if __name__ == "__main__":
     main()
