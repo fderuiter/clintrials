@@ -29,7 +29,7 @@ def render() -> None:
 
     # Use schema to generate UI inputs
     kwargs = {}
-    for name, field in WinRatioSchema.model_fields.items():  # type: ignore
+    for name, field in WinRatioSchema.model_fields.items():
         min_val = 0.0 if "Probability" in str(field.annotation) else 1
         max_val = 1.0 if "Probability" in str(field.annotation) else None
 

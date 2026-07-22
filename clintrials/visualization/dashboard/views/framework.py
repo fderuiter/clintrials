@@ -48,7 +48,7 @@ class BaseSimulationView:
         from clintrials.core.simulation import extract_sim_data
 
         func_map = cls.model_class.get_summary_functions()  # type: ignore
-        summary_df = extract_sim_data(  # type: ignore
+        summary_df = extract_sim_data(
             sims, ps, func_map, var_map=cls.var_map, return_type="dataframe"
         )
 

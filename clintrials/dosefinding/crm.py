@@ -71,7 +71,7 @@ def _compound_toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, doses
     """
     from clintrials.validation import validate_matching_lengths
 
-    validate_matching_lengths(doses=doses, toxs=toxs)  # type: ignore
+    validate_matching_lengths(doses=doses, toxs=toxs)
 
     if log:
         l = 0
@@ -319,7 +319,7 @@ def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: A
     """
     from clintrials.validation import validate_matching_lengths
 
-    validate_matching_lengths(toxicities=toxicities, dose_levels=dose_levels)  # type: ignore
+    validate_matching_lengths(toxicities=toxicities, dose_levels=dose_levels)
 
     if "logit1" in F_func.__name__ and isinstance(beta_dist, type(norm())):
         alpha0 = np.exp(beta_dist.mean() + beta_dist.var() / 2)

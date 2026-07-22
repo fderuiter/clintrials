@@ -1,9 +1,9 @@
 """Module containing the abstract base class Protocol and associated methods."""
 
 from __future__ import annotations
-from typing import Any, Optional
 
 import abc
+from typing import Any, Optional
 
 
 class Protocol(metaclass=abc.ABCMeta):
@@ -34,7 +34,7 @@ class Protocol(metaclass=abc.ABCMeta):
         if self._rng is None:
             # Fallback to local numpy random generator but warn or just create one
             from clintrials.core.rng import get_rng
-            self._rng = get_rng()
+            self._rng = get_rng()  # type: ignore[no-untyped-call]
         return self._rng
 
     @abc.abstractmethod
@@ -101,11 +101,11 @@ class Protocol(metaclass=abc.ABCMeta):
         from clintrials.core.simulation import UniversalProtocolSimulationRunner
         from clintrials.core.unified import SimulationResult
 
-        self.set_rng(get_rng(seed))
+        self.set_rng(get_rng(seed))  # type: ignore[no-untyped-call]
 
         mode = "vectorized" if method == "bulk" else "iterative"
 
         runner = UniversalProtocolSimulationRunner(self)
         results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **kwargs)
 
-        return SimulationResult(results, mode=method)
+        return SimulationResult(results, mode=method)  # type: ignore[no-untyped-call]

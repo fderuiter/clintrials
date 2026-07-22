@@ -37,7 +37,7 @@ class PatientCohortTracker:
                 doses=doses_list,
                 toxicities=toxicities_list,
                 efficacies=efficacies_list
-            )  # type: ignore
+            )
             new_records = [
                 PatientRecord(dose=d, toxicity=t, efficacy=e)
                 for d, t, e in zip(doses_list, toxicities_list, efficacies_list)
@@ -46,7 +46,7 @@ class PatientCohortTracker:
             validate_matching_lengths(
                 doses=doses_list,
                 toxicities=toxicities_list
-            )  # type: ignore
+            )
             new_records = [
                 PatientRecord(dose=d, toxicity=t)
                 for d, t in zip(doses_list, toxicities_list)

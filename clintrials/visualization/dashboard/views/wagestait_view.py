@@ -34,7 +34,7 @@ def wagestait_preview_sims(target_tox, cohort_size, max_size):  # type: ignore
 
     tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
     eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
-    return run_bivariate_simulations(wt, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)  # type: ignore
+    return run_bivariate_simulations(wt, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
 
 @PROTOCOL_REGISTRY.register("Wages & Tait", preview_func=wagestait_preview_sims)
 @dashboard_view(title="Wages & Tait Simulation Results", model_name="Wages & Tait", file_prefix="wagestait_simulations", param_space_config={
@@ -51,7 +51,7 @@ def render(sims, ps):  # type: ignore
         "true_prob_eff": "true_prob_eff",
     }
 
-    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")  # type: ignore
+    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
 
     figures = []
     if not summary_df.empty:

@@ -10,8 +10,17 @@ import json
 import logging
 from collections import OrderedDict
 from datetime import datetime
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Protocol,
+    Sequence,
+    Union,
+    runtime_checkable,
+)
 
-from typing import Any, Callable, Dict, List, Optional, Protocol, Sequence, Union, runtime_checkable
 
 @runtime_checkable
 class OutcomeGenerator(Protocol):
