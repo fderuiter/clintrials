@@ -55,6 +55,9 @@ jobs:
       - name: Build clintrials wheel
         run: poetry build --format wheel
 
+      - name: Serialize Python schemas to JSON
+        run: poetry run python scripts/serialize_schemas.py
+
       - name: Prepare unified staging directory
         run: |
           mkdir -p public
