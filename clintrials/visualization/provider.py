@@ -8,7 +8,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-
 HIGH_CONTRAST_PALETTE = [
     "#8A5F00",  # Darkened Orange
     "#005A8F",  # Darkened Sky Blue
