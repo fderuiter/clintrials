@@ -167,7 +167,7 @@ The repository is organized as follows:
     -   **`dosefinding/`**: Implementations of various dose-finding trial designs, including CRM, EffTox, and Wages & Tait.
     -   **`phase3/`**: Implementations of Phase III trial designs, including Group Sequential Designs.
     -   **`winratio/`**: Tools for win-ratio analysis.
-    -   **`visualization/dashboard/main.py`**: The Trial Simulation Hub entry point and source code for the interactive web dashboard.
+    -   **`clintrials/visualization/dashboard/main.py`**: The Trial Simulation Hub entry point and source code for the interactive web dashboard.
 -   **`docs/`**: Documentation files, including tutorials and API reference.
 -   **`tests/`**: Unit tests for the library.
 

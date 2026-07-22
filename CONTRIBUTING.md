@@ -38,6 +38,13 @@ We require standardized approaches when dealing with high-complexity code, espec
 - Link your pull request to the relevant issue.
 - Describe your changes clearly in the pull request description.
 
+### Documentation Verification
+When modifying documentation files (Markdown or reStructuredText), please ensure that all internal repository links and file paths are valid. You can run the automated documentation path-validation test locally using the following command:
+
+```bash
+poetry run pytest tests/test_docs_links.py
+```
+
 ## Promoting Features to the Public API
 
 If you develop a core utility (e.g., a numerical integration method or a math function) that would be useful for researchers outside of the internal modules, you can promote it to the public API surface.
@@ -47,5 +54,5 @@ To transition a feature from an internal utility to public status, follow these 
 2. Ensure the utility is not an internal-only helper. Internal-only helpers must remain hidden using standard naming conventions (e.g., prefixing with an underscore `_`) to avoid cluttering the public API.
 3. Import the newly promoted utility in the package root `clintrials/__init__.py`.
 4. Add the utility to the `__all__` list in `clintrials/__init__.py`.
-5. Update the API documentation index at `docs/reference/index.rst` to include the new top-level utility so it is discoverable by users.
+5. Update the API documentation index at `README.md` to include the new top-level utility so it is discoverable by users.
 6. Run `poetry run python scripts/verify_api_signatures.py --generate` to update the `api_manifest.json` file. Commit this file along with your changes.
