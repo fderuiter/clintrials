@@ -171,7 +171,7 @@ class GroupSequentialDesign(Protocol):
             for row in range(i):
                 for col in range(row + 1, i):
                     corr = np.sqrt(self.timing[row] / self.timing[col])
-                    cov[row, col] = cov[col, row] = corr  # type: ignore
+                    cov[row, col] = cov[col, row] = corr
 
             def cdf_at_look_i(u_i):  # type: ignore
                 limits = boundaries + [u_i]

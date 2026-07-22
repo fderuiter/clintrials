@@ -260,7 +260,7 @@ class DoseFindingTrial(Protocol):
         self._next_dose = self.__calculate_next_dose()
         return self._next_dose
 
-    def observed_toxicity_rates(self) -> npt.NDArray[np.float64]:  # type: ignore
+    def observed_toxicity_rates(self) -> npt.NDArray[np.float64]:
         """Gets the observed rate of toxicity at all doses.
 
         Returns:
@@ -419,8 +419,8 @@ class ThreePlusThree(DoseFindingTrial):
 
     def _DoseFindingTrial__calculate_next_dose(self) -> Any:
         dose_indices = np.array(self._doses) == self._next_dose
-        toxes_at_dose = sum(np.array(self._toxicities)[dose_indices])  # type: ignore
-        if sum(dose_indices) == 3:  # type: ignore
+        toxes_at_dose = sum(np.array(self._toxicities)[dose_indices])
+        if sum(dose_indices) == 3:
             if toxes_at_dose == 0:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -442,7 +442,7 @@ class ThreePlusThree(DoseFindingTrial):
                 else:
                     self._status = -1
                 self._continue = False
-        elif sum(dose_indices) == 6:  # type: ignore
+        elif sum(dose_indices) == 6:
             if toxes_at_dose <= 1:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -543,7 +543,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
         try:
             had_tox = lambda x: x < np.array(true_toxicities)
             tox_horizons = np.array([had_tox(x) for x in tolerances])  # type: ignore
-            tox_hat = tox_horizons.mean(axis=0)  # type: ignore
+            tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)  # type: ignore

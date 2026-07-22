@@ -32,9 +32,9 @@ def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, 
     Returns:
         float or numpy.ndarray: The computed posterior expectation(s).
     """
-    nodes, weights = np.polynomial.hermite.hermgauss(deg)  # type: ignore
-    theta_nodes = prior_mean + np.sqrt(2) * prior_sd * nodes  # type: ignore
-    log_w = np.log(weights)  # type: ignore
+    nodes, weights = np.polynomial.hermite.hermgauss(deg)
+    theta_nodes = prior_mean + np.sqrt(2) * prior_sd * nodes
+    log_w = np.log(weights)
 
     ll = log_likelihood_func(theta_nodes)
     log_post = log_w + ll
@@ -193,7 +193,7 @@ def integrate_posterior_1d(  # type: ignore
                 "expansions": expansions,
                 "tail_mass": float(tail_mass),
                 "max_at_edge": bool(max_at_edge),
-                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),  # type: ignore
+                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),
             }
             return (val, diag) if return_diagnostics else val
 
@@ -208,7 +208,7 @@ def integrate_posterior_1d(  # type: ignore
                 "tail_mass": float(tail_mass),
                 "max_at_edge": bool(max_at_edge),
                 "hit_cap": True,
-                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),  # type: ignore
+                "log_marginal": float(logsumexp(lp) + np.log(xs[1] - xs[0])),
             }
             return (val, diag) if return_diagnostics else val
 

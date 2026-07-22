@@ -16,7 +16,7 @@ import numpy.typing as npt
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
 
 
-def logit(p: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
+def logit(p: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:
     """Calculates the logit of a probability.
 
     The probability is silently clipped to [1e-7, 1 - 1e-7] to prevent log(0).
@@ -28,10 +28,10 @@ def logit(p: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[
         float or numpy.ndarray: The logit.
     """
     p = np.clip(p, 1e-7, 1 - 1e-7)
-    return np.log(p / (1 - p))  # type: ignore
+    return np.log(p / (1 - p))
 
 
-def bernoulli_likelihood(p: Union[float, npt.NDArray[np.float64]], y: Union[int, npt.NDArray[np.int_]], log: bool = False) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
+def bernoulli_likelihood(p: Union[float, npt.NDArray[np.float64]], y: Union[int, npt.NDArray[np.int_]], log: bool = False) -> Union[float, npt.NDArray[np.float64]]:
     """Calculates the Bernoulli likelihood or log-likelihood.
 
     Args:
@@ -189,7 +189,7 @@ def inverse_logit1(x, a0=3, beta=0):  # type: ignore
 
 
 
-def association_to_correlation(psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
+def association_to_correlation(psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:
     """Converts an association parameter to a correlation coefficient.
 
     The formula is: (e^psi - 1) / (e^psi + 1)
@@ -203,7 +203,7 @@ def association_to_correlation(psi: Union[float, npt.NDArray[np.float64]]) -> Un
     return (np.exp(psi) - 1) / (np.exp(psi) + 1)  # type: ignore
 
 
-def fgm_joint_prob(a: Union[int, npt.NDArray[np.int_]], b: Union[int, npt.NDArray[np.int_]], p1: Union[float, npt.NDArray[np.float64]], p2: Union[float, npt.NDArray[np.float64]], psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:  # type: ignore
+def fgm_joint_prob(a: Union[int, npt.NDArray[np.int_]], b: Union[int, npt.NDArray[np.int_]], p1: Union[float, npt.NDArray[np.float64]], p2: Union[float, npt.NDArray[np.float64]], psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:
     """Calculates the joint probability of two Bernoulli variables using an FGM copula.
 
     Args:
@@ -216,9 +216,9 @@ def fgm_joint_prob(a: Union[int, npt.NDArray[np.int_]], b: Union[int, npt.NDArra
     Returns:
         float or numpy.ndarray: The joint probability.
     """
-    prob = p1**a * (1 - p1) ** (1 - a) * p2**b * (1 - p2) ** (1 - b)  # type: ignore
+    prob = p1**a * (1 - p1) ** (1 - a) * p2**b * (1 - p2) ** (1 - b)
     prob += (
-        (-1) ** (a + b)  # type: ignore
+        (-1) ** (a + b)
         * p1
         * (1 - p1)
         * p2

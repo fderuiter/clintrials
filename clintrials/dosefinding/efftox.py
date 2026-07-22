@@ -59,22 +59,22 @@ def efftox_priors_from_skeleton(real_doses: Any, prior_tox_probs: Any, prior_eff
 
     # Toxicity: logit(pi_T) = mu_T + beta_T * x
     logit_tox = logit(np.array(prior_tox_probs))
-    beta_T_mean, mu_T_mean = np.polyfit(scaled_x, logit_tox, 1)  # type: ignore
+    beta_T_mean, mu_T_mean = np.polyfit(scaled_x, logit_tox, 1)
 
     # Efficacy: logit(pi_E) = mu_E + beta1_E * x + beta2_E * x^2
     logit_eff = logit(np.array(prior_eff_probs))
-    beta2_E_mean, beta1_E_mean, mu_E_mean = np.polyfit(scaled_x, logit_eff, 2)  # type: ignore
+    beta2_E_mean, beta1_E_mean, mu_E_mean = np.polyfit(scaled_x, logit_eff, 2)
 
     # Principled default SDs:
     # Intercepts and linear slopes: 2.0
     # Quadratic term: 0.2 (usually smaller as it's for curvature)
     # Association parameter psi: mean 0, SD 1.0
     priors = [
-        norm(loc=mu_T_mean, scale=2.0),  # type: ignore
-        norm(loc=beta_T_mean, scale=2.0),  # type: ignore
-        norm(loc=mu_E_mean, scale=2.0),  # type: ignore
-        norm(loc=beta1_E_mean, scale=2.0),  # type: ignore
-        norm(loc=beta2_E_mean, scale=0.2),  # type: ignore
+        norm(loc=mu_T_mean, scale=2.0),
+        norm(loc=beta_T_mean, scale=2.0),
+        norm(loc=mu_E_mean, scale=2.0),
+        norm(loc=beta1_E_mean, scale=2.0),
+        norm(loc=beta2_E_mean, scale=0.2),
         norm(loc=0.0, scale=1.0),
     ]
     return priors
@@ -560,7 +560,7 @@ class InverseQuadraticCurve:
                 m = gradient
                 coeffs = [m, -(m + self.a), -self.b, -self.c]
                 roots = np.roots(coeffs)
-                real_roots = roots[np.isreal(roots)].real  # type: ignore
+                real_roots = roots[np.isreal(roots)].real
                 valid_roots = real_roots[(real_roots > 0) & (real_roots <= 1.00000001)]
                 if len(valid_roots) == 0:
                     return np.nan
@@ -788,7 +788,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 for i, (x, y) in enumerate(zip(prob_acc_tox, prob_acc_eff))
             ]
         )
-        admissable_set = [i + 1 for i, x in enumerate(admissable) if x]  # type: ignore
+        admissable_set = [i + 1 for i, x in enumerate(admissable) if x]
         utility = np.array([self.metric(x[0], x[1]) for x in zip(prob_eff, prob_tox)])
         self.prob_tox = prob_tox
         self.prob_eff = prob_eff
@@ -805,7 +805,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         if self.treated_at_dose(self.first_dose()) > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            for i in np.argsort(-self.utility):  # type: ignore
+            for i in np.argsort(-self.utility):
                 dose_level = i + 1
                 if dose_level in self.admissable_set():
                     if (
@@ -842,7 +842,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.prob_acc_tox = []  # type: ignore
         self.prob_acc_eff = []  # type: ignore
         self._admissable_set = []
-        self.utility = []
+        self.utility = []  # type: ignore
 
     def has_more(self) -> bool:
         """Checks if the trial is ongoing.
@@ -966,12 +966,12 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 probability that dose i has superior utility to dose j.
         """
         superiority_mat = np.zeros((self.num_doses, self.num_doses))
-        superiority_mat[:] = np.nan  # type: ignore
+        superiority_mat[:] = np.nan
         for i in range(1, self.num_doses + 1):
             for j in range(i + 1, self.num_doses + 1):
                 p = self.prob_superior_utility(i, j)
-                superiority_mat[i - 1, j - 1] = p  # type: ignore
-                superiority_mat[j - 1, i - 1] = 1 - p  # type: ignore
+                superiority_mat[i - 1, j - 1] = p
+                superiority_mat[j - 1, i - 1] = 1 - p
         return superiority_mat
 
 

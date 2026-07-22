@@ -150,7 +150,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             self._next_dose = 1
 
         self.skeletons = skeletons
-        self.K, self.I = np.array(skeletons).shape  # type: ignore
+        self.K, self.I = np.array(skeletons).shape
         from clintrials.validation import validate_expected_length
 
         validate_expected_length(prior_tox_probs, self.I, "prior_tox_probs")
@@ -203,7 +203,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.must_try_lowest_dose = must_try_lowest_dose
 
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[  # type: ignore
+            np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -237,7 +237,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         Returns:
             float: The theta estimate.
         """
-        return self.theta_hats[self.most_likely_model_index]  # type: ignore
+        return self.theta_hats[self.most_likely_model_index]
 
     def model_theta_var(self) -> Any:
         """Gets the theta variance for the most likely model.
@@ -245,7 +245,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         Returns:
             float: The theta variance.
         """
-        return self.theta_vars[self.most_likely_model_index]  # type: ignore
+        return self.theta_vars[self.most_likely_model_index]
 
     def _theta_posterior_unnormalized_pdf(self, theta: Any, cases: Any, skeleton: Any) -> Any:
         """Calculates the unnormalized posterior PDF for theta.
@@ -278,15 +278,15 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             estimate_var=True,
         )
         theta_hats, theta_vars, log_marginal = zip(*integrals)
-        self.theta_hats = theta_hats
-        self.theta_vars = theta_vars
+        self.theta_hats = theta_hats  # type: ignore
+        self.theta_vars = theta_vars  # type: ignore
         log_w = np.log(self.model_prior_weights + 1e-300) + np.array(log_marginal)
         log_w = log_w - np.max(log_w)
         w = np.exp(log_w)
         self.w = w / sum(w)
         most_likely_model_index = np.argmax(self.w)
         self.most_likely_model_index = most_likely_model_index
-        self.post_tox_probs = np.array(self.crm.prob_tox())
+        self.post_tox_probs = np.array(self.crm.prob_tox())  # type: ignore
         if self.plugin_mean:
             self.post_eff_probs = empiric(
                 self.skeletons[most_likely_model_index],
@@ -318,7 +318,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
     def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[  # type: ignore
+            np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
             ]
         )
@@ -397,26 +397,26 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             return np.ones_like(skeleton, dtype=float)
 
         one_mask = skeleton == 1.0
-        probs[one_mask] = 1.0  # type: ignore
+        probs[one_mask] = 1.0
 
         zero_mask = skeleton == 0.0
-        probs[zero_mask] = 0.0  # type: ignore
+        probs[zero_mask] = 0.0
 
         middle_mask = ~(one_mask | zero_mask)
         if not np.any(middle_mask):
             return probs
 
-        sub_skeleton = skeleton[middle_mask]  # type: ignore
+        sub_skeleton = skeleton[middle_mask]
         eff_cutoff_clipped = np.maximum(eff_cutoff, 1e-9)
         thresholds = np.log(eff_cutoff_clipped) / np.log(sub_skeleton)
 
         if backend == "analytic":
             theta_sd = np.sqrt(self.model_theta_var())
             if theta_sd <= 0:
-                probs[middle_mask] = (self.model_theta_hat() < thresholds).astype(float)  # type: ignore
+                probs[middle_mask] = (self.model_theta_hat() < thresholds).astype(float)
             else:
                 theta_posterior = norm(loc=self.model_theta_hat(), scale=theta_sd)
-                probs[middle_mask] = theta_posterior.cdf(thresholds)  # type: ignore
+                probs[middle_mask] = theta_posterior.cdf(thresholds)
         elif backend == "mc":
             if self.estimate_var:
                 theta_sd = np.sqrt(self.model_theta_var())
@@ -426,7 +426,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                     theta_sample = norm(loc=self.model_theta_hat(), scale=theta_sd).rvs(
                         n
                     )
-                probs[middle_mask] = np.array(  # type: ignore
+                probs[middle_mask] = np.array(
                     [np.mean(theta_sample < t) for t in thresholds]
                 )
             else:
@@ -450,12 +450,12 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                 # (Laplace) approximation.
                 theta_sd = np.sqrt(self.model_theta_var())
                 if theta_sd <= 0:
-                    probs[middle_mask] = (self.model_theta_hat() < thresholds).astype(  # type: ignore
+                    probs[middle_mask] = (self.model_theta_hat() < thresholds).astype(
                         float
                     )
                 else:
                     theta_posterior = norm(loc=self.model_theta_hat(), scale=theta_sd)
-                    probs[middle_mask] = theta_posterior.cdf(thresholds)  # type: ignore
+                    probs[middle_mask] = theta_posterior.cdf(thresholds)
             else:
                 for i, t in enumerate(thresholds):
                     num, _ = quad(
@@ -467,7 +467,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
                         epsabs=epsabs,
                         epsrel=epsrel,
                     )
-                    probs[np.where(middle_mask)[0][i]] = num / denom  # type: ignore
+                    probs[np.where(middle_mask)[0][i]] = num / denom
         else:
             raise ValueError(f"Unknown backend: {backend}")
 
@@ -607,12 +607,12 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         admissable_set = [i + 1 for i, x in enumerate(admissable) if x]
         self._admissable_set = admissable_set
         utility = np.array([self.metric(x[0], x[1]) for x in zip(eff_probs, tox_probs)])
-        self.utility = utility
+        self.utility = utility  # type: ignore
 
         if self.size() > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            for i in np.argsort(-utility):  # type: ignore
+            for i in np.argsort(-utility):
                 dose_level = i + 1
                 if dose_level in admissable_set:
                     if (

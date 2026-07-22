@@ -135,8 +135,8 @@ def correlated_binary_outcomes_from_uniforms(unifs: Any, u: Any, psi: Any) -> An
         u12 = _correlated_binary_outcomes_solve2(u[0], u[1], psi)
         n = unifs.shape[0]
         y = -1 * np.ones(shape=(n, 2))
-        y[:, 0] = (unifs[:, 0] < u[0]).astype(int)  # type: ignore
-        y[:, 1] = y[:, 0] * (unifs[:, 1] <= u12 / u[0]) + (1 - y[:, 0]) * (unifs[:, 2] <= (u[1] - u12) / (1 - u[0]))  # type: ignore
+        y[:, 0] = (unifs[:, 0] < u[0]).astype(int)
+        y[:, 1] = y[:, 0] * (unifs[:, 1] <= u12 / u[0]) + (1 - y[:, 0]) * (unifs[:, 2] <= (u[1] - u12) / (1 - u[0]))
         return y
     else:
         raise ValueError('unifs must be an n*3 array')

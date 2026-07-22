@@ -143,7 +143,7 @@ def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, to
         tuple[float, float | None]: A tuple containing the MLE and variance
             of beta. The variance is `None` if `estimate_var` is `False`.
     """
-    if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:  # type: ignore
+    if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
         logging.warning(
             "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist."
         )
@@ -639,7 +639,7 @@ class CRM(DoseFindingTrial):
                 return proposed_dose
 
         if self.coherency_threshold and proposed_dose > current_dose:
-            tox_rate_at_current = self.observed_toxicity_rates()[current_dose - 1]  # type: ignore
+            tox_rate_at_current = self.observed_toxicity_rates()[current_dose - 1]
             if (
                 not np.isnan(tox_rate_at_current)
                 and tox_rate_at_current > self.coherency_threshold
@@ -664,13 +664,13 @@ class CRM(DoseFindingTrial):
 
         return proposed_dose
 
-    def prob_tox(self) -> npt.NDArray[np.float64]:  # type: ignore
+    def prob_tox(self) -> npt.NDArray[np.float64]:
         """Gets the posterior probabilities of toxicity for each dose level.
 
         Returns:
             list[float]: A list of posterior probabilities of toxicity.
         """
-        return list(self.post_tox)
+        return list(self.post_tox)  # type: ignore
 
     def _prob_tox_exceeds_quadrature(self, tox_cutoff: Any, deg: Any = CORE_REGISTRY["crm_deg"]) -> Any:
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
