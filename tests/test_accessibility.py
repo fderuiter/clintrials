@@ -22,8 +22,8 @@ def streamlit_server():  # type: ignore
     process = subprocess.Popen(
         [sys.executable, "-m", "clintrials.visualization.dashboard.launcher", "--port", "8502", "--server.headless=true"],
         env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
     )
 
     # Wait for the server to start

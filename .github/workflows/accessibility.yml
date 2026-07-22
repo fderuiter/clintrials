@@ -12,8 +12,8 @@ jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Install poetry
@@ -28,7 +28,7 @@ jobs:
           poetry run pytest tests/test_accessibility.py
       - name: Upload Accessibility Reports
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: accessibility-reports
           path: accessibility_reports/
