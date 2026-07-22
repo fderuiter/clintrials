@@ -81,8 +81,7 @@
         ],
         "plot_outcomes": [
           "self",
-          "chart_title",
-          "use_ggplot"
+          "chart_title"
         ],
         "report": [
           "self"
@@ -179,8 +178,7 @@
         ],
         "plot_outcomes": [
           "self",
-          "chart_title",
-          "use_ggplot"
+          "chart_title"
         ],
         "report": [
           "self"
@@ -274,8 +272,7 @@
         ],
         "plot_outcomes": [
           "self",
-          "chart_title",
-          "use_ggplot"
+          "chart_title"
         ],
         "report": [
           "self"

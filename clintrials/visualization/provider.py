@@ -8,17 +8,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-COLORBLIND_PALETTE = [
-    "#E69F00",
-    "#56B4E9",
-    "#009E73",
-    "#F0E442",
-    "#0072B2",
-    "#D55E00",
-    "#CC79A7",
-    "#000000",
-]
-
 HIGH_CONTRAST_PALETTE = [
     "#8A5F00",  # Darkened Orange
     "#005A8F",  # Darkened Sky Blue

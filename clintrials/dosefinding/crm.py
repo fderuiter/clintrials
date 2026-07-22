@@ -809,13 +809,12 @@ class CRM(DoseFindingTrial):
         p = [self.F_func(x, a0=self.intercept, beta=beta_est) for x in labels]
         return p
 
-    def plot_toxicity_probabilities(self, chart_title: Optional[str] = None, use_ggplot: bool = False) -> Any:
+    def plot_toxicity_probabilities(self, chart_title: Optional[str] = None) -> Any:
         """Plots the prior and posterior dose-toxicity curves.
 
         Args:
             chart_title (str, optional): The title for the chart.
                 Defaults to a descriptive title.
-            use_ggplot (bool, optional): Ignored. Included for backwards compatibility.
 
         Returns:
             A plot object.

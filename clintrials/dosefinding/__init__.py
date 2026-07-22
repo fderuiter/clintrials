@@ -288,13 +288,12 @@ class DoseFindingTrial(Protocol):
         """
         raise NotImplementedError()
 
-    def plot_outcomes(self, chart_title: Optional[str] = None, use_ggplot: bool = False) -> Any:
+    def plot_outcomes(self, chart_title: Optional[str] = None) -> Any:
         """Plots the outcomes of patients observed.
 
         Args:
             chart_title (str, optional): The title for the chart. Defaults to
                 a descriptive title.
-            use_ggplot (bool, optional): Ignored. Included for backwards compatibility.
 
         Returns:
             A plot object.

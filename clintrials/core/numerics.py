@@ -32,7 +32,7 @@ def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, 
     Returns:
         float or numpy.ndarray: The computed posterior expectation(s).
     """
-    nodes, weights = np.polynomial.hermite.hermgauss(deg)
+    nodes, weights = np.polynomial.hermite.hermgauss(deg)  # type: ignore
     theta_nodes = prior_mean + np.sqrt(2) * prior_sd * nodes
     log_w = np.log(weights)
 

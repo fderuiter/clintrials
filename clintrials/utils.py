@@ -190,7 +190,7 @@ class Memoize:
             self.memo.move_to_end(cache_key)
         return self.memo[cache_key]
 
-    def __get__(self, instance: Any, owner: Any) -> Any:
+    def __get__(self, instance: Any, *args: Any) -> Any:
         """Support instance methods."""
         return partial(self, instance)
 
