@@ -44,6 +44,7 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
+from clintrials.core.cohort import PatientCohortTracker
 from clintrials.core.protocol import Protocol
 
 
@@ -77,10 +78,17 @@ class DoseFindingTrial(Protocol):
         self.num_doses = num_doses
         self._max_size = max_size
         # Reset
-        self._doses: List[int] = []
-        self._toxicities: List[int] = []
+        self._tracker = PatientCohortTracker()
         self._next_dose = self._first_dose
         self._status = 0
+
+    @property
+    def _doses(self) -> List[int]:
+        return self._tracker.doses
+
+    @property
+    def _toxicities(self) -> List[int]:
+        return self._tracker.toxicities
 
     def status(self) -> int:
         """Gets the current status of the trial.
@@ -92,8 +100,7 @@ class DoseFindingTrial(Protocol):
 
     def reset(self) -> None:
         """Resets the trial to its initial state."""
-        self._doses: List[int] = []  # type: ignore
-        self._toxicities: List[int] = []  # type: ignore
+        self._tracker.reset()
         self._next_dose = self._first_dose
         self._status = 0
         self.__reset()
@@ -253,9 +260,16 @@ class DoseFindingTrial(Protocol):
         Returns:
             int: The next recommended dose level.
         """
-        for dose, tox in cases:
-            self._doses.append(dose)
-            self._toxicities.append(tox)
+        if cases:
+            doses = []
+            toxicities = []
+            for case in cases:
+                if len(case) < 2:
+                    from clintrials.core.errors import ErrorTemplates
+                    raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="Patient outcome", expected_length=2))
+                doses.append(case[0])
+                toxicities.append(case[1])
+            self._tracker.add_patients(doses=doses, toxicities=toxicities)
 
         self._next_dose = self.__calculate_next_dose()
         return self._next_dose
