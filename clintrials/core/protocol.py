@@ -1,6 +1,7 @@
 """Module containing the abstract base class Protocol and associated methods."""
 
 from __future__ import annotations
+from typing import Any, Optional
 
 import abc
 
@@ -8,11 +9,11 @@ import abc
 class Protocol(metaclass=abc.ABCMeta):
     """Unified Protocol Framework interface."""
 
-    def __init__(self):  # type: ignore
+    def __init__(self) -> None:
         """Initializes a new Protocol instance."""
         self._rng = None
 
-    def set_rng(self, rng):  # type: ignore
+    def set_rng(self, rng: Any) -> None:
         """Inject a local RNG generator for reproducible, state-free random generation.
 
         Args:
@@ -24,7 +25,7 @@ class Protocol(metaclass=abc.ABCMeta):
         self._rng = rng
 
     @property
-    def rng(self):  # type: ignore
+    def rng(self) -> Any:
         """Get the current RNG. If not set, raise an error to enforce injection.
 
         Returns:
@@ -33,11 +34,11 @@ class Protocol(metaclass=abc.ABCMeta):
         if self._rng is None:
             # Fallback to local numpy random generator but warn or just create one
             from clintrials.core.rng import get_rng
-            self._rng = get_rng()  # type: ignore
+            self._rng = get_rng()
         return self._rng
 
     @abc.abstractmethod
-    def reset(self):  # type: ignore
+    def reset(self) -> None:
         """Resets the trial to its initial state.
 
         Returns:
@@ -46,7 +47,7 @@ class Protocol(metaclass=abc.ABCMeta):
         pass  # pragma: no cover
 
     @abc.abstractmethod
-    def update(self, *args, **kwargs):  # type: ignore
+    def update(self, *args: Any, **kwargs: Any) -> None:
         """Updates the trial with new cases or a new stage.
 
         Args:
@@ -59,7 +60,7 @@ class Protocol(metaclass=abc.ABCMeta):
         pass  # pragma: no cover
 
     @abc.abstractmethod
-    def has_more(self):  # type: ignore
+    def has_more(self) -> bool:
         """Checks if the trial is ongoing.
 
         Returns:
@@ -68,7 +69,7 @@ class Protocol(metaclass=abc.ABCMeta):
         pass  # pragma: no cover
 
     @abc.abstractmethod
-    def report(self):  # type: ignore
+    def report(self) -> Any:
         """Returns a standardized, ordered, JSON-serializable report.
 
         Returns:
@@ -76,14 +77,14 @@ class Protocol(metaclass=abc.ABCMeta):
         """
         pass  # pragma: no cover
 
-    def run(  # type: ignore
+    def run(
         self,
         n_sims: int,
         method: str = "iterative",
-        seed: int = None,  # type: ignore
+        seed: Optional[int] = None,
         show_progress: bool = False,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> Any:
         """Polymorphic entry point for simulation execution.
 
         Args:
@@ -100,11 +101,11 @@ class Protocol(metaclass=abc.ABCMeta):
         from clintrials.core.simulation import UniversalProtocolSimulationRunner
         from clintrials.core.unified import SimulationResult
 
-        self.set_rng(get_rng(seed))  # type: ignore
+        self.set_rng(get_rng(seed))
 
         mode = "vectorized" if method == "bulk" else "iterative"
 
-        runner = UniversalProtocolSimulationRunner(self)  # type: ignore
-        results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **kwargs)  # type: ignore
+        runner = UniversalProtocolSimulationRunner(self)
+        results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **kwargs)
 
-        return SimulationResult(results, mode=method)  # type: ignore
+        return SimulationResult(results, mode=method)
