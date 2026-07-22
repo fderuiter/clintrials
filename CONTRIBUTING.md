@@ -33,6 +33,17 @@ We require standardized approaches when dealing with high-complexity code, espec
 - **Security First**: High-risk security dependencies listed in `ROADMAP.md` are top priorities.
 - **Handling Vulnerabilities**: Ensure dependency updates are tested thoroughly, and adhere to standard disclosure policies before detailing new vulnerabilities in the public roadmap.
 
+## Test-Driven Development (TDD) Sequencing
+
+This project enforces strict Test-Driven Development (TDD) practices for all new business logic. Our Continuous Integration (CI) pipeline includes a Git History Timeline Auditor that verifies the order of commits in your pull request.
+
+- **TDD Sequencing Requirements**: Tests must be written before or alongside the business logic they verify. The CI pipeline ensures that any commit modifying a source file is preceded by, or accompanied by, a commit that adds or modifies the corresponding test file.
+  - The corresponding test file for a module like `clintrials/core/recruitment.py` should be named `test_recruitment.py` or `test_recruitment_*.py` and placed in the `tests/` directory.
+
+- **Urgent Hotfix Exemptions**: If you are deploying an urgent hotfix to production and cannot adhere to TDD sequencing rules, you can bypass the timeline audit using one of the following methods:
+  - **Branch Name Prefix**: Prefix your pull request branch name with `hotfix/` (e.g., `hotfix/urgent-bug-fix`).
+  - **Git Commit Trailer**: Append the `skip-tdd` trailer to any commit message in your pull request branch (e.g., by adding `skip-tdd: true` or `skip-tdd: security-hotfix` on a new line at the bottom of the commit message).
+
 ## Pull Request Process
 - Ensure all tests pass.
 - Link your pull request to the relevant issue.
