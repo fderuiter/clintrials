@@ -60,15 +60,16 @@ def audit_commits(base_ref, head_ref, override_branch_name=None):
         print("No commits found in PR range.")  # noqa: T201
         return True
 
-    seen_tests = set()
-
+    # 3. Pre-scan for skip-tdd trailer in any commit message to skip the entire audit
     for commit in commits:
-        # 3. Check for skip-tdd trailer in this commit message
         msg = run_git(['log', '-1', '--format=%B', commit])
         if re.search(r'(?im)^skip-tdd\b', msg):
             print(f"Skipping TDD audit due to skip-tdd trailer in commit {commit}.")  # noqa: T201
             return True
 
+    seen_tests = set()
+
+    for commit in commits:
         # Check modified files in this commit
         files_output = run_git(['show', '--name-only', '--format=', commit])
         files = [f for f in files_output.split('\n') if f.strip()]
