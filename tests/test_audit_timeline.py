@@ -23,7 +23,8 @@ def test_is_test_file_for_module():
     assert is_test_file_for_module('src/test_recruitment.py', 'recruitment') is False
 
 @pytest.fixture
-def temp_git_repo():
+def temp_git_repo(monkeypatch):
+    monkeypatch.delenv("GITHUB_HEAD_REF", raising=False)
     with tempfile.TemporaryDirectory() as temp_dir:
         original_cwd = os.getcwd()
         os.chdir(temp_dir)
