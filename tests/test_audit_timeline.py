@@ -1,12 +1,14 @@
 import os
 import subprocess
-import tempfile
-import pytest
 import sys
+import tempfile
+
+import pytest
 
 # Add scripts directory to path to import audit_timeline
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts')))
-from audit_timeline import get_module_name, is_test_file_for_module, audit_commits
+from audit_timeline import audit_commits, get_module_name, is_test_file_for_module
+
 
 def test_get_module_name():
     assert get_module_name('clintrials/core/recruitment.py') == 'recruitment'
@@ -37,7 +39,7 @@ def temp_git_repo():
                 f.write('hello')
             subprocess.run(['git', 'add', 'README.md'], check=True)
             subprocess.run(['git', 'commit', '-m', 'Initial commit'], check=True)
-            
+
             subprocess.run(['git', 'branch', '-m', 'main'], check=True)
             yield temp_dir
         finally:
@@ -48,14 +50,14 @@ def run_git(args):
 
 def test_audit_commits_success(temp_git_repo):
     run_git(['checkout', '-b', 'feature-branch'])
-    
+
     # Commit test first
     os.makedirs('tests', exist_ok=True)
     with open('tests/test_recruitment.py', 'w') as f:
         f.write('def test_foo(): pass')
     run_git(['add', 'tests/test_recruitment.py'])
     run_git(['commit', '-m', 'Add test'])
-    
+
     # Commit implementation
     os.makedirs('clintrials/core', exist_ok=True)
     with open('clintrials/core/recruitment.py', 'w') as f:
@@ -67,7 +69,7 @@ def test_audit_commits_success(temp_git_repo):
 
 def test_audit_commits_failure(temp_git_repo):
     run_git(['checkout', '-b', 'feature-branch'])
-    
+
     # Commit implementation without test
     os.makedirs('clintrials/core', exist_ok=True)
     with open('clintrials/core/recruitment.py', 'w') as f:
@@ -79,16 +81,16 @@ def test_audit_commits_failure(temp_git_repo):
 
 def test_audit_commits_concurrent(temp_git_repo):
     run_git(['checkout', '-b', 'feature-branch'])
-    
+
     # Commit both at the same time
     os.makedirs('tests', exist_ok=True)
     with open('tests/test_recruitment.py', 'w') as f:
         f.write('def test_foo(): pass')
-    
+
     os.makedirs('clintrials/core', exist_ok=True)
     with open('clintrials/core/recruitment.py', 'w') as f:
         f.write('def foo(): pass')
-        
+
     run_git(['add', 'tests/test_recruitment.py', 'clintrials/core/recruitment.py'])
     run_git(['commit', '-m', 'Add both'])
 
@@ -96,7 +98,7 @@ def test_audit_commits_concurrent(temp_git_repo):
 
 def test_audit_commits_hotfix(temp_git_repo):
     run_git(['checkout', '-b', 'hotfix/urgent-fix'])
-    
+
     # Commit implementation without test
     os.makedirs('clintrials/core', exist_ok=True)
     with open('clintrials/core/recruitment.py', 'w') as f:
@@ -109,7 +111,7 @@ def test_audit_commits_hotfix(temp_git_repo):
 
 def test_audit_commits_hotfix_override(temp_git_repo):
     run_git(['checkout', '-b', 'feature-branch'])
-    
+
     # Commit implementation without test
     os.makedirs('clintrials/core', exist_ok=True)
     with open('clintrials/core/recruitment.py', 'w') as f:
@@ -122,7 +124,7 @@ def test_audit_commits_hotfix_override(temp_git_repo):
 
 def test_audit_commits_skip_tdd_trailer(temp_git_repo):
     run_git(['checkout', '-b', 'feature-branch'])
-    
+
     # Commit implementation without test, but with skip-tdd
     os.makedirs('clintrials/core', exist_ok=True)
     with open('clintrials/core/recruitment.py', 'w') as f:
