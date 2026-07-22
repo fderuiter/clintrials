@@ -1,5 +1,6 @@
 """Script to serialize Python dataclass schemas into a JSON contract for the frontend."""
 
+import dataclasses
 import json
 import os
 import sys
@@ -87,7 +88,6 @@ def generate_schema_for_class(cls):
     for name, field_info in cls.model_fields.items():
         prop = get_field_type_info(field_info.annotation, field_info)
 
-        import dataclasses
         if field_info.default is not dataclasses.MISSING and field_info.default is not None:
             prop["default"] = field_info.default
 
