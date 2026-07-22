@@ -149,7 +149,7 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: i
         raise ValueError(f"Unsupported widget type: {widget_type}")
 
 
-def render_metric(st_module, label, value, precision=4):  # type: ignore
+def render_metric(st_module, label, value):  # type: ignore
     """Renders a semantic metric card with configurable numeric precision for statistical floats."""
     from clintrials.visualization.helpers import format_number
     if isinstance(value, float):
@@ -164,7 +164,7 @@ def render_metric(st_module, label, value, precision=4):  # type: ignore
     st_module.metric(label=label, value=formatted_value)
 
 
-def render_accessible_chart(st_module, fig, expander_label="Data Summary"):  # type: ignore
+def render_accessible_chart(st_module, fig):  # type: ignore
     """Shared utility to render a Plotly chart with an accessible Markdown table summary."""
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
 
