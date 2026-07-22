@@ -254,7 +254,7 @@ class UniversalProtocolSimulationRunner:
             for i in range(self.design.k):
                 for j in range(i + 1, self.design.k):
                     corr = np.sqrt(self.design.timing[i] / self.design.timing[j])
-                    cov[i, j] = cov[j, i] = corr  # type: ignore
+                    cov[i, j] = cov[j, i] = corr
             simulated_z = self.design.rng.multivariate_normal(mean=means, cov=cov, size=n_sims)
             stopped_at = np.full(n_sims, self.design.k + 1, dtype=int)
             rejected = np.zeros(n_sims, dtype=bool)

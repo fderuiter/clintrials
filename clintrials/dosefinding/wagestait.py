@@ -189,7 +189,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         )
 
         self.skeletons = skeletons
-        self.K, self.I = np.array(skeletons).shape  # type: ignore
+        self.K, self.I = np.array(skeletons).shape
         if self.I != len(prior_tox_probs):
             raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="prior_tox_probs", expected_length=self.I))
         if tox_target > tox_limit:
@@ -216,7 +216,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.estimate_var = estimate_var
 
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[  # type: ignore
+            np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -289,7 +289,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         Returns:
             float: The theta estimate.
         """
-        return self.theta_hats[self.most_likely_model_index]  # type: ignore
+        return self.theta_hats[self.most_likely_model_index]
 
     def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self) -> Any:
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
@@ -308,14 +308,14 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         )
         theta_hats, theta_vars, log_marginal = zip(*integrals)
 
-        self.theta_hats = theta_hats
+        self.theta_hats = theta_hats  # type: ignore
         log_w = np.log(self.model_prior_weights + 1e-300) + np.array(log_marginal)
         log_w = log_w - np.max(log_w)
         w = np.exp(log_w)
         self.w = w / sum(w)
         most_likely_model_index = np.argmax(self.w)
         self.most_likely_model_index = most_likely_model_index
-        self.post_tox_probs = np.array(self.crm.prob_tox())
+        self.post_tox_probs = np.array(self.crm.prob_tox())  # type: ignore
         a0 = 0
         theta0 = self.theta_prior.mean()
         dose_labels = [
@@ -361,7 +361,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 
     def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[  # type: ignore
+            np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -432,7 +432,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 for (acc, i) in zip(acceptable_doses, range(1, self.num_doses + 1))
                 if acc
             ]
-            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1  # type: ignore
+            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1
         else:
             self._status = -1
             self._admissable_set = []
