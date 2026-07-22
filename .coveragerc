@@ -1,8 +1,0 @@
-[run]
-branch = True
-omit =
-    */__main__*
-    tests/*
-
-[report]
-fail_under = 70
