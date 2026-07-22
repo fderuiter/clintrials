@@ -1,5 +1,6 @@
-from __future__ import annotations
 """Centralized registry for all statistical constants."""
+
+from __future__ import annotations
 
 from typing import Any, Dict
 
@@ -68,16 +69,12 @@ CORE_REGISTRY: Dict[str, Any] = {
 import importlib
 import logging
 import pkgutil
-from typing import Any, Dict, Callable, Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, List, Optional
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    import clintrials.visualization.dashboard.views as views
-    import clintrials.visualization.dashboard.views.crm_view
-    import clintrials.visualization.dashboard.views.efftox_view
-    import clintrials.visualization.dashboard.views.framework
-    import clintrials.visualization.dashboard.views.watu_view
+    pass
 
 class ProtocolRegistry:
     """A registry for clinical trial protocol designs and their visualization methods."""

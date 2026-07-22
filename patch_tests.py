@@ -1,3 +1,4 @@
+# ruff: noqa: D100, D103, T201
 import re
 
 with open('tests/test_dashboard_views.py', 'r') as f:

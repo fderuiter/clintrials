@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Renders the Win Ratio simulation view in the Streamlit dashboard.
 
 Random Seed Strategy: {winratio_view_seed_strategy}
 """
+
+from __future__ import annotations
 
 import pandas as pd
 import streamlit as st

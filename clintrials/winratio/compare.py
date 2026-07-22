@@ -1,9 +1,9 @@
-from __future__ import annotations
 """Compare two subjects component-wise in a hierarchical manner.
 
 Random Seed Strategy: {compare_seed_strategy}
 """
 
+from __future__ import annotations
 
 from typing import Iterable
 

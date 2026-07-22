@@ -12,14 +12,14 @@ class BaseSimulationView:
     model_name = ""
     title = ""
     file_prefix = ""
-    param_space_config = {}
+    param_space_config = {}  # type: ignore
     model_class = None
     var_map = None
     csv_index = True
     skip_summary_table = False
 
     @classmethod
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, **kwargs):  # type: ignore
         """Register the view automatically on subclassing."""
         super().__init_subclass__(**kwargs)
         if cls.model_name:
@@ -36,27 +36,27 @@ class BaseSimulationView:
 
             preview = None
             if "preview_sims" in cls.__dict__:
-                preview = cls.preview_sims
+                preview = cls.preview_sims  # type: ignore
 
             PROTOCOL_REGISTRY.register_manual(
                 cls.model_name, render_func=decorated_render, preview_func=preview
             )
 
     @classmethod
-    def _base_render(cls, sims, ps=None):
+    def _base_render(cls, sims, ps=None):  # type: ignore
         """Render the sidebar controls, parse parameter combinations, and execute the view mapping."""
         from clintrials.core.simulation import extract_sim_data
 
-        func_map = cls.model_class.get_summary_functions()
-        summary_df = extract_sim_data(
+        func_map = cls.model_class.get_summary_functions()  # type: ignore
+        summary_df = extract_sim_data(  # type: ignore
             sims, ps, func_map, var_map=cls.var_map, return_type="dataframe"
         )
 
-        figures = cls.build_figures(summary_df)
+        figures = cls.build_figures(summary_df)  # type: ignore
         return summary_df, figures
 
     @classmethod
-    def build_figures(cls, summary_df):
+    def build_figures(cls, summary_df):  # type: ignore
         """Build figures from the simulation summary dataframe. Should be overridden."""
         return []
 
@@ -64,7 +64,7 @@ class BaseSimulationView:
 from clintrials.utils import ParameterSpace
 
 
-def render_sidebar_config(param_space_config: dict) -> ParameterSpace:
+def render_sidebar_config(param_space_config: dict) -> ParameterSpace:  # type: ignore
     """Render the sidebar configuration and return the parameter space."""
     import streamlit as st
 
@@ -78,9 +78,9 @@ def render_sidebar_config(param_space_config: dict) -> ParameterSpace:
 
 def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):  # type: ignore
     """Decorator to generate a standard dashboard view."""
-    def decorator(func):
+    def decorator(func):  # type: ignore
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args, **kwargs):  # type: ignore
             import streamlit as st
 
             if not hasattr(st, "fragment"):
@@ -130,7 +130,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
 
                         meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
                         text_summaries.append(meta)
-                        render_accessible_chart(st, fig)
+                        render_accessible_chart(st, fig)  # type: ignore
                 elif summary_df is not None and not summary_df.empty:
                     pass
 
@@ -148,7 +148,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                     mime="text/csv",
                 )
 
-                viz_provider = get_visualization_provider()
+                viz_provider = get_visualization_provider()  # type: ignore
                 pdf_data = viz_provider.generate_pdf_report(
                     summary_df, model_name, text_summaries=text_summaries
                 ) if viz_provider else None

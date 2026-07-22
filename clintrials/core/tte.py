@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Time-to-event trial designs.
 
 Random Seed Strategy: {tte_seed_strategy}
 """
+
+from __future__ import annotations
 
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"

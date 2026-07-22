@@ -1,9 +1,9 @@
-from __future__ import annotations
 """Generate synthetic data for win-ratio simulations.
 
 Random Seed Strategy: {data_generation_seed_strategy}
 """
 
+from __future__ import annotations
 
 import numpy as np
 

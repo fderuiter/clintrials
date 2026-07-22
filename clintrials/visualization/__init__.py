@@ -1,5 +1,6 @@
-from __future__ import annotations
 """Visualization namespace. Ensure you have installed the optional viz dependencies."""
+
+from __future__ import annotations
 
 from clintrials.visualization.provider import (
     create_bar_chart,

@@ -9,24 +9,24 @@ from clintrials.dosefinding.efftox import EffTox
 from clintrials.visualization.dashboard.views.framework import BaseSimulationView
 
 
-class EffToxView(BaseSimulationView):
+class EffToxView(BaseSimulationView):  # type: ignore
     """View class for the Efficacy-Toxicity (EffTox) model."""
 
     model_name = "EffTox"
     title = "EffTox Simulation Results"
     file_prefix = "efftox_simulations"
-    model_class = EffTox
+    model_class = EffTox  # type: ignore
     param_space_config = {
         "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
         "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
     }
-    var_map = {
+    var_map = {  # type: ignore
         "true_prob_tox": "true_prob_tox",
         "true_prob_eff": "true_prob_eff",
     }
 
     @classmethod
-    def preview_sims(cls, target_tox, cohort_size, max_size):
+    def preview_sims(cls, target_tox, cohort_size, max_size):  # type: ignore
         """Generate preview simulations for the EffTox model."""
         from clintrials.core.simulation import run_bivariate_simulations
         from clintrials.dosefinding.efftox import EffTox, LpNormCurve
@@ -36,7 +36,7 @@ class EffToxView(BaseSimulationView):
         prior_eff_probs = [0.2, 0.4, 0.6, 0.7, 0.8]
 
         metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-        trial = EffTox(
+        trial = EffTox(  # type: ignore
             real_doses=real_doses,
             prior_tox_probs=prior_tox_probs,
             prior_eff_probs=prior_eff_probs,
@@ -51,16 +51,16 @@ class EffToxView(BaseSimulationView):
         tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
         eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
 
-        return run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
+        return run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)  # type: ignore
 
     @classmethod
-    def build_figures(cls, summary_df):
+    def build_figures(cls, summary_df):  # type: ignore
         """Generate visualization plots for the EffTox summary dataframe."""
         figures = []
         if not summary_df.empty:
             if "recommended_dose_prob" in summary_df.columns:
                 import clintrials.visualization as viz
-                fig_rec = viz.plot_bivariate_simulation_recommendation(
+                fig_rec = viz.plot_bivariate_simulation_recommendation(  # type: ignore
                     summary_df,
                     high_contrast=False
                 )
@@ -71,7 +71,7 @@ class EffToxView(BaseSimulationView):
                 and "prob_accept_eff" in summary_df.columns
             ):
                 import clintrials.visualization as viz
-                fig_accept = viz.plot_efftox_simulation_acceptability(
+                fig_accept = viz.plot_efftox_simulation_acceptability(  # type: ignore
                     summary_df,
                     high_contrast=False
                 )

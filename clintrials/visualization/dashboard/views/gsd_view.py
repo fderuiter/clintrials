@@ -1,5 +1,6 @@
-from __future__ import annotations
 """Renders the Group Sequential Design simulation view in the Streamlit dashboard."""
+
+from __future__ import annotations
 
 import pandas as pd
 import streamlit as st

@@ -1,8 +1,9 @@
-from __future__ import annotations
 """Abstract interface for visualization providers.
 
 Random Seed Strategy: {viz_interface_seed_strategy}
 """
+
+from __future__ import annotations
 
 import abc
 
