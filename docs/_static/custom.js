@@ -146,6 +146,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Homepage Placeholder & Click-to-Play
+    const homepagePlaceholder = document.getElementById('homepage-sim-placeholder');
+    if (homepagePlaceholder) {
+        // Disable side drawer button on homepage
+        toggleBtn.style.display = 'none';
+
+        const launchBtn = document.getElementById('launch-sim-btn');
+        const loadingSpinner = document.getElementById('sim-loading-spinner');
+
+        if (launchBtn) {
+            launchBtn.addEventListener('click', () => {
+                launchBtn.style.display = 'none';
+                if (loadingSpinner) loadingSpinner.style.display = 'flex';
+
+                const iframe = document.createElement('iframe');
+                iframe.title = 'Clinical Trials Simulation Hub Dashboard';
+                iframe.src = getHubUrl() + 'index.html?embed=true&view=Win+Ratio';
+                iframe.style.width = '100%';
+                iframe.style.height = '800px';
+                iframe.style.border = 'none';
+                iframe.style.background = 'transparent';
+                iframe.style.overflow = 'hidden';
+                iframe.setAttribute('scrolling', 'no');
+                iframe.style.opacity = '0';
+                iframe.style.transition = 'opacity 0.3s ease-in-out';
+
+                iframe.onload = () => {
+                    if (loadingSpinner) loadingSpinner.style.display = 'none';
+                    iframe.style.opacity = '1';
+                    
+                    Array.from(homepagePlaceholder.children).forEach(child => {
+                        if (child !== iframe) {
+                            child.style.display = 'none';
+                        }
+                    });
+                    
+                    homepagePlaceholder.style.border = 'none';
+                    homepagePlaceholder.style.background = 'transparent';
+                    homepagePlaceholder.style.boxShadow = 'none';
+                    
+                    if (window.iFrameResize) {
+                        window.iFrameResize({
+                            log: false,
+                            checkOrigin: false,
+                            heightCalculationMethod: 'lowestElement'
+                        }, iframe);
+                    }
+                };
+
+                homepagePlaceholder.appendChild(iframe);
+            });
+        }
+    }
+
     // 5. Service Worker Registration
     if ('serviceWorker' in navigator) {
         const isSubpath = window.location.pathname.includes('/clintrials/');
