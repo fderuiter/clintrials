@@ -286,7 +286,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.w = w / sum(w)
         most_likely_model_index = np.argmax(self.w)
         self.most_likely_model_index = most_likely_model_index
-        self.post_tox_probs = np.array(self.crm.prob_tox())  # type: ignore
+        self.post_tox_probs = np.array(self.crm.prob_tox())
         if self.plugin_mean:
             self.post_eff_probs = empiric(
                 self.skeletons[most_likely_model_index],

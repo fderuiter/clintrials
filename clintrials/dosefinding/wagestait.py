@@ -315,7 +315,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.w = w / sum(w)
         most_likely_model_index = np.argmax(self.w)
         self.most_likely_model_index = most_likely_model_index
-        self.post_tox_probs = np.array(self.crm.prob_tox())  # type: ignore
+        self.post_tox_probs = np.array(self.crm.prob_tox())
         a0 = 0
         theta0 = self.theta_prior.mean()
         dose_labels = [
