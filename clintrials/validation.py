@@ -1,11 +1,12 @@
 """Validation functions for the Clinical Trials library."""
 
 from __future__ import annotations
+from typing import Any, Optional, Sequence, Union
 
 from clintrials.core.errors import ErrorTemplates
 
 
-def validate_matching_lengths(**kwargs):  # type: ignore
+def validate_matching_lengths(**kwargs: Sequence[Any]) -> None:
     """Validates that all provided arrays have the same length.
 
     Pass arrays as keyword arguments. For example:
@@ -33,7 +34,7 @@ def validate_matching_lengths(**kwargs):  # type: ignore
             raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name=first_name, name=name))
 
 
-def validate_expected_length(array, expected_length: int, name: str):  # type: ignore
+def validate_expected_length(array: Sequence[Any], expected_length: int, name: str) -> None:
     """Validates that an array has exactly the expected length.
 
     Args:
@@ -51,7 +52,7 @@ def validate_expected_length(array, expected_length: int, name: str):  # type: i
         raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=name, expected_length=expected_length))
 
 
-def validate_bounds(value, lower, upper, name: str, exclusive=False):  # type: ignore
+def validate_bounds(value: Union[float, int], lower: Optional[Union[float, int]], upper: Optional[Union[float, int]], name: str, exclusive: bool = False) -> None:
     """Validates that a numerical value is within the specified bounds.
 
     Args:
@@ -80,7 +81,7 @@ def validate_bounds(value, lower, upper, name: str, exclusive=False):  # type: i
             raise ValueError(ErrorTemplates.LE.format(name=name, bound=upper))
 
 
-def validate_probability(value, name: str, exclusive=False):  # type: ignore
+def validate_probability(value: float, name: str, exclusive: bool = False) -> None:
     """Validates that a value is a valid probability between 0 and 1.
 
     Args:
@@ -103,7 +104,7 @@ def validate_probability(value, name: str, exclusive=False):  # type: ignore
             raise ValueError(ErrorTemplates.PROBABILITY.format(name=name))
 
 
-def validate_positive_integer(value, name: str):  # type: ignore
+def validate_positive_integer(value: int, name: str) -> None:
     """Validates that a value is a positive integer.
 
     Args:

@@ -11,6 +11,42 @@ import logging
 from collections import OrderedDict
 from datetime import datetime
 
+from typing import Any, Callable, Dict, List, Optional, Protocol, Sequence, Union, runtime_checkable
+
+@runtime_checkable
+class OutcomeGenerator(Protocol):
+    def __call__(
+        self,
+        design: Any,
+        current_size: int,
+        cohort_size: int,
+        **kwargs: Any
+    ) -> Any:
+        ...
+
+@runtime_checkable
+class TrialDesign(Protocol):
+    def reset(self) -> None: ...
+    def update(self, *args: Any, **kwargs: Any) -> None: ...
+    def has_more(self) -> bool: ...
+    def report(self) -> Any: ...
+
+@runtime_checkable
+class TrialDesignWithMaxSize(TrialDesign, Protocol):
+    max_size: Union[int, float]
+
+@runtime_checkable
+class TrialDesignWithEfficacyBoundaries(TrialDesign, Protocol):
+    efficacy_boundaries: Sequence[float]
+    timing: Sequence[float]
+    k: int
+    rng: Any
+
+@runtime_checkable
+class TrialDesignWithBulk(TrialDesign, Protocol):
+    def run_bulk(self, n_sims: int, **kwargs: Any) -> list[Any]: ...
+
+
 from clintrials.utils import Memoize, filter_list_of_dicts, tuple_to_dataframe
 
 __all__ = [
@@ -24,7 +60,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 @Memoize
-def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, **kwargs):  # type: ignore
+def run_sims(sim_func: Callable[..., Any], n1: int = 1, n2: int = 1, out_file: Optional[str] = None, agg_func: Optional[Callable[..., Any]] = None, metadata: Optional[Dict[str, Any]] = None, **kwargs: Any) -> Any:
     """Runs simulations using a delegate function.
 
     Args:
@@ -44,13 +80,13 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, 
         list or dict: A list of simulation results, or if metadata is provided,
             a nested dict with "Parameters" and "Simulations" keys.
     """
-    sims = [] if agg_func is None else None  # type: ignore
+    sims: Any = [] if agg_func is None else None
     for j in range(n1):
         sims1 = [sim_func(**kwargs) for i in range(n2)]
         if agg_func:
             sims = agg_func(sims, sims1)
         else:
-            sims += sims1  # type: ignore
+            sims += sims1
         if out_file:
             try:
                 with open(out_file, 'w') as outfile:
@@ -65,7 +101,7 @@ def run_sims(sim_func, n1=1, n2=1, out_file=None, agg_func=None, metadata=None, 
     return sims
 
 @Memoize
-def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=None, metadata=None):  # type: ignore
+def sim_parameter_space(sim_func: Callable[..., Any], ps: Any, n1: int = 1, n2: Optional[int] = None, out_file: Optional[str] = None, agg_func: Optional[Callable[..., Any]] = None, metadata: Optional[Dict[str, Any]] = None) -> Any:
     """Runs simulations for a parameter space.
 
     Args:
@@ -87,15 +123,16 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=Non
             a nested dict with "Parameters" and "Simulations" keys.
     """
     if not n2 or n2 <= 0:
-        n2 = ps.size()
-    sims = [] if agg_func is None else None  # type: ignore
+        n2 = int(ps.size())
+    sims: Any = [] if agg_func is None else None
     params_iterator = ps.get_cyclical_iterator()
     for j in range(n1):
+        assert n2 is not None
         sims1 = [sim_func(**params_iterator.next()) for i in range(n2)]
         if agg_func:
             sims = agg_func(sims, sims1)
         else:
-            sims += sims1  # type: ignore
+            sims += sims1
         if out_file:
             try:
                 with open(out_file, 'w') as outfile:
@@ -109,7 +146,7 @@ def sim_parameter_space(sim_func, ps, n1=1, n2=None, out_file=None, agg_func=Non
         return {'Parameters': metadata, 'Simulations': sims}
     return sims
 
-def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10):  # type: ignore
+def run_bivariate_simulations(trial: Any, tox_scenarios: Any, eff_scenarios: Any, cohort_size: int, n_replicates: int = 10) -> Any:
     """Shared simulation runner for bivariate trial models (EffTox/WATU)."""
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
     from clintrials.utils import ParameterSpace
@@ -118,7 +155,7 @@ def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, 
     ps.add("true_prob_tox", tox_scenarios)
     ps.add("true_prob_eff", eff_scenarios)
 
-    def wrapped_sim_func(true_prob_tox, true_prob_eff):  # type: ignore
+    def wrapped_sim_func(true_prob_tox: float, true_prob_eff: float) -> Any:
         report = simulate_trial(trial, true_toxicities=true_prob_tox, true_efficacies=true_prob_eff, cohort_size=cohort_size)
         report["true_prob_tox"] = true_prob_tox
         report["true_prob_eff"] = true_prob_eff
@@ -126,7 +163,7 @@ def run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, 
 
     return sim_parameter_space(wrapped_sim_func, ps, n1=n_replicates)
 
-def extract_sim_data(sims, ps, func_map, var_map=None, return_type='dataframe'):  # type: ignore
+def extract_sim_data(sims: Any, ps: Any, func_map: Dict[str, Callable[..., Any]], var_map: Optional[Dict[str, str]] = None, return_type: str = 'dataframe') -> Any:
     """Extracts and summarises a list of simulations.
 
     This method partitions simulations into subsets that used the same set of
@@ -189,12 +226,12 @@ class UniversalProtocolSimulationRunner:
     initialisation, recruitment timing, outcome generation, and standard reporting.
     """
 
-    def __init__(self, design, outcome_generator=None, recruitment_stream=None):  # type: ignore
+    def __init__(self, design: Union[TrialDesign, TrialDesignWithMaxSize, TrialDesignWithEfficacyBoundaries, TrialDesignWithBulk, Any], outcome_generator: Optional[OutcomeGenerator] = None, recruitment_stream: Optional[Any] = None) -> None:
         self.design = design
         self.outcome_generator = outcome_generator
         self.recruitment_stream = recruitment_stream
 
-    def run(self, mode='iterative', n_sims=1, cohort_size=1, show_progress=False, **kwargs):  # type: ignore
+    def run(self, mode: str = 'iterative', n_sims: int = 1, cohort_size: int = 1, show_progress: bool = False, **kwargs: Any) -> Any:
         """Runs the trial simulation loop.
 
         Args:
@@ -209,7 +246,7 @@ class UniversalProtocolSimulationRunner:
             list: A list of individual trial simulation reports.
         """
         if mode == 'vectorized':
-            return self._run_vectorized(n_sims, **kwargs)  # type: ignore
+            return self._run_vectorized(n_sims, **kwargs)
         try:
             from tqdm import tqdm
         except ImportError:
@@ -225,9 +262,9 @@ class UniversalProtocolSimulationRunner:
             if recruitment_stream:
                 recruitment_stream.reset()
             i = 0
-            max_size = getattr(design, 'max_size', lambda: float('inf'))()
+            max_size: Union[int, float] = getattr(design, 'max_size', lambda: float('inf'))()
             while i < max_size and design.has_more():
-                current_cohort_size = min(cohort_size, max_size - i) if max_size != float('inf') else cohort_size
+                current_cohort_size: int = int(min(cohort_size, max_size - i)) if max_size != float('inf') else int(cohort_size)
                 if recruitment_stream:
                     kwargs['arrival_times'] = [recruitment_stream.next() for _ in range(current_cohort_size)]
                 if self.outcome_generator:
@@ -242,15 +279,18 @@ class UniversalProtocolSimulationRunner:
             results.append(design.report())
         return results if n_sims > 1 or mode == 'iterative' else results[0]
 
-    def _run_vectorized(self, n_sims, **kwargs):  # type: ignore
+    def _run_vectorized(self, n_sims: int, **kwargs: Any) -> Any:
         import numpy as np
 
         from clintrials.validation import validate_positive_integer
         validate_positive_integer(n_sims, 'Number of simulations')
         if hasattr(self.design, 'efficacy_boundaries'):
+            assert hasattr(self.design, 'timing')
+            assert hasattr(self.design, 'k')
+            assert hasattr(self.design, 'rng')
             theta = kwargs.get('theta', 0.0)
             means = theta * np.array(self.design.timing)
-            cov = np.identity(self.design.k)
+            cov: Any = np.identity(self.design.k)
             for i in range(self.design.k):
                 for j in range(i + 1, self.design.k):
                     corr = np.sqrt(self.design.timing[i] / self.design.timing[j])
