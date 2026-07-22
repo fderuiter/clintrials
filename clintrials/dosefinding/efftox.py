@@ -991,7 +991,7 @@ def solve_metrizable_efftox_scenario(prob_tox: Any, prob_eff: Any, metric: Any, 
     """
     from clintrials.validation import validate_matching_lengths
 
-    validate_matching_lengths(prob_tox=prob_tox, prob_eff=prob_eff)  # type: ignore
+    validate_matching_lengths(prob_tox=prob_tox, prob_eff=prob_eff)
 
     t = prob_tox
     r = prob_eff

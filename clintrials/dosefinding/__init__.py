@@ -73,7 +73,7 @@ class DoseFindingTrial(Protocol):
         if first_dose > num_doses:
             raise ValueError("First dose must be no greater than number of doses.")
 
-        super().__init__()  # type: ignore
+        super().__init__()
         self._first_dose = first_dose
         self.num_doses = num_doses
         self._max_size = max_size
@@ -243,7 +243,7 @@ class DoseFindingTrial(Protocol):
         """
         return self._next_dose
 
-    def update(self, cases: List[Tuple[int, int]], **kwargs: Any) -> int:
+    def update(self, cases: List[Tuple[int, int]], **kwargs: Any) -> int:  # type: ignore[override]
         """Updates the trial with a list of new cases.
 
         Warning:
@@ -535,12 +535,12 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
 
     # Simulate trial
     if conduct_trial:
-        runner = UniversalProtocolSimulationRunner(  # type: ignore
+        runner = UniversalProtocolSimulationRunner(
             design=design,
-            outcome_generator=_df_outcome_generator,
+            outcome_generator=_df_outcome_generator,  # type: ignore[arg-type]
             recruitment_stream=recruitment_stream
         )
-        sim_report = runner.run(  # type: ignore
+        sim_report = runner.run(
             cohort_size=cohort_size,
             true_toxicities=true_toxicities,
             tolerances=tolerances

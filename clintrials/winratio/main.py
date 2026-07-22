@@ -24,7 +24,7 @@ class WinRatioTrial(Protocol):
     """Win-Ratio simulation wrapped as a Protocol."""
 
     def __init__(self, **kwargs):  # type: ignore
-        super().__init__()  # type: ignore
+        super().__init__()
         self.config = WinRatioSchema(**kwargs)
         self.success = False
         self.ci = None
@@ -138,7 +138,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run a win-ratio simulation to calculate statistical power."
     )
-    for name, field in WinRatioSchema.model_fields.items():  # type: ignore
+    for name, field in WinRatioSchema.model_fields.items():
         arg_name = f"--{name}"
         if name == "significance_level":
             arg_name = "--significance"

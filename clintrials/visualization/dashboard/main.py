@@ -216,7 +216,7 @@ def main():  # type: ignore
             # Typically Win Ratio
             try:
                 from clintrials.core.schema import WinRatioSchema
-                for name, field in WinRatioSchema.model_fields.items():  # type: ignore
+                for name, field in WinRatioSchema.model_fields.items():
                     if name in UI_REGISTRY:
                         entries.append((field.description, UI_REGISTRY[name]))
             except ImportError:

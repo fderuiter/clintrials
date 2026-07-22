@@ -51,7 +51,7 @@ class EffToxView(BaseSimulationView):  # type: ignore
         tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
         eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
 
-        return run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)  # type: ignore
+        return run_bivariate_simulations(trial, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
 
     @classmethod
     def build_figures(cls, summary_df):  # type: ignore
