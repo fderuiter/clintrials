@@ -29,6 +29,7 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
+from clintrials.core.cohort import PatientCohortTracker
 from clintrials.core.protocol import Protocol
 
 
@@ -64,12 +65,22 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         self._max_size = max_size
 
         # Reset
-        self._doses = []  # type: ignore
-        self._toxicities = []  # type: ignore
-        self._efficacies: List[int] = []
+        self._tracker = PatientCohortTracker()
         self._next_dose = self._first_dose
         self._status = 0
         self._admissable_set = []  # type: ignore
+
+    @property
+    def _doses(self) -> List[int]:
+        return self._tracker.doses
+
+    @property
+    def _toxicities(self) -> List[int]:
+        return self._tracker.toxicities
+
+    @property
+    def _efficacies(self) -> List[int]:
+        return self._tracker.efficacies
 
     def status(self) -> int:
         """Gets the current status of the trial.
@@ -81,9 +92,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
 
     def reset(self) -> None:
         """Resets the trial to its initial state."""
-        self._doses = []
-        self._toxicities = []
-        self._efficacies: List[int] = []  # type: ignore
+        self._tracker.reset()
         self._next_dose = self._first_dose
         self._status = 0
         self.__reset()
@@ -195,7 +204,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 have been treated.
         """
         if len(self._doses) > 0:
-            return max(self._doses)  # type: ignore
+            return max(self._doses)
         else:
             return None
 
@@ -207,7 +216,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 have been treated.
         """
         if len(self._doses) > 0:
-            return min(self._doses)  # type: ignore
+            return min(self._doses)
         else:
             return None
 
@@ -267,11 +276,18 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
             int: The next recommended dose level.
         """
         if len(cases) > 0:
-            for dose, tox, eff in cases:
-                self._doses.append(dose)
-                self._toxicities.append(tox)
-                self._efficacies.append(eff)
+            doses = []
+            toxicities = []
+            efficacies = []
+            for case in cases:
+                if len(case) < 3:
+                    from clintrials.core.errors import ErrorTemplates
+                    raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="Patient outcome", expected_length=3))
+                doses.append(case[0])
+                toxicities.append(case[1])
+                efficacies.append(case[2])
 
+            self._tracker.add_patients(doses=doses, toxicities=toxicities, efficacies=efficacies)
             self._next_dose = self.__calculate_next_dose(**kwargs)
         else:
             logging.warning("Cannot update design with no cases")
