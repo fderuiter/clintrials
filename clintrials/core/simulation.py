@@ -54,7 +54,12 @@ __all__ = [
     "sim_parameter_space",
     "extract_sim_data",
     "UniversalProtocolSimulationRunner",
-    "run_bivariate_simulations"
+    "run_bivariate_simulations",
+    "OutcomeGenerator",
+    "TrialDesign",
+    "TrialDesignWithMaxSize",
+    "TrialDesignWithEfficacyBoundaries",
+    "TrialDesignWithBulk",
 ]
 
 logger = logging.getLogger(__name__)
