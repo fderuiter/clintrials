@@ -144,25 +144,25 @@ def test_audit_commits_skip_tdd_trailer(temp_git_repo: str) -> None:
 
     assert audit_commits('main', 'HEAD') is True
 
-def test_audit_commits_existing_test(temp_git_repo):
+def test_audit_commits_existing_test(temp_git_repo: str) -> None:
     # Commit test on main branch first
     os.makedirs('tests', exist_ok=True)
     with open('tests/test_recruitment.py', 'w') as f:
         f.write('def test_foo(): pass')
-    
+
     os.makedirs('clintrials/core', exist_ok=True)
     with open('clintrials/core/recruitment.py', 'w') as f:
         f.write('def foo(): pass')
-        
+
     run_git(['add', 'tests/test_recruitment.py', 'clintrials/core/recruitment.py'])
     run_git(['commit', '-m', 'Add test and impl on main'])
-    
+
     # Create feature branch and modify only the implementation
     run_git(['checkout', '-b', 'feature-branch'])
     with open('clintrials/core/recruitment.py', 'w') as f:
         f.write('def foo(): return 42')
     run_git(['add', 'clintrials/core/recruitment.py'])
     run_git(['commit', '-m', 'Modify impl'])
-    
+
     # Audit should pass because test exists in tree
     assert audit_commits('main', 'HEAD') is True

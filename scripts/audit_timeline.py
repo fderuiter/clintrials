@@ -80,7 +80,7 @@ def audit_commits(base_ref, head_ref, override_branch_name=None):
                     tree_files = run_git(['ls-tree', '-r', '--name-only', commit, 'tests/']).split('\n')
                 except subprocess.CalledProcessError:
                     tree_files = []
-                
+
                 test_found = any(is_test_file_for_module(t, module_name) for t in tree_files if t.strip())
                 if not test_found:
                     print(f"TDD Audit Failed: Commit {commit} modifies source file '{f}' (module: '{module_name}') "  # noqa: T201

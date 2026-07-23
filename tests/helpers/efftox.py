@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from scipy.stats import norm
 
 from clintrials.dosefinding.efftox import EffTox, LpNormCurve
@@ -26,9 +28,9 @@ class EffToxBuilder:
         self._metric = LpNormCurve(
             0.5, 0.3, 0.7, 0.25
         )
-        self._kwargs = {}
+        self._kwargs: Dict[str, Any] = {}
 
-    def with_real_doses(self, real_doses: list) -> "EffToxBuilder":
+    def with_real_doses(self, real_doses: List[Any]) -> "EffToxBuilder":
         self._real_doses = real_doses
         return self
 
@@ -50,20 +52,20 @@ class EffToxBuilder:
         self._max_size = max_size
         return self
 
-    def with_theta_priors(self, theta_priors) -> "EffToxBuilder":
+    def with_theta_priors(self, theta_priors: List[Any]) -> "EffToxBuilder":
         self._theta_priors = theta_priors
         return self
 
-    def with_metric(self, metric) -> "EffToxBuilder":
+    def with_metric(self, metric: Any) -> "EffToxBuilder":
         self._metric = metric
         return self
 
-    def with_kwargs(self, **kwargs) -> "EffToxBuilder":
+    def with_kwargs(self, **kwargs: Any) -> "EffToxBuilder":
         self._kwargs.update(kwargs)
         return self
 
     def build(self) -> EffTox:
-        return EffTox(
+        return EffTox(  # type: ignore[abstract]
             real_doses=self._real_doses,
             tox_cutoff=self._tox_cutoff,
             eff_cutoff=self._eff_cutoff,

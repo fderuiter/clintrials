@@ -1,3 +1,5 @@
+from typing import Any, Callable, Dict, List
+
 import numpy as np
 from scipy.stats import norm
 
@@ -7,20 +9,20 @@ from clintrials.dosefinding.crm import CRM
 
 class CRMBuilder:
     def __init__(self) -> None:
-        self._prior = [0.05, 0.12, 0.25, 0.40, 0.55]
+        self._prior: List[float] = [0.05, 0.12, 0.25, 0.40, 0.55]
         self._target = 0.25
         self._first_dose = 3
         self._max_size = 30
-        self._F_func = logistic
-        self._inverse_F = inverse_logistic
-        self._beta_prior = norm(loc=0, scale=np.sqrt(1.34))
+        self._F_func: Callable[..., Any] = logistic
+        self._inverse_F: Any = inverse_logistic
+        self._beta_prior: Any = norm(loc=0, scale=np.sqrt(1.34))
         self._method = "bayes"
         self._use_quick_integration = False
         self._estimate_var = True
         self._mle_var_method = "hessian"
-        self._kwargs = {}
+        self._kwargs: Dict[str, Any] = {}
 
-    def with_prior(self, prior: list) -> "CRMBuilder":
+    def with_prior(self, prior: list[float]) -> "CRMBuilder":
         self._prior = prior
         return self
 
@@ -36,12 +38,12 @@ class CRMBuilder:
         self._max_size = max_size
         return self
 
-    def with_F_func(self, F_func, inverse_F=None) -> "CRMBuilder":
+    def with_F_func(self, F_func: Callable[..., Any], inverse_F: Any = None) -> "CRMBuilder":
         self._F_func = F_func
         self._inverse_F = inverse_F
         return self
 
-    def with_beta_prior(self, beta_prior) -> "CRMBuilder":
+    def with_beta_prior(self, beta_prior: Any) -> "CRMBuilder":
         self._beta_prior = beta_prior
         return self
 
@@ -61,12 +63,12 @@ class CRMBuilder:
         self._mle_var_method = mle_var_method
         return self
 
-    def with_kwargs(self, **kwargs) -> "CRMBuilder":
+    def with_kwargs(self, **kwargs: Any) -> "CRMBuilder":
         self._kwargs.update(kwargs)
         return self
 
     def build(self) -> CRM:
-        return CRM(
+        return CRM(  # type: ignore[abstract]
             prior=self._prior,
             target=self._target,
             first_dose=self._first_dose,
