@@ -1,0 +1,8 @@
+<link href="{{ pathto('_static/../pagefind/pagefind-ui.css', 1) }}" rel="stylesheet">
+<script src="{{ pathto('_static/../pagefind/pagefind-ui.js', 1) }}"></script>
+<div id="search" style="position: relative;"></div>
+<script>
+    window.addEventListener('DOMContentLoaded', (event) => {
+        new PagefindUI({ element: "#search", showSubResults: true });
+    });
+</script>

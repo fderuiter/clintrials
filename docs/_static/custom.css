@@ -124,3 +124,29 @@ body.hub-dragging * {
         display: none !important;
     }
 }
+
+/* Pagefind Search Integration Fixes */
+.pagefind-ui {
+    --pagefind-ui-scale: 0.85;
+    --pagefind-ui-primary: #496D89;
+}
+
+#search .pagefind-ui__drawer {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-sidebar-background, #fff);
+    max-height: 50vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 0 10px;
+}
+
+/* On mobile, ensure the search overlay doesn't fall under the hub toggle */
+@media screen and (max-width: 768px) {
+    #search .pagefind-ui__drawer {
+        z-index: 9000;
+    }
+}
