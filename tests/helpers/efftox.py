@@ -1,7 +1,7 @@
-import numpy as np
 from scipy.stats import norm
 
 from clintrials.dosefinding.efftox import EffTox, LpNormCurve
+
 
 class EffToxBuilder:
     def __init__(self) -> None:
@@ -12,7 +12,7 @@ class EffToxBuilder:
         self._eff_certainty = 0.1
         self._first_dose = 1
         self._max_size = 39
-        
+
         # Default Thall 2014 priors
         # These are commonly used in the test suite
         self._theta_priors = [

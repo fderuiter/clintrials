@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import norm
 
-from clintrials.core.math import logistic, inverse_logistic
+from clintrials.core.math import inverse_logistic, logistic
 from clintrials.dosefinding.crm import CRM
 
 

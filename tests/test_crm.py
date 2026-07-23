@@ -16,7 +16,7 @@ from clintrials.core.math import (
     logistic,
     logit1,
 )
-from clintrials.dosefinding.crm import CRM, crm
+from clintrials.dosefinding.crm import crm
 from tests.helpers import CRMBuilder
 
 

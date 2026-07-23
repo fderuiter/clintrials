@@ -4,7 +4,6 @@ import numpy as np
 from scipy.stats import norm
 
 from clintrials.dosefinding.efftox import (
-    EffTox,
     LpNormCurve,
     efftox_get_posterior_probs,
 )
