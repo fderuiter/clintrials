@@ -67,27 +67,24 @@ def audit_commits(base_ref, head_ref, override_branch_name=None):
             print(f"Skipping TDD audit due to skip-tdd trailer in commit {commit}.")  # noqa: T201
             return True
 
-    seen_tests = set()
-
     for commit in commits:
         # Check modified files in this commit
         files_output = run_git(['show', '--name-only', '--format=', commit])
         files = [f for f in files_output.split('\n') if f.strip()]
 
-        # Add tests to seen_tests (before checking source files in this commit,
-        # as tests could be modified in the same commit)
-        for f in files:
-            if f.startswith('tests/') and f.endswith('.py'):
-                seen_tests.add(f)
-
         # Now check source files
         for f in files:
             module_name = get_module_name(f)
             if module_name:
-                test_found = any(is_test_file_for_module(t, module_name) for t in seen_tests)
+                try:
+                    tree_files = run_git(['ls-tree', '-r', '--name-only', commit, 'tests/']).split('\n')
+                except subprocess.CalledProcessError:
+                    tree_files = []
+                
+                test_found = any(is_test_file_for_module(t, module_name) for t in tree_files if t.strip())
                 if not test_found:
                     print(f"TDD Audit Failed: Commit {commit} modifies source file '{f}' (module: '{module_name}') "  # noqa: T201
-                          f"but no corresponding test file (e.g. 'tests/test_{module_name}.py') was added/modified "
+                          f"but no corresponding test file (e.g. 'tests/test_{module_name}.py') exists or was added "
                           "in this or any preceding commit.")
                     return False
 
