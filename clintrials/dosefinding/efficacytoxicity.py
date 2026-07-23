@@ -172,7 +172,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         Returns:
             int: The number of patients treated at the given dose.
         """
-        return sum(np.array(self._doses) == dose)
+        return int(np.sum(np.array(self._doses) == dose))  # type: ignore[call-overload,no-any-return]
 
     def toxicities_at_dose(self, dose: int) -> int:
         """Gets the number of toxicities observed at a specific dose level.
@@ -503,14 +503,14 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
                         for v in zip(true_toxicities, true_efficacies)
                     ]
                 )
-                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]
+                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]  # type: ignore[index]
             else:
                 had_tox = lambda x: x < np.array(true_toxicities)
                 tox_horizons = np.array([had_tox(x) for x in tolerances[:, 0]])  # type: ignore
-                tox_hat = tox_horizons.mean(axis=0)
+                tox_hat = tox_horizons.mean(axis=0)  # type: ignore[attr-defined]
                 had_eff = lambda x: x < np.array(true_efficacies)
                 eff_horizons = np.array([had_eff(x) for x in tolerances[:, 1]])  # type: ignore
-                eff_hat = eff_horizons.mean(axis=0)
+                eff_hat = eff_horizons.mean(axis=0)  # type: ignore[attr-defined]
 
             optimal_allocation = design.optimal_decision(tox_hat, eff_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(  # type: ignore

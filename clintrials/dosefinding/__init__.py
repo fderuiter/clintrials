@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 
 __author__ = "Kristian Brock"
@@ -182,7 +181,7 @@ class DoseFindingTrial(Protocol):
         Returns:
             int: The number of toxicities at the given dose.
         """
-        return int(sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose]))
+        return int(np.sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose]))
 
     def maximum_dose_given(self) -> Optional[int]:
         """Gets the maximum dose level administered so far.
@@ -274,7 +273,7 @@ class DoseFindingTrial(Protocol):
         self._next_dose = self.__calculate_next_dose()
         return self._next_dose
 
-    def observed_toxicity_rates(self) -> npt.NDArray[np.float64]:
+    def observed_toxicity_rates(self) -> np.ndarray[Any, np.dtype[np.float64]]:
         """Gets the observed rate of toxicity at all doses.
 
         Returns:
@@ -404,7 +403,7 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
         """
         return (
             DoseFindingTrial.has_more(self)
-            and (sum(self.toxicities()) < self.max_toxicities)
+            and (np.sum(self.toxicities()) < self.max_toxicities)
             and self.maximum_dose_given() < self.number_of_doses()  # type: ignore
         )
 
@@ -432,8 +431,8 @@ class ThreePlusThree(DoseFindingTrial):
 
     def _DoseFindingTrial__calculate_next_dose(self) -> Any:
         dose_indices = np.array(self._doses) == self._next_dose
-        toxes_at_dose = sum(np.array(self._toxicities)[dose_indices])
-        if sum(dose_indices) == 3:
+        toxes_at_dose = np.sum(np.array(self._toxicities)[dose_indices])  # type: ignore[index]
+        if np.sum(dose_indices) == 3:  # type: ignore[call-overload]
             if toxes_at_dose == 0:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -455,7 +454,7 @@ class ThreePlusThree(DoseFindingTrial):
                 else:
                     self._status = -1
                 self._continue = False
-        elif sum(dose_indices) == 6:
+        elif np.sum(dose_indices) == 6:  # type: ignore[call-overload]
             if toxes_at_dose <= 1:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -556,7 +555,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
         try:
             had_tox = lambda x: x < np.array(true_toxicities)
             tox_horizons = np.array([had_tox(x) for x in tolerances])  # type: ignore
-            tox_hat = tox_horizons.mean(axis=0)
+            tox_hat = tox_horizons.mean(axis=0)  # type: ignore[attr-defined]
 
             optimal_allocation = design.optimal_decision(tox_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)  # type: ignore
@@ -639,7 +638,7 @@ def find_mtd(toxicity_target: Any, scenario: Any, strictly_lte: Any = False, ver
         return loc
     else:
         if strictly_lte:
-            if sum(np.array(scenario) <= toxicity_target) == 0:
+            if np.sum(np.array(scenario) <= toxicity_target) == 0:
                 # Infeasible scenario
                 if verbose:
                     logger.warning("All doses are too toxic")

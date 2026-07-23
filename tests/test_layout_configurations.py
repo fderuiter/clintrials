@@ -1,10 +1,12 @@
 import sys
 from unittest.mock import MagicMock
 
+import pytest
+
 from clintrials.visualization.dashboard.views.framework import render_sidebar_config
 
 
-def test_render_sidebar_config_structure(monkeypatch):
+def test_render_sidebar_config_structure(monkeypatch: pytest.MonkeyPatch) -> None:
     """
     Verify that render_sidebar_config properly structures the sidebar inputs
     and returns a valid ParameterSpace, without loading browser automation.

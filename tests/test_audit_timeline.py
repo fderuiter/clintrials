@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import tempfile
+from typing import Iterator, List
 
 import pytest
 
@@ -10,20 +11,28 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 from audit_timeline import audit_commits, get_module_name, is_test_file_for_module
 
 
-def test_get_module_name():
+def test_get_module_name() -> None:
     assert get_module_name('clintrials/core/recruitment.py') == 'recruitment'
     assert get_module_name('clintrials/core/__init__.py') is None
     assert get_module_name('other/core/recruitment.py') is None
     assert get_module_name('clintrials/core/data.txt') is None
 
-def test_is_test_file_for_module():
+def test_is_test_file_for_module() -> None:
     assert is_test_file_for_module('tests/test_recruitment.py', 'recruitment') is True
     assert is_test_file_for_module('tests/test_recruitment_utils.py', 'recruitment') is True
     assert is_test_file_for_module('tests/test_crm.py', 'recruitment') is False
     assert is_test_file_for_module('src/test_recruitment.py', 'recruitment') is False
 
-@pytest.fixture
-def temp_git_repo(monkeypatch):
+import typing
+
+if typing.TYPE_CHECKING:
+    _F = typing.TypeVar('_F', bound=typing.Callable[..., typing.Any])
+    def _fixture(func: _F) -> _F: return func
+else:
+    _fixture = pytest.fixture
+
+@_fixture
+def temp_git_repo(monkeypatch: pytest.MonkeyPatch) -> Iterator[str]:
     monkeypatch.delenv("GITHUB_HEAD_REF", raising=False)
     with tempfile.TemporaryDirectory() as temp_dir:
         original_cwd = os.getcwd()
@@ -46,10 +55,10 @@ def temp_git_repo(monkeypatch):
         finally:
             os.chdir(original_cwd)
 
-def run_git(args):
+def run_git(args: List[str]) -> None:
     subprocess.run(['git'] + args, check=True, capture_output=True)
 
-def test_audit_commits_success(temp_git_repo):
+def test_audit_commits_success(temp_git_repo: str) -> None:
     run_git(['checkout', '-b', 'feature-branch'])
 
     # Commit test first
@@ -68,7 +77,7 @@ def test_audit_commits_success(temp_git_repo):
 
     assert audit_commits('main', 'HEAD') is True
 
-def test_audit_commits_failure(temp_git_repo):
+def test_audit_commits_failure(temp_git_repo: str) -> None:
     run_git(['checkout', '-b', 'feature-branch'])
 
     # Commit implementation without test
@@ -80,7 +89,7 @@ def test_audit_commits_failure(temp_git_repo):
 
     assert audit_commits('main', 'HEAD') is False
 
-def test_audit_commits_concurrent(temp_git_repo):
+def test_audit_commits_concurrent(temp_git_repo: str) -> None:
     run_git(['checkout', '-b', 'feature-branch'])
 
     # Commit both at the same time
@@ -97,7 +106,7 @@ def test_audit_commits_concurrent(temp_git_repo):
 
     assert audit_commits('main', 'HEAD') is True
 
-def test_audit_commits_hotfix(temp_git_repo):
+def test_audit_commits_hotfix(temp_git_repo: str) -> None:
     run_git(['checkout', '-b', 'hotfix/urgent-fix'])
 
     # Commit implementation without test
@@ -110,7 +119,7 @@ def test_audit_commits_hotfix(temp_git_repo):
     # Should pass because of branch name
     assert audit_commits('main', 'HEAD') is True
 
-def test_audit_commits_hotfix_override(temp_git_repo):
+def test_audit_commits_hotfix_override(temp_git_repo: str) -> None:
     run_git(['checkout', '-b', 'feature-branch'])
 
     # Commit implementation without test
@@ -123,7 +132,7 @@ def test_audit_commits_hotfix_override(temp_git_repo):
     # Should pass because of override branch name
     assert audit_commits('main', 'HEAD', override_branch_name='hotfix/override') is True
 
-def test_audit_commits_skip_tdd_trailer(temp_git_repo):
+def test_audit_commits_skip_tdd_trailer(temp_git_repo: str) -> None:
     run_git(['checkout', '-b', 'feature-branch'])
 
     # Commit implementation without test, but with skip-tdd

@@ -84,9 +84,9 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
             import streamlit as st
 
             if not hasattr(st, "fragment"):
-                st.fragment = lambda f: f
+                st.fragment = lambda f: f  # type: ignore[assignment]
             if not hasattr(st, "columns"):
-                st.columns = lambda x: (st, st)
+                st.columns = lambda x: (st, st)  # type: ignore[assignment,misc]
 
             ps = None
             if param_space_config is not None:

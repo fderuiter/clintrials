@@ -11,12 +11,11 @@ __contact__ = "kristian.brock@gmail.com"
 from typing import Any, Union
 
 import numpy as np
-import numpy.typing as npt
 
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
 
 
-def logit(p: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:
+def logit(p: Union[float, np.ndarray[Any, np.dtype[np.float64]]]) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     """Calculates the logit of a probability.
 
     The probability is silently clipped to [1e-7, 1 - 1e-7] to prevent log(0).
@@ -28,10 +27,10 @@ def logit(p: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[
         float or numpy.ndarray: The logit.
     """
     p = np.clip(p, 1e-7, 1 - 1e-7)
-    return np.log(p / (1 - p))
+    return np.log(p / (1 - p))  # type: ignore[no-any-return]
 
 
-def bernoulli_likelihood(p: Union[float, npt.NDArray[np.float64]], y: Union[int, npt.NDArray[np.int_]], log: bool = False) -> Union[float, npt.NDArray[np.float64]]:
+def bernoulli_likelihood(p: Union[float, np.ndarray[Any, np.dtype[np.float64]]], y: Union[int, np.ndarray[Any, np.dtype[np.int_]]], log: bool = False) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     """Calculates the Bernoulli likelihood or log-likelihood.
 
     Args:
@@ -178,18 +177,18 @@ def inverse_logistic(x: float, a0: float = 0, beta: float = 0) -> float:
     return _inverse_logistic_core(x, a0, beta)  # type: ignore
 
 
-def logit1(x, a0=3, beta=0):  # type: ignore
+def logit1(x: float, a0: float = 3.0, beta: float = 0.0) -> float:
     """Logistic link function with an intercept default of 3."""
     return _logistic_core(x, a0, beta)  # type: ignore
 
 
-def inverse_logit1(x, a0=3, beta=0):  # type: ignore
+def inverse_logit1(x: float, a0: float = 3.0, beta: float = 0.0) -> float:
     """Inverse logistic link function with an intercept default of 3."""
     return _inverse_logistic_core(x, a0, beta)  # type: ignore
 
 
 
-def association_to_correlation(psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:
+def association_to_correlation(psi: Union[float, np.ndarray[Any, np.dtype[np.float64]]]) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     """Converts an association parameter to a correlation coefficient.
 
     The formula is: (e^psi - 1) / (e^psi + 1)
@@ -200,10 +199,10 @@ def association_to_correlation(psi: Union[float, npt.NDArray[np.float64]]) -> Un
     Returns:
         float or numpy.ndarray: The correlation coefficient.
     """
-    return (np.exp(psi) - 1) / (np.exp(psi) + 1)
+    return (np.exp(psi) - 1) / (np.exp(psi) + 1)  # type: ignore[no-any-return]
 
 
-def fgm_joint_prob(a: Union[int, npt.NDArray[np.int_]], b: Union[int, npt.NDArray[np.int_]], p1: Union[float, npt.NDArray[np.float64]], p2: Union[float, npt.NDArray[np.float64]], psi: Union[float, npt.NDArray[np.float64]]) -> Union[float, npt.NDArray[np.float64]]:
+def fgm_joint_prob(a: Union[int, np.ndarray[Any, np.dtype[np.int_]]], b: Union[int, np.ndarray[Any, np.dtype[np.int_]]], p1: Union[float, np.ndarray[Any, np.dtype[np.float64]]], p2: Union[float, np.ndarray[Any, np.dtype[np.float64]]], psi: Union[float, np.ndarray[Any, np.dtype[np.float64]]]) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     """Calculates the joint probability of two Bernoulli variables using an FGM copula.
 
     Args:

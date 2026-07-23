@@ -60,7 +60,7 @@ def render() -> None:
         st.subheader("Results")
 
         if not hasattr(st, "columns"):
-            st.columns = lambda x: (st, st)
+            st.columns = lambda x: (st, st)  # type: ignore[assignment,misc]
         met_col1, met_col2 = st.columns(2)
 
         render_metric(met_col1, "Power", power)  # type: ignore

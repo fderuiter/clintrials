@@ -36,7 +36,7 @@ def main():  # type: ignore
         try:
             import streamlit.web.cli as stcli
         except ImportError:
-            import streamlit.cli as stcli
+            import streamlit.cli as stcli  # type: ignore[no-redef]
 
         stcli.main()
     except KeyboardInterrupt:
