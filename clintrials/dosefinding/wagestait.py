@@ -189,7 +189,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         )
 
         self.skeletons = skeletons
-        self.K, self.I = np.array(skeletons).shape
+        self.K, self.I = np.array(skeletons).shape  # type: ignore[attr-defined]
         if self.I != len(prior_tox_probs):
             raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="prior_tox_probs", expected_length=self.I))
         if tox_target > tox_limit:
@@ -216,7 +216,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.estimate_var = estimate_var
 
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[
+            np.array(range(self.K))[  # type: ignore[index]
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -289,7 +289,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         Returns:
             float: The theta estimate.
         """
-        return self.theta_hats[self.most_likely_model_index]
+        return self.theta_hats[self.most_likely_model_index]  # type: ignore[index]
 
     def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self) -> Any:
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
@@ -361,7 +361,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 
     def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[
+            np.array(range(self.K))[  # type: ignore[index]
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -432,7 +432,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 for (acc, i) in zip(acceptable_doses, range(1, self.num_doses + 1))
                 if acc
             ]
-            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1
+            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1  # type: ignore[index]
         else:
             self._status = -1
             self._admissable_set = []

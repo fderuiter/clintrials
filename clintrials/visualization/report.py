@@ -14,7 +14,7 @@ class AccessibleTable(Table):  # type: ignore[misc]
     """A PDF table formatted with accessibility tags."""
     def _render_table_row(self, i, row_layout_info, cell_x_positions, **kwargs):  # type: ignore
         is_header = (i < self._num_heading_rows)
-        with self._fpdf.mark_text("/TR"):
+        with self._fpdf.mark_text("/TR"):  # type: ignore[attr-defined]
             self._current_row_is_header = is_header
             super()._render_table_row(i, row_layout_info, cell_x_positions, **kwargs)
 
@@ -24,7 +24,7 @@ class AccessibleTable(Table):  # type: ignore[misc]
             return super()._render_table_cell(i, j, cell, row_height, cell_height_info, cell_x_positions, **kwargs)
 
         tag = "/TH" if getattr(self, "_current_row_is_header", False) else "/TD"
-        with self._fpdf.mark_text(tag):
+        with self._fpdf.mark_text(tag):  # type: ignore[attr-defined]
             return super()._render_table_cell(i, j, cell, row_height, cell_height_info, cell_x_positions, **kwargs)
 
 
@@ -58,7 +58,7 @@ class AccessiblePDF(FPDF):  # type: ignore[misc]
             yield from walk(builder.doc_struct_elem)  # type: ignore
 
         if hasattr(self, 'struct_builder'):
-            self.struct_builder.__class__.__iter__ = recursive_iter
+            self.struct_builder.__class__.__iter__ = recursive_iter  # type: ignore[method-assign]
 
     @contextmanager
     def artifact(self, artifact_type="Layout"):  # type: ignore

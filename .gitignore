@@ -19,3 +19,4 @@ docs/_static/vendor/
 
 docs/reference/generated/
 hub/schema.json
+.mypy_cache/

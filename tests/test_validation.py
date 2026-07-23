@@ -80,6 +80,6 @@ def test_validate_positive_integer():  # type: ignore
     with pytest.raises(ValueError, match="val must be a positive integer"):
         validate_positive_integer(-1, "val")
     with pytest.raises(ValueError, match="val must be a positive integer"):
-        validate_positive_integer(1.5, "val")
+        validate_positive_integer(1.5, "val")  # type: ignore[arg-type]
     with pytest.raises(ValueError, match="val must be a positive integer"):
-        validate_positive_integer("1", "val")
+        validate_positive_integer("1", "val")  # type: ignore[arg-type]

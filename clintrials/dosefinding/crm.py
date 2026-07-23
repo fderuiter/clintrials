@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any, Callable, Optional, Sequence
 
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 
 """
@@ -143,7 +142,7 @@ def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, to
         tuple[float, float | None]: A tuple containing the MLE and variance
             of beta. The variance is `None` if `estimate_var` is `False`.
     """
-    if sum(np.array(toxs) == 1) == 0 or sum(np.array(toxs) == 0) == 0:
+    if np.sum(np.array(toxs) == 1) == 0 or np.sum(np.array(toxs) == 0) == 0:  # type: ignore[call-overload]
         logging.warning(
             "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist."
         )
@@ -664,7 +663,7 @@ class CRM(DoseFindingTrial):
 
         return proposed_dose
 
-    def prob_tox(self) -> npt.NDArray[np.float64]:
+    def prob_tox(self) -> np.ndarray[Any, np.dtype[np.float64]]:
         """Gets the posterior probabilities of toxicity for each dose level.
 
         Returns:

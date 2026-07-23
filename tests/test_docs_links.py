@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 
 
-def test_documentation_internal_paths():
+def test_documentation_internal_paths() -> None:
     root = Path(__file__).parent.parent
 
     # Gather all documentation files (.md and .rst)

@@ -95,14 +95,14 @@ class BayesianTimeToEvent:
         # Filter to just patients who are registered by time
         registered_patients = recruit_time <= time
         has_failed = (
-            time - recruit_time[registered_patients] > event_time[registered_patients]
+            time - recruit_time[registered_patients] > event_time[registered_patients]  # type: ignore[index]
         )
         survival_time = np.array(
             [
                 min(x, y)
                 for (x, y) in zip(
-                    time - recruit_time[registered_patients],
-                    event_time[registered_patients],
+                    time - recruit_time[registered_patients],  # type: ignore[index]
+                    event_time[registered_patients],  # type: ignore[index]
                 )
             ]
         )
@@ -199,11 +199,11 @@ def matrix_cohort_analysis(  # type: ignore
         event_times = expon(scale=true_mean).rvs(
             n_patients
         )  # Exponential survival times
-        cases = [(x, y) for (x, y) in zip(event_times, recruitment_times)]
+        cases = [(x, y) for (x, y) in zip(event_times, recruitment_times)]  # type: ignore[var-annotated]
         trial.update(cases)  # type: ignore
         interim_analysis_times = list(
             {
-                recruitment_times[x - 1] + interim_analysis_time_delta
+                recruitment_times[x - 1] + interim_analysis_time_delta  # type: ignore[index]
                 for x in interim_analysis_after_patients
                 if x < n_patients
             }

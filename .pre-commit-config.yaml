@@ -14,7 +14,7 @@ repos:
     hooks:
     -   id: mypy
         additional_dependencies: ["numpy<2.0.0"]
-        files: ^clintrials/
+        files: ^(clintrials/|tests/)
 
 -   repo: local
     hooks:
@@ -37,5 +37,5 @@ repos:
         name: ast-ui-linter
         entry: poetry run python scripts/ast_ui_linter.py
         language: system
-        files: ^clintrials/visualization/dashboard/views/
+        files: ^(clintrials/|tests/)visualization/dashboard/views/
         pass_filenames: true

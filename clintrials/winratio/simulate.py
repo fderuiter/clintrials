@@ -34,7 +34,7 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # t
 
     first_non_zero_idx = np.argmax(non_zero, axis=2)
 
-    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)
+    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)  # type: ignore[attr-defined,index]
 
     wins = np.sum((first_diff > 0) & has_non_zero)
     losses = np.sum((first_diff < 0) & has_non_zero)
