@@ -105,6 +105,11 @@ def scan_module(module_name: str) -> typing.Dict[str, typing.Any]:
         if obj is None:
             continue
 
+        # Skip objects not defined within the clintrials package (e.g., imported standard library or third-party features)
+        obj_mod = getattr(obj, "__module__", None)
+        if obj_mod is None or not obj_mod.startswith("clintrials"):
+            continue
+
         if inspect.isclass(obj):
             manifest[name] = {
                 "type": "class",

@@ -6,6 +6,7 @@ from scripts.verify_api_signatures import (
     compare_parameters,
     get_public_methods,
     get_signature_info,
+    scan_module,
 )
 
 
@@ -156,3 +157,11 @@ def test_compare_manifests() -> None:
     # Test missing export
     diffs_missing_exp = compare_manifests(baseline, {"module1": {}})
     assert any("Export 'WATU' missing" in d for d in diffs_missing_exp)
+
+
+def test_scan_module() -> None:
+    manifest = scan_module("clintrials.core.math")
+    assert "logistic" in manifest
+    assert "Any" not in manifest
+    assert "np" not in manifest
+
