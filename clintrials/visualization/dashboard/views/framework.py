@@ -4,7 +4,7 @@ from functools import wraps
 
 from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
-from clintrials.visualization.helpers import build_html_table
+from clintrials.visualization.helpers import build_html_table as _build_html_table
 
 
 class BaseSimulationView:
@@ -118,7 +118,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                             if str(c).lower() == "index" or c == "":
                                 rename_map[c] = "Index"
                         summary_df_no_idx = summary_df_no_idx.rename(columns=rename_map)
-                        html_table = build_html_table(summary_df_no_idx)
+                        html_table = _build_html_table(summary_df_no_idx)
                         st.markdown(html_table, unsafe_allow_html=True)
 
                 text_summaries = []
