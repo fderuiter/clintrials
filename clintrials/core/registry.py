@@ -83,6 +83,20 @@ class ProtocolRegistry:
         """Initializes a new ProtocolRegistry instance."""
         self._designs: Dict[str, Dict[str, Any]] = {}
         self._discovered: bool = False
+        self._snapshot: Optional[Dict[str, Dict[str, Any]]] = None
+        self._discovered_snapshot: Optional[bool] = None
+
+    def snapshot(self) -> None:
+        """Capture a snapshot of the current registry state."""
+        self._snapshot = {k: v.copy() for k, v in self._designs.items()}
+        self._discovered_snapshot = self._discovered
+
+    def restore(self) -> None:
+        """Restore the registry state from the snapshot."""
+        if self._snapshot is not None:
+            self._designs = {k: v.copy() for k, v in self._snapshot.items()}
+        if self._discovered_snapshot is not None:
+            self._discovered = self._discovered_snapshot
 
     def _discover(self) -> None:
         if self._discovered:

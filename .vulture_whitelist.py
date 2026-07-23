@@ -38,3 +38,5 @@ _.viewer_preferences  # unused attribute (clintrials/visualization/report.py:41)
 _.__iter__  # unused attribute (clintrials/visualization/report.py:61)
 _.artifact  # unused method (clintrials/visualization/report.py:63)
 validate_pdf_ua_structure  # unused function (clintrials/visualization/report.py:216)
+_.snapshot
+_.restore
