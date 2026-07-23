@@ -98,6 +98,7 @@ class BaseModel:
         origin = get_origin(annotation)
         if origin is Annotated:
             args = get_args(annotation)
+            self._validate_annotated(name, value, args[0])
             is_prob = False
             is_pos_int = False
             for arg in args[1:]:
@@ -109,13 +110,13 @@ class BaseModel:
                 if isinstance(arg, FieldInfo):
                     if is_prob:
                         validate_probability(value, name)
-                    elif is_pos_int:
+                    if is_pos_int:
                         validate_positive_integer(value, name)
-                    else:
-                        if arg.ge is not None or arg.le is not None:
-                            validate_bounds(value, lower=arg.ge, upper=arg.le, name=name, exclusive=False)
-                        if arg.gt is not None or arg.lt is not None:
-                            validate_bounds(value, lower=arg.gt, upper=arg.lt, name=name, exclusive=True)
+
+                    if arg.ge is not None or arg.le is not None:
+                        validate_bounds(value, lower=arg.ge, upper=arg.le, name=name, exclusive=False)
+                    if arg.gt is not None or arg.lt is not None:
+                        validate_bounds(value, lower=arg.gt, upper=arg.lt, name=name, exclusive=True)
         elif origin is list or getattr(origin, "__origin__", origin) is list:
             args = get_args(annotation)
             if args:
