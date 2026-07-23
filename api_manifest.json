@@ -14837,6 +14837,17 @@
     }
   },
   "clintrials.visualization.helpers": {
+    "build_html_table": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "df",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "pd.DataFrame",
+          "default": null
+        }
+      ]
+    },
     "format_label": {
       "type": "function",
       "parameters": [
@@ -14938,6 +14949,17 @@
           ]
         }
       }
+    },
+    "build_html_table": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "df",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "pd.DataFrame",
+          "default": null
+        }
+      ]
     },
     "fmt": {
       "type": "function",
