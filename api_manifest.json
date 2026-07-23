@@ -13347,6 +13347,17 @@
         }
       }
     },
+    "build_html_table": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "df",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "pd.DataFrame",
+          "default": null
+        }
+      ]
+    },
     "dashboard_view": {
       "type": "function",
       "parameters": [
@@ -14949,6 +14960,17 @@
           ]
         }
       }
+    },
+    "build_html_table": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "df",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "pd.DataFrame",
+          "default": null
+        }
+      ]
     },
     "fmt": {
       "type": "function",
