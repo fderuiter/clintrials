@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from clintrials.visualization.helpers import (
     build_html_table,
@@ -8,7 +9,7 @@ from clintrials.visualization.helpers import (
 from clintrials.visualization.models import MultiFormatSummaryContainer
 
 
-def test_format_label_standard():
+def test_format_label_standard() -> None:
     """Test that format_label standardizes column names to title-cased labels."""
     assert format_label("trial_phase") == "Trial Phase"
     assert format_label("dose_level") == "Dose Level"
@@ -16,7 +17,7 @@ def test_format_label_standard():
     assert format_label(1234) == 1234
 
 
-def test_format_number_standard():
+def test_format_number_standard() -> None:
     """Test that format_number rounds floats to exactly 4 decimal places."""
     assert format_number(1.234567) == "1.2346"
     assert format_number(0.00001) == "0.0000"
@@ -24,7 +25,7 @@ def test_format_number_standard():
     assert format_number("string_val") == "string_val"
 
 
-def test_build_html_table_flat():
+def test_build_html_table_flat() -> None:
     """Test standard flat HTML table serialization outputs correct labels, rounded floats, and correct structure."""
     df = pd.DataFrame({
         "trial_phase": ["Phase I", "Phase II"],
@@ -52,7 +53,7 @@ def test_build_html_table_flat():
     assert "<td>30</td>" in html
 
 
-def test_container_flat_table_rendering():
+def test_container_flat_table_rendering() -> None:
     """Test that MultiFormatSummaryContainer returns correct flat HTML table in standard mode."""
     df = pd.DataFrame({
         "dose_level": [1.123456, 2.5]
@@ -66,7 +67,7 @@ def test_container_flat_table_rendering():
     assert "2.5000" in html
 
 
-def test_container_hierarchical_rendering(monkeypatch):
+def test_container_hierarchical_rendering(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test that MultiFormatSummaryContainer renders hierarchical lists with proper markup in accessibility mode."""
     import streamlit as st
     monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
