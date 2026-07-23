@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
-from clintrials.visualization.helpers import build_html_table
+from clintrials.visualization.helpers import build_html_table as _build_html_table
 from clintrials.visualization.helpers import format_label as _format_label
 from clintrials.visualization.helpers import format_number as fmt
 
@@ -58,7 +58,7 @@ class MultiFormatSummaryContainer:
             return self._generate_hierarchical_html()  # type: ignore
 
         summary = f"<strong>Data Summary: {self.title}</strong><br><br>\n"
-        return summary + build_html_table(self.df)
+        return summary + _build_html_table(self.df)
 
     def _generate_hierarchical_html(self):  # type: ignore
         """Generates a hierarchical accessible HTML summary table using nested details."""
@@ -90,11 +90,11 @@ class MultiFormatSummaryContainer:
         grouping_cols = grouping_cols[:3]
 
         if not grouping_cols:
-            return summary + build_html_table(self.df) + "\n"  # type: ignore
+            return summary + _build_html_table(self.df) + "\n"  # type: ignore
 
         def generate_level(df, current_grouping_cols, level=1):  # type: ignore
             if not current_grouping_cols:
-                return build_html_table(df) + "\n"  # type: ignore
+                return _build_html_table(df) + "\n"  # type: ignore
 
             col = current_grouping_cols[0]
             grouped = df.groupby(col)
