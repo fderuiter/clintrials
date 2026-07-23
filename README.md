@@ -205,12 +205,16 @@ Contributions are welcome! Please see the [contributing guide](CONTRIBUTING.md) 
 
 We recommend using the provided Dev Container for a standardized development environment. When you open this repository in a supported editor (like VS Code), you will be prompted to reopen it in a container. The Dev Container automatically installs all necessary system and Python dependencies using Poetry.
 
-To set up a development environment locally without a container, use Poetry:
+To set up a development environment locally without a container, you can use the provided setup scripts:
 
+**For Unix (macOS/Linux) users (Bash):**
 ```bash
-poetry install --all-extras
-poetry run pre-commit install
-poetry run pre-commit run --all-files
+./setup.sh
+```
+
+**For Windows users (PowerShell):**
+```powershell
+.\setup.ps1
 ```
 
 ### Testing
