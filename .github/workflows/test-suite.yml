@@ -35,7 +35,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: Install dependencies
-        run: poetry install --with dev -E viz
+        run: poetry install --with dev -E viz -E docs
       - name: Test Tutorial Notebooks
         run: |
           find docs/tutorials -name "*.ipynb" -not -name "*draft*" -not -name "*test*" | while read nb; do
