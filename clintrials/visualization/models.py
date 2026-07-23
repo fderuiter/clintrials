@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
+from clintrials.visualization.helpers import build_html_table
 from clintrials.visualization.helpers import format_label as _format_label
 from clintrials.visualization.helpers import format_number as fmt
 
@@ -57,23 +58,7 @@ class MultiFormatSummaryContainer:
             return self._generate_hierarchical_html()  # type: ignore
 
         summary = f"<strong>Data Summary: {self.title}</strong><br><br>\n"
-        cols = list(self.df.columns)
-
-        html = summary + "<table>\n"
-        html += "  <thead>\n    <tr>\n"
-        for c in cols:
-            html += f'      <th scope="col">{_format_label(c)}</th>\n'
-        html += "    </tr>\n  </thead>\n"
-
-        html += "  <tbody>\n"
-        for _, row in self.df.iterrows():
-            html += "    <tr>\n"
-            for x in row:
-                html += f"      <td>{fmt(x)}</td>\n"
-            html += "    </tr>\n"
-        html += "  </tbody>\n</table>"
-
-        return html
+        return summary + build_html_table(self.df)
 
     def _generate_hierarchical_html(self):  # type: ignore
         """Generates a hierarchical accessible HTML summary table using nested details."""
@@ -104,26 +89,12 @@ class MultiFormatSummaryContainer:
         # Limit to 3 levels of nesting (4 levels total including leaf table)
         grouping_cols = grouping_cols[:3]
 
-        def _build_html_table(df):  # type: ignore
-            cols = list(df.columns)
-            html = "<table>\n  <thead>\n    <tr>\n"
-            for c in cols:
-                html += f'      <th scope="col">{_format_label(c)}</th>\n'
-            html += "    </tr>\n  </thead>\n  <tbody>\n"
-            for _, row in df.iterrows():
-                html += "    <tr>\n"
-                for x in row:
-                    html += f"      <td>{fmt(x)}</td>\n"
-                html += "    </tr>\n"
-            html += "  </tbody>\n</table>\n"
-            return html
-
         if not grouping_cols:
-            return summary + _build_html_table(self.df)  # type: ignore
+            return summary + build_html_table(self.df) + "\n"  # type: ignore
 
         def generate_level(df, current_grouping_cols, level=1):  # type: ignore
             if not current_grouping_cols:
-                return _build_html_table(df)  # type: ignore
+                return build_html_table(df) + "\n"  # type: ignore
 
             col = current_grouping_cols[0]
             grouped = df.groupby(col)
