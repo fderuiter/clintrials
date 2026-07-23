@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any, Dict, List
 
 import numpy as np
+import pandas as pd
 
 
 def format_label(label: str | Any) -> str | Any:
@@ -27,3 +28,21 @@ def format_number(v: float | int | Any) -> str:
     if isinstance(v, (float, np.float64)):
         return f"{v:.4f}"
     return str(v)
+
+def build_html_table(df: pd.DataFrame) -> str:
+    """Build a standard HTML table from a pandas DataFrame."""
+    cols = list(df.columns)
+    html = "<table>\n"
+    html += "  <thead>\n    <tr>\n"
+    for c in cols:
+        html += f'      <th scope="col">{format_label(c)}</th>\n'
+    html += "    </tr>\n  </thead>\n"
+
+    html += "  <tbody>\n"
+    for _, row in df.iterrows():
+        html += "    <tr>\n"
+        for x in row:
+            html += f"      <td>{format_number(x)}</td>\n"
+        html += "    </tr>\n"
+    html += "  </tbody>\n</table>"
+    return html
