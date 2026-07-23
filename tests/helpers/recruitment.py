@@ -1,5 +1,6 @@
 from clintrials.core.recruitment import QuadrilateralRecruitmentStream
 
+
 class QuadrilateralRecruitmentStreamBuilder:
     def __init__(self) -> None:
         self._intrapatient_gap = 15.0
