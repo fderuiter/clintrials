@@ -6,6 +6,7 @@ from clintrials.validation import (
     validate_matching_lengths,
     validate_positive_integer,
     validate_probability,
+    validate_version,
 )
 
 
@@ -84,3 +85,24 @@ def test_validate_positive_integer():  # type: ignore
     with pytest.raises(ValueError, match="val must be a positive integer"):
         validate_positive_integer("1", "val")  # type: ignore[arg-type]
 
+
+def test_validate_version():  # type: ignore
+    # Valid PEP 440 versions should not raise
+    validate_version("1.0.0", "version")
+    validate_version("2.1.0b1", "version")
+    validate_version("0.1.4", "version")
+    validate_version("1.2.3.post1", "version")
+    validate_version("3.0.0a2", "version")
+    validate_version("1.0.0-beta", "version")
+
+    # Invalid PEP 440 versions should raise ValueError with correct message
+    invalid_versions = ["latest", "stable", "", "abc"]
+    for val in invalid_versions:
+        with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+            validate_version(val, "version")
+
+    # Non-string values should raise ValueError with correct message
+    non_strings = [None, 123, 1.0, [], {}, True]
+    for val in non_strings:
+        with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+            validate_version(val, "version")  # type: ignore[arg-type]

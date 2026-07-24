@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Optional, Sequence, Union
 
+from packaging.version import InvalidVersion, Version
+
 from clintrials.core.errors import ErrorTemplates
 
 
@@ -121,3 +123,25 @@ def validate_positive_integer(value: int, name: str) -> None:
     if not isinstance(value, int) or value <= 0:
         raise ValueError(ErrorTemplates.POSITIVE_INTEGER.format(name=name))
 
+
+def validate_version(value: Any, name: str) -> None:
+    """Validates that a value is a valid PEP 440 version string.
+
+    Args:
+        value (Any): The value to validate.
+        name (str): The name of the parameter, used in the error message.
+
+    Returns:
+        None
+
+    Raises:
+        ValueError: If the value is not a string, is an empty string, or is not a
+            valid PEP 440 version string.
+    """
+    if not isinstance(value, str) or not value:
+        raise ValueError(ErrorTemplates.PEP440_VERSION.format(name=name))
+
+    try:
+        Version(value)
+    except InvalidVersion as e:
+        raise ValueError(ErrorTemplates.PEP440_VERSION.format(name=name)) from e
