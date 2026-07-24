@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytest
 
 from clintrials.validation import (
@@ -102,7 +104,7 @@ def test_validate_version():  # type: ignore
             validate_version(val, "version")
 
     # Non-string values should raise ValueError with correct message
-    non_strings = [None, 123, 1.0, [], {}, True]
-    for val in non_strings:
+    non_strings: list[Any] = [None, 123, 1.0, [], {}, True]
+    for non_str in non_strings:
         with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
-            validate_version(val, "version")  # type: ignore[arg-type]
+            validate_version(non_str, "version")  # type: ignore[arg-type]
