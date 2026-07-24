@@ -7,6 +7,7 @@ from clintrials.validation import (
     validate_bounds,
     validate_positive_integer,
     validate_probability,
+    validate_version,
 )
 
 
@@ -101,17 +102,22 @@ class BaseModel:
             self._validate_annotated(name, value, args[0])
             is_prob = False
             is_pos_int = False
+            is_version = False
             for arg in args[1:]:
                 if arg == "Probability":
                     is_prob = True
                 elif arg == "PositiveInt":
                     is_pos_int = True
+                elif arg == "Version":
+                    is_version = True
 
                 if isinstance(arg, FieldInfo):
                     if is_prob:
                         validate_probability(value, name)
                     if is_pos_int:
                         validate_positive_integer(value, name)
+                    if is_version:
+                        validate_version(value, name)
 
                     if arg.ge is not None or arg.le is not None:
                         validate_bounds(value, lower=arg.ge, upper=arg.le, name=name, exclusive=False)
@@ -131,6 +137,7 @@ Probability = Annotated[
     float, "Probability", Field(ge=0.0, le=1.0, description="A valid probability between 0 and 1.")
 ]
 PositiveInt = Annotated[int, "PositiveInt", Field(gt=0, description="A positive integer.")]
+Version = Annotated[str, "Version", Field(description="A PEP 440 compliant version string.")]
 
 class WinRatioSchema(BaseModel):
     num_subjects_A: PositiveInt = Field(

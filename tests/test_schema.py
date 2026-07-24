@@ -58,3 +58,25 @@ def test_dynamic_bounds_enforcement():  # type: ignore
         CustomAnnotatedTypeSchema(p_custom=0.5, count_custom=10)  # type: ignore[call-arg]
     with pytest.raises(ValueError, match="count_custom must be < 50"):
         CustomAnnotatedTypeSchema(p_custom=0.5, count_custom=50)  # type: ignore[call-arg]
+
+
+def test_version_schema_enforcement():  # type: ignore
+    from clintrials.core.schema import BaseModel, Field, Version
+
+    class InlineVersionSchema(BaseModel):
+        version: Version = Field(description="Package or hub version")
+
+    # Valid PEP 440 versions should be accepted
+    InlineVersionSchema(version="1.0.0")  # type: ignore[call-arg]
+    InlineVersionSchema(version="2.3.4.dev1")  # type: ignore[call-arg]
+    InlineVersionSchema(version="1.0a1")  # type: ignore[call-arg]
+
+    # Non-PEP 440 versions (like 'latest') should be rejected with the standard error
+    with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+        InlineVersionSchema(version="latest")  # type: ignore[call-arg]
+
+    with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+        InlineVersionSchema(version="invalid-version")  # type: ignore[call-arg]
+
+    with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+        InlineVersionSchema(version="")  # type: ignore[call-arg]
