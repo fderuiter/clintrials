@@ -69,6 +69,11 @@ def validate_pyproject_toml(path: Union[str, Path]) -> str:
             f"pyproject.toml is missing expected section or key: {e}"
         ) from e
 
+    if not isinstance(version, str):
+        raise ValueError(
+            f"[tool.poetry] version must be a string, got {type(version).__name__}"
+        )
+
     validate_version(version, "[tool.poetry] version")
     return version
 

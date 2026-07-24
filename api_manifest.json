@@ -1725,6 +1725,23 @@
           "default": "False"
         }
       ]
+    },
+    "validate_version": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "value",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": null
+        },
+        {
+          "name": "name",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "str",
+          "default": null
+        }
+      ]
     }
   },
   "clintrials.core.simulation": {
