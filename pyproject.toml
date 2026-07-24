@@ -148,7 +148,7 @@ docs = ["sphinx", "furo", "nbsphinx", "myst-parser"]
 viz = ["streamlit", "plotly", "matplotlib", "fpdf2"]
 
 [tool.deptry]
-extend_exclude = ["docs/"]
+extend_exclude = ["docs/", "scripts/"]
 
 [tool.deptry.package_module_name_map]
 fpdf2 = ["fpdf"]

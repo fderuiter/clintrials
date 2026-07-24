@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+
 import pytest
 
 from scripts.verify_pep440_version import (
