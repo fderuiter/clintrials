@@ -17,3 +17,6 @@ class ErrorTemplates:
     # Length validations
     MATCHING_LENGTHS = "{first_name} and {name} should be same length"
     EXPECTED_LENGTH = "{name} should have {expected_length} items"
+
+    # PEP 440 version validation template
+    PEP440_VERSION = "{name} must be a valid PEP 440 version string"
