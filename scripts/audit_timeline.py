@@ -20,6 +20,8 @@ def get_module_name(file_path):
     """
     if not file_path.startswith('clintrials/') or not file_path.endswith('.py'):
         return None
+    if file_path.startswith('clintrials/visualization/'):
+        return None
     if file_path.endswith('__init__.py'):
         return None
     basename = os.path.basename(file_path)

@@ -16,6 +16,8 @@ def test_get_module_name() -> None:
     assert get_module_name('clintrials/core/__init__.py') is None
     assert get_module_name('other/core/recruitment.py') is None
     assert get_module_name('clintrials/core/data.txt') is None
+    assert get_module_name('clintrials/visualization/helpers.py') is None
+    assert get_module_name('clintrials/visualization/dashboard/main.py') is None
 
 def test_is_test_file_for_module() -> None:
     assert is_test_file_for_module('tests/test_recruitment.py', 'recruitment') is True
@@ -166,3 +168,59 @@ def test_audit_commits_existing_test(temp_git_repo: str) -> None:
 
     # Audit should pass because test exists in tree
     assert audit_commits('main', 'HEAD') is True
+
+def test_audit_commits_visualization_only(temp_git_repo: str) -> None:
+    run_git(['checkout', '-b', 'feature-branch'])
+
+    # Commit only visualization files without corresponding tests
+    os.makedirs('clintrials/visualization/dashboard/views', exist_ok=True)
+    with open('clintrials/visualization/dashboard/views/crm_view.py', 'w') as f:
+        f.write('def draw_chart(): pass')
+    run_git(['add', 'clintrials/visualization/dashboard/views/crm_view.py'])
+    run_git(['commit', '-m', 'Add dashboard view'])
+
+    # Audit should pass because visualization files are automatically excluded
+    assert audit_commits('main', 'HEAD') is True
+
+def test_audit_commits_combined_core_and_visualization(temp_git_repo: str) -> None:
+    run_git(['checkout', '-b', 'feature-branch'])
+
+    # Commit core test first
+    os.makedirs('tests', exist_ok=True)
+    with open('tests/test_recruitment.py', 'w') as f:
+        f.write('def test_foo(): pass')
+    run_git(['add', 'tests/test_recruitment.py'])
+    run_git(['commit', '-m', 'Add recruitment test'])
+
+    # Commit both core implementation and visualization updates
+    os.makedirs('clintrials/core', exist_ok=True)
+    with open('clintrials/core/recruitment.py', 'w') as f:
+        f.write('def foo(): pass')
+
+    os.makedirs('clintrials/visualization', exist_ok=True)
+    with open('clintrials/visualization/helpers.py', 'w') as f:
+        f.write('def helper(): pass')
+
+    run_git(['add', 'clintrials/core/recruitment.py', 'clintrials/visualization/helpers.py'])
+    run_git(['commit', '-m', 'Add recruitment core and visualization helper'])
+
+    # Audit should pass because recruitment has a test, and visualization helper is ignored
+    assert audit_commits('main', 'HEAD') is True
+
+def test_audit_commits_combined_core_missing_test(temp_git_repo: str) -> None:
+    run_git(['checkout', '-b', 'feature-branch'])
+
+    # Commit core implementation AND visualization without tests
+    os.makedirs('clintrials/core', exist_ok=True)
+    with open('clintrials/core/recruitment.py', 'w') as f:
+        f.write('def foo(): pass')
+
+    os.makedirs('clintrials/visualization', exist_ok=True)
+    with open('clintrials/visualization/helpers.py', 'w') as f:
+        f.write('def helper(): pass')
+
+    run_git(['add', 'clintrials/core/recruitment.py', 'clintrials/visualization/helpers.py'])
+    run_git(['commit', '-m', 'Add recruitment core and visualization helper'])
+
+    # Audit should fail because recruitment is missing tests (even though visualization helper is ignored)
+    assert audit_commits('main', 'HEAD') is False
