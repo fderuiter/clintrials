@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] — 2025-07-30
 
 ### Added
+- PEP 440 validation utility (`validate_version`), PEP 440 opt-in `Version` schema type, local pre-commit hook (`verify-pep440-version`), and GitHub Action deployment guardrails to verify `pyproject.toml` and `build-manifest.json` versions.
 - Quadrature back‑end for `prob_tox_exceeds`. (`8b101bb`)
 - Adaptive 1‑D posterior integrator for improved accuracy/efficiency. (`b5db76b`)
 - Tests for final decision path in TTE. (`41d1a62`)
@@ -28,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Ensure tests install local package** in CI to validate current changes. (`10e630c`)
 
 ### Fixed
+- Prevent invalid version specifiers such as `latest` from reaching the WebAssembly/micropip wheel installation path.
 - Import compatibility: use `collections.abc.Iterable` on modern Python. (`c986f7a`)
 - Integration defaults and associated **Wages–Tait** tests. (`75f4c1a`, #5)
 - Intersphinx configuration. (`c29a545`)
