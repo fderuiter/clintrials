@@ -2,9 +2,11 @@ import json
 from pathlib import Path
 
 import pytest
+from pytest_mock import MockerFixture
 
 from scripts.verify_pep440_version import (
     extract_wheel_version,
+    main,
     validate_build_manifest,
     validate_pyproject_toml,
 )
@@ -126,3 +128,74 @@ def test_validate_build_manifest_invalid_json_type(tmp_path: Path) -> None:
 def test_validate_build_manifest_missing_file() -> None:
     with pytest.raises(FileNotFoundError, match="build-manifest.json not found"):
         validate_build_manifest("nonexistent_file.json")
+
+
+def test_main_missing_manifest(mocker: MockerFixture) -> None:
+    mocker.patch("scripts.verify_pep440_version.validate_pyproject_toml", return_value="0.1.4")
+    original_exists = Path.exists
+    def mock_exists(self: Path) -> bool:
+        if "build-manifest.json" in str(self):
+            return False
+        return original_exists(self)
+    mocker.patch.object(Path, "exists", mock_exists)
+
+    def exit_side_effect(code: int = 0) -> None:
+        raise SystemExit(code)
+    mocker.patch("sys.exit", side_effect=exit_side_effect)
+    mock_stdout = mocker.patch("sys.stdout.write")
+
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+
+    assert excinfo.value.code == 0
+    called_args = [call[0][0] for call in mock_stdout.call_args_list]
+    assert any("WARNING: public/hub/build-manifest.json not found" in arg for arg in called_args)
+
+
+def test_main_with_manifest_success(mocker: MockerFixture) -> None:
+    mocker.patch("scripts.verify_pep440_version.validate_pyproject_toml", return_value="0.1.4")
+    mocker.patch("scripts.verify_pep440_version.validate_build_manifest", return_value=("0.1.4", "0.1.4"))
+
+    original_exists = Path.exists
+    def mock_exists(self: Path) -> bool:
+        if "build-manifest.json" in str(self):
+            return True
+        return original_exists(self)
+    mocker.patch.object(Path, "exists", mock_exists)
+
+    def exit_side_effect(code: int = 0) -> None:
+        raise SystemExit(code)
+    mocker.patch("sys.exit", side_effect=exit_side_effect)
+    mock_stdout = mocker.patch("sys.stdout.write")
+
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+
+    assert excinfo.value.code == 0
+    called_args = [call[0][0] for call in mock_stdout.call_args_list]
+    assert any("Validated public/hub/build-manifest.json version: 0.1.4" in arg for arg in called_args)
+
+
+def test_main_with_manifest_failure(mocker: MockerFixture) -> None:
+    mocker.patch("scripts.verify_pep440_version.validate_pyproject_toml", return_value="0.1.4")
+    mocker.patch("scripts.verify_pep440_version.validate_build_manifest", side_effect=ValueError("Invalid version"))
+
+    original_exists = Path.exists
+    def mock_exists(self: Path) -> bool:
+        if "build-manifest.json" in str(self):
+            return True
+        return original_exists(self)
+    mocker.patch.object(Path, "exists", mock_exists)
+
+    def exit_side_effect(code: int = 0) -> None:
+        raise SystemExit(code)
+    mocker.patch("sys.exit", side_effect=exit_side_effect)
+    mock_stderr = mocker.patch("sys.stderr.write")
+
+    with pytest.raises(SystemExit) as excinfo:
+        main()
+
+    assert excinfo.value.code == 1
+    called_args = [call[0][0] for call in mock_stderr.call_args_list]
+    assert any("public/hub/build-manifest.json validation failed" in arg for arg in called_args)
+

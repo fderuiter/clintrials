@@ -123,7 +123,7 @@ def main() -> None:
     repo_root = script_dir.parent
 
     pyproject_path = repo_root / "pyproject.toml"
-    manifest_path = repo_root / "hub" / "build-manifest.json"
+    manifest_path = repo_root / "public" / "hub" / "build-manifest.json"
 
     errors = []
 
@@ -137,14 +137,14 @@ def main() -> None:
         try:
             manifest_version, wheel_version = validate_build_manifest(manifest_path)
             sys.stdout.write(
-                f"Validated hub/build-manifest.json version: {manifest_version}\n"
+                f"Validated public/hub/build-manifest.json version: {manifest_version}\n"
             )
             sys.stdout.write(f"Validated wheel version segment: {wheel_version}\n")
         except Exception as e:
-            errors.append(f"hub/build-manifest.json validation failed: {e}")
+            errors.append(f"public/hub/build-manifest.json validation failed: {e}")
     else:
         sys.stdout.write(
-            "hub/build-manifest.json not found, skipping manifest and wheel validation.\n"
+            "WARNING: public/hub/build-manifest.json not found, skipping manifest and wheel validation.\n"
         )
 
     if errors:
