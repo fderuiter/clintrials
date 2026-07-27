@@ -56,9 +56,6 @@ jobs:
       - name: Build clintrials wheel
         run: poetry build --format wheel
 
-      - name: Verify PEP 440 version compatibility
-        run: poetry run python scripts/verify_pep440_version.py
-
       - name: Serialize Python schemas to JSON
         run: poetry run python scripts/serialize_schemas.py
 
@@ -75,6 +72,9 @@ jobs:
           cp dist/*.whl public/hub/
           VERSION=$(poetry version -s)
           echo "{\"version\": \"$VERSION\", \"wheel\": \"clintrials-$VERSION-py3-none-any.whl\"}" > public/hub/build-manifest.json
+
+      - name: Verify PEP 440 version compatibility
+        run: poetry run python scripts/verify_pep440_version.py
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
