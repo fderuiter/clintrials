@@ -88,6 +88,9 @@
       <h1>Simulation Configuration</h1>
       <p>Select a trial model to configure parameters.</p>
       
+      <!-- Dedicated, idempotent error region -->
+      <div id="error-region"></div>
+
       <select id="schema-selector">
         <option value="">-- Select Model Schema --</option>
       </select>
@@ -102,12 +105,61 @@
       let schemas = {};
 
       async function initializeApp() {
+        const errorRegion = document.getElementById('error-region');
+        if (errorRegion) {
+          errorRegion.innerHTML = '';
+        }
+
+        let response;
         try {
-          const response = await fetch('schema.json');
-          if (!response.ok) throw new Error("Failed to load schema.json");
+          response = await fetch('schema.json', { cache: 'no-store' });
+        } catch (netErr) {
+          console.error("Network error loading schema.json:", netErr);
+          if (errorRegion) {
+            errorRegion.innerHTML = '<p style="color:red">Schema failed to load (network/404 failure).</p>';
+          }
+          return;
+        }
+
+        if (!response.ok) {
+          console.error("HTTP error loading schema.json:", response.status);
+          if (errorRegion) {
+            errorRegion.innerHTML = '<p style="color:red">Schema failed to load (network/404 failure).</p>';
+          }
+          return;
+        }
+
+        try {
           schemas = await response.json();
           
+          // Validate schema is non-empty and shaped as expected
+          const isValid = schemas &&
+                          typeof schemas === 'object' &&
+                          !Array.isArray(schemas) &&
+                          Object.keys(schemas).length > 0;
+
+          if (!isValid) {
+            throw new Error("Empty schemas");
+          }
+
+          for (const schemaName in schemas) {
+            if (!schemas[schemaName] || typeof schemas[schemaName] !== 'object' || !schemas[schemaName].properties || typeof schemas[schemaName].properties !== 'object') {
+              throw new Error("Invalid schema shape");
+            }
+          }
+        } catch (parseOrValErr) {
+          console.error("Schema validation/parsing error:", parseOrValErr);
+          if (errorRegion) {
+            errorRegion.innerHTML = '<p style="color:red">Schema loaded but empty/invalid.</p>';
+          }
+          return;
+        }
+
+        try {
           const selector = document.getElementById('schema-selector');
+          // Clear any existing options except the first placeholder
+          selector.innerHTML = '<option value="">-- Select Model Schema --</option>';
+
           for (const schemaName in schemas) {
             const option = document.createElement('option');
             option.value = schemaName;
@@ -119,8 +171,10 @@
             renderForm(e.target.value);
           });
         } catch (err) {
-          console.error("Initialization error:", err);
-          document.querySelector('.container').innerHTML += '<p style="color:red">Failed to load configuration schemas.</p>';
+          console.error("Dropdown population error:", err);
+          if (errorRegion) {
+            errorRegion.innerHTML = '<p style="color:red">Schema loaded but empty/invalid.</p>';
+          }
         }
       }
 
@@ -144,10 +198,10 @@
                        break;
                     }
                     if (itemSchema.minimum !== undefined && num < itemSchema.minimum) {
-                       isValid = false; errorMsg = \`Items must be >= \${itemSchema.minimum}\`; break;
+                       isValid = false; errorMsg = `Items must be >= ${itemSchema.minimum}`; break;
                     }
                     if (itemSchema.maximum !== undefined && num > itemSchema.maximum) {
-                       isValid = false; errorMsg = \`Items must be <= \${itemSchema.maximum}\`; break;
+                       isValid = false; errorMsg = `Items must be <= ${itemSchema.maximum}`; break;
                     }
                  }
               }
@@ -167,19 +221,19 @@
               }
               if (prop.minimum !== undefined && num < prop.minimum) {
                 isValid = false;
-                errorMsg = \`Value must be >= \${prop.minimum}\`;
+                errorMsg = `Value must be >= ${prop.minimum}`;
               }
               if (prop.maximum !== undefined && num > prop.maximum) {
                 isValid = false;
-                errorMsg = \`Value must be <= \${prop.maximum}\`;
+                errorMsg = `Value must be <= ${prop.maximum}`;
               }
               if (prop.exclusiveMinimum !== undefined && num <= prop.exclusiveMinimum) {
                 isValid = false;
-                errorMsg = \`Value must be strictly > \${prop.exclusiveMinimum}\`;
+                errorMsg = `Value must be strictly > ${prop.exclusiveMinimum}`;
               }
               if (prop.exclusiveMaximum !== undefined && num >= prop.exclusiveMaximum) {
                 isValid = false;
-                errorMsg = \`Value must be strictly < \${prop.exclusiveMaximum}\`;
+                errorMsg = `Value must be strictly < ${prop.exclusiveMaximum}`;
               }
             }
           }
@@ -201,13 +255,28 @@
         const formFields = document.getElementById('form-fields');
         formFields.innerHTML = '';
         
+        const errorRegion = document.getElementById('error-region');
+        if (errorRegion) {
+          errorRegion.innerHTML = '';
+        }
+
         if (!schemaName) {
           form.style.display = 'none';
           return;
         }
-        form.style.display = 'block';
 
         const schema = schemas[schemaName];
+        if (!schema || !schema.properties) {
+          form.style.display = 'none';
+          if (errorRegion) {
+            errorRegion.innerHTML = `<p style="color:red">Selected schema "${schemaName}" is missing or invalid.</p>`;
+          }
+          return;
+        }
+
+        // Only set the form's display = 'block' after successful validation of the schema entry
+        form.style.display = 'block';
+
         const properties = schema.properties;
         const required = schema.required || [];
 
