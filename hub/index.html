@@ -104,28 +104,39 @@
     <script>
       let schemas = {};
 
-      async function initializeApp() {
+      function showError(message) {
+        const errorRegion = document.getElementById('error-region');
+        if (errorRegion) {
+          errorRegion.innerHTML = '';
+          const p = document.createElement('p');
+          p.style.color = 'red';
+          p.textContent = message;
+          errorRegion.appendChild(p);
+        }
+      }
+
+      function clearError() {
         const errorRegion = document.getElementById('error-region');
         if (errorRegion) {
           errorRegion.innerHTML = '';
         }
+      }
+
+      async function initializeApp() {
+        clearError();
 
         let response;
         try {
           response = await fetch('schema.json', { cache: 'no-store' });
         } catch (netErr) {
           console.error("Network error loading schema.json:", netErr);
-          if (errorRegion) {
-            errorRegion.innerHTML = '<p style="color:red">Schema failed to load (network/404 failure).</p>';
-          }
+          showError("Schema failed to load (network/404 failure).");
           return;
         }
 
         if (!response.ok) {
           console.error("HTTP error loading schema.json:", response.status);
-          if (errorRegion) {
-            errorRegion.innerHTML = '<p style="color:red">Schema failed to load (network/404 failure).</p>';
-          }
+          showError("Schema failed to load (network/404 failure).");
           return;
         }
 
@@ -149,9 +160,7 @@
           }
         } catch (parseOrValErr) {
           console.error("Schema validation/parsing error:", parseOrValErr);
-          if (errorRegion) {
-            errorRegion.innerHTML = '<p style="color:red">Schema loaded but empty/invalid.</p>';
-          }
+          showError("Schema loaded but empty/invalid.");
           return;
         }
 
@@ -172,9 +181,7 @@
           });
         } catch (err) {
           console.error("Dropdown population error:", err);
-          if (errorRegion) {
-            errorRegion.innerHTML = '<p style="color:red">Schema loaded but empty/invalid.</p>';
-          }
+          showError("Schema loaded but empty/invalid.");
         }
       }
 
@@ -255,10 +262,7 @@
         const formFields = document.getElementById('form-fields');
         formFields.innerHTML = '';
         
-        const errorRegion = document.getElementById('error-region');
-        if (errorRegion) {
-          errorRegion.innerHTML = '';
-        }
+        clearError();
 
         if (!schemaName) {
           form.style.display = 'none';
@@ -268,9 +272,7 @@
         const schema = schemas[schemaName];
         if (!schema || !schema.properties) {
           form.style.display = 'none';
-          if (errorRegion) {
-            errorRegion.innerHTML = `<p style="color:red">Selected schema "${schemaName}" is missing or invalid.</p>`;
-          }
+          showError(`Selected schema "${schemaName}" is missing or invalid.`);
           return;
         }
 
