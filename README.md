@@ -1,7 +1,7 @@
 # clintrials
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Documentation Status](https://fderuiter.github.io/clintrials/badge.svg)](https://fderuiter.github.io/clintrials)
+[![Documentation Status](https://img.shields.io/badge/docs-latest-blue.svg)](https://fderuiter.github.io/clintrials)
 
 `clintrials` is a Python library for designing and simulating clinical trials. It provides implementations of various trial designs, with a focus on early-phase oncology trials.
 
