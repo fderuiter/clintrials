@@ -1,16 +1,14 @@
+"""Base classes and utilities for efficacy-toxicity dose-finding trials.
+
+Random Seed Strategy: {efficacytoxicity_seed_strategy}
+"""
+
 from __future__ import annotations
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
-
-"""
-Base classes and utilities for efficacy-toxicity dose-finding trials.
-
-
-Random Seed Strategy: {efficacytoxicity_seed_strategy}
-"""
 
 __author__ = "brockk"
 
@@ -34,8 +32,9 @@ from clintrials.core.protocol import Protocol
 
 
 class EfficacyToxicityDoseFindingTrial(Protocol):
-    """An abstract base class for dose-finding trials that jointly monitor
-    toxicity and efficacy.
+    """An abstract base class for dose-finding trials.
+
+    Jointly monitors toxicity and efficacy.
 
     Warning:
         Data updates are strictly incremental. Do not repeatedly pass the full

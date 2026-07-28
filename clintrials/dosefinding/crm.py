@@ -1,15 +1,14 @@
+"""Continual Reassessment Method (CRM) for dose-finding clinical trials.
+
+Random Seed Strategy: {crm_seed_strategy}
+"""
+
 from __future__ import annotations
 
 from typing import Any, Callable, Optional, Sequence
 
 import numpy as np
 import pandas as pd
-
-"""
-Continual Reassessment Method (CRM) for dose-finding clinical trials.
-
-Random Seed Strategy: {crm_seed_strategy}
-"""
 
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"

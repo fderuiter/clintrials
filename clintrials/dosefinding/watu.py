@@ -1,18 +1,14 @@
+"""Seamless phase I/II trial design fusing Wages & Tait and EffTox.
+
+Random Seed Strategy: {watu_seed_strategy}
+"""
+
 from __future__ import annotations
 
 from typing import Any, Sequence
 
 import numpy as np
 import pandas as pd
-
-"""
-Brock & Yap's novel seamless phase I/II efficacy/toxicity design, fusing
-elements of Wages & Tait's design with elements of Thall & Cook's EffTox
-design.
-
-
-Random Seed Strategy: {watu_seed_strategy}
-"""
 
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
@@ -33,8 +29,9 @@ from clintrials.dosefinding.wagestait import (
 
 
 class WATU(EfficacyToxicityDoseFindingTrial):
-    """Brock & Yap's fusion of Wages & Tait's phase I/II design with Thall &
-    Cook's EffTox utility contours.
+    """Seamless phase I/II trial design fusing Wages & Tait and EffTox.
+
+    WATU is Brock & Yap's fusion design using EffTox utility contours.
     """
 
     @classmethod

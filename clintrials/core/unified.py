@@ -1,3 +1,5 @@
+"""Unified container structures for simulation results."""
+
 from __future__ import annotations
 
 
@@ -5,16 +7,20 @@ class SimulationResult:
     """Unified result container for simulation runs."""
 
     def __init__(self, results, mode="iterative"):  # type: ignore
+        """Initialize the SimulationResult with results and execution mode."""
         self.results = results
         self.mode = mode
 
     def __iter__(self):  # type: ignore
+        """Iterate over the underlying results."""
         return iter(self.results)
 
     def __len__(self):  # type: ignore
+        """Return the count of items in the underlying results."""
         return len(self.results)
 
     def __getitem__(self, key_or_idx):  # type: ignore
+        """Retrieve an item by its key or index."""
         return self.results[key_or_idx]
 
     def get(self, key, default=None):  # type: ignore

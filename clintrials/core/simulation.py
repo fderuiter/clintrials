@@ -24,6 +24,8 @@ from typing import (
 
 @runtime_checkable
 class OutcomeGenerator(Protocol):
+    """Protocol interface for generating trial outcomes dynamically."""
+
     def __call__(
         self,
         design: Any,
@@ -31,21 +33,39 @@ class OutcomeGenerator(Protocol):
         cohort_size: int,
         **kwargs: Any
     ) -> Any:
+        """Generate outcomes for the next cohort of patients."""
         ...
 
 @runtime_checkable
 class TrialDesign(Protocol):
-    def reset(self) -> None: ...
-    def update(self, *args: Any, **kwargs: Any) -> None: ...
-    def has_more(self) -> bool: ...
-    def report(self) -> Any: ...
+    """Protocol interface defining a standard clinical trial design."""
+
+    def reset(self) -> None:
+        """Reset the trial state to baseline."""
+        ...
+
+    def update(self, *args: Any, **kwargs: Any) -> None:
+        """Update the trial state with new clinical outcomes."""
+        ...
+
+    def has_more(self) -> bool:
+        """Check if the trial has more patients or stages remaining."""
+        ...
+
+    def report(self) -> Any:
+        """Generate a summary report of the current trial state."""
+        ...
 
 @runtime_checkable
 class TrialDesignWithMaxSize(TrialDesign, Protocol):
+    """Protocol interface for a trial design with a maximum sample size constraint."""
+
     max_size: Union[int, float]
 
 @runtime_checkable
 class TrialDesignWithEfficacyBoundaries(TrialDesign, Protocol):
+    """Protocol interface for a trial design with efficacy boundaries."""
+
     efficacy_boundaries: Sequence[float]
     timing: Sequence[float]
     k: int
@@ -53,7 +73,11 @@ class TrialDesignWithEfficacyBoundaries(TrialDesign, Protocol):
 
 @runtime_checkable
 class TrialDesignWithBulk(TrialDesign, Protocol):
-    def run_bulk(self, n_sims: int, **kwargs: Any) -> list[Any]: ...
+    """Protocol for trial designs capable of vectorized or bulk simulation."""
+
+    def run_bulk(self, n_sims: int, **kwargs: Any) -> list[Any]:
+        """Run multiple simulations in a single bulk execution."""
+        ...
 
 
 from clintrials.utils import Memoize, filter_list_of_dicts, tuple_to_dataframe
@@ -241,6 +265,7 @@ class UniversalProtocolSimulationRunner:
     """
 
     def __init__(self, design: Union[TrialDesign, TrialDesignWithMaxSize, TrialDesignWithEfficacyBoundaries, TrialDesignWithBulk, Any], outcome_generator: Optional[OutcomeGenerator] = None, recruitment_stream: Optional[Any] = None) -> None:
+        """Initialize the universal simulation runner."""
         self.design = design
         self.outcome_generator = outcome_generator
         self.recruitment_stream = recruitment_stream

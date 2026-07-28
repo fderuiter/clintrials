@@ -1,17 +1,14 @@
+"""An implementation of Thall & Cook's EffTox design for dose-finding in clinical trials.
+
+Random Seed Strategy: {efftox_seed_strategy}
+"""
+
 from __future__ import annotations
 
 from typing import Any
 
 import numpy as np
 import pandas as pd
-
-"""
-An implementation of Thall & Cook's EffTox design for dose-finding in
-clinical trials.
-
-
-Random Seed Strategy: {efftox_seed_strategy}
-"""
 
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
