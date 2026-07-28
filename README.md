@@ -197,7 +197,7 @@ For developers working on the Trial Simulation Hub locally, ensure you generate 
 poetry run python scripts/serialize_schemas.py
 ```
 
-This mirrors the deployment pipeline and ensures `hub/schema.json` is present and up-to-date.
+This mirrors the deployment pipeline and ensures `schema.json` (inside the `hub` directory) is present and up-to-date.
 
 ## Documentation
 

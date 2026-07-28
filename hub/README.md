@@ -10,4 +10,4 @@ Before serving `index.html` locally, make sure to generate the `schema.json` art
 poetry run python scripts/serialize_schemas.py
 ```
 
-This ensures that the latest Python schemas are serialized to `hub/schema.json` and are available to the frontend.
+This ensures that the latest Python schemas are serialized to `schema.json` under this directory and are available to the frontend.
