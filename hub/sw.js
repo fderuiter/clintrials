@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sim-hub-cache-v3';
+const CACHE_NAME = 'sim-hub-cache-v4';
 
 const isSubpath = self.location.pathname.includes('/clintrials/');
 const basePath = isSubpath ? '/clintrials/hub/' : '/hub/';
@@ -40,45 +40,69 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - return response
-        if (response) {
+  // Restrict runtime caching and intercepting to GET requests only
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  const url = new URL(event.request.url);
+  const path = url.pathname;
+
+  // Determine if this is a dynamic asset (schema.json, index.html, or base paths)
+  const isDynamic = path.endsWith('/schema.json') ||
+                    path.endsWith('/index.html') ||
+                    path === basePath ||
+                    path === basePath + 'index.html' ||
+                    path === basePath.slice(0, -1);
+
+  if (isDynamic) {
+    // Network-first strategy for dynamic assets
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          // Restrict runtime caching to successful responses only
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          }
           return response;
-        }
-
-        // IMPORTANT: Clone the request. A request is a stream and
-        // can only be consumed once.
-        let fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest).then(
-          response => {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              // We could also cache CORS responses (type 'cors' or 'opaque') from the CDN
-              if (response && response.status === 200) {
-                 let responseToCache = response.clone();
-                 caches.open(CACHE_NAME)
-                   .then(cache => {
-                     cache.put(event.request, responseToCache);
-                   });
-              }
-              return response;
+        })
+        .catch(() => {
+          // Fallback to cache if network fails
+          return caches.match(event.request).then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
             }
+            // Propagate network error rather than returning undefined
+            throw new Error('Network and cache failed for dynamic asset: ' + url.href);
+          });
+        })
+    );
+  } else {
+    // Cache-first strategy for precached static assets
+    event.respondWith(
+      caches.match(event.request)
+        .then(cachedResponse => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
 
-            let responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
+          return fetch(event.request).then(response => {
+            // Restrict runtime caching to successful responses only
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open(CACHE_NAME).then(cache => {
                 cache.put(event.request, responseToCache);
               });
-
+            }
             return response;
-          }
-        ).catch(err => {
-            console.log('Fetch failed, offline?', err);
-        });
-      })
-  );
+          }).catch(err => {
+            // Propagate network error rather than returning undefined
+            throw err;
+          });
+        })
+    );
+  }
 });

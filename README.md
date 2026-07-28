@@ -191,6 +191,14 @@ poetry run dashboard
 
 This will start a local web server and open the Trial Simulation Hub in your browser.
 
+For developers working on the Trial Simulation Hub locally, ensure you generate the configuration schemas before serving the hub assets by running:
+
+```bash
+poetry run python scripts/serialize_schemas.py
+```
+
+This mirrors the deployment pipeline and ensures `hub/schema.json` is present and up-to-date.
+
 ## Documentation
 
 The full documentation, including tutorials and API reference, is hosted on GitHub Pages and can be found at:
