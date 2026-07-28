@@ -1,3 +1,5 @@
+"""Dose finding packages and core escalation trial structures."""
+
 from __future__ import annotations
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
@@ -355,8 +357,9 @@ class DoseFindingTrial(Protocol):
 
 
 class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
-    """A simple design that monotonically increases the dose until a
-    certain number of toxicities are observed.
+    """A simple design that monotonically increases the dose.
+
+    Escalates until a certain number of toxicities are observed.
     """
 
     def __init__(self, first_dose: Any, num_doses: Any, max_size: Any, max_toxicities: Any = 1) -> None:
@@ -567,8 +570,9 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
 
 
 def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = True, calculate_optimal_decision: Any = True, recruitment_stream: Any = None) -> Any:
-    """Simulates multiple toxicity-driven dose-finding trials from the same
-    patient data.
+    """Simulates multiple toxicity-driven dose-finding trials.
+
+    Runs simulations from the same patient data.
 
     Args:
         design_map (dict[str, DoseFindingTrial]): A dictionary mapping

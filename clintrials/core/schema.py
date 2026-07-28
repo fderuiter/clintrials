@@ -1,3 +1,5 @@
+"""Schema definitions for validating trial design parameters."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -12,7 +14,10 @@ from clintrials.validation import (
 
 
 class FieldInfo:
+    """Information about a model field's constraints and metadata."""
+
     def __init__(self, default: Any = dataclasses.MISSING, description: Optional[str] = None, ge: Optional[Union[int, float]] = None, le: Optional[Union[int, float]] = None, gt: Optional[Union[int, float]] = None, lt: Optional[Union[int, float]] = None) -> None:
+        """Initializes field metadata with optional defaults and boundaries."""
         self.default = default
         self.description = description
         self.ge = ge
@@ -26,8 +31,11 @@ def Field(default: Any = dataclasses.MISSING, description: Optional[str] = None,
     return FieldInfo(default=default, description=description, ge=ge, le=le, gt=gt, lt=lt)
 
 class BaseModel:
+    """Base schema class with automatic validation of type constraints."""
+
     model_fields: dict[str, Any]
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Sets up subclasses with dataclass logic and validates schemas."""
         super().__init_subclass__(**kwargs)
         cls.model_fields = {}
         import typing
@@ -52,6 +60,7 @@ class BaseModel:
         dataclasses.dataclass(cls)
 
     def __post_init__(self) -> None:
+        """Validates fields after dataclass initialization."""
         for name, f in self.model_fields.items():
             val = getattr(self, name)
             self._validate_value(name, val, f)
@@ -140,6 +149,8 @@ PositiveInt = Annotated[int, "PositiveInt", Field(gt=0, description="A positive 
 Version = Annotated[str, "Version", Field(description="A PEP 440 compliant version string.")]
 
 class WinRatioSchema(BaseModel):
+    """Schema for validating Win Ratio clinical trial design parameters."""
+
     num_subjects_A: PositiveInt = Field(
         default=100, description="Number of subjects in Group A"
     )
@@ -172,6 +183,8 @@ class WinRatioSchema(BaseModel):
     )
 
 class CRMSchema(BaseModel):
+    """Schema for validating Continual Reassessment Method design parameters."""
+
     prior: List[Probability] = Field(description="Prior probabilities of toxicity")
     target: Probability = Field(description="Target toxicity probability")
     first_dose: PositiveInt = Field(default=1, description="First dose level")
@@ -192,12 +205,15 @@ class CRMSchema(BaseModel):
     sample_size: Optional[PositiveInt] = Field(default=None, description="Monte Carlo sample size")
 
     def __post_init__(self) -> None:
+        """Performs additional validation on CRM parameters."""
         super().__post_init__()
         if self.min_beta is not None and self.max_beta is not None:
             if self.min_beta >= self.max_beta:
                 raise ValueError("min_beta must be less than max_beta")
 
 class EffToxSchema(BaseModel):
+    """Schema for validating EffTox design parameters."""
+
     real_doses: List[float] = Field(description="Real dose values")
     prior_tox_probs: Optional[List[Probability]] = Field(
         default=None, description="Prior tox probs"

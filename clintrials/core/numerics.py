@@ -16,8 +16,9 @@ from clintrials.core.stats import ProbabilityDensitySample
 
 
 def posterior_expectation_gh(log_likelihood_func, f_func, prior_mean, prior_sd, deg=20):  # type: ignore
-    """Evaluates the posterior expectation of f(theta) using Gauss-Hermite quadrature,
-    assuming a Gaussian prior N(prior_mean, prior_sd^2).
+    """Evaluates the posterior expectation of f(theta) using Gauss-Hermite quadrature.
+
+    Assuming a Gaussian prior N(prior_mean, prior_sd^2).
 
     Args:
         log_likelihood_func (Callable): A function taking a 1D array of parameter nodes

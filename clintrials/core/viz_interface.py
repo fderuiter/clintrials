@@ -9,6 +9,8 @@ import abc
 
 
 class VisualizationProvider(abc.ABC):
+    """Abstract base class representing a visualization rendering provider."""
+
     @abc.abstractmethod
     def plot_dose_finding_outcomes(self, trial, chart_title=None):  # type: ignore
         """Plot dose finding outcomes."""
