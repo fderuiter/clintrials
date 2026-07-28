@@ -1,9 +1,12 @@
 import inspect
 import pkgutil
 import re
+from typing import Any, List, Optional
+
 import clintrials
 
-def extract_docstring_params(doc):
+
+def extract_docstring_params(doc: Optional[str]) -> List[str]:
     if not doc:
         return []
     lines = doc.split("\n")
@@ -26,7 +29,7 @@ def extract_docstring_params(doc):
                     params.append(param_name)
     return params
 
-def get_sig_params(obj):
+def get_sig_params(obj: Any) -> Optional[List[str]]:
     try:
         sig = inspect.signature(obj)
     except (ValueError, TypeError):
@@ -58,7 +61,7 @@ def test_docstring_parameter_signatures() -> None:
             obj_module = getattr(obj, "__module__", "")
             if not obj_module.startswith("clintrials"):
                 continue
-            
+
             # Check function
             if inspect.isfunction(obj):
                 sig_p = get_sig_params(obj)
@@ -78,5 +81,5 @@ def test_docstring_parameter_signatures() -> None:
                         if sig_p is not None and doc_p:
                             if set(sig_p) != set(doc_p):
                                 mismatches.append(f"Class {module_name}.{obj.__name__}.__init__ signature {sig_p} != docstring {doc_p}")
-                                
-    assert not mismatches, f"Docstring-to-signature parameter name mismatches found:\n" + "\n".join(mismatches)
+
+    assert not mismatches, "Docstring-to-signature parameter name mismatches found:\n" + "\n".join(mismatches)
