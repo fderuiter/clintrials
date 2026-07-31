@@ -1,7 +1,8 @@
 import json
-import subprocess
 import shutil
+import subprocess
 from pathlib import Path
+
 
 def test_notebook_exclusion_during_compilation() -> None:
     root_dir = Path(__file__).parent.parent
