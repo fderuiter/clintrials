@@ -8,9 +8,7 @@ const urlsToCache = [
   basePath + 'index.html',
   basePath + 'manifest.json',
   basePath + 'icon.svg',
-  basePath + 'vendor/stlite.css',
-  basePath + 'vendor/iframeResizer.contentWindow.min.js',
-  basePath + 'vendor/stlite.js'
+  basePath + 'vendor/iframeResizer.contentWindow.min.js'
 ];
 
 self.addEventListener('install', event => {
