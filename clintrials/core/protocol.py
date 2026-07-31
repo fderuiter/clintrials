@@ -97,15 +97,38 @@ class Protocol(metaclass=abc.ABCMeta):
         Returns:
             SimulationResult: A container with the results of the simulations.
         """
+        from clintrials.core.registry import RUNNER_REGISTRY
         from clintrials.core.rng import get_rng
-        from clintrials.core.simulation import UniversalProtocolSimulationRunner
-        from clintrials.core.unified import SimulationResult
 
         self.set_rng(get_rng(seed))  # type: ignore[no-untyped-call]
 
         mode = "vectorized" if method == "bulk" else "iterative"
 
-        runner = UniversalProtocolSimulationRunner(self)
-        results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **kwargs)
+        runner_class, result_container_class = RUNNER_REGISTRY.resolve(self)
 
-        return SimulationResult(results, mode=method)  # type: ignore[no-untyped-call]
+        # Utilize the resolved runner's custom configuration mapping if defined
+        mapped_kwargs = kwargs
+        if hasattr(runner_class, "config_map"):
+            config_map = runner_class.config_map
+            if callable(config_map):
+                mapped_kwargs = config_map(kwargs)
+            elif isinstance(config_map, dict):
+                mapped_kwargs = {config_map.get(k, k): v for k, v in kwargs.items()}
+        elif hasattr(runner_class, "config_mapping"):
+            config_mapping = runner_class.config_mapping
+            if callable(config_mapping):
+                mapped_kwargs = config_mapping(kwargs)
+            elif isinstance(config_mapping, dict):
+                mapped_kwargs = {config_mapping.get(k, k): v for k, v in kwargs.items()}
+
+        runner = runner_class(self)
+
+        # Utilizing the resolved runner's seed-based random generators if applicable
+        if hasattr(runner, "set_rng") and callable(runner.set_rng):
+            runner.set_rng(self.rng)
+        elif hasattr(runner, "rng"):
+            runner.rng = self.rng
+
+        results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **mapped_kwargs)
+
+        return result_container_class(results, mode=method)  # type: ignore[no-untyped-call]

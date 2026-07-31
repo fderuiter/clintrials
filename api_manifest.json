@@ -1271,6 +1271,91 @@
         }
       }
     },
+    "RunnerRegistry": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "register": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "design",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "runner",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
+            },
+            {
+              "name": "result_container",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
+            }
+          ]
+        },
+        "resolve": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "design",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "set_defaults": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "runner",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "result_container",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        }
+      }
+    },
     "inject_docs": {
       "type": "function",
       "parameters": []

@@ -150,3 +150,119 @@ def inject_docs() -> Callable:  # type: ignore
         return obj
     return decorator
 
+
+class RunnerRegistry:
+    """Registry to map trial designs (Protocol classes or string names) to simulation runners and result containers."""
+
+    def __init__(self) -> None:
+        """Initializes a new RunnerRegistry instance."""
+        self._registry: Dict[Any, tuple[Any, Any]] = {}
+        self._default_runner: Any = None
+        self._default_result_container: Any = None
+
+    def set_defaults(self, runner: Any, result_container: Any) -> None:
+        """Set the default runner and result container."""
+        self._default_runner = runner
+        self._default_result_container = result_container
+
+    def register(self, design: Any, runner: Optional[Any] = None, result_container: Optional[Any] = None) -> Any:
+        """Register a runner and optional result container for a specific trial design.
+
+        Can be used as a function call or as a decorator on the runner class.
+
+        Args:
+            design: The trial design class (or string name).
+            runner: The simulation runner class or callable. Optional if used as decorator.
+            result_container: The result container class or callable. Optional.
+        """
+        if runner is None:
+            # Decorator usage: @RUNNER_REGISTRY.register(design, result_container=...)
+            def decorator(runner_cls: Any) -> Any:
+                self.register(design, runner_cls, result_container)
+                return runner_cls
+            return decorator
+
+        # Validation
+        if design is None:
+            raise ValueError(
+                "Unable to register: The 'design' parameter cannot be None.\n"
+                "Troubleshooting:\n"
+                "1. Ensure you pass a valid clinical trial design class (subclassing Protocol) or a string identifier.\n"
+                "2. Check that the design class is fully imported and defined before registration."
+            )
+        if not isinstance(design, (type, str)):
+            raise TypeError(
+                f"Unable to register: Invalid 'design' parameter type '{type(design).__name__}'.\n"
+                "Troubleshooting:\n"
+                "1. The design parameter must be a Python class or a string identifier.\n"
+                "2. If you are registering a custom runner for a Protocol class, pass the class name or the class object itself (e.g., DummyTrial)."
+            )
+        if runner is None:
+            raise ValueError(
+                "Unable to register: The 'runner' parameter cannot be None.\n"
+                "Troubleshooting:\n"
+                "1. Provide a valid simulation runner class or callable.\n"
+                "2. The runner must implement a 'run' method matching the expected simulation execution interface."
+            )
+        if not callable(runner):
+            raise TypeError(
+                f"Unable to register: The 'runner' parameter must be callable (a class or function). Got: '{type(runner).__name__}'.\n"
+                "Troubleshooting:\n"
+                "1. Ensure the runner is a class definition or a factory function, not an instantiated object.\n"
+                "2. If it is a custom class, verify it is defined correctly before calling register."
+            )
+        if result_container is not None and not callable(result_container):
+            raise TypeError(
+                f"Unable to register: The 'result_container' parameter must be callable. Got: '{type(result_container).__name__}'.\n"
+                "Troubleshooting:\n"
+                "1. Ensure the result_container is a class or factory function that wraps execution results.\n"
+                "2. Pass None or omit the argument if you want to use the default unified SimulationResult container."
+            )
+
+        self._registry[design] = (runner, result_container)
+
+    def resolve(self, design: Any) -> tuple[Any, Any]:
+        """Resolve the simulation runner and result container for a given trial design (Protocol instance or class)."""
+        design_class = design if isinstance(design, type) else type(design)
+
+        # 1. Try resolving by exact class
+        if design_class in self._registry:
+            runner, result_container = self._registry[design_class]
+            if self._default_runner is None or self._default_result_container is None:
+                self._load_defaults()
+            return runner, result_container or self._default_result_container
+
+        # 2. Try resolving by string representation or name
+        if hasattr(design_class, "__name__") and design_class.__name__ in self._registry:
+            runner, result_container = self._registry[design_class.__name__]
+            if self._default_runner is None or self._default_result_container is None:
+                self._load_defaults()
+            return runner, result_container or self._default_result_container
+
+        # 3. Try inheritance lookup (MRO search for any registered class)
+        if hasattr(design_class, "__mro__"):
+            for parent in design_class.__mro__:
+                if parent in self._registry:
+                    runner, result_container = self._registry[parent]
+                    if self._default_runner is None or self._default_result_container is None:
+                        self._load_defaults()
+                    return runner, result_container or self._default_result_container
+
+        # 4. Fallback to default
+        if self._default_runner is None or self._default_result_container is None:
+            self._load_defaults()
+
+        return self._default_runner, self._default_result_container
+
+    def _load_defaults(self) -> None:
+        if self._default_runner is None:
+            from clintrials.core.simulation import UniversalProtocolSimulationRunner
+            self._default_runner = UniversalProtocolSimulationRunner
+        if self._default_result_container is None:
+            from clintrials.core.unified import SimulationResult
+            self._default_result_container = SimulationResult
+
+
+RUNNER_REGISTRY = RunnerRegistry()
+
+
