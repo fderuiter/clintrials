@@ -795,7 +795,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.utility = utility
         self.pds = _pds
 
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
+    def _calculate_next_dose(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
         if n is None:
             n = self.num_integral_steps
         self._update_integrals(n, rng, **kwargs)
@@ -833,7 +833,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 
         return self._next_dose
 
-    def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self.prob_tox = []  # type: ignore
         self.prob_eff = []  # type: ignore
         self.prob_acc_tox = []  # type: ignore

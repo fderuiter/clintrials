@@ -289,7 +289,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         """
         return self.theta_hats[self.most_likely_model_index]  # type: ignore[index]
 
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self, **kwargs: Any) -> Any:
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
@@ -357,7 +357,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 
         return self._next_dose
 
-    def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self.most_likely_model_index = self.rng.choice(
             np.array(range(self.K))[  # type: ignore[index]
                 self.model_prior_weights == max(self.model_prior_weights)

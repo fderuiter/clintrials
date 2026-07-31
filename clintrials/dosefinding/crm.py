@@ -578,12 +578,12 @@ class CRM(DoseFindingTrial):
         """Gets the Monte Carlo sample size."""
         return self._sample_size_override if self._sample_size_override is not None else CORE_REGISTRY["crm_sample_size"]
 
-    def _DoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self.beta_hat, self.beta_var = self.beta_prior.mean(), self.beta_prior.var()
         self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = self.prior
 
-    def _DoseFindingTrial__calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self) -> Any:
         if self.principle_escalation_func:
             cases = zip(self._doses, self._toxicities)
             proposed_dose = self.principle_escalation_func(cases)

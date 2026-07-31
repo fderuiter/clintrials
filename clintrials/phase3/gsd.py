@@ -5,7 +5,7 @@ Random Seed Strategy: {gsd_seed_strategy}
 
 from __future__ import annotations
 
-from typing import Callable, List
+from typing import Any, Callable, List
 
 import numpy as np
 from scipy.optimize import brentq
@@ -214,7 +214,7 @@ class GroupSequentialDesign(Protocol):
         return boundaries
 
     @deprecated(alternative="run(..., method='bulk')")  # type: ignore
-    def simulate(self, n_sims: int, theta: float = 0.0):
+    def simulate(self, n_sims: int, theta: float = 0.0) -> Any:
         """Legacy method for backward compatibility."""
         # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
         return self.run(n_sims=n_sims, method="bulk", theta=theta)
