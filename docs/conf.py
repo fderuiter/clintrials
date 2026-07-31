@@ -47,6 +47,15 @@ exclude_patterns = [
     "_build",
     "Thumbs.db",
     ".DS_Store",
+    "**/*draft*",
+    "**/*Draft*",
+    "**/*DRAFT*",
+    "**/*test*",
+    "**/*Test*",
+    "**/*TEST*",
+    "**/*temp*",
+    "**/*Temp*",
+    "**/*TEMP*",
 ]
 
 html_theme = "furo"
