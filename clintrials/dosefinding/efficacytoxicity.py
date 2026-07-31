@@ -27,8 +27,7 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
-from clintrials.core.cohort import PatientCohortTracker
-from clintrials.core.protocol import BaseDoseFindingTrial, Protocol
+from clintrials.core.protocol import BaseDoseFindingTrial
 
 
 class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):

@@ -3,10 +3,9 @@
 from __future__ import annotations
 
 import abc
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Iterable, List, Optional
+
 import numpy as np
-import pandas as pd
-from collections import OrderedDict
 
 from clintrials.core.cohort import PatientCohortTracker
 
