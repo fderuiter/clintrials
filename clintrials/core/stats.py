@@ -10,6 +10,8 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 
+from typing import Any, Callable
+
 import numpy as np
 from scipy.stats import norm
 
@@ -21,7 +23,7 @@ class ProbabilityDensitySample:
     such as expectation, variance, CDF, and quantiles.
     """
 
-    def __init__(self, samp, func):  # type: ignore
+    def __init__(self, samp: Any, func: Callable[[Any], Any]) -> None:
         """Initializes a ProbabilityDensitySample object.
 
         Args:

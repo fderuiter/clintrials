@@ -183,16 +183,17 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 if `tox_target` is greater than `tox_limit`.
         """
         from clintrials.core.schema import WagesTaitSchema
-        WagesTaitSchema(
-            skeletons=skeletons,
-            prior_tox_probs=prior_tox_probs,
-            tox_target=tox_target,
-            tox_limit=tox_limit,
-            eff_limit=eff_limit,
-            first_dose=first_dose,
-            max_size=max_size,
-            randomisation_stage_size=randomisation_stage_size,
-        )
+        schema_args = {
+            "skeletons": skeletons,
+            "prior_tox_probs": prior_tox_probs,
+            "tox_target": tox_target,
+            "tox_limit": tox_limit,
+            "eff_limit": eff_limit,
+            "first_dose": first_dose,
+            "max_size": max_size,
+            "randomisation_stage_size": randomisation_stage_size,
+        }
+        WagesTaitSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
