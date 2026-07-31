@@ -33,7 +33,7 @@ class DummyTrial(Protocol):
         return [{"sum": s} for s in sums]
 
 
-def test_unified_protocol():  # type: ignore
+def test_protocol():  # type: ignore
     # Test Iterative
     trial_iter = DummyTrial()  # type: ignore
     res_iter = trial_iter.run(n_sims=100, method="iterative", seed=42)
