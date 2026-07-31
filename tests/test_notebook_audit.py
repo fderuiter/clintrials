@@ -148,7 +148,7 @@ def test_audit_single_notebook(tmp_path: Path) -> None:
                 "cell_type": "markdown",
                 "source": [
                     "# Tutorial\n",
-                    "This links to [good](referenced.md) and [bad](missing.md) and [external](https://google.com)\n"
+                    "This links to [good](referenced.md) and [bad](missing.md) and [external](https://example.com)\n"
                 ]
             },
             {
@@ -170,12 +170,11 @@ def test_audit_single_notebook(tmp_path: Path) -> None:
 
     # Should flag the bad relative link
     assert any("Broken link" in issue and "missing.md" in issue for issue in issues)
-    # Should not flag the good relative link or the external google.com link
-    assert not any("referenced.md" in issue for issue in issues)
-    assert not any("google.com" in issue for issue in issues)
-
     # Should flag the private import
     assert any("Private API violation" in issue and "_private" in issue for issue in issues)
+
+    # Ensure no other issues are reported (especially not for the good relative link or the external link)
+    assert len(issues) == 2
 
     # Should track clintrials.core.Protocol
     assert "clintrials.core.Protocol" in referenced
