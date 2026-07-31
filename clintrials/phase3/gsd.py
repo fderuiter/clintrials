@@ -83,16 +83,11 @@ class GroupSequentialDesign(Protocol):
 
         Raises:
             ValueError: If `alpha` is not between 0 and 1, `k` is not a
-                positive integer, or `timing` is not a strictly increasing
-                sequence of length `k` ending in 1.0.
+            positive integer, or `timing` is not a strictly increasing
+            sequence of length `k` ending in 1.0.
         """
-        from clintrials.validation import (
-            validate_positive_integer,
-            validate_probability,
-        )
-
-        validate_probability(alpha, "alpha", exclusive=True)
-        validate_positive_integer(k, "k")
+        from clintrials.core.schema import GroupSequentialDesignSchema
+        GroupSequentialDesignSchema(k=k, alpha=alpha, timing=timing)
 
         self.k = k
         self.alpha = alpha

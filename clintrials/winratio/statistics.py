@@ -22,6 +22,11 @@ def calculate_confidence_intervals(wr: float, wins: int, losses: int):  # type: 
         tuple[float, float]: A tuple containing the lower and upper bounds of
             the confidence interval.
     """
+    from clintrials.core.errors import ErrorTemplates
+    if wins < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
+    if losses < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="losses", bound=0))
     if wins == 0 or losses == 0:
         return (0, 0)
     variance = 1 / wins + 1 / losses
@@ -40,6 +45,11 @@ def calculate_p_value(wr: float, wins: int, losses: int) -> float:
     Returns:
         float: The p-value.
     """
+    from clintrials.core.errors import ErrorTemplates
+    if wins < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
+    if losses < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="losses", bound=0))
     if wins == 0 or losses == 0:
         return 1.0
     variance = 1 / wins + 1 / losses
@@ -57,6 +67,11 @@ def calculate_win_ratio(wins: int, losses: int) -> float:
     Returns:
         float: The win ratio, or infinity if there are no losses.
     """
+    from clintrials.core.errors import ErrorTemplates
+    if wins < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
+    if losses < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="losses", bound=0))
     if losses == 0:
         return float("inf")
     return wins / losses
