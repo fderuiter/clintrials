@@ -141,18 +141,19 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             ValueError: If the dimensions of the inputs are inconsistent.
         """
         from clintrials.core.schema import WATUSchema
-        WATUSchema(
-            skeletons=skeletons,
-            prior_tox_probs=prior_tox_probs,
-            tox_target=tox_target,
-            tox_limit=tox_limit,
-            eff_limit=eff_limit,
-            first_dose=first_dose,
-            max_size=max_size,
-            stage_one_size=stage_one_size,
-            tox_certainty=tox_certainty,
-            eff_certainty=eff_certainty,
-        )
+        schema_args = {
+            "skeletons": skeletons,
+            "prior_tox_probs": prior_tox_probs,
+            "tox_target": tox_target,
+            "tox_limit": tox_limit,
+            "eff_limit": eff_limit,
+            "first_dose": first_dose,
+            "max_size": max_size,
+            "stage_one_size": stage_one_size,
+            "tox_certainty": tox_certainty,
+            "eff_certainty": eff_certainty,
+        }
+        WATUSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size

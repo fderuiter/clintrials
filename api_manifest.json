@@ -527,13 +527,13 @@
             {
               "name": "samp",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "Any",
               "default": null
             },
             {
               "name": "func",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "Callable[[Any], Any]",
               "default": null
             }
           ]
@@ -1660,6 +1660,180 @@
         }
       }
     },
+    "GroupSequentialDesignSchema": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "k",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "PositiveInt",
+              "default": null
+            },
+            {
+              "name": "alpha",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": "0.025"
+            },
+            {
+              "name": "timing",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[List[float]]",
+              "default": "None"
+            }
+          ]
+        }
+      }
+    },
+    "WATUSchema": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "skeletons",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "List[List[float]]",
+              "default": null
+            },
+            {
+              "name": "prior_tox_probs",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "List[Probability]",
+              "default": null
+            },
+            {
+              "name": "tox_target",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": null
+            },
+            {
+              "name": "tox_limit",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": null
+            },
+            {
+              "name": "eff_limit",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": null
+            },
+            {
+              "name": "max_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "PositiveInt",
+              "default": null
+            },
+            {
+              "name": "stage_one_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "0"
+            },
+            {
+              "name": "tox_certainty",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": "0.05"
+            },
+            {
+              "name": "eff_certainty",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": "0.05"
+            },
+            {
+              "name": "first_dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[PositiveInt]",
+              "default": "None"
+            }
+          ]
+        }
+      }
+    },
+    "WagesTaitSchema": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "skeletons",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "List[List[float]]",
+              "default": null
+            },
+            {
+              "name": "prior_tox_probs",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "List[Probability]",
+              "default": null
+            },
+            {
+              "name": "tox_target",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": null
+            },
+            {
+              "name": "tox_limit",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": null
+            },
+            {
+              "name": "eff_limit",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Probability",
+              "default": null
+            },
+            {
+              "name": "max_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "PositiveInt",
+              "default": null
+            },
+            {
+              "name": "randomisation_stage_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "PositiveInt",
+              "default": null
+            },
+            {
+              "name": "first_dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[PositiveInt]",
+              "default": "None"
+            }
+          ]
+        }
+      }
+    },
     "WinRatioSchema": {
       "type": "class",
       "methods": {
@@ -2379,13 +2553,13 @@
             {
               "name": "samp",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "Any",
               "default": null
             },
             {
               "name": "func",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "Callable[[Any], Any]",
               "default": null
             }
           ]

@@ -87,7 +87,8 @@ class GroupSequentialDesign(Protocol):
             sequence of length `k` ending in 1.0.
         """
         from clintrials.core.schema import GroupSequentialDesignSchema
-        GroupSequentialDesignSchema(k=k, alpha=alpha, timing=timing)
+        schema_args = {"k": k, "alpha": alpha, "timing": timing}
+        GroupSequentialDesignSchema(**schema_args)
 
         self.k = k
         self.alpha = alpha
