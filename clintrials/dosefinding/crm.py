@@ -583,7 +583,7 @@ class CRM(DoseFindingTrial):
         self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = self.prior
 
-    def _calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self, **kwargs: Any) -> Any:
         if self.principle_escalation_func:
             cases = zip(self._doses, self._toxicities)
             proposed_dose = self.principle_escalation_func(cases)
