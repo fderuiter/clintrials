@@ -200,3 +200,27 @@ def test_new_schema_and_math_guardrails():  # type: ignore
 
     with pytest.raises(ValueError, match="losses must be >= 0"):
         calculate_win_ratio(3, -2)
+
+    # Division-by-zero validation (wins or losses is 0)
+    with pytest.raises(ValueError, match="wins must be > 0"):
+        calculate_confidence_intervals(1.5, 0, 5)
+    with pytest.raises(ValueError, match="losses must be > 0"):
+        calculate_confidence_intervals(1.5, 5, 0)
+    with pytest.raises(ValueError, match="losses must be > 0"):
+        calculate_win_ratio(5, 0)
+
+    # Log of negative or zero ratio validation
+    with pytest.raises(ValueError, match="wr must be > 0"):
+        calculate_confidence_intervals(0.0, 5, 5)
+    with pytest.raises(ValueError, match="wr must be > 0"):
+        calculate_confidence_intervals(-1.5, 5, 5)
+    with pytest.raises(ValueError, match="wr must be > 0"):
+        calculate_p_value(0.0, 5, 5)
+    with pytest.raises(ValueError, match="wr must be > 0"):
+        calculate_p_value(-1.5, 5, 5)
+
+    # Unmatched sequence shapes or invalid input types for compare_subjects
+    with pytest.raises(ValueError, match="Subject outcomes must be 1D sequences."):
+        compare_subjects(np.array([[1, 2]]), np.array([1, 2]))
+    with pytest.raises(ValueError, match="subject1 and subject2 should be same length"):
+        compare_subjects(np.array([1, 2]), np.array([1, 2, 3]))

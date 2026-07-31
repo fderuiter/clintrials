@@ -27,7 +27,12 @@ def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
     if not isinstance(subject1, (list, tuple, np.ndarray)) or not isinstance(subject2, (list, tuple, np.ndarray)):
         raise TypeError("Subject outcomes must be sequence types (list, tuple, or numpy array).")
 
-    if len(subject1) != len(subject2):
+    s1_arr = np.asarray(subject1)
+    s2_arr = np.asarray(subject2)
+    if s1_arr.ndim != 1 or s2_arr.ndim != 1:
+        raise ValueError("Subject outcomes must be 1D sequences.")
+
+    if s1_arr.shape != s2_arr.shape:
         raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name="subject1", name="subject2"))
 
     for i in range(len(subject1)):  # type: ignore

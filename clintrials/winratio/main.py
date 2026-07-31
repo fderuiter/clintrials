@@ -82,9 +82,11 @@ def _single_iteration(  # type: ignore
         p_y3_B,
     )
     results = simulate_comparisons(treatment_group, control_group)
-    wr = calculate_win_ratio(results["wins"], results["losses"])
-    if wr == float("inf"):
+    if results["losses"] == 0:
         return results["wins"] > 0, None
+    if results["wins"] == 0:
+        return False, (0, 0)
+    wr = calculate_win_ratio(results["wins"], results["losses"])
     ci = calculate_confidence_intervals(wr, results["wins"], results["losses"])
     p_value = calculate_p_value(wr, results["wins"], results["losses"])
     return p_value < significance_level, ci
