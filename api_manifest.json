@@ -132,6 +132,340 @@
           ]
         }
       }
+    },
+    "BaseDoseFindingTrial": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "first_dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "num_doses",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "max_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "dose_levels": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "doses": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "first_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "has_more": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "max_size": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "maximum_dose_given": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "minimum_dose_given": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "next_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "number_of_doses": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "observed_toxicity_rates": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "report": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "rng": {
+          "type": "property"
+        },
+        "run": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "method",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'iterative'"
+            },
+            {
+              "name": "seed",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[int]",
+              "default": "None"
+            },
+            {
+              "name": "show_progress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "set_next_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "set_rng": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "size": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "status": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "toxicities": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "toxicities_at_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "treated_at_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "update": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        }
+      }
     }
   },
   "clintrials.core.cohort": {
@@ -865,6 +1199,405 @@
     }
   },
   "clintrials.core.protocol": {
+    "BaseDoseFindingTrial": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "first_dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "num_doses",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "max_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "dose_levels": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "doses": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "first_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "has_more": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "max_size": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "maximum_dose_given": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "minimum_dose_given": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "next_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "number_of_doses": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "observed_toxicity_rates": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "report": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "rng": {
+          "type": "property"
+        },
+        "run": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "method",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'iterative'"
+            },
+            {
+              "name": "seed",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[int]",
+              "default": "None"
+            },
+            {
+              "name": "show_progress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "set_next_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "set_rng": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "size": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "status": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "toxicities": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "toxicities_at_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "treated_at_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "update": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        }
+      }
+    },
+    "PatientCohortTracker": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "add_patients": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "doses",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Iterable",
+              "default": null
+            },
+            {
+              "name": "toxicities",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Iterable",
+              "default": null
+            },
+            {
+              "name": "efficacies",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "doses": {
+          "type": "property"
+        },
+        "efficacies": {
+          "type": "property"
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "toxicities": {
+          "type": "property"
+        }
+      }
+    },
     "Protocol": {
       "type": "class",
       "methods": {
@@ -5216,6 +5949,340 @@
     }
   },
   "clintrials.dosefinding.efficacytoxicity": {
+    "BaseDoseFindingTrial": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "first_dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "num_doses",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "max_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "dose_levels": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "doses": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "first_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "has_more": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "max_size": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "maximum_dose_given": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "minimum_dose_given": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "next_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "number_of_doses": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "observed_toxicity_rates": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "report": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "rng": {
+          "type": "property"
+        },
+        "run": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "method",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'iterative'"
+            },
+            {
+              "name": "seed",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[int]",
+              "default": "None"
+            },
+            {
+              "name": "show_progress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "set_next_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "set_rng": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "size": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "status": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "toxicities": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "toxicities_at_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "treated_at_dose": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dose",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ]
+        },
+        "update": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        }
+      }
+    },
     "EfficacyToxicityDoseFindingTrial": {
       "type": "class",
       "methods": {
@@ -5633,204 +6700,6 @@
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "List[Tuple[int, int, int]]",
-              "default": null
-            },
-            {
-              "name": "kwargs",
-              "kind": "VAR_KEYWORD",
-              "annotation": "Any",
-              "default": null
-            }
-          ]
-        }
-      }
-    },
-    "PatientCohortTracker": {
-      "type": "class",
-      "methods": {
-        "__init__": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            }
-          ]
-        },
-        "add_patients": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            },
-            {
-              "name": "doses",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Iterable",
-              "default": null
-            },
-            {
-              "name": "toxicities",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Iterable",
-              "default": null
-            },
-            {
-              "name": "efficacies",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Optional",
-              "default": "None"
-            }
-          ]
-        },
-        "doses": {
-          "type": "property"
-        },
-        "efficacies": {
-          "type": "property"
-        },
-        "reset": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            }
-          ]
-        },
-        "toxicities": {
-          "type": "property"
-        }
-      }
-    },
-    "Protocol": {
-      "type": "class",
-      "methods": {
-        "__init__": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            }
-          ]
-        },
-        "has_more": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            }
-          ]
-        },
-        "report": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            }
-          ]
-        },
-        "reset": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            }
-          ]
-        },
-        "rng": {
-          "type": "property"
-        },
-        "run": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            },
-            {
-              "name": "n_sims",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "int",
-              "default": null
-            },
-            {
-              "name": "method",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
-            },
-            {
-              "name": "seed",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Optional[int]",
-              "default": "None"
-            },
-            {
-              "name": "show_progress",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "bool",
-              "default": "False"
-            },
-            {
-              "name": "kwargs",
-              "kind": "VAR_KEYWORD",
-              "annotation": "Any",
-              "default": null
-            }
-          ]
-        },
-        "set_rng": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            },
-            {
-              "name": "rng",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Any",
-              "default": null
-            }
-          ]
-        },
-        "update": {
-          "type": "method",
-          "parameters": [
-            {
-              "name": "self",
-              "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
-              "default": null
-            },
-            {
-              "name": "args",
-              "kind": "VAR_POSITIONAL",
-              "annotation": "Any",
               "default": null
             },
             {

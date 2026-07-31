@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -45,8 +45,7 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
-from clintrials.core.cohort import PatientCohortTracker
-from clintrials.core.protocol import BaseDoseFindingTrial, Protocol
+from clintrials.core.protocol import BaseDoseFindingTrial
 
 
 class DoseFindingTrial(BaseDoseFindingTrial):

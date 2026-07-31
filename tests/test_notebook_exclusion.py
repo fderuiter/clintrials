@@ -6,11 +6,11 @@ from pathlib import Path
 
 import pytest
 
-has_docs_dependencies = importlib.util.find_spec("sphinx") is not None
+has_docs_dependencies = importlib.util.find_spec("sphinx") is not None and shutil.which("pandoc") is not None
 
 if not has_docs_dependencies:
     pytest.skip(
-        "Optional docs dependencies are not installed, skipping integration tests.",
+        "Optional docs dependencies or pandoc are not installed, skipping integration tests.",
         allow_module_level=True,
     )
 
