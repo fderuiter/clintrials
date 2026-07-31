@@ -199,3 +199,42 @@ def test_main_with_manifest_failure(mocker: MockerFixture) -> None:
     called_args = [call[0][0] for call in mock_stderr.call_args_list]
     assert any("public/hub/build-manifest.json validation failed" in arg for arg in called_args)
 
+
+def test_main_custom_path_missing(mocker: MockerFixture) -> None:
+    mocker.patch("scripts.verify_pep440_version.validate_pyproject_toml", return_value="0.1.4")
+
+    # Mock exists to say the custom file doesn't exist
+    mocker.patch.object(Path, "exists", return_value=False)
+
+    def exit_side_effect(code: int = 0) -> None:
+        raise SystemExit(code)
+    mocker.patch("sys.exit", side_effect=exit_side_effect)
+    mock_stderr = mocker.patch("sys.stderr.write")
+
+    with pytest.raises(SystemExit) as excinfo:
+        main(["custom-manifest.json"])
+
+    assert excinfo.value.code == 1
+    called_args = [call[0][0] for call in mock_stderr.call_args_list]
+    assert any("Custom build manifest file not found at custom-manifest.json" in arg for arg in called_args)
+
+
+def test_main_custom_path_success(mocker: MockerFixture) -> None:
+    mocker.patch("scripts.verify_pep440_version.validate_pyproject_toml", return_value="0.1.4")
+    mocker.patch("scripts.verify_pep440_version.validate_build_manifest", return_value=("0.1.4", "0.1.4"))
+
+    # Mock exists to say the custom file exists
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    def exit_side_effect(code: int = 0) -> None:
+        raise SystemExit(code)
+    mocker.patch("sys.exit", side_effect=exit_side_effect)
+    mock_stdout = mocker.patch("sys.stdout.write")
+
+    with pytest.raises(SystemExit) as excinfo:
+        main(["custom-manifest.json"])
+
+    assert excinfo.value.code == 0
+    called_args = [call[0][0] for call in mock_stdout.call_args_list]
+    assert any("Validated custom-manifest.json version: 0.1.4" in arg for arg in called_args)
+

@@ -7,6 +7,7 @@ version strings.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -117,13 +118,35 @@ def validate_build_manifest(path: Union[str, Path]) -> tuple[str, str]:
     return version, wheel_version
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     """Runs the version verification process for pyproject.toml and build-manifest.json."""
+    if argv is None:
+        if any("pytest" in arg for arg in sys.argv):
+            argv = []
+        else:
+            argv = sys.argv[1:]
+
+    parser = argparse.ArgumentParser(description="PEP 440 version verification tool.")
+    parser.add_argument("manifest_path", nargs="?", default=None, help="Optional alternative path to build-manifest.json")
+    args = parser.parse_args(argv)
+
     script_dir = Path(__file__).parent.resolve()
     repo_root = script_dir.parent
 
     pyproject_path = repo_root / "pyproject.toml"
-    manifest_path = repo_root / "public" / "hub" / "build-manifest.json"
+
+    is_custom_path = args.manifest_path is not None
+    if is_custom_path:
+        manifest_path = Path(args.manifest_path)
+    else:
+        manifest_path = repo_root / "public" / "hub" / "build-manifest.json"
+
+    display_path = manifest_path
+    if manifest_path.is_absolute():
+        try:
+            display_path = manifest_path.relative_to(repo_root)
+        except ValueError:
+            pass
 
     errors = []
 
@@ -137,15 +160,18 @@ def main() -> None:
         try:
             manifest_version, wheel_version = validate_build_manifest(manifest_path)
             sys.stdout.write(
-                f"Validated public/hub/build-manifest.json version: {manifest_version}\n"
+                f"Validated {display_path} version: {manifest_version}\n"
             )
             sys.stdout.write(f"Validated wheel version segment: {wheel_version}\n")
         except Exception as e:
-            errors.append(f"public/hub/build-manifest.json validation failed: {e}")
+            errors.append(f"{display_path} validation failed: {e}")
     else:
-        sys.stdout.write(
-            "WARNING: public/hub/build-manifest.json not found, skipping manifest and wheel validation.\n"
-        )
+        if is_custom_path:
+            errors.append(f"Custom build manifest file not found at {display_path}")
+        else:
+            sys.stdout.write(
+                f"WARNING: {display_path} not found, skipping manifest and wheel validation.\n"
+            )
 
     if errors:
         sys.stderr.write("PEP 440 Version Verification Failed!\n")
