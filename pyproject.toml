@@ -128,6 +128,10 @@ fail_under = 70
 [tool.pytest.ini_options]
 addopts = "--ignore=tests/test_accessibility.py"
 testpaths = ["tests"]
+filterwarnings = [
+    "error::DeprecationWarning:clintrials.*",
+    "error::DeprecationWarning:tests.*",
+]
 
 [tool.poetry.extras]
 docs = ["sphinx", "furo", "nbsphinx", "myst-parser"]

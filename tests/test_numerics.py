@@ -1,6 +1,7 @@
 from unittest.mock import patch
 
 import numpy as np
+import pytest
 from scipy.stats import norm
 
 from clintrials.core.numerics import integrate_posterior_1d
@@ -46,7 +47,7 @@ def test_integrate_posterior_1d_no_diag():  # type: ignore
 
 def test_integrate_posterior_1d_warn_on_max():  # type: ignore
     logpost = lambda x: norm(loc=10, scale=1).logpdf(x)
-    with np.testing.assert_warns(RuntimeWarning):
+    with pytest.warns(RuntimeWarning):
         integrate_posterior_1d(
             logpost,
             lambda x: x,
