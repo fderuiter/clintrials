@@ -104,7 +104,7 @@ class DoseFindingTrial(Protocol):
         self._tracker.reset()
         self._next_dose = self._first_dose
         self._status = 0
-        self.__reset()
+        self._reset()
 
     def number_of_doses(self) -> int:
         """Gets the number of dose levels under investigation.
@@ -272,7 +272,7 @@ class DoseFindingTrial(Protocol):
                 toxicities.append(case[1])
             self._tracker.add_patients(doses=doses, toxicities=toxicities)
 
-        self._next_dose = self.__calculate_next_dose()
+        self._next_dose = self._calculate_next_dose()
         return self._next_dose
 
     def observed_toxicity_rates(self) -> np.ndarray[Any, np.dtype[np.float64]]:
@@ -320,7 +320,7 @@ class DoseFindingTrial(Protocol):
         return viz.plot_dose_finding_outcomes(self, chart_title=chart_title)
 
     @abc.abstractmethod
-    def __reset(self) -> None:
+    def _reset(self) -> None:
         """Performs implementation-specific reset operations."""
         return
 
@@ -351,7 +351,7 @@ class DoseFindingTrial(Protocol):
         return report
 
     @abc.abstractmethod
-    def __calculate_next_dose(self) -> int:
+    def _calculate_next_dose(self) -> int:
         """Calculates the next dose to be administered."""
         return -1  # Default implementation
 
@@ -380,10 +380,10 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
         # Reset
         self.max_dose_given = -1
 
-    def _DoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self.max_dose_given = -1
 
-    def _DoseFindingTrial__calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self) -> Any:
         if self.has_more():
             self._status = 1
             if len(self.doses()) > 0:
@@ -429,10 +429,10 @@ class ThreePlusThree(DoseFindingTrial):
         # Reset
         self._continue = True
 
-    def _DoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self._continue = True
 
-    def _DoseFindingTrial__calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self) -> Any:
         dose_indices = np.array(self._doses) == self._next_dose
         toxes_at_dose = np.sum(np.array(self._toxicities)[dose_indices])  # type: ignore[index]
         if np.sum(dose_indices) == 3:  # type: ignore[call-overload]

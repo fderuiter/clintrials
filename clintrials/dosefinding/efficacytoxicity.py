@@ -94,7 +94,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         self._tracker.reset()
         self._next_dose = self._first_dose
         self._status = 0
-        self.__reset()
+        self._reset()
 
     def number_of_doses(self) -> int:
         """Gets the number of dose levels under investigation.
@@ -287,7 +287,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 efficacies.append(case[2])
 
             self._tracker.add_patients(doses=doses, toxicities=toxicities, efficacies=efficacies)
-            self._next_dose = self.__calculate_next_dose(**kwargs)
+            self._next_dose = self._calculate_next_dose(**kwargs)
         else:
             logging.warning("Cannot update design with no cases")
 
@@ -355,7 +355,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def __reset(self) -> None:
+    def _reset(self) -> None:
         """Performs implementation-specific reset operations."""
         return
 
@@ -387,7 +387,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         return report
 
     @abc.abstractmethod
-    def __calculate_next_dose(self, **kwargs: Any) -> Any:
+    def _calculate_next_dose(self, **kwargs: Any) -> Any:
         """Calculates the next dose to be administered.
 
         Subclasses should override this method.

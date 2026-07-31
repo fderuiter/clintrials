@@ -8,10 +8,10 @@ from clintrials.dosefinding.efficacytoxicity import (
 
 
 class DummyEfficacyToxicityTrial(EfficacyToxicityDoseFindingTrial):
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self, **kwargs):
+    def _calculate_next_dose(self, **kwargs):
         return 1
 
-    def _EfficacyToxicityDoseFindingTrial__reset(self):
+    def _reset(self):
         pass
 
     def has_more(self):
