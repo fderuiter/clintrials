@@ -1,7 +1,18 @@
+import importlib.util
 import json
 import shutil
 import subprocess
 from pathlib import Path
+
+import pytest
+
+has_docs_dependencies = importlib.util.find_spec("sphinx") is not None
+
+if not has_docs_dependencies:
+    pytest.skip(
+        "Optional docs dependencies are not installed, skipping integration tests.",
+        allow_module_level=True,
+    )
 
 
 def test_notebook_exclusion_during_compilation() -> None:
@@ -26,13 +37,13 @@ def test_notebook_exclusion_during_compilation() -> None:
                 "source": [
                     "# Draft Tutorial Test\n",
                     "\n",
-                    "This is a draft/test tutorial notebook. It has a broken reference :ref:`non-existent-reference-99999` which would fail in strict mode if not excluded."
-                ]
+                    "This is a draft/test tutorial notebook. It has a broken reference :ref:`non-existent-reference-99999` which would fail in strict mode if not excluded.",
+                ],
             }
         ],
         "metadata": {},
         "nbformat": 4,
-        "nbformat_minor": 4
+        "nbformat_minor": 4,
     }
 
     # Ensure clean state before starting
@@ -52,14 +63,25 @@ def test_notebook_exclusion_during_compilation() -> None:
         # Run sphinx build with strict mode enabled (-W is warnings as errors)
         # We run it via 'poetry run' to ensure the exact environment is used
         result = subprocess.run(
-            ["poetry", "run", "sphinx-build", "-W", "-b", "html", "docs", "docs/_build/html"],
+            [
+                "poetry",
+                "run",
+                "sphinx-build",
+                "-W",
+                "-b",
+                "html",
+                "docs",
+                "docs/_build/html",
+            ],
             cwd=str(root_dir),
             capture_output=True,
-            text=True
+            text=True,
         )
 
         # Check that the build succeeded
-        assert result.returncode == 0, f"Sphinx compilation failed in strict mode:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        assert result.returncode == 0, (
+            f"Sphinx compilation failed in strict mode:\nSTDOUT:\n{result.stdout}\nSTDERR:\n{result.stderr}"
+        )
 
         # Assert no HTML output files corresponding to draft/test notebooks exist
         html_dir = build_dir / "html"
@@ -68,7 +90,9 @@ def test_notebook_exclusion_during_compilation() -> None:
         for draft_file in draft_files:
             html_name = f"{draft_file.stem}.html"
             compiled_html_path = html_dir / "tutorials" / html_name
-            assert not compiled_html_path.exists(), f"Draft notebook {draft_file.name} was compiled to {compiled_html_path}!"
+            assert not compiled_html_path.exists(), (
+                f"Draft notebook {draft_file.name} was compiled to {compiled_html_path}!"
+            )
 
             # Also check pagefind index specifically to be sure it does not contain the stem
             pagefind_dir = html_dir / "pagefind"
@@ -78,7 +102,9 @@ def test_notebook_exclusion_during_compilation() -> None:
                 for f in pagefind_dir.rglob("*"):
                     if f.is_file():
                         content = f.read_bytes()
-                        assert draft_file.stem.encode('utf-8') not in content, f"Pagefind index contains references to {draft_file.stem} in {f}!"
+                        assert draft_file.stem.encode("utf-8") not in content, (
+                            f"Pagefind index contains references to {draft_file.stem} in {f}!"
+                        )
 
     finally:
         # Clean up temporary files created for the test
