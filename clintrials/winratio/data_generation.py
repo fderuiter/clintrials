@@ -5,6 +5,8 @@ Random Seed Strategy: {data_generation_seed_strategy}
 
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 
 
@@ -17,6 +19,7 @@ def generate_data(  # type: ignore
     p_y2_B: float,
     p_y3_A: float,
     p_y3_B: float,
+    rng: Any = None,
 ):
     """Generate data for treatment (A) and control (B) groups.
 
@@ -31,24 +34,29 @@ def generate_data(  # type: ignore
         p_y2_B (float): Probability of outcome ``y2`` equals 1 for Group B.
         p_y3_A (float): Probability of outcome ``y3`` equals 1 for Group A.
         p_y3_B (float): Probability of outcome ``y3`` equals 1 for Group B.
+        rng (Any, optional): Local random number generator instance.
 
     Returns:
         tuple[numpy.ndarray, numpy.ndarray]: Two arrays representing the
             subjects in Groups A and B respectively.
     """
+    if rng is None:
+        from clintrials.core.rng import get_rng
+        rng = get_rng()
+
     group_A = np.vstack(  # type: ignore[attr-defined]
         [
-            np.random.binomial(1, p_y1_A, num_subjects_A),
-            np.random.binomial(1, p_y2_A, num_subjects_A),
-            np.random.binomial(1, p_y3_A, num_subjects_A),
+            rng.binomial(1, p_y1_A, num_subjects_A),
+            rng.binomial(1, p_y2_A, num_subjects_A),
+            rng.binomial(1, p_y3_A, num_subjects_A),
         ]
     ).T
 
     group_B = np.vstack(  # type: ignore[attr-defined]
         [
-            np.random.binomial(1, p_y1_B, num_subjects_B),
-            np.random.binomial(1, p_y2_B, num_subjects_B),
-            np.random.binomial(1, p_y3_B, num_subjects_B),
+            rng.binomial(1, p_y1_B, num_subjects_B),
+            rng.binomial(1, p_y2_B, num_subjects_B),
+            rng.binomial(1, p_y3_B, num_subjects_B),
         ]
     ).T
 

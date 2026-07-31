@@ -81,3 +81,4 @@ def test_winratio_trial():  # type: ignore
 )
 def test_main_cli():  # type: ignore
     main()
+
