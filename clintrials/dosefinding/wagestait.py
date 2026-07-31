@@ -182,6 +182,18 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             ValueError: If the dimensions of the inputs are inconsistent, or
                 if `tox_target` is greater than `tox_limit`.
         """
+        from clintrials.core.schema import WagesTaitSchema
+        WagesTaitSchema(
+            skeletons=skeletons,
+            prior_tox_probs=prior_tox_probs,
+            tox_target=tox_target,
+            tox_limit=tox_limit,
+            eff_limit=eff_limit,
+            first_dose=first_dose,
+            max_size=max_size,
+            randomisation_stage_size=randomisation_stage_size,
+        )
+
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
         )

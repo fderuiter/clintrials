@@ -83,6 +83,9 @@ def _logistic_core(x, a0, beta):  # type: ignore
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
 def _inverse_logistic_core(x, a0, beta):  # type: ignore
+    from clintrials.core.errors import ErrorTemplates
+    if np.any(x <= 0) or np.any(x >= 1):
+        raise ValueError(ErrorTemplates.PROBABILITY.format(name="x"))
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return (np.log(x / (1 - x)) - a0) / np.exp(beta)
 

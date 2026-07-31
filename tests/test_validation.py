@@ -108,3 +108,95 @@ def test_validate_version():  # type: ignore
     for non_str in non_strings:
         with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
             validate_version(non_str, "version")  # type: ignore[arg-type]
+
+
+def test_new_schema_and_math_guardrails():  # type: ignore
+    import numpy as np
+
+    from clintrials.core.stats import (
+        ProbabilityDensitySample,
+        log_scale_p_value,
+        log_scale_wald_interval,
+    )
+    from clintrials.dosefinding.efftox import LpNormCurve
+    from clintrials.dosefinding.wagestait import WagesTait
+    from clintrials.dosefinding.watu import WATU
+    from clintrials.phase3.gsd import GroupSequentialDesign
+    from clintrials.winratio.compare import compare_subjects
+    from clintrials.winratio.simulate import simulate_comparisons
+    from clintrials.winratio.statistics import (
+        calculate_confidence_intervals,
+        calculate_p_value,
+        calculate_win_ratio,
+    )
+
+    skeletons = [[0.1, 0.2, 0.3]]
+    prior_tox_probs = [0.1, 0.2, 0.3]
+    metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
+
+    # 1. WagesTait validation: tox_target > tox_limit
+    with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
+        WagesTait(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
+
+    # WagesTait validation: negative max_size (boundary check via schema)
+    with pytest.raises(ValueError, match="max_size must be a positive integer"):
+        WagesTait(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=-5, randomisation_stage_size=10)
+
+    # 2. WATU validation: tox_target > tox_limit
+    with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
+        WATU(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+
+    # WATU validation: invalid probability in skeletons
+    bad_skeletons = [[-0.1, 0.2, 0.3]]
+    with pytest.raises(ValueError, match="skeletons must be between 0.0 and 1.0"):
+        WATU(bad_skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+
+    # 3. GroupSequentialDesign validation: alpha <= 0
+    with pytest.raises(ValueError, match="alpha must be between 0.0 and 1.0"):
+        GroupSequentialDesign(k=3, alpha=0.0)
+
+    with pytest.raises(ValueError, match="alpha must be between 0.0 and 1.0"):
+        GroupSequentialDesign(k=3, alpha=1.0)
+
+    # 4. Subject comparisons sequence / type validation
+    # compare_subjects
+    with pytest.raises(TypeError, match="Subject outcomes must be sequence types"):
+        compare_subjects(1, [2, 3])  # type: ignore
+
+    with pytest.raises(ValueError, match="subject1 and subject2 should be same length"):
+        compare_subjects([1, 2], [1, 2, 3])
+
+    # simulate_comparisons
+    with pytest.raises(TypeError, match="Groups must be sequence or array types"):
+        simulate_comparisons(1, [[2, 3]])  # type: ignore
+
+    with pytest.raises(ValueError, match="treatment_group components and control_group components should be same length"):
+        simulate_comparisons([[1, 2]], [[1, 2, 3]])
+
+    # 5. Statistical/math checks
+    # Log scale ratio validation
+    with pytest.raises(ValueError, match="ratio must be > 0"):
+        log_scale_wald_interval(ratio=0.0, standard_error=0.1)
+
+    with pytest.raises(ValueError, match="standard_error must be > 0"):
+        log_scale_wald_interval(ratio=1.5, standard_error=0.0)
+
+    with pytest.raises(ValueError, match="ratio must be > 0"):
+        log_scale_p_value(ratio=-0.5, standard_error=0.1)
+
+    with pytest.raises(ValueError, match="standard_error must be > 0"):
+        log_scale_p_value(ratio=1.5, standard_error=-0.1)
+
+    # ProbabilityDensitySample scale division-by-zero validation
+    with pytest.raises(ValueError, match="scale must be > 0"):
+        ProbabilityDensitySample(np.array([1, 2]), lambda x: np.array([0.0, 0.0]))
+
+    # Negative wins/losses validation in winratio statistics
+    with pytest.raises(ValueError, match="wins must be >= 0"):
+        calculate_confidence_intervals(1.5, -1, 5)
+
+    with pytest.raises(ValueError, match="losses must be >= 0"):
+        calculate_p_value(1.5, 3, -2)
+
+    with pytest.raises(ValueError, match="losses must be >= 0"):
+        calculate_win_ratio(3, -2)
