@@ -11,7 +11,7 @@ class Protocol(metaclass=abc.ABCMeta):
 
     def __init__(self) -> None:
         """Initializes a new Protocol instance."""
-        self._rng = None
+        self._rng: Any = None
 
     def set_rng(self, rng: Any) -> None:
         """Inject a local RNG generator for reproducible, state-free random generation.
@@ -34,7 +34,7 @@ class Protocol(metaclass=abc.ABCMeta):
         if self._rng is None:
             # Fallback to local numpy random generator but warn or just create one
             from clintrials.core.rng import get_rng
-            self._rng = get_rng()  # type: ignore[no-untyped-call]
+            self._rng = get_rng()
         return self._rng
 
     @abc.abstractmethod

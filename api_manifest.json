@@ -1368,7 +1368,7 @@
         {
           "name": "seed",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": "None"
         }
       ]
@@ -19848,6 +19848,12 @@
           "kind": "POSITIONAL_OR_KEYWORD",
           "annotation": "float",
           "default": null
+        },
+        {
+          "name": "rng",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": "None"
         }
       ]
     },
@@ -20002,6 +20008,12 @@
           "kind": "POSITIONAL_OR_KEYWORD",
           "annotation": "float",
           "default": null
+        },
+        {
+          "name": "rng",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": "None"
         }
       ]
     }
@@ -20259,7 +20271,7 @@
             {
               "name": "kwargs",
               "kind": "VAR_KEYWORD",
-              "annotation": null,
+              "annotation": "Any",
               "default": null
             }
           ]
@@ -20496,6 +20508,12 @@
           "kind": "POSITIONAL_OR_KEYWORD",
           "annotation": "float",
           "default": null
+        },
+        {
+          "name": "rng",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": "None"
         }
       ]
     },
