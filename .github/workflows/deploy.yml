@@ -30,18 +30,21 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install poetry
-        run: pipx install poetry
+      - name: Cache Poetry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-3.11-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-3.11-
 
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y pandoc
 
-      - name: Install dependencies
-        run: |
-          poetry install --all-extras
-
-      - name: Fetch Vendor Dependencies
-        run: ./fetch_vendor.sh
+      - name: Run setup script
+        env:
+          SETUP_NO_TESTS: "1"
+        run: ./setup.sh
 
       - name: Build Sphinx HTML
         env:
