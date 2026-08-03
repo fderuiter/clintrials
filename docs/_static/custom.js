@@ -207,13 +207,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 5. Service Worker Registration
+    // 5. Service Worker Unregistration & Cache Cleanup
     if ('serviceWorker' in navigator) {
-        const isSubpath = window.location.pathname.includes('/clintrials/');
-        const swUrl = isSubpath ? '/clintrials/sw.js' : '/sw.js';
-        const swScope = isSubpath ? '/clintrials/' : '/';
-        navigator.serviceWorker.register(swUrl, { scope: swScope })
-            .then(reg => console.log('SW registered on root scope:', reg.scope))
-            .catch(err => console.log('SW registration failed:', err));
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            for (const registration of registrations) {
+                const isHubScope = registration.scope.endsWith('/hub/') || registration.scope.includes('/hub/');
+                if (!isHubScope) {
+                    registration.unregister().then(success => {
+                        if (success) {
+                            console.log('Successfully unregistered stale root-scoped service worker:', registration.scope);
+                        }
+                    });
+                }
+            }
+        }).catch(err => {
+            console.error('Error getting service worker registrations:', err);
+        });
+
+        if ('caches' in window) {
+            caches.delete('sim-hub-cache-v4').then(deleted => {
+                if (deleted) {
+                    console.log('Successfully cleared stale service worker cache (sim-hub-cache-v4)');
+                }
+            });
+        }
     }
 });

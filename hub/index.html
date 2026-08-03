@@ -365,6 +365,18 @@
       }
 
       window.addEventListener('DOMContentLoaded', initializeApp);
+
+      // Register dedicated scoped service worker for the Simulation Hub
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          const isSubpath = window.location.pathname.includes('/clintrials/');
+          const swUrl = isSubpath ? '/clintrials/hub/sw.js' : '/hub/sw.js';
+          const swScope = isSubpath ? '/clintrials/hub/' : '/hub/';
+          navigator.serviceWorker.register(swUrl, { scope: swScope })
+            .then(reg => console.log('Simulation Hub SW registered with scope:', reg.scope))
+            .catch(err => console.log('Simulation Hub SW registration failed:', err));
+        });
+      }
     </script>
   </body>
 </html>

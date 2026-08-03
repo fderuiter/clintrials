@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sim-hub-cache-v4';
+const CACHE_NAME = 'sim-hub-cache-v5';
 
 const isSubpath = self.location.pathname.includes('/clintrials/');
 const basePath = isSubpath ? '/clintrials/hub/' : '/hub/';
@@ -38,13 +38,18 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+  const path = url.pathname;
+
+  // Only intercept requests originating from within the Hub path
+  if (!path.startsWith(basePath)) {
+    return;
+  }
+
   // Restrict runtime caching and intercepting to GET requests only
   if (event.request.method !== 'GET') {
     return;
   }
-
-  const url = new URL(event.request.url);
-  const path = url.pathname;
 
   // Determine if this is a dynamic asset (schema.json, index.html, or base paths)
   const isDynamic = path.endsWith('/schema.json') ||
