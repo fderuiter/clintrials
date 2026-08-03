@@ -20,3 +20,10 @@ docs/_static/vendor/
 docs/reference/generated/
 hub/schema.json
 .mypy_cache/
+
+# Generated documentation assets
+docs_manifest.json
+docs/reference/clintrials/
+node_modules/
+
+
