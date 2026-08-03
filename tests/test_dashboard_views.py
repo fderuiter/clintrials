@@ -400,7 +400,7 @@ def test_main_preview_mode_crm(monkeypatch):
     monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())  # type: ignore
     monkeypatch.setattr(main, "get_preview_sims", MagicMock(return_value=[{"preview": True}]))
     main.main()  # type: ignore
-    main.get_preview_sims.assert_called_once()
+    main.get_preview_sims.assert_called_once()  # type: ignore[attr-defined]
     main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with([{"preview": True}])  # type: ignore
 
 

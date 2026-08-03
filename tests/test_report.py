@@ -64,7 +64,7 @@ def test_pdf_structural_nesting_and_mcid():
         row.cell("Data 1")
         row.cell("Data 2")
 
-    pdf_bytes = pdf.output()
+    pdf_bytes = bytes(pdf.output())
 
     # 1. Use the validation utility
     validate_pdf_ua_structure(pdf_bytes)

@@ -217,8 +217,8 @@ class TestCRMMLEVariance:
         assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.3)
         assert hasattr(trial_hessian, "beta_se")
         assert hasattr(trial_bootstrap, "beta_se")
-        assert np.isclose(trial_hessian.beta_se, np.sqrt(trial_hessian.beta_var))
-        assert np.isclose(trial_bootstrap.beta_se, np.sqrt(trial_bootstrap.beta_var))
+        assert np.isclose(trial_hessian.beta_se, np.sqrt(trial_hessian.beta_var))  # type: ignore[arg-type]
+        assert np.isclose(trial_bootstrap.beta_se, np.sqrt(trial_bootstrap.beta_var))  # type: ignore[arg-type]
 
     def test_crm_function_se_return(self):
         # Test that crm() returns 5 elements when estimate_var=True

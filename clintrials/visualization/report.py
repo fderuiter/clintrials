@@ -10,25 +10,27 @@ from fpdf.prefs import ViewerPreferences
 from fpdf.table import Table
 
 
-class AccessibleTable(Table):  # type: ignore[misc]
+class AccessibleTable(Table):
     """A PDF table formatted with accessibility tags."""
     def _render_table_row(self, i, row_layout_info, cell_x_positions, **kwargs):  # type: ignore
+        fpdf: AccessiblePDF = self._fpdf  # type: ignore
         is_header = (i < self._num_heading_rows)
-        with self._fpdf.mark_text("/TR"):
+        with fpdf.mark_text("/TR"):
             self._current_row_is_header = is_header
             super()._render_table_row(i, row_layout_info, cell_x_positions, **kwargs)
 
     def _render_table_cell(self, i, j, cell, row_height, cell_height_info=None, cell_x_positions=None, **kwargs):  # type: ignore
+        fpdf: AccessiblePDF = self._fpdf  # type: ignore
         height_query_only = (cell_height_info is None)
         if height_query_only:
             return super()._render_table_cell(i, j, cell, row_height, cell_height_info, cell_x_positions, **kwargs)
 
         tag = "/TH" if getattr(self, "_current_row_is_header", False) else "/TD"
-        with self._fpdf.mark_text(tag):
+        with fpdf.mark_text(tag):
             return super()._render_table_cell(i, j, cell, row_height, cell_height_info, cell_x_positions, **kwargs)
 
 
-class AccessiblePDF(FPDF):  # type: ignore[misc]
+class AccessiblePDF(FPDF):
     """A customized FPDF class designed for accessible PDF generation."""
 
     def __init__(self, title="Trial Simulation Report"):  # type: ignore
@@ -58,7 +60,7 @@ class AccessiblePDF(FPDF):  # type: ignore[misc]
             yield from walk(builder.doc_struct_elem)  # type: ignore
 
         if hasattr(self, 'struct_builder'):
-            self.struct_builder.__class__.__iter__ = recursive_iter
+            self.struct_builder.__class__.__iter__ = recursive_iter  # type: ignore[method-assign]
 
     @contextmanager
     def artifact(self, artifact_type="Layout"):  # type: ignore
