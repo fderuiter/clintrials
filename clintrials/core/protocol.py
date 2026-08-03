@@ -104,7 +104,7 @@ class Protocol(metaclass=abc.ABCMeta):
         from clintrials.core.registry import RUNNER_REGISTRY
         from clintrials.core.rng import get_rng
 
-        self.set_rng(get_rng(seed))  # type: ignore[no-untyped-call]
+        self.set_rng(get_rng(seed))
 
         mode = "vectorized" if method == "bulk" else "iterative"
 
@@ -135,7 +135,7 @@ class Protocol(metaclass=abc.ABCMeta):
 
         results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **mapped_kwargs)
 
-        return result_container_class(results, mode=method)  # type: ignore[no-untyped-call]
+        return result_container_class(results, mode=method)
 
 
 class BaseDoseFindingTrial(Protocol):

@@ -65,7 +65,7 @@ class EffToxBuilder:
         return self
 
     def build(self) -> EffTox:
-        return EffTox(  # type: ignore[abstract]
+        return EffTox(
             real_doses=self._real_doses,
             tox_cutoff=self._tox_cutoff,
             eff_cutoff=self._eff_cutoff,

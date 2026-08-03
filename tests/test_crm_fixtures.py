@@ -6,7 +6,7 @@ from clintrials.core.math import inverse_logit1, logit1
 from clintrials.dosefinding.crm import crm
 
 
-def test_CRM_with_generated_fixtures():  # type: ignore
+def test_CRM_with_generated_fixtures():
     # Load the fixtures
     expected_probs = pd.read_csv("tests/fixtures/expected_posterior_dlt_probs.csv")
     expected_doses = pd.read_csv("tests/fixtures/next_dose_recommendations.csv")

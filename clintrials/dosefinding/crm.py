@@ -141,7 +141,7 @@ def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, to
         tuple[float, float | None]: A tuple containing the MLE and variance
             of beta. The variance is `None` if `estimate_var` is `False`.
     """
-    if np.sum(np.array(toxs) == 1) == 0 or np.sum(np.array(toxs) == 0) == 0:  # type: ignore[call-overload]
+    if np.sum(np.array(toxs) == 1) == 0 or np.sum(np.array(toxs) == 0) == 0:
         logging.warning(
             "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist."
         )
@@ -193,7 +193,7 @@ def _get_beta_hat_mle_bootstrap(F: Callable, intercept: Any, beta_hat: Any, codi
     """
     if rng is None:
         from clintrials.core.rng import get_rng
-        rng = get_rng()  # type: ignore
+        rng = get_rng()
 
     beta_hats_boot = []
     for _ in range(B):
@@ -668,7 +668,7 @@ class CRM(DoseFindingTrial):
         Returns:
             list[float]: A list of posterior probabilities of toxicity.
         """
-        return list(self.post_tox)  # type: ignore
+        return list(self.post_tox)
 
     def _prob_tox_exceeds_quadrature(self, tox_cutoff: Any, deg: Any = CORE_REGISTRY["crm_deg"]) -> Any:
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""

@@ -36,7 +36,7 @@ class EffToxView(BaseSimulationView):  # type: ignore
         prior_eff_probs = [0.2, 0.4, 0.6, 0.7, 0.8]
 
         metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-        trial = EffTox(  # type: ignore
+        trial = EffTox(
             real_doses=real_doses,
             prior_tox_probs=prior_tox_probs,
             prior_eff_probs=prior_eff_probs,

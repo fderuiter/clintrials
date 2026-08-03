@@ -35,10 +35,10 @@ def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
     if s1_arr.shape != s2_arr.shape:
         raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name="subject1", name="subject2"))
 
-    for i in range(len(subject1)):  # type: ignore
-        if subject1[i] > subject2[i]:  # type: ignore
+    for i in range(len(subject1)):
+        if subject1[i] > subject2[i]:
             return "win"
-        if subject1[i] < subject2[i]:  # type: ignore
+        if subject1[i] < subject2[i]:
             return "loss"
     return "tie"
 

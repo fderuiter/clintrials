@@ -15,26 +15,26 @@ from clintrials.visualization import (
 )
 
 
-def test_plot_dose_finding_outcomes():  # type: ignore[no-untyped-def]
+def test_plot_dose_finding_outcomes():
     # empty trial
-    trial = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)  # type: ignore[abstract]
+    trial = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)
     fig = plot_dose_finding_outcomes(trial)  # type: ignore[no-untyped-call]
     assert isinstance(fig, go.Figure)
 
     # trial with patients
-    trial = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)  # type: ignore[abstract]
+    trial = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)
     trial.update([(1, 0), (2, 0), (3, 1)])
     fig = plot_dose_finding_outcomes(trial)  # type: ignore[no-untyped-call]
     assert isinstance(fig, go.Figure)
 
 
-def test_plot_crm_toxicity_probabilities():  # type: ignore[no-untyped-def]
-    trial = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)  # type: ignore[abstract]
+def test_plot_crm_toxicity_probabilities():
+    trial = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)
     fig = plot_crm_toxicity_probabilities(trial)  # type: ignore[no-untyped-call]
     assert isinstance(fig, go.Figure)
 
 
-def test_plot_efftox_utility_contours():  # type: ignore[no-untyped-def]
+def test_plot_efftox_utility_contours():
     metric = LpNormCurve(0.5, 0.65, 0.7, 0.25)
     fig = plot_efftox_utility_contours(metric=metric, prob_eff=[0.1], prob_tox=[0.1])  # type: ignore[no-untyped-call]
     assert isinstance(fig, go.Figure)
@@ -43,9 +43,9 @@ def test_plot_efftox_utility_contours():  # type: ignore[no-untyped-def]
 from scipy.stats import norm
 
 
-def test_plot_efftox_density():  # type: ignore[no-untyped-def]
+def test_plot_efftox_density():
     metric = LpNormCurve(0.5, 0.65, 0.7, 0.25)
-    trial = EffTox(  # type: ignore[abstract]
+    trial = EffTox(
         real_doses=[1, 2, 3],
         theta_priors=[
             norm(-7.9593, 3.5487),
@@ -65,20 +65,20 @@ def test_plot_efftox_density():  # type: ignore[no-untyped-def]
 
     # Mock pds
     class DummyPDS:
-        def __init__(self):  # type: ignore[no-untyped-def]
+        def __init__(self):
             self._samp = [1.0, 2.0]
             self._probs = np.array([0.5, 0.5])
 
     trial.pds = DummyPDS()  # type: ignore[no-untyped-call]
 
-    def data_func(x, samp):  # type: ignore[no-untyped-def]
+    def data_func(x, samp):
         return np.random.normal(0, 1, size=len(samp))
 
     fig = plot_efftox_density(data_func=data_func, trial=trial, include_doses=[1, 2])  # type: ignore[no-untyped-call]
     assert isinstance(fig, go.Figure)
 
 
-def test_plot_crm_simulation_recommendation():  # type: ignore[no-untyped-def]
+def test_plot_crm_simulation_recommendation():
     summary_df = pd.DataFrame(
         {
             "true_tox": [0.1, 0.2],
@@ -93,7 +93,7 @@ def test_plot_crm_simulation_recommendation():  # type: ignore[no-untyped-def]
     assert isinstance(fig, go.Figure)
 
 
-def test_plot_bivariate_simulation_recommendation():  # type: ignore
+def test_plot_bivariate_simulation_recommendation():
     summary_df = pd.DataFrame(
         {
             "true_prob_tox": [0.1, 0.2],
@@ -109,7 +109,7 @@ def test_plot_bivariate_simulation_recommendation():  # type: ignore
     assert isinstance(fig, go.Figure)
 
 
-def test_plot_efftox_simulation_acceptability():  # type: ignore[no-untyped-def]
+def test_plot_efftox_simulation_acceptability():
     summary_df = pd.DataFrame(
         {
             "true_prob_tox": [0.1, 0.2],
@@ -126,7 +126,7 @@ def test_plot_efftox_simulation_acceptability():  # type: ignore[no-untyped-def]
     assert isinstance(fig, go.Figure)
 
 
-def test_visualization_models():  # type: ignore[no-untyped-def]
+def test_visualization_models():
     from clintrials.visualization.models import (  # type: ignore[attr-defined]
         MultiFormatSummaryContainer,
         TextSection,
@@ -156,7 +156,7 @@ def test_visualization_models():  # type: ignore[no-untyped-def]
     assert "x" in table_str
 
 
-def test_generate_pdf_report():  # type: ignore[no-untyped-def]
+def test_generate_pdf_report():
     import pandas as pd
 
     from clintrials.visualization.models import MultiFormatSummaryContainer, TextSection

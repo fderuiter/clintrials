@@ -35,7 +35,7 @@ import copy
 import logging
 from collections import OrderedDict
 
-from scipy.stats import uniform
+from scipy.stats import uniform as uniform
 
 from clintrials.utils import (
     atomic_to_json,
@@ -259,8 +259,8 @@ class ThreePlusThree(DoseFindingTrial):
 
     def _calculate_next_dose(self, **kwargs: Any) -> Any:
         dose_indices = np.array(self._doses) == self._next_dose
-        toxes_at_dose = np.sum(np.array(self._toxicities)[dose_indices])  # type: ignore[index]
-        if np.sum(dose_indices) == 3:  # type: ignore[call-overload]
+        toxes_at_dose = np.sum(np.array(self._toxicities)[dose_indices])
+        if np.sum(dose_indices) == 3:
             if toxes_at_dose == 0:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -282,7 +282,7 @@ class ThreePlusThree(DoseFindingTrial):
                 else:
                     self._status = -1
                 self._continue = False
-        elif np.sum(dose_indices) == 6:  # type: ignore[call-overload]
+        elif np.sum(dose_indices) == 6:
             if toxes_at_dose <= 1:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -383,7 +383,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
         try:
             had_tox = lambda x: x < np.array(true_toxicities)
             tox_horizons = np.array([had_tox(x) for x in tolerances])  # type: ignore
-            tox_hat = tox_horizons.mean(axis=0)  # type: ignore[attr-defined]
+            tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)  # type: ignore

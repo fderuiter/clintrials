@@ -3,7 +3,7 @@ import numpy as np
 from clintrials.winratio.data_generation import generate_data
 
 
-def test_winratio_data_generation_reproducibility():  # type: ignore
+def test_winratio_data_generation_reproducibility():
     from clintrials.core.rng import get_rng
 
     rng1 = get_rng(42)

@@ -105,7 +105,7 @@ def run_winratio_simulations(**kwargs):  # type: ignore
 
     Returns a dictionary with 'power', 'average_ci', and the raw 'results'.
     """
-    trial = WinRatioTrial(**kwargs)  # type: ignore
+    trial = WinRatioTrial(**kwargs)
 
     # Run bulk simulations via unified runner
     num_simulations = getattr(trial.config, 'num_simulations', 1)

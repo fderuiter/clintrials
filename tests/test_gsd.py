@@ -8,7 +8,7 @@ from clintrials.phase3.gsd import (
 )
 
 
-def test_obrien_fleming_boundaries():  # type: ignore
+def test_obrien_fleming_boundaries():
     """
     Test the O'Brien-Fleming boundaries against known values from a reference.
     Reference: http://www.biostat.umn.edu/~josephk/courses/pubh8482_fall2012/lecture_notes/pubh8482_week3.pdf
@@ -30,14 +30,14 @@ def test_obrien_fleming_boundaries():  # type: ignore
     )
 
 
-def test_spending_functions_at_t1():  # type: ignore
+def test_spending_functions_at_t1():
     """Test that spending functions spend the full alpha at t=1."""
     alpha = 0.025
     assert spending_function_pocock(1.0, alpha) == pytest.approx(alpha)
     assert spending_function_obrien_fleming(1.0, alpha) == pytest.approx(alpha)
 
 
-def test_simulation_type1_error():  # type: ignore
+def test_simulation_type1_error():
     """Test that the simulated Type I error is close to alpha."""
     k = 4
     alpha = 0.025
@@ -57,7 +57,7 @@ def test_simulation_type1_error():  # type: ignore
     assert rejection_prob == pytest.approx(alpha, abs=0.01)
 
 
-def test_gsd_with_timing():  # type: ignore
+def test_gsd_with_timing():
     k = 4
     alpha = 0.025
     timing = [0.25, 0.5, 0.75, 1.0]
@@ -67,7 +67,7 @@ def test_gsd_with_timing():  # type: ignore
     assert len(design.efficacy_boundaries) == k
 
 
-def test_gsd_with_invalid_timing():  # type: ignore
+def test_gsd_with_invalid_timing():
     k = 4
     alpha = 0.025
     with pytest.raises(ValueError):
@@ -93,23 +93,23 @@ def test_gsd_with_invalid_timing():  # type: ignore
         )
 
 
-def test_gsd_with_invalid_k():  # type: ignore
+def test_gsd_with_invalid_k():
     with pytest.raises(ValueError):
         GroupSequentialDesign(k=0)
 
 
-def test_gsd_with_invalid_alpha():  # type: ignore
+def test_gsd_with_invalid_alpha():
     with pytest.raises(ValueError):
         GroupSequentialDesign(k=4, alpha=0)
     with pytest.raises(ValueError):
         GroupSequentialDesign(k=4, alpha=1)
 
 
-def test_spending_function_obrien_fleming_zero():  # type: ignore
+def test_spending_function_obrien_fleming_zero():
     assert spending_function_obrien_fleming(0.0, 0.05) == 0.0
 
 
-def test_gsd_update_and_report():  # type: ignore
+def test_gsd_update_and_report():
     design = GroupSequentialDesign(k=3, alpha=0.025)
 
     assert design.has_more() is True  # type: ignore
@@ -150,7 +150,7 @@ def test_gsd_update_and_report():  # type: ignore
     assert design2._rejected is False
 
 
-def test_gsd_run_bulk_invalid_sims():  # type: ignore
+def test_gsd_run_bulk_invalid_sims():
     design = GroupSequentialDesign(k=3)
     with pytest.raises(
         ValueError, match="Number of simulations must be a positive integer|must be positive"
@@ -160,7 +160,7 @@ def test_gsd_run_bulk_invalid_sims():  # type: ignore
 from unittest.mock import patch
 
 
-def test_gsd_brentq_fallback():  # type: ignore
+def test_gsd_brentq_fallback():
     from clintrials.phase3.gsd import GroupSequentialDesign
 
     with patch("clintrials.phase3.gsd.brentq") as mock_brentq:
@@ -168,7 +168,7 @@ def test_gsd_brentq_fallback():  # type: ignore
         design = GroupSequentialDesign(k=1, alpha=0.025)
         assert design.efficacy_boundaries[0] == 2.0
 
-def test_gsd_brentq_fallback_failure():  # type: ignore
+def test_gsd_brentq_fallback_failure():
     import pytest
 
     from clintrials.phase3.gsd import GroupSequentialDesign
@@ -178,7 +178,7 @@ def test_gsd_brentq_fallback_failure():  # type: ignore
         with pytest.raises(RuntimeError, match="Could not find a valid final boundary."):
             GroupSequentialDesign(k=1, alpha=0.025)
 
-def test_gsd_simulate_deprecation():  # type: ignore
+def test_gsd_simulate_deprecation():
     design = GroupSequentialDesign(
         k=2,
         alpha=0.025,

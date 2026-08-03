@@ -1,7 +1,7 @@
 from clintrials.winratio.main import WinRatioTrial
 
 
-def test_winratio_trial_run_reproducibility():  # type: ignore
+def test_winratio_trial_run_reproducibility():
     trial1 = WinRatioTrial(
         num_subjects_A=10,
         num_subjects_B=10,

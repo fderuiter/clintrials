@@ -10,26 +10,26 @@ from clintrials.winratio import (
 )
 
 
-def test_compare_subjects():  # type: ignore
+def test_compare_subjects():
     assert compare_subjects([1, 0, 0], [0, 0, 0]) == "win"
     assert compare_subjects([0, 0, 0], [1, 0, 0]) == "loss"
     assert compare_subjects([1, 0, 1], [1, 0, 1]) == "tie"
 
 
-def test_generate_data_shapes():  # type: ignore
+def test_generate_data_shapes():
     a, b = generate_data(5, 4, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
     assert a.shape == (5, 3)
     assert b.shape == (4, 3)
 
 
-def test_simulate_comparisons_counts():  # type: ignore
+def test_simulate_comparisons_counts():
     treatment = np.array([[1, 0, 0]])
     control = np.array([[0, 0, 0], [1, 0, 0]])
     results = simulate_comparisons(treatment, control)
     assert results == {"wins": 1, "losses": 0, "ties": 1}
 
 
-def test_statistics_helpers():  # type: ignore
+def test_statistics_helpers():
     wr = calculate_win_ratio(20, 10)
     assert wr == 2
     ci = calculate_confidence_intervals(wr, 20, 10)
@@ -43,8 +43,8 @@ from unittest.mock import patch
 from clintrials.winratio.main import WinRatioTrial, main
 
 
-def test_winratio_trial():  # type: ignore
-    trial = WinRatioTrial(  # type: ignore
+def test_winratio_trial():
+    trial = WinRatioTrial(
         num_subjects_A=10,
         num_subjects_B=10,
         num_simulations=5,
@@ -79,6 +79,6 @@ def test_winratio_trial():  # type: ignore
         "5",
     ],
 )
-def test_main_cli():  # type: ignore
+def test_main_cli():
     main()
 

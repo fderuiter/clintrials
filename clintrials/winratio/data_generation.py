@@ -44,7 +44,7 @@ def generate_data(  # type: ignore
         from clintrials.core.rng import get_rng
         rng = get_rng()
 
-    group_A = np.vstack(  # type: ignore[attr-defined]
+    group_A = np.vstack(
         [
             rng.binomial(1, p_y1_A, num_subjects_A),
             rng.binomial(1, p_y2_A, num_subjects_A),
@@ -52,7 +52,7 @@ def generate_data(  # type: ignore
         ]
     ).T
 
-    group_B = np.vstack(  # type: ignore[attr-defined]
+    group_B = np.vstack(
         [
             rng.binomial(1, p_y1_B, num_subjects_B),
             rng.binomial(1, p_y2_B, num_subjects_B),

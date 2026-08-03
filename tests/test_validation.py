@@ -12,20 +12,20 @@ from clintrials.validation import (
 )
 
 
-def test_validate_matching_lengths():  # type: ignore
+def test_validate_matching_lengths():
     # Should not raise
-    validate_matching_lengths()  # type: ignore
-    validate_matching_lengths(a=[1, 2], b=[3, 4])  # type: ignore
-    validate_matching_lengths(a=[1], b=[2], c=[3])  # type: ignore
+    validate_matching_lengths()
+    validate_matching_lengths(a=[1, 2], b=[3, 4])
+    validate_matching_lengths(a=[1], b=[2], c=[3])
 
     # Should raise
     with pytest.raises(ValueError, match="a and b should be same length"):
-        validate_matching_lengths(a=[1, 2], b=[3])  # type: ignore
+        validate_matching_lengths(a=[1, 2], b=[3])
     with pytest.raises(ValueError, match="x and z should be same length"):
-        validate_matching_lengths(x=[1, 2], y=[3, 4], z=[5, 6, 7])  # type: ignore
+        validate_matching_lengths(x=[1, 2], y=[3, 4], z=[5, 6, 7])
 
 
-def test_validate_expected_length():  # type: ignore
+def test_validate_expected_length():
     # Should not raise
     validate_expected_length([1, 2, 3], 3, "test_arr")
 
@@ -34,7 +34,7 @@ def test_validate_expected_length():  # type: ignore
         validate_expected_length([1, 2], 3, "test_arr")
 
 
-def test_validate_bounds():  # type: ignore
+def test_validate_bounds():
     # Inclusive
     validate_bounds(5, 0, 10, "val", exclusive=False)
     validate_bounds(0, 0, 10, "val", exclusive=False)
@@ -54,7 +54,7 @@ def test_validate_bounds():  # type: ignore
         validate_bounds(10, 0, 10, "val", exclusive=True)
 
 
-def test_validate_probability():  # type: ignore
+def test_validate_probability():
     # Inclusive
     validate_probability(0.5, "prob")
     validate_probability(0, "prob")
@@ -74,7 +74,7 @@ def test_validate_probability():  # type: ignore
         validate_probability(1, "prob", exclusive=True)
 
 
-def test_validate_positive_integer():  # type: ignore
+def test_validate_positive_integer():
     validate_positive_integer(1, "val")
     validate_positive_integer(100, "val")
 
@@ -88,7 +88,7 @@ def test_validate_positive_integer():  # type: ignore
         validate_positive_integer("1", "val")  # type: ignore[arg-type]
 
 
-def test_validate_version():  # type: ignore
+def test_validate_version():
     # Valid PEP 440 versions should not raise
     validate_version("1.0.0", "version")
     validate_version("2.1.0b1", "version")
@@ -107,10 +107,10 @@ def test_validate_version():  # type: ignore
     non_strings: list[Any] = [None, 123, 1.0, [], {}, True]
     for non_str in non_strings:
         with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
-            validate_version(non_str, "version")  # type: ignore[arg-type]
+            validate_version(non_str, "version")
 
 
-def test_new_schema_and_math_guardrails():  # type: ignore
+def test_new_schema_and_math_guardrails():
     import numpy as np
 
     from clintrials.core.stats import (
@@ -136,20 +136,20 @@ def test_new_schema_and_math_guardrails():  # type: ignore
 
     # 1. WagesTait validation: tox_target > tox_limit
     with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
-        WagesTait(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)  # type: ignore[abstract]
+        WagesTait(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
 
     # WagesTait validation: negative max_size (boundary check via schema)
     with pytest.raises(ValueError, match="max_size must be a positive integer"):
-        WagesTait(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=-5, randomisation_stage_size=10)  # type: ignore[abstract]
+        WagesTait(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=-5, randomisation_stage_size=10)
 
     # 2. WATU validation: tox_target > tox_limit
     with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
-        WATU(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)  # type: ignore[abstract]
+        WATU(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
 
     # WATU validation: invalid probability in skeletons
     bad_skeletons = [[-0.1, 0.2, 0.3]]
     with pytest.raises(ValueError, match="skeletons must be between 0.0 and 1.0"):
-        WATU(bad_skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)  # type: ignore[abstract]
+        WATU(bad_skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
 
     # 3. GroupSequentialDesign validation: alpha <= 0
     with pytest.raises(ValueError, match="alpha must be between 0.0 and 1.0"):
@@ -168,7 +168,7 @@ def test_new_schema_and_math_guardrails():  # type: ignore
 
     # simulate_comparisons
     with pytest.raises(TypeError, match="Groups must be sequence or array types"):
-        simulate_comparisons(1, [[2, 3]])  # type: ignore
+        simulate_comparisons(1, [[2, 3]])
 
     with pytest.raises(ValueError, match="treatment_group components and control_group components should be same length"):
         simulate_comparisons([[1, 2]], [[1, 2, 3]])

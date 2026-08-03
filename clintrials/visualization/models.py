@@ -90,11 +90,11 @@ class MultiFormatSummaryContainer:
         grouping_cols = grouping_cols[:3]
 
         if not grouping_cols:
-            return summary + _build_html_table(self.df) + "\n"  # type: ignore
+            return summary + _build_html_table(self.df) + "\n"
 
         def generate_level(df, current_grouping_cols, level=1):  # type: ignore
             if not current_grouping_cols:
-                return _build_html_table(df) + "\n"  # type: ignore
+                return _build_html_table(df) + "\n"
 
             col = current_grouping_cols[0]
             grouped = df.groupby(col)

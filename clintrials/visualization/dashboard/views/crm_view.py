@@ -27,7 +27,7 @@ class CRMView(BaseSimulationView):  # type: ignore
         from clintrials.dosefinding import simulate_dose_finding_trial
         from clintrials.utils import ParameterSpace
 
-        crm = CRM(  # type: ignore
+        crm = CRM(
             prior=[0.05, 0.1, 0.2, 0.3, 0.4],
             target=target_tox,
             first_dose=1,

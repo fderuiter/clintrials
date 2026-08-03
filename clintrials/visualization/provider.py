@@ -273,12 +273,12 @@ def plot_efftox_utility_contours(  # type: ignore
     fig = go.Figure()
 
     # Plot general contours
-    for u in util_vals:  # type: ignore[attr-defined]
-        tox_vals = [metric.get_tox(eff=x, util=u) for x in eff_vals]  # type: ignore[attr-defined]
+    for u in util_vals:
+        tox_vals = [metric.get_tox(eff=x, util=u) for x in eff_vals]
         # remove None or out of bounds tox values
         valid_eff = []
         valid_tox = []
-        for e, t in zip(eff_vals, tox_vals):  # type: ignore[var-annotated]
+        for e, t in zip(eff_vals, tox_vals):
             if t is not None and 0 <= t <= 1:
                 valid_eff.append(e)
                 valid_tox.append(t)
@@ -294,7 +294,7 @@ def plot_efftox_utility_contours(  # type: ignore
             )
 
     # Add neutral utility contour
-    tox_vals = [metric.get_tox(eff=x, util=0) for x in eff_vals]  # type: ignore[attr-defined]
+    tox_vals = [metric.get_tox(eff=x, util=0) for x in eff_vals]
     valid_eff = []
     valid_tox = []
     for e, t in zip(eff_vals, tox_vals):
@@ -369,10 +369,10 @@ def plot_efftox_density(  # type: ignore
         if dose_index in include_doses:
             dist = np.random.multinomial(boot_samps, p)
             samp_boot = []
-            for j, count in enumerate(dist):  # type: ignore[var-annotated]
+            for j, count in enumerate(dist):
                 if count > 0:
                     samp_boot.extend([samp[j]] * count)
-            samp_boot = np.array(samp_boot)  # type: ignore
+            samp_boot = np.array(samp_boot)
 
             vals = data_func(x, samp_boot)
             x_boot.extend(vals)
