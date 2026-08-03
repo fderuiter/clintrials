@@ -125,8 +125,8 @@ def render() -> None:
             "Outcome": ["Stop" for _ in stages]
         })
 
-        import clintrials.visualization as viz
-        fig = viz.create_bar_chart(  # type: ignore
+        from clintrials.core.viz_interface import get_visualization_provider
+        fig = get_visualization_provider().create_bar_chart(  # type: ignore
             plot_df,
             x="Stage",
             y="Count",

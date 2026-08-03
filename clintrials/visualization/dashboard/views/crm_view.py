@@ -50,9 +50,9 @@ class CRMView(BaseSimulationView):  # type: ignore
         """Generate visualization plots for the CRM summary dataframe."""
         figures = []
         if not summary_df.empty and "recommended_dose_prob" in summary_df.columns:
-            import clintrials.visualization as viz
+            from clintrials.core.viz_interface import get_visualization_provider
 
-            fig = viz.plot_crm_simulation_recommendation(summary_df, high_contrast=False)  # type: ignore
+            fig = get_visualization_provider().plot_crm_simulation_recommendation(summary_df, high_contrast=False)  # type: ignore
             figures.append(("Dose Recommendation Probability", fig))
         else:
             st.warning(

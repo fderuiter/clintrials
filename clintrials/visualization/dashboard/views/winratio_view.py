@@ -74,8 +74,8 @@ def render() -> None:
 
         df = pd.DataFrame([results_dict])
 
-        import clintrials.visualization as viz
-        fig = viz.plot_winratio_power_curve(  # type: ignore
+        from clintrials.core.viz_interface import get_visualization_provider
+        fig = get_visualization_provider().plot_winratio_power_curve(  # type: ignore
             df,
             high_contrast=False
         )
