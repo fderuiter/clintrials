@@ -319,7 +319,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         )
         theta_hats, theta_vars, log_marginal = zip(*integrals)
 
-        self.theta_hats = theta_hats
+        self.theta_hats = np.asarray(theta_hats)
         log_w = np.log(self.model_prior_weights + 1e-300) + np.array(log_marginal)
         log_w = log_w - np.max(log_w)
         w = np.exp(log_w)
@@ -407,10 +407,10 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         """
         admiss = prob_tox <= self.tox_limit
         if sum(admiss) > 0:
-            wt_obd = np.nanargmax(np.where(admiss, prob_eff, np.nan)) + 1
+            wt_obd = int(np.nanargmax(np.where(admiss, prob_eff, np.nan)) + 1)
         else:
             wt_obd = -1
-        return wt_obd  # type: ignore
+        return wt_obd
 
     def _randomise_next_dose(self, tox_probs: Any, eff_probs: Any) -> Any:
         acceptable_doses = tox_probs <= self.tox_limit

@@ -240,7 +240,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self.theta_hats = np.zeros(self.K)
         self.theta_vars = np.zeros(self.K)
 
-        self.utility = []  # type: ignore
+        self.utility: list[Any] | np.ndarray[Any, np.dtype[np.float64]] = []
         self.dose_allocation_mode = 0
 
     def model_theta_hat(self) -> Any:
@@ -290,8 +290,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             estimate_var=True,
         )
         theta_hats, theta_vars, log_marginal = zip(*integrals)
-        self.theta_hats = theta_hats
-        self.theta_vars = theta_vars
+        self.theta_hats = np.asarray(theta_hats)
+        self.theta_vars = np.asarray(theta_vars)
         log_w = np.log(self.model_prior_weights + 1e-300) + np.array(log_marginal)
         log_w = log_w - np.max(log_w)
         w = np.exp(log_w)
