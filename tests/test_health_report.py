@@ -3,7 +3,7 @@ import os
 try:
     import tomllib
 except ImportError:
-    import tomli as tomllib  # type: ignore[no-redef]
+    import tomli as tomllib  # type: ignore[no-redef, unused-ignore]
 
 def test_dashboard_framework_dependencies():
     """Verify that Streamlit is the only dashboard framework, and Dash is removed."""
