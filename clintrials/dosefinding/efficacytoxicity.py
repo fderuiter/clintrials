@@ -334,14 +334,14 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
                         for v in zip(true_toxicities, true_efficacies)
                     ]
                 )
-                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]  # type: ignore[index]
+                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]
             else:
                 had_tox = lambda x: x < np.array(true_toxicities)
                 tox_horizons = np.array([had_tox(x) for x in tolerances[:, 0]])  # type: ignore
-                tox_hat = tox_horizons.mean(axis=0)  # type: ignore[attr-defined]
+                tox_hat = tox_horizons.mean(axis=0)
                 had_eff = lambda x: x < np.array(true_efficacies)
                 eff_horizons = np.array([had_eff(x) for x in tolerances[:, 1]])  # type: ignore
-                eff_hat = eff_horizons.mean(axis=0)  # type: ignore[attr-defined]
+                eff_hat = eff_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat, eff_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(  # type: ignore

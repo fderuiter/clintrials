@@ -21,7 +21,7 @@ def wagestait_preview_sims(target_tox, cohort_size, max_size):  # type: ignore
     ]
     tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
 
-    wt = WagesTait(  # type: ignore
+    wt = WagesTait(
         skeletons=skeletons,
         prior_tox_probs=tox_prior,
         tox_target=target_tox,

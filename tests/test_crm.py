@@ -20,15 +20,15 @@ from clintrials.dosefinding.crm import crm
 from tests.helpers import CRMBuilder
 
 
-def setup_func():  # type: ignore
+def setup_func():
     pass
 
 
-def teardown_func():  # type: ignore
+def teardown_func():
     pass
 
 
-def test_CRM_bayes():  # type: ignore
+def test_CRM_bayes():
 
     # Test that Bayesian CRM works by reproducing Table 3.2 on p.26 of Cheung's book:
     # Dose Finding By The Continual Reassessment Method, (Chapman & Hall/CRC Biostatistics Series)
@@ -102,7 +102,7 @@ def test_CRM_bayes():  # type: ignore
         assert abs(crm.beta_hat - beta_hats[patient_no - 1]) <= beta_hat_epsilon
 
 
-def test_CRM_mle():  # type: ignore
+def test_CRM_mle():
 
     # Test that MLE CRM works by reproducing an example in Python that can be verified in R
     # using Cheung's dfcrm package.
@@ -149,7 +149,7 @@ def test_CRM_mle():  # type: ignore
     # This is all verifiable in R.
 
 
-def test_CRM_bayes_again():  # type: ignore
+def test_CRM_bayes_again():
     prior = [0.1, 0.2, 0.4, 0.6]
     target = 0.4
     doses = [1, 1, 1, 2, 2, 2]
@@ -165,26 +165,26 @@ def test_CRM_bayes_again():  # type: ignore
     trial_plugin_4.update(cases)
 
     assert np.all(
-        np.array(trial_plugin_1.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])  # type: ignore
+        np.array(trial_plugin_1.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])
         < 0.001
     )
     assert np.all(
-        np.array(trial_plugin_2.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])  # type: ignore
+        np.array(trial_plugin_2.prob_tox()) - np.array([[0.240, 0.368, 0.566, 0.728]])
         < 0.001
     )
     assert np.all(
-        np.array(trial_plugin_3.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])  # type: ignore
+        np.array(trial_plugin_3.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])
         < 0.001
     )
     assert np.all(
-        np.array(trial_plugin_4.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])  # type: ignore
+        np.array(trial_plugin_4.prob_tox()) - np.array([[0.274, 0.412, 0.598, 0.734]])
         < 0.001
     )
     # These are verifiable in R
 
 
 class TestCRMMLEVariance:
-    def setup_method(self):  # type: ignore
+    def setup_method(self):
         self.prior = [0.05, 0.12, 0.25, 0.40, 0.55]
         self.target = 0.25
         self.F_func = logistic
@@ -193,25 +193,25 @@ class TestCRMMLEVariance:
         self.doses = [3, 3, 1, 2, 2, 3, 3, 2, 3, 2, 1, 2, 1, 1, 1, 2, 2]
         self.tox = [0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0]
 
-    def test_mle_variance_hessian(self):  # type: ignore
+    def test_mle_variance_hessian(self):
         trial = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("hessian").build()
         trial.update(list(zip(self.doses, self.tox)))
         assert trial.beta_var is not None
         assert trial.beta_var > 0
 
-    def test_mle_variance_bootstrap(self):  # type: ignore
+    def test_mle_variance_bootstrap(self):
         trial = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("bootstrap").with_kwargs(bootstrap_samples=50).build()
-        trial.set_rng(np.random.default_rng(42))  # type: ignore
+        trial.set_rng(np.random.default_rng(42))
         trial.update(list(zip(self.doses, self.tox)))
         assert trial.beta_var is not None
         assert trial.beta_var > 0
 
-    def test_mle_variance_comparison(self):  # type: ignore
+    def test_mle_variance_comparison(self):
         trial_hessian = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("hessian").build()
         trial_hessian.update(list(zip(self.doses, self.tox)))
 
         trial_bootstrap = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("bootstrap").with_kwargs(bootstrap_samples=200).build()
-        trial_bootstrap.set_rng(np.random.default_rng(42))  # type: ignore
+        trial_bootstrap.set_rng(np.random.default_rng(42))
         trial_bootstrap.update(list(zip(self.doses, self.tox)))
 
         assert np.isclose(trial_hessian.beta_var, trial_bootstrap.beta_var, rtol=0.3)
@@ -220,7 +220,7 @@ class TestCRMMLEVariance:
         assert np.isclose(trial_hessian.beta_se, np.sqrt(trial_hessian.beta_var))
         assert np.isclose(trial_bootstrap.beta_se, np.sqrt(trial_bootstrap.beta_var))
 
-    def test_crm_function_se_return(self):  # type: ignore
+    def test_crm_function_se_return(self):
         # Test that crm() returns 5 elements when estimate_var=True
         res = crm(
             self.prior,
@@ -251,7 +251,7 @@ class TestCRMMLEVariance:
         assert len(res_no_var) == 4
 
 
-def test_CRM_class_with_generated_fixtures():  # type: ignore
+def test_CRM_class_with_generated_fixtures():
     # Load the fixtures
     expected_probs = pd.read_csv("tests/fixtures/expected_posterior_dlt_probs.csv")
     expected_doses = pd.read_csv("tests/fixtures/next_dose_recommendations.csv")
@@ -299,7 +299,7 @@ def test_CRM_class_with_generated_fixtures():  # type: ignore
 
 
 
-def test_prob_tox_exceeds_bootstrap_deprecation():  # type: ignore
+def test_prob_tox_exceeds_bootstrap_deprecation():
     # Instantiate CRM model
     prior = [0.1, 0.2, 0.3, 0.4]
     target = 0.3

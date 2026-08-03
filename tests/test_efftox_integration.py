@@ -10,7 +10,7 @@ from clintrials.dosefinding.efftox import (
 from tests.helpers import EffToxBuilder
 
 
-def test_adaptive_integration_extreme_case(caplog):  # type: ignore
+def test_adaptive_integration_extreme_case(caplog):
     # Prior: N(0, 1) for all parameters
     priors = [norm(0, 1) for _ in range(6)]
     scaled_doses = [-1.0, 0.0, 1.0]
@@ -82,7 +82,7 @@ def test_adaptive_integration_extreme_case(caplog):  # type: ignore
     assert np.any(pds_exp._samp < orig_low) or np.any(pds_exp._samp > orig_high)
 
 
-def test_efftox_class_propagation():  # type: ignore
+def test_efftox_class_propagation():
     real_doses = [1, 2, 3]
     priors = [norm(0, 1) for _ in range(6)]
     metric = LpNormCurve(0.4, 0.7, 0.5, 0.4)
@@ -103,7 +103,7 @@ def test_efftox_class_propagation():  # type: ignore
     assert len(trial.prob_tox) == 3
 
 
-def test_boundary_mass_warning(caplog):  # type: ignore
+def test_boundary_mass_warning(caplog):
     # Create a situation where it's impossible to cover the mass (e.g. max_iter=1 and very tight threshold)
     priors = [norm(0, 1) for _ in range(6)]
     scaled_doses = [0.0]

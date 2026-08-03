@@ -8,15 +8,15 @@ import numpy as np
 from clintrials.dosefinding.wagestait import WagesTait
 
 
-def setup_func():  # type: ignore
+def setup_func():
     pass
 
 
-def teardown_func():  # type: ignore
+def teardown_func():
     pass
 
 
-def test_wages_tait_1():  # type: ignore
+def test_wages_tait_1():
 
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
     tox_cutoff = 0.33
@@ -41,7 +41,7 @@ def test_wages_tait_1():  # type: ignore
     trial_size = 64
     ar_size = 16
 
-    trial = WagesTait(  # type: ignore
+    trial = WagesTait(
         skeletons,
         tox_prior,
         tox_target,
@@ -68,7 +68,7 @@ def test_wages_tait_1():  # type: ignore
 
     assert np.all(
         np.abs(
-            trial.post_tox_probs  # type: ignore
+            trial.post_tox_probs
             - np.array(
                 [0.1374908, 0.3126617, 0.4095831, 0.4856057, 0.5506505, 0.6086650]
             )
@@ -77,7 +77,7 @@ def test_wages_tait_1():  # type: ignore
     )  # The first one varies a bit more
     assert np.all(
         np.abs(
-            trial.post_eff_probs  # type: ignore
+            trial.post_eff_probs
             - np.array(
                 [0.2479070, 0.3639813, 0.4615474, 0.5497718, 0.6321674, 0.7105235]
             )
@@ -86,7 +86,7 @@ def test_wages_tait_1():  # type: ignore
     )
     assert np.all(
         np.abs(
-            trial.w  # type: ignore
+            trial.w
             - np.array(
                 [
                     0.01347890,
@@ -112,7 +112,7 @@ def test_wages_tait_1():  # type: ignore
     # The exact values above were taken from Nolan's implementation in R.
 
 
-def test_wages_tait_2():  # type: ignore
+def test_wages_tait_2():
 
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
     tox_cutoff = 0.33
@@ -137,7 +137,7 @@ def test_wages_tait_2():  # type: ignore
     trial_size = 64
     ar_size = 16
 
-    trial = WagesTait(  # type: ignore
+    trial = WagesTait(
         skeletons,
         tox_prior,
         tox_target,
@@ -172,17 +172,17 @@ def test_wages_tait_2():  # type: ignore
     next_dose = trial.update(cases)
     assert next_dose == 2
     assert np.all(
-        trial.post_tox_probs  # type: ignore
+        trial.post_tox_probs
         - np.array([0.1292270, 0.3118714, 0.4124383, 0.4906021, 0.5569093, 0.6155878])
         < 0.00001
     )
     assert np.all(
-        trial.post_eff_probs  # type: ignore
+        trial.post_eff_probs
         - np.array([0.3999842, 0.4935574, 0.5830685, 0.6697646, 0.5830685, 0.4935574])
         < 0.00001
     )
     assert np.all(
-        trial.w  # type: ignore
+        trial.w
         - np.array(
             [
                 0.00165319,

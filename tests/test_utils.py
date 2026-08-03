@@ -2,27 +2,27 @@
 from clintrials.utils import Memoize, filter_list_of_dicts, to_1d_list
 
 
-def test_filter_list_of_dicts():  # type: ignore
+def test_filter_list_of_dicts():
     list_of_dicts = [{'a': 1, 'b': 2}, {'a': 1, 'b': 3}, {'a': 2, 'b': 2}]
     assert filter_list_of_dicts(list_of_dicts, {'a': 1}) == [{'a': 1, 'b': 2}, {'a': 1, 'b': 3}]
     assert filter_list_of_dicts(list_of_dicts, {'b': 2}) == [{'a': 1, 'b': 2}, {'a': 2, 'b': 2}]
     assert filter_list_of_dicts(list_of_dicts, {'a': 1, 'b': 2}) == [{'a': 1, 'b': 2}]
 
-def test_to_1d_list():  # type: ignore
+def test_to_1d_list():
     assert to_1d_list(1) == [1]  # type: ignore
     assert to_1d_list([1, 2, 3]) == [1, 2, 3]  # type: ignore
     assert to_1d_list([1, [2, 3]]) == [1, 2, 3]  # type: ignore
     assert to_1d_list([1, [2, [3]]]) == [1, 2, 3]  # type: ignore
 
-def test_memoize():  # type: ignore
+def test_memoize():
 
     class MyClass:
 
-        def __init__(self):  # type: ignore
+        def __init__(self):
             self.call_count = 0
 
         @Memoize
-        def my_method(self, x):  # type: ignore
+        def my_method(self, x):
             self.call_count += 1
             return x * 2
     c = MyClass()  # type: ignore
@@ -38,7 +38,7 @@ import pytest
 from clintrials.utils import deprecated
 
 
-def test_deprecated_function():  # type: ignore
+def test_deprecated_function():
     @deprecated(alternative="new_func")  # type: ignore
     def old_func():
         return 42
@@ -51,10 +51,10 @@ def test_deprecated_function():  # type: ignore
     assert "old_func is deprecated" in str(record[0].message)
     assert "Use new_func instead" in str(record[0].message)
 
-def test_deprecated_class():  # type: ignore
+def test_deprecated_class():
     @deprecated(alternative="NewClass")  # type: ignore
     class OldClass:
-        def __init__(self, val):  # type: ignore
+        def __init__(self, val):
             self.val = val
 
     with pytest.warns(DeprecationWarning) as record:

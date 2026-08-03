@@ -27,7 +27,7 @@ def logit(p: Union[float, np.ndarray[Any, np.dtype[np.float64]]]) -> Union[float
         float or numpy.ndarray: The logit.
     """
     p = np.clip(p, 1e-7, 1 - 1e-7)
-    return np.log(p / (1 - p))  # type: ignore[no-any-return]
+    return np.log(p / (1 - p))
 
 
 def bernoulli_likelihood(p: Union[float, np.ndarray[Any, np.dtype[np.float64]]], y: Union[int, np.ndarray[Any, np.dtype[np.int_]]], log: bool = False) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
@@ -44,9 +44,9 @@ def bernoulli_likelihood(p: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
     p = np.clip(p, 1e-15, 1 - 1e-15)
     log_l = y * np.log(p) + (1 - y) * np.log(1 - p)
     if log:
-        return log_l  # type: ignore
+        return log_l
     else:
-        return np.exp(np.clip(log_l, -700, 700))  # type: ignore
+        return np.exp(np.clip(log_l, -700, 700))
 
 
 def inverse_logit(x: float) -> float:
@@ -71,18 +71,32 @@ def inverse_logit(x: float) -> float:
 # They are written in pairs and all use the same call signature.
 # They take their lead from the same in the dfcrm R-package.
 
-def _empiric_core(x, beta):  # type: ignore
+def _empiric_core(
+    x: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
+    beta: Union[float, np.ndarray[Any, np.dtype[np.float64]]]
+) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return x ** np.exp(beta)
 
-def _inverse_empiric_core(x, beta):  # type: ignore
+def _inverse_empiric_core(
+    x: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
+    beta: Union[float, np.ndarray[Any, np.dtype[np.float64]]]
+) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     return x ** np.exp(-beta)
 
-def _logistic_core(x, a0, beta):  # type: ignore
+def _logistic_core(
+    x: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
+    a0: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
+    beta: Union[float, np.ndarray[Any, np.dtype[np.float64]]]
+) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
     return 1 / (1 + np.exp(-a0 - np.exp(beta) * x))
 
-def _inverse_logistic_core(x, a0, beta):  # type: ignore
+def _inverse_logistic_core(
+    x: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
+    a0: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
+    beta: Union[float, np.ndarray[Any, np.dtype[np.float64]]]
+) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
     from clintrials.core.errors import ErrorTemplates
     if np.any(x <= 0) or np.any(x >= 1):
         raise ValueError(ErrorTemplates.PROBABILITY.format(name="x"))
@@ -111,7 +125,10 @@ def empiric(x: float, a0: Any = None, beta: float = 0) -> float:
         >>> float(empiric(0.5, beta=math.log(2)))
         0.25
     """
-    return _empiric_core(x, beta)  # type: ignore
+    res = _empiric_core(x, beta)
+    if isinstance(res, np.ndarray):
+        return res  # type: ignore[no-any-return]
+    return float(res)
 
 
 def inverse_empiric(x: float, a0: float = 0, beta: float = 0) -> float:
@@ -134,7 +151,10 @@ def inverse_empiric(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(inverse_empiric(0.25, beta=math.log(2)))
         0.5
     """
-    return _inverse_empiric_core(x, beta)  # type: ignore
+    res = _inverse_empiric_core(x, beta)
+    if isinstance(res, np.ndarray):
+        return res  # type: ignore[no-any-return]
+    return float(res)
 
 
 @inject_docs()
@@ -155,7 +175,10 @@ def logistic(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(logistic(0.25, -1, 1))
         0.42057106852688747
     """
-    return _logistic_core(x, a0, beta)  # type: ignore
+    res = _logistic_core(x, a0, beta)
+    if isinstance(res, np.ndarray):
+        return res  # type: ignore[no-any-return]
+    return float(res)
 
 
 @inject_docs()
@@ -177,17 +200,26 @@ def inverse_logistic(x: float, a0: float = 0, beta: float = 0) -> float:
         >>> float(round(inverse_logistic(0.42057106852688747, -1, 1), 2))
         0.25
     """
-    return _inverse_logistic_core(x, a0, beta)  # type: ignore
+    res = _inverse_logistic_core(x, a0, beta)
+    if isinstance(res, np.ndarray):
+        return res  # type: ignore[no-any-return]
+    return float(res)
 
 
 def logit1(x: float, a0: float = 3.0, beta: float = 0.0) -> float:
     """Logistic link function with an intercept default of 3."""
-    return _logistic_core(x, a0, beta)  # type: ignore
+    res = _logistic_core(x, a0, beta)
+    if isinstance(res, np.ndarray):
+        return res  # type: ignore[no-any-return]
+    return float(res)
 
 
 def inverse_logit1(x: float, a0: float = 3.0, beta: float = 0.0) -> float:
     """Inverse logistic link function with an intercept default of 3."""
-    return _inverse_logistic_core(x, a0, beta)  # type: ignore
+    res = _inverse_logistic_core(x, a0, beta)
+    if isinstance(res, np.ndarray):
+        return res  # type: ignore[no-any-return]
+    return float(res)
 
 
 
@@ -202,7 +234,7 @@ def association_to_correlation(psi: Union[float, np.ndarray[Any, np.dtype[np.flo
     Returns:
         float or numpy.ndarray: The correlation coefficient.
     """
-    return (np.exp(psi) - 1) / (np.exp(psi) + 1)  # type: ignore[no-any-return]
+    return (np.exp(psi) - 1) / (np.exp(psi) + 1)
 
 
 def fgm_joint_prob(a: Union[int, np.ndarray[Any, np.dtype[np.int_]]], b: Union[int, np.ndarray[Any, np.dtype[np.int_]]], p1: Union[float, np.ndarray[Any, np.dtype[np.float64]]], p2: Union[float, np.ndarray[Any, np.dtype[np.float64]]], psi: Union[float, np.ndarray[Any, np.dtype[np.float64]]]) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
@@ -227,7 +259,7 @@ def fgm_joint_prob(a: Union[int, np.ndarray[Any, np.dtype[np.int_]]], b: Union[i
         * (1 - p2)
         * association_to_correlation(psi)
     )
-    return prob  # type: ignore
+    return prob
 
 
 # Inject module-level docstring

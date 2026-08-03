@@ -8,14 +8,14 @@ import pandas as pd
 from clintrials.visualization.dashboard.views.framework import dashboard_view
 
 
-def _make_streamlit_mock(selectbox_return="CRM", file_data=None):  # type: ignore
+def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
     """Create a minimal mock of the streamlit module."""
 
     class DummyFile:
-        def __init__(self, data):  # type: ignore
+        def __init__(self, data):
             self._data = data
 
-        def getvalue(self):  # type: ignore
+        def getvalue(self):
             return self._data
 
     if file_data is None:
@@ -55,7 +55,7 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):  # type: ignor
     return st
 
 
-def test_dashboard_view_table_rendering(monkeypatch):  # type: ignore
+def test_dashboard_view_table_rendering(monkeypatch):
     st_mock = _make_streamlit_mock()  # type: ignore
     st_mock.session_state = {"accessibility_mode": False}
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -68,7 +68,7 @@ def test_dashboard_view_table_rendering(monkeypatch):  # type: ignore
         index=pd.Index([0.1], name="true_tox"),
     )
 
-    @dashboard_view(title="Test Title", model_name="CRM", file_prefix="test_prefix")  # type: ignore[misc]
+    @dashboard_view(title="Test Title", model_name="CRM", file_prefix="test_prefix")
     def dummy_render() -> tuple[pd.DataFrame, list[object]]:
         return summary_df, []
 
@@ -82,7 +82,7 @@ def test_dashboard_view_table_rendering(monkeypatch):  # type: ignore
     assert any("<details>" not in html for html in called_htmls)
 
 
-def test_dashboard_view_table_rendering_accessible(monkeypatch):  # type: ignore
+def test_dashboard_view_table_rendering_accessible(monkeypatch):
     st_mock = _make_streamlit_mock()  # type: ignore
     st_mock.session_state = {"accessibility_mode": True}
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
@@ -95,7 +95,7 @@ def test_dashboard_view_table_rendering_accessible(monkeypatch):  # type: ignore
         index=pd.Index([0.1], name="true_tox"),
     )
 
-    @dashboard_view(title="Test Title", model_name="CRM", file_prefix="test_prefix")  # type: ignore[misc]
+    @dashboard_view(title="Test Title", model_name="CRM", file_prefix="test_prefix")
     def dummy_render() -> tuple[pd.DataFrame, list[object]]:
         return summary_df, []
 

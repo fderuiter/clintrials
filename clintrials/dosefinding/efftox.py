@@ -56,22 +56,22 @@ def efftox_priors_from_skeleton(real_doses: Any, prior_tox_probs: Any, prior_eff
 
     # Toxicity: logit(pi_T) = mu_T + beta_T * x
     logit_tox = logit(np.array(prior_tox_probs))
-    beta_T_mean, mu_T_mean = np.polyfit(scaled_x, logit_tox, 1)  # type: ignore[misc]
+    beta_T_mean, mu_T_mean = np.polyfit(scaled_x, logit_tox, 1)
 
     # Efficacy: logit(pi_E) = mu_E + beta1_E * x + beta2_E * x^2
     logit_eff = logit(np.array(prior_eff_probs))
-    beta2_E_mean, beta1_E_mean, mu_E_mean = np.polyfit(scaled_x, logit_eff, 2)  # type: ignore[misc]
+    beta2_E_mean, beta1_E_mean, mu_E_mean = np.polyfit(scaled_x, logit_eff, 2)
 
     # Principled default SDs:
     # Intercepts and linear slopes: 2.0
     # Quadratic term: 0.2 (usually smaller as it's for curvature)
     # Association parameter psi: mean 0, SD 1.0
     priors = [
-        norm(loc=mu_T_mean, scale=2.0),  # type: ignore[has-type]
-        norm(loc=beta_T_mean, scale=2.0),  # type: ignore[has-type]
-        norm(loc=mu_E_mean, scale=2.0),  # type: ignore[has-type]
-        norm(loc=beta1_E_mean, scale=2.0),  # type: ignore[has-type]
-        norm(loc=beta2_E_mean, scale=0.2),  # type: ignore[has-type]
+        norm(loc=mu_T_mean, scale=2.0),
+        norm(loc=beta_T_mean, scale=2.0),
+        norm(loc=mu_E_mean, scale=2.0),
+        norm(loc=beta1_E_mean, scale=2.0),
+        norm(loc=beta2_E_mean, scale=0.2),
         norm(loc=0.0, scale=1.0),
     ]
     return priors
@@ -227,7 +227,7 @@ def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10*
     """
     if rng is None:
         from clintrials.core.rng import get_rng
-        rng = get_rng()  # type: ignore
+        rng = get_rng()
 
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
 
@@ -557,7 +557,7 @@ class InverseQuadraticCurve:
                 m = gradient
                 coeffs = [m, -(m + self.a), -self.b, -self.c]
                 roots = np.roots(coeffs)
-                real_roots = roots[np.isreal(roots)].real  # type: ignore[index]
+                real_roots = roots[np.isreal(roots)].real
                 valid_roots = real_roots[(real_roots > 0) & (real_roots <= 1.00000001)]
                 if len(valid_roots) == 0:
                     return np.nan
@@ -785,7 +785,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 for i, (x, y) in enumerate(zip(prob_acc_tox, prob_acc_eff))
             ]
         )
-        admissable_set = [i + 1 for i, x in enumerate(admissable) if x]  # type: ignore[var-annotated]
+        admissable_set = [i + 1 for i, x in enumerate(admissable) if x]
         utility = np.array([self.metric(x[0], x[1]) for x in zip(prob_eff, prob_tox)])
         self.prob_tox = prob_tox
         self.prob_eff = prob_eff
@@ -802,7 +802,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         if self.treated_at_dose(self.first_dose()) > 0:
             max_dose_given = self.maximum_dose_given()
             min_dose_given = self.minimum_dose_given()
-            for i in np.argsort(-self.utility):  # type: ignore[operator]
+            for i in np.argsort(-self.utility):
                 dose_level = i + 1
                 if dose_level in self.admissable_set():
                     if (
@@ -839,7 +839,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.prob_acc_tox = []  # type: ignore
         self.prob_acc_eff = []  # type: ignore
         self._admissable_set = []
-        self.utility = []  # type: ignore
+        self.utility = []
 
     def has_more(self) -> bool:
         """Checks if the trial is ongoing.
@@ -963,12 +963,12 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
                 probability that dose i has superior utility to dose j.
         """
         superiority_mat = np.zeros((self.num_doses, self.num_doses))
-        superiority_mat[:] = np.nan  # type: ignore[index]
+        superiority_mat[:] = np.nan
         for i in range(1, self.num_doses + 1):
             for j in range(i + 1, self.num_doses + 1):
                 p = self.prob_superior_utility(i, j)
-                superiority_mat[i - 1, j - 1] = p  # type: ignore[index]
-                superiority_mat[j - 1, i - 1] = 1 - p  # type: ignore[index]
+                superiority_mat[i - 1, j - 1] = p
+                superiority_mat[j - 1, i - 1] = 1 - p
         return superiority_mat
 
 

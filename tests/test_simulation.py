@@ -6,7 +6,7 @@ from clintrials.utils import ParameterSpace
 
 
 @pytest.fixture
-def sample_sims():  # type: ignore
+def sample_sims():
     """Return a list of sample simulation results."""
     return [
         {"param1": 1, "param2": "a", "metric": 10},
@@ -18,7 +18,7 @@ def sample_sims():  # type: ignore
 
 
 @pytest.fixture
-def sample_ps():  # type: ignore
+def sample_ps():
     """Return a sample ParameterSpace."""
     ps = ParameterSpace()
     ps.add("param1", [1, 2])
@@ -26,15 +26,15 @@ def sample_ps():  # type: ignore
     return ps
 
 
-def mean_metric(sims, params):  # type: ignore
+def mean_metric(sims, params):
     """Calculate the mean of the 'metric' field."""
     return pd.DataFrame(sims)["metric"].mean()
 
 
-def test_extract_sim_data_dataframe_default(sample_sims, sample_ps):  # type: ignore
+def test_extract_sim_data_dataframe_default(sample_sims, sample_ps):
     """Test that extract_sim_data returns a DataFrame by default."""
     func_map = {"mean_metric": mean_metric}
-    result = extract_sim_data(sample_sims, sample_ps, func_map)  # type: ignore
+    result = extract_sim_data(sample_sims, sample_ps, func_map)
     assert isinstance(result, pd.DataFrame)
     assert not result.empty
     assert "mean_metric" in result.columns
@@ -44,10 +44,10 @@ def test_extract_sim_data_dataframe_default(sample_sims, sample_ps):  # type: ig
     assert result.loc[(2, "b"), "mean_metric"] == 40
 
 
-def test_extract_sim_data_tuple(sample_sims, sample_ps):  # type: ignore
+def test_extract_sim_data_tuple(sample_sims, sample_ps):
     """Test that extract_sim_data returns a tuple when requested."""
     func_map = {"mean_metric": mean_metric}
-    result = extract_sim_data(sample_sims, sample_ps, func_map, return_type="tuple")  # type: ignore
+    result = extract_sim_data(sample_sims, sample_ps, func_map, return_type="tuple")
     assert isinstance(result, tuple)
     assert len(result) == 2
     row_tuples, index_tuples = result
@@ -57,36 +57,36 @@ def test_extract_sim_data_tuple(sample_sims, sample_ps):  # type: ignore
     assert len(index_tuples) == 4
 
 
-def test_extract_sim_data_empty_sims(sample_ps):  # type: ignore
+def test_extract_sim_data_empty_sims(sample_ps):
     """Test that extract_sim_data handles empty simulation lists correctly."""
     func_map = {"mean_metric": mean_metric}
 
     # Test DataFrame return type
-    result_df = extract_sim_data([], sample_ps, func_map)  # type: ignore
+    result_df = extract_sim_data([], sample_ps, func_map)
     assert isinstance(result_df, pd.DataFrame)
     assert result_df.empty
     assert "mean_metric" in result_df.columns
 
     # Test tuple return type
-    result_tuple = extract_sim_data([], sample_ps, func_map, return_type="tuple")  # type: ignore
+    result_tuple = extract_sim_data([], sample_ps, func_map, return_type="tuple")
     assert result_tuple == ([], [])
 
 
 
-def test_extract_sim_data_with_dataframe_input(sample_sims, sample_ps):  # type: ignore
+def test_extract_sim_data_with_dataframe_input(sample_sims, sample_ps):
     """Test that extract_sim_data accepts a pandas DataFrame as input."""
     sims_df = pd.DataFrame(sample_sims)
     func_map = {"mean_metric": mean_metric}
-    result = extract_sim_data(sims_df, sample_ps, func_map)  # type: ignore
+    result = extract_sim_data(sims_df, sample_ps, func_map)
     assert isinstance(result, pd.DataFrame)
     assert not result.empty
     assert result.loc[(1, "a"), "mean_metric"] == 12.5
 
 
-def test_extract_sim_data_consistent_empty_output(sample_ps):  # type: ignore
+def test_extract_sim_data_consistent_empty_output(sample_ps):
     """Test that empty results return a DataFrame with correct column and index names."""
     func_map = {"mean_metric": mean_metric}
-    result = extract_sim_data([], sample_ps, func_map)  # type: ignore
+    result = extract_sim_data([], sample_ps, func_map)
     assert isinstance(result, pd.DataFrame)
     assert result.empty
     assert list(result.columns) == ["mean_metric"]
