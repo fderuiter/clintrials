@@ -51,7 +51,7 @@ def viewport(request):
 
 def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: dict, tmp_path):  # type: ignore
     # Set viewport
-    page.set_viewport_size(viewport)
+    page.set_viewport_size(viewport)  # type: ignore[arg-type]
 
     # Navigate to the dashboard
     page.goto(streamlit_server)
