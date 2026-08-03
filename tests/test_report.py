@@ -8,11 +8,11 @@ from clintrials.visualization.models import (  # type: ignore
 from clintrials.visualization.report import generate_pdf_report
 
 
-def test_text_section():  # type: ignore
+def test_text_section():
     section = TextSection("Hello World")
     assert str(section) == "Hello World"
 
-def test_table_section():  # type: ignore
+def test_table_section():
     df = pd.DataFrame({"col_a": [1.23456, 2.0], "col_b": ["a", "b"]})
     section = MultiFormatSummaryContainer(title="My Title", df=df)
     output = str(section)
@@ -28,11 +28,11 @@ def test_table_section():  # type: ignore
     assert '<td>1.2346</td>' in html_output
     assert '<td>2.0000</td>' in html_output
 
-def test_format_label():  # type: ignore
+def test_format_label():
     assert _format_label("hello_world") == "Hello World"
     assert _format_label(123) == 123
 
-def test_generate_pdf_report():  # type: ignore
+def test_generate_pdf_report():
     df = pd.DataFrame({"col_a": [1.1, 2.2]})
     text_summaries = [
         TextSection("This is a paragraph."),
@@ -48,7 +48,7 @@ from clintrials.visualization.report import (
 )
 
 
-def test_pdf_structural_nesting_and_mcid():  # type: ignore
+def test_pdf_structural_nesting_and_mcid():
     """Validates that Tables, TR, TD are nested properly and MCIDs are assigned correctly."""
     pdf = AccessiblePDF()  # type: ignore
     pdf.set_font("helvetica", "", 12)
@@ -64,7 +64,7 @@ def test_pdf_structural_nesting_and_mcid():  # type: ignore
         row.cell("Data 1")
         row.cell("Data 2")
 
-    pdf_bytes = pdf.output()
+    pdf_bytes = bytes(pdf.output())
 
     # 1. Use the validation utility
     validate_pdf_ua_structure(pdf_bytes)
@@ -94,7 +94,7 @@ def test_pdf_structural_nesting_and_mcid():  # type: ignore
         assert parent['type'] == 'TR', "Cell parent must be TR"
         assert len(cell['kids']) == 1 and str(cell['kids'][0]).startswith('MCID_'), "Cells should have MCIDs"
 
-def test_artifact_tagging():  # type: ignore
+def test_artifact_tagging():
     """Validates that decorative elements can be tagged as artifacts."""
     pdf = AccessiblePDF()  # type: ignore
     pdf.set_font("helvetica", "", 12)

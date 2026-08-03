@@ -273,12 +273,12 @@ def plot_efftox_utility_contours(  # type: ignore
     fig = go.Figure()
 
     # Plot general contours
-    for u in util_vals:  # type: ignore[attr-defined]
-        tox_vals = [metric.get_tox(eff=x, util=u) for x in eff_vals]  # type: ignore[attr-defined]
+    for u in util_vals:
+        tox_vals = [metric.get_tox(eff=x, util=u) for x in eff_vals]
         # remove None or out of bounds tox values
         valid_eff = []
         valid_tox = []
-        for e, t in zip(eff_vals, tox_vals):  # type: ignore[var-annotated]
+        for e, t in zip(eff_vals, tox_vals):
             if t is not None and 0 <= t <= 1:
                 valid_eff.append(e)
                 valid_tox.append(t)
@@ -294,7 +294,7 @@ def plot_efftox_utility_contours(  # type: ignore
             )
 
     # Add neutral utility contour
-    tox_vals = [metric.get_tox(eff=x, util=0) for x in eff_vals]  # type: ignore[attr-defined]
+    tox_vals = [metric.get_tox(eff=x, util=0) for x in eff_vals]
     valid_eff = []
     valid_tox = []
     for e, t in zip(eff_vals, tox_vals):
@@ -369,12 +369,12 @@ def plot_efftox_density(  # type: ignore
         if dose_index in include_doses:
             dist = np.random.multinomial(boot_samps, p)
             samp_boot = []
-            for j, count in enumerate(dist):  # type: ignore[var-annotated]
+            for j, count in enumerate(dist):
                 if count > 0:
                     samp_boot.extend([samp[j]] * count)
-            samp_boot = np.array(samp_boot)  # type: ignore
+            samp_boot_arr = np.array(samp_boot)
 
-            vals = data_func(x, samp_boot)
+            vals = data_func(x, samp_boot_arr)
             x_boot.extend(vals)
             dose_indices.extend([str(dose_index)] * boot_samps)
 
@@ -518,11 +518,13 @@ class DefaultVisualizationProvider(VisualizationProvider):
 
     def plot_dose_finding_outcomes(self, trial, chart_title=None, high_contrast=False):  # type: ignore
         """Plot dose finding outcomes."""
-        return plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
+        import clintrials.visualization as viz
+        return viz.plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
 
     def plot_crm_toxicity_probabilities(self, trial, chart_title=None, high_contrast=False):  # type: ignore
         """Plot CRM toxicity probabilities."""
-        return plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
+        import clintrials.visualization as viz
+        return viz.plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
 
     def generate_pdf_report(self, df, design_type, text_summaries=None):  # type: ignore
         """Generates an accessibility-first PDF report for trial simulations."""
@@ -533,6 +535,31 @@ class DefaultVisualizationProvider(VisualizationProvider):
             warnings.warn("PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`.")
             return None
         return _gen_pdf(df, design_type, text_summaries)  # type: ignore
+
+    def plot_crm_simulation_recommendation(self, summary_df, high_contrast=False):  # type: ignore
+        """Plots CRM simulation recommendation probabilities."""
+        import clintrials.visualization as viz
+        return viz.plot_crm_simulation_recommendation(summary_df, high_contrast=high_contrast)  # type: ignore
+
+    def plot_bivariate_simulation_recommendation(self, summary_df, high_contrast=False):  # type: ignore
+        """Plots EffTox simulation recommendation probabilities."""
+        import clintrials.visualization as viz
+        return viz.plot_bivariate_simulation_recommendation(summary_df, high_contrast=high_contrast)  # type: ignore
+
+    def plot_efftox_simulation_acceptability(self, summary_df, high_contrast=False):  # type: ignore
+        """Plots EffTox simulation acceptability probabilities."""
+        import clintrials.visualization as viz
+        return viz.plot_efftox_simulation_acceptability(summary_df, high_contrast=high_contrast)  # type: ignore
+
+    def plot_winratio_power_curve(self, df, high_contrast=False):  # type: ignore
+        """Plots a Win Ratio simulation power curve."""
+        import clintrials.visualization as viz
+        return viz.plot_winratio_power_curve(df, high_contrast=high_contrast)  # type: ignore
+
+    def create_bar_chart(self, df, x, y, color, title, labels=None, high_contrast=False):  # type: ignore
+        """Creates a centralized bar chart with accessibility standards."""
+        import clintrials.visualization as viz
+        return viz.create_bar_chart(df, x, y, color, title, labels=labels, high_contrast=high_contrast)  # type: ignore
 
 
 def get_default_provider():  # type: ignore

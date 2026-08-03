@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 from collections import OrderedDict
+from typing import Any
 
 from clintrials.core.protocol import Protocol
 from clintrials.core.schema import WinRatioSchema
@@ -23,7 +24,7 @@ from .statistics import (
 class WinRatioTrial(Protocol):
     """Win-Ratio simulation wrapped as a Protocol."""
 
-    def __init__(self, **kwargs):  # type: ignore
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__()
         self.config = WinRatioSchema(**kwargs)
         self.success = False
@@ -48,6 +49,7 @@ class WinRatioTrial(Protocol):
             p_y3_A=self.config.p_y3_A,
             p_y3_B=self.config.p_y3_B,
             significance_level=self.config.significance_level,
+            rng=self.rng,
         )
         self._completed = True
 
@@ -70,6 +72,7 @@ def _single_iteration(  # type: ignore
     p_y3_A: float,
     p_y3_B: float,
     significance_level: float,
+    rng: Any = None,
 ):
     treatment_group, control_group = generate_data(
         num_subjects_A,
@@ -80,11 +83,14 @@ def _single_iteration(  # type: ignore
         p_y2_B,
         p_y3_A,
         p_y3_B,
+        rng=rng,
     )
     results = simulate_comparisons(treatment_group, control_group)
-    wr = calculate_win_ratio(results["wins"], results["losses"])
-    if wr == float("inf"):
+    if results["losses"] == 0:
         return results["wins"] > 0, None
+    if results["wins"] == 0:
+        return False, (0, 0)
+    wr = calculate_win_ratio(results["wins"], results["losses"])
     ci = calculate_confidence_intervals(wr, results["wins"], results["losses"])
     p_value = calculate_p_value(wr, results["wins"], results["losses"])
     return p_value < significance_level, ci
@@ -99,11 +105,11 @@ def run_winratio_simulations(**kwargs):  # type: ignore
 
     Returns a dictionary with 'power', 'average_ci', and the raw 'results'.
     """
-    trial = WinRatioTrial(**kwargs)  # type: ignore
+    trial = WinRatioTrial(**kwargs)
 
     # Run bulk simulations via unified runner
     num_simulations = getattr(trial.config, 'num_simulations', 1)
-    results = trial.run(n_sims=num_simulations, method="iterative")
+    results = trial.run(n_sims=num_simulations, method="iterative", seed=kwargs.get("seed"))
 
     # Extract list of result dicts, depending on if SimulationResult is iterable or has a property
     # SimulationResult is iterable

@@ -39,7 +39,7 @@ class WATUView(BaseSimulationView):  # type: ignore
         tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
         metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
 
-        watu = WATU(  # type: ignore
+        watu = WATU(
             skeletons=skeletons,
             prior_tox_probs=tox_prior,
             tox_target=target_tox,
@@ -60,9 +60,9 @@ class WATUView(BaseSimulationView):  # type: ignore
         figures = []
         if not summary_df.empty:
             if "recommended_dose_prob" in summary_df.columns:
-                import clintrials.visualization as viz
+                from clintrials.core.viz_interface import get_visualization_provider
 
-                fig_rec = viz.plot_bivariate_simulation_recommendation(  # type: ignore
+                fig_rec = get_visualization_provider().plot_bivariate_simulation_recommendation(  # type: ignore
                     summary_df,
                     high_contrast=False
                 )

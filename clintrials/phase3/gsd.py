@@ -5,7 +5,7 @@ Random Seed Strategy: {gsd_seed_strategy}
 
 from __future__ import annotations
 
-from typing import Callable, List
+from typing import Any, Callable, List
 
 import numpy as np
 from scipy.optimize import brentq
@@ -83,16 +83,12 @@ class GroupSequentialDesign(Protocol):
 
         Raises:
             ValueError: If `alpha` is not between 0 and 1, `k` is not a
-                positive integer, or `timing` is not a strictly increasing
-                sequence of length `k` ending in 1.0.
+            positive integer, or `timing` is not a strictly increasing
+            sequence of length `k` ending in 1.0.
         """
-        from clintrials.validation import (
-            validate_positive_integer,
-            validate_probability,
-        )
-
-        validate_probability(alpha, "alpha", exclusive=True)
-        validate_positive_integer(k, "k")
+        from clintrials.core.schema import GroupSequentialDesignSchema
+        schema_args = {"k": k, "alpha": alpha, "timing": timing}
+        GroupSequentialDesignSchema(**schema_args)
 
         self.k = k
         self.alpha = alpha
@@ -171,7 +167,7 @@ class GroupSequentialDesign(Protocol):
             for row in range(i):
                 for col in range(row + 1, i):
                     corr = np.sqrt(self.timing[row] / self.timing[col])
-                    cov[row, col] = cov[col, row] = corr  # type: ignore[index]
+                    cov[row, col] = cov[col, row] = corr
 
             def cdf_at_look_i(u_i):  # type: ignore
                 limits = boundaries + [u_i]
@@ -214,7 +210,7 @@ class GroupSequentialDesign(Protocol):
         return boundaries
 
     @deprecated(alternative="run(..., method='bulk')")  # type: ignore
-    def simulate(self, n_sims: int, theta: float = 0.0):
+    def simulate(self, n_sims: int, theta: float = 0.0) -> Any:
         """Legacy method for backward compatibility."""
         # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
         return self.run(n_sims=n_sims, method="bulk", theta=theta)

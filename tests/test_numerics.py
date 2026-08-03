@@ -1,12 +1,13 @@
 from unittest.mock import patch
 
 import numpy as np
+import pytest
 from scipy.stats import norm
 
 from clintrials.core.numerics import integrate_posterior_1d
 
 
-def test_integrate_posterior_1d_expands():  # type: ignore
+def test_integrate_posterior_1d_expands():
     logpost = lambda x: norm(loc=3, scale=1).logpdf(x)
     val, diag = integrate_posterior_1d(
         logpost,
@@ -19,7 +20,7 @@ def test_integrate_posterior_1d_expands():  # type: ignore
     assert diag["expansions"] > 0
 
 
-def test_integrate_posterior_1d_no_expand():  # type: ignore
+def test_integrate_posterior_1d_no_expand():
     logpost = lambda x: norm(loc=0, scale=1).logpdf(x)
     val, diag = integrate_posterior_1d(
         logpost,
@@ -32,7 +33,7 @@ def test_integrate_posterior_1d_no_expand():  # type: ignore
     assert diag["expansions"] == 0
 
 
-def test_integrate_posterior_1d_no_diag():  # type: ignore
+def test_integrate_posterior_1d_no_diag():
     logpost = lambda x: norm(loc=0, scale=1).logpdf(x)
     val = integrate_posterior_1d(
         logpost,
@@ -44,9 +45,9 @@ def test_integrate_posterior_1d_no_diag():  # type: ignore
     assert abs(val) < 1e-2
 
 
-def test_integrate_posterior_1d_warn_on_max():  # type: ignore
+def test_integrate_posterior_1d_warn_on_max():
     logpost = lambda x: norm(loc=10, scale=1).logpdf(x)
-    with np.testing.assert_warns(RuntimeWarning):
+    with pytest.warns(RuntimeWarning):
         integrate_posterior_1d(
             logpost,
             lambda x: x,
@@ -57,7 +58,7 @@ def test_integrate_posterior_1d_warn_on_max():  # type: ignore
         )
 
 
-def test_expansion_logic_is_correct():  # type: ignore
+def test_expansion_logic_is_correct():
     """
     Test that the expansion logic is correct.
     The new width should be width * (1 + expand_factor).

@@ -12,7 +12,7 @@ from clintrials.core.recruitment import (
 from tests.helpers import QuadrilateralRecruitmentStreamBuilder
 
 
-def test_constant_recruitment_stream():  # type: ignore
+def test_constant_recruitment_stream():
 
     s = ConstantRecruitmentStream(2)  # type: ignore
 
@@ -23,7 +23,7 @@ def test_constant_recruitment_stream():  # type: ignore
     assert s.next() == 2  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_1():  # type: ignore
+def test_quadrilateral_recruitment_stream_1():
 
     s = QuadrilateralRecruitmentStreamBuilder().build()
 
@@ -37,7 +37,7 @@ def test_quadrilateral_recruitment_stream_1():  # type: ignore
     assert s.next() == 15.0  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_2():  # type: ignore
+def test_quadrilateral_recruitment_stream_2():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_interpolate(False).build()
 
@@ -51,7 +51,7 @@ def test_quadrilateral_recruitment_stream_2():  # type: ignore
     assert s.next() == 15.0  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_3():  # type: ignore
+def test_quadrilateral_recruitment_stream_3():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10).with_initial_intensity(0.5).with_vertices([]).build()
 
@@ -62,7 +62,7 @@ def test_quadrilateral_recruitment_stream_3():  # type: ignore
     assert s.next() == 20.0  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_4():  # type: ignore
+def test_quadrilateral_recruitment_stream_4():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10).with_initial_intensity(0.5).with_vertices([]).with_interpolate(False).build()
 
@@ -73,7 +73,7 @@ def test_quadrilateral_recruitment_stream_4():  # type: ignore
     assert s.next() == 20.0  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_5():  # type: ignore
+def test_quadrilateral_recruitment_stream_5():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(5).with_initial_intensity(0.1).with_vertices([(90, 0.25), (180, 1), (150, 0.75)]).build()
 
@@ -97,7 +97,7 @@ def test_quadrilateral_recruitment_stream_5():  # type: ignore
     assert_almost_equal(s.next(), 37.979589711327129)  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_6():  # type: ignore
+def test_quadrilateral_recruitment_stream_6():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(5).with_initial_intensity(0.1).with_vertices([(90, 0.25), (180, 1), (150, 0.75)]).with_interpolate(False).build()
 
@@ -116,7 +116,7 @@ def test_quadrilateral_recruitment_stream_6():  # type: ignore
     assert_almost_equal(s.next(), 50.0)  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_7():  # type: ignore
+def test_quadrilateral_recruitment_stream_7():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10.0).with_initial_intensity(0.0).with_vertices([(100, 1.0)]).build()
 
@@ -131,7 +131,7 @@ def test_quadrilateral_recruitment_stream_7():  # type: ignore
     assert_almost_equal(s.next(), 44.721359549995789)  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_8():  # type: ignore
+def test_quadrilateral_recruitment_stream_8():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10.0).with_initial_intensity(0.0).with_vertices([(100, 1.0), (130, 0.0), (150, 0.5)]).with_interpolate(False).build()
 
@@ -144,7 +144,7 @@ def test_quadrilateral_recruitment_stream_8():  # type: ignore
     assert_almost_equal(s.next(), 110.0)  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_9():  # type: ignore
+def test_quadrilateral_recruitment_stream_9():
 
     s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10.0).with_initial_intensity(0.0).with_vertices([(100, 0.0), (200, 1.0), (250, 0.5)]).build()
 
@@ -162,36 +162,36 @@ def test_quadrilateral_recruitment_stream_9():  # type: ignore
     assert_almost_equal(s.next(), 144.72135954999578)  # type: ignore
 
 
-def test_linearly_interpolate_y_when_t1_equals_t0_returns_nan():  # type: ignore
+def test_linearly_interpolate_y_when_t1_equals_t0_returns_nan():
     s = QuadrilateralRecruitmentStream(1.0, 1.0, [])  # type: ignore
     assert np.isnan(s._linearly_interpolate_y(1, 0, 0, 1, 1))  # type: ignore
 
 
-def test_invert_negative_discriminant_raises_typeerror():  # type: ignore
+def test_invert_negative_discriminant_raises_typeerror():
     s = QuadrilateralRecruitmentStream(1.0, 1.0, [])  # type: ignore
     with pytest.raises(TypeError):
         s._invert(0, 1, 1, 0, 1)  # type: ignore
 
 
-def test_constant_recruitment_stream_invalid_gap_raises_error():  # type: ignore
+def test_constant_recruitment_stream_invalid_gap_raises_error():
     with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
         ConstantRecruitmentStream(0)  # type: ignore
     with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
         ConstantRecruitmentStream(-1)  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_invalid_gap_raises_error():  # type: ignore
+def test_quadrilateral_recruitment_stream_invalid_gap_raises_error():
     with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
         QuadrilateralRecruitmentStream(0, 1, [])  # type: ignore
     with pytest.raises(ValueError, match="intrapatient_gap must be strictly positive"):
         QuadrilateralRecruitmentStream(-1, 1, [])  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_negative_initial_intensity_raises_error():  # type: ignore
+def test_quadrilateral_recruitment_stream_negative_initial_intensity_raises_error():
     with pytest.raises(ValueError, match="initial_intensity must be non-negative"):
         QuadrilateralRecruitmentStream(1, -0.1, [])  # type: ignore
 
 
-def test_quadrilateral_recruitment_stream_zero_initial_intensity_is_allowed():  # type: ignore
+def test_quadrilateral_recruitment_stream_zero_initial_intensity_is_allowed():
     # This should not raise an error
     QuadrilateralRecruitmentStream(1, 0, [])  # type: ignore

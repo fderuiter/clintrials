@@ -86,8 +86,8 @@ def render() -> None:
             with st.spinner("Running simulation..."):
                 sfu = spending_function_pocock if sfu_name == "Pocock" else spending_function_obrien_fleming
                 gsd = GroupSequentialDesign(k=k, alpha=alpha, sfu=sfu)
-                # Ensure we use .simulate() which was on the whitelist
-                sims = gsd.simulate(n_sims=n_sims, theta=theta)
+                # Ensure we use the modern, high-performance simulation engine via .run()
+                sims = gsd.run(n_sims=n_sims, method="bulk", theta=theta)
             announce_status_locally("Simulation completed", key="gsd-complete")
             st.success("Simulation complete")
         except Exception as e:
@@ -125,8 +125,8 @@ def render() -> None:
             "Outcome": ["Stop" for _ in stages]
         })
 
-        import clintrials.visualization as viz
-        fig = viz.create_bar_chart(  # type: ignore
+        from clintrials.core.viz_interface import get_visualization_provider
+        fig = get_visualization_provider().create_bar_chart(  # type: ignore
             plot_df,
             x="Stage",
             y="Count",

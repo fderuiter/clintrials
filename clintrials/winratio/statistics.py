@@ -22,9 +22,21 @@ def calculate_confidence_intervals(wr: float, wins: int, losses: int):  # type: 
         tuple[float, float]: A tuple containing the lower and upper bounds of
             the confidence interval.
     """
-    if wins == 0 or losses == 0:
-        return (0, 0)
+    from clintrials.core.errors import ErrorTemplates
+    if wins < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
+    if losses < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="losses", bound=0))
+    if wins == 0:
+        raise ValueError(ErrorTemplates.GT.format(name="wins", bound=0))
+    if losses == 0:
+        raise ValueError(ErrorTemplates.GT.format(name="losses", bound=0))
+    if wr <= 0:
+        raise ValueError(ErrorTemplates.GT.format(name="wr", bound=0))
+
     variance = 1 / wins + 1 / losses
+    if variance < 0:
+        raise ValueError("Variance cannot be negative.")
     standard_error = np.sqrt(variance)
     return log_scale_wald_interval(wr, standard_error)
 
@@ -40,9 +52,21 @@ def calculate_p_value(wr: float, wins: int, losses: int) -> float:
     Returns:
         float: The p-value.
     """
-    if wins == 0 or losses == 0:
-        return 1.0
+    from clintrials.core.errors import ErrorTemplates
+    if wins < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
+    if losses < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="losses", bound=0))
+    if wins == 0:
+        raise ValueError(ErrorTemplates.GT.format(name="wins", bound=0))
+    if losses == 0:
+        raise ValueError(ErrorTemplates.GT.format(name="losses", bound=0))
+    if wr <= 0:
+        raise ValueError(ErrorTemplates.GT.format(name="wr", bound=0))
+
     variance = 1 / wins + 1 / losses
+    if variance < 0:
+        raise ValueError("Variance cannot be negative.")
     standard_error = np.sqrt(variance)
     return log_scale_p_value(wr, standard_error)
 
@@ -57,8 +81,13 @@ def calculate_win_ratio(wins: int, losses: int) -> float:
     Returns:
         float: The win ratio, or infinity if there are no losses.
     """
+    from clintrials.core.errors import ErrorTemplates
+    if wins < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
+    if losses < 0:
+        raise ValueError(ErrorTemplates.GE.format(name="losses", bound=0))
     if losses == 0:
-        return float("inf")
+        raise ValueError(ErrorTemplates.GT.format(name="losses", bound=0))
     return wins / losses
 
 

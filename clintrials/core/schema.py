@@ -238,3 +238,80 @@ class EffToxSchema(BaseModel):
     max_size: Optional[PositiveInt] = Field(default=None, description="Maximum size")
     first_dose: PositiveInt = Field(default=1, description="First dose level")
 
+
+class WagesTaitSchema(BaseModel):
+    """Schema for validating Wages & Tait design parameters."""
+
+    skeletons: List[List[float]] = Field(description="A list of efficacy skeletons.")
+    prior_tox_probs: List[Probability] = Field(description="A list of prior toxicity probabilities.")
+    tox_target: Probability = Field(description="The target toxicity rate.")
+    tox_limit: Probability = Field(description="The maximum acceptable toxicity probability.")
+    eff_limit: Probability = Field(description="The minimum acceptable efficacy probability.")
+    max_size: PositiveInt = Field(description="The maximum number of patients in the trial.")
+    randomisation_stage_size: PositiveInt = Field(description="The number of patients to randomize in the first stage.")
+    first_dose: Optional[PositiveInt] = Field(default=None, description="The starting dose level (1-based).")
+
+    def __post_init__(self) -> None:
+        """Performs additional validation on WagesTait parameters."""
+        super().__post_init__()
+        from clintrials.core.errors import ErrorTemplates
+        from clintrials.validation import validate_probability
+        if self.tox_target > self.tox_limit:
+            raise ValueError(ErrorTemplates.LE.format(name="tox_target", bound="tox_limit"))
+        if len(self.skeletons) == 0:
+            raise ValueError("skeletons cannot be empty.")
+        expected_len = len(self.prior_tox_probs)
+        for idx, skeleton in enumerate(self.skeletons):
+            if len(skeleton) != expected_len:
+                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=f"skeletons[{idx}]", expected_length=expected_len))
+            for val in skeleton:
+                validate_probability(val, "skeletons")
+
+
+class WATUSchema(BaseModel):
+    """Schema for validating WATU design parameters."""
+
+    skeletons: List[List[float]] = Field(description="A list of efficacy skeletons.")
+    prior_tox_probs: List[Probability] = Field(description="A list of prior toxicity probabilities.")
+    tox_target: Probability = Field(description="The target toxicity rate.")
+    tox_limit: Probability = Field(description="The maximum acceptable toxicity probability.")
+    eff_limit: Probability = Field(description="The minimum acceptable efficacy probability.")
+    max_size: PositiveInt = Field(description="The maximum number of patients in the trial.")
+    stage_one_size: int = Field(default=0, description="The size of the first stage of the trial.")
+    tox_certainty: Probability = Field(default=0.05, description="The posterior certainty required that toxicity is less than the cutoff.")
+    eff_certainty: Probability = Field(default=0.05, description="The posterior certainty required that efficacy is greater than the cutoff.")
+    first_dose: Optional[PositiveInt] = Field(default=None, description="The starting dose level (1-based).")
+
+    def __post_init__(self) -> None:
+        """Performs additional validation on WATU parameters."""
+        super().__post_init__()
+        from clintrials.core.errors import ErrorTemplates
+        from clintrials.validation import validate_probability
+        if self.tox_target > self.tox_limit:
+            raise ValueError(ErrorTemplates.LE.format(name="tox_target", bound="tox_limit"))
+        if self.stage_one_size < 0:
+            raise ValueError(ErrorTemplates.GE.format(name="stage_one_size", bound=0))
+        if len(self.skeletons) == 0:
+            raise ValueError("skeletons cannot be empty.")
+        expected_len = len(self.prior_tox_probs)
+        for idx, skeleton in enumerate(self.skeletons):
+            if len(skeleton) != expected_len:
+                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=f"skeletons[{idx}]", expected_length=expected_len))
+            for val in skeleton:
+                validate_probability(val, "skeletons")
+
+
+class GroupSequentialDesignSchema(BaseModel):
+    """Schema for validating Group Sequential Design parameters."""
+
+    k: PositiveInt = Field(description="The number of analyses (looks) in the trial.")
+    alpha: Probability = Field(default=0.025, description="The overall one-sided significance level.")
+    timing: Optional[List[float]] = Field(default=None, description="A list of information fractions for each look.")
+
+    def __post_init__(self) -> None:
+        """Performs additional validation on GSD parameters."""
+        super().__post_init__()
+        from clintrials.core.errors import ErrorTemplates
+        if self.alpha <= 0.0 or self.alpha >= 1.0:
+            raise ValueError(ErrorTemplates.PROBABILITY.format(name="alpha"))
+

@@ -9,15 +9,15 @@ from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
 
 
-def setup_func():  # type: ignore
+def setup_func():
     pass
 
 
-def teardown_func():  # type: ignore
+def teardown_func():
     pass
 
 
-def test_watu_1():  # type: ignore
+def test_watu_1():
 
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
     tox_cutoff = 0.33
@@ -43,7 +43,7 @@ def test_watu_1():  # type: ignore
     stage1_size = 16
 
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
-    trial = WATU(  # type: ignore
+    trial = WATU(
         skeletons,
         tox_prior,
         tox_target,
@@ -71,7 +71,7 @@ def test_watu_1():  # type: ignore
 
     assert np.all(
         np.abs(
-            trial.post_tox_probs  # type: ignore
+            trial.post_tox_probs
             - np.array(
                 [0.13749075, 0.31266169, 0.40958313, 0.48560574, 0.55065048, 0.60866504]
             )
@@ -80,7 +80,7 @@ def test_watu_1():  # type: ignore
     )  # First one varies a bit more
     assert np.all(
         np.abs(
-            trial.post_eff_probs  # type: ignore
+            trial.post_eff_probs
             - np.array(
                 [0.2479070, 0.3639813, 0.4615474, 0.5497718, 0.6321674, 0.7105235]
             )
@@ -89,7 +89,7 @@ def test_watu_1():  # type: ignore
     )
     assert np.all(
         np.abs(
-            trial.w  # type: ignore
+            trial.w
             - np.array(
                 [
                     0.01347890,
@@ -119,7 +119,7 @@ def test_watu_1():  # type: ignore
     assert trial.utility == []
 
 
-def test_watu_2():  # type: ignore
+def test_watu_2():
 
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
     tox_cutoff = 0.33
@@ -145,7 +145,7 @@ def test_watu_2():  # type: ignore
     stage1_size = 16
 
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
-    trial = WATU(  # type: ignore
+    trial = WATU(
         skeletons,
         tox_prior,
         tox_target,
@@ -181,19 +181,19 @@ def test_watu_2():  # type: ignore
     next_dose = trial.update(cases)
     assert next_dose == 1
     assert np.all(
-        trial.post_tox_probs  # type: ignore
+        trial.post_tox_probs
         - np.array(
             [0.12922712, 0.31187137, 0.41243826, 0.49060208, 0.55690928, 0.61558775]
         )
         < 0.00001
     )
     assert np.all(
-        trial.post_eff_probs  # type: ignore
+        trial.post_eff_probs
         - np.array([0.3999842, 0.4935573, 0.5830683, 0.6697644, 0.5830683, 0.4935573])
         < 0.00001
     )
     assert np.all(
-        trial.w  # type: ignore
+        trial.w
         - np.array(
             [
                 0.00165319,
@@ -222,7 +222,7 @@ def test_watu_2():  # type: ignore
     # Utility is now a non-empty array in stage 2
     assert np.all(
         np.abs(
-            trial.utility  # type: ignore
+            trial.utility
             - np.array(
                 [
                     0.18320154,

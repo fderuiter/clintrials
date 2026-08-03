@@ -3,6 +3,6 @@
 from __future__ import annotations
 
 # This file marks the `core` directory as a Python package.
-from .protocol import Protocol
+from .protocol import BaseDoseFindingTrial, Protocol
 
-__all__ = ["Protocol"]
+__all__ = ["Protocol", "BaseDoseFindingTrial"]

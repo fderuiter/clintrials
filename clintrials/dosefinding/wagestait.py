@@ -182,12 +182,25 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             ValueError: If the dimensions of the inputs are inconsistent, or
                 if `tox_target` is greater than `tox_limit`.
         """
+        from clintrials.core.schema import WagesTaitSchema
+        schema_args = {
+            "skeletons": skeletons,
+            "prior_tox_probs": prior_tox_probs,
+            "tox_target": tox_target,
+            "tox_limit": tox_limit,
+            "eff_limit": eff_limit,
+            "first_dose": first_dose,
+            "max_size": max_size,
+            "randomisation_stage_size": randomisation_stage_size,
+        }
+        WagesTaitSchema(**schema_args)
+
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
         )
 
         self.skeletons = skeletons
-        self.K, self.I = np.array(skeletons).shape  # type: ignore[attr-defined]
+        self.K, self.I = np.array(skeletons).shape
         if self.I != len(prior_tox_probs):
             raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="prior_tox_probs", expected_length=self.I))
         if tox_target > tox_limit:
@@ -214,7 +227,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.estimate_var = estimate_var
 
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[  # type: ignore[index]
+            np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -227,7 +240,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             self.randomise_at_start = True
         else:
             self.randomise_at_start = False
-        self.crm = CRM(  # type: ignore
+        self.crm = CRM(
             prior=prior_tox_probs,
             target=tox_target,
             first_dose=first_dose,
@@ -287,9 +300,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         Returns:
             float: The theta estimate.
         """
-        return self.theta_hats[self.most_likely_model_index]  # type: ignore[index]
+        return self.theta_hats[self.most_likely_model_index]
 
-    def _EfficacyToxicityDoseFindingTrial__calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self, **kwargs: Any) -> Any:
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
@@ -306,7 +319,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         )
         theta_hats, theta_vars, log_marginal = zip(*integrals)
 
-        self.theta_hats = theta_hats  # type: ignore
+        self.theta_hats = np.asarray(theta_hats)
         log_w = np.log(self.model_prior_weights + 1e-300) + np.array(log_marginal)
         log_w = log_w - np.max(log_w)
         w = np.exp(log_w)
@@ -357,9 +370,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 
         return self._next_dose
 
-    def _EfficacyToxicityDoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self.most_likely_model_index = self.rng.choice(
-            np.array(range(self.K))[  # type: ignore[index]
+            np.array(range(self.K))[
                 self.model_prior_weights == max(self.model_prior_weights)
             ],
             1,
@@ -394,10 +407,10 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         """
         admiss = prob_tox <= self.tox_limit
         if sum(admiss) > 0:
-            wt_obd = np.nanargmax(np.where(admiss, prob_eff, np.nan)) + 1
+            wt_obd = int(np.nanargmax(np.where(admiss, prob_eff, np.nan)) + 1)
         else:
-            wt_obd = -1  # type: ignore
-        return wt_obd  # type: ignore
+            wt_obd = -1
+        return wt_obd
 
     def _randomise_next_dose(self, tox_probs: Any, eff_probs: Any) -> Any:
         acceptable_doses = tox_probs <= self.tox_limit
@@ -430,7 +443,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 for (acc, i) in zip(acceptable_doses, range(1, self.num_doses + 1))
                 if acc
             ]
-            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1  # type: ignore[index]
+            return np.argmax(np.array(eff_probs)[acceptable_doses]) + 1
         else:
             self._status = -1
             self._admissable_set = []

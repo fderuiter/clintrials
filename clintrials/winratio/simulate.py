@@ -21,11 +21,22 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # t
         dict[str, int]: Counts of wins, losses and ties for the treatment
             group.
     """
+    from clintrials.core.errors import ErrorTemplates
+
+    if not isinstance(treatment_group, (list, tuple, np.ndarray)) or not isinstance(control_group, (list, tuple, np.ndarray)):
+        raise TypeError("Groups must be sequence or array types.")
+
     t_group = np.asarray(treatment_group)
     c_group = np.asarray(control_group)
 
     if t_group.size == 0 or c_group.size == 0:
         return {"wins": 0, "losses": 0, "ties": 0}
+
+    if t_group.ndim != 2 or c_group.ndim != 2:
+        raise ValueError("Groups must be 2D arrays or sequences of sequences.")
+
+    if t_group.shape[1] != c_group.shape[1]:
+        raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name="treatment_group components", name="control_group components"))
 
     diff = t_group[:, np.newaxis, :] - c_group[np.newaxis, :, :]
 
@@ -34,7 +45,7 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # t
 
     first_non_zero_idx = np.argmax(non_zero, axis=2)
 
-    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)  # type: ignore[attr-defined,index]
+    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)
 
     wins = np.sum((first_diff > 0) & has_non_zero)
     losses = np.sum((first_diff < 0) & has_non_zero)

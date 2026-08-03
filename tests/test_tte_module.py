@@ -4,7 +4,7 @@ from clintrials.core.recruitment import ConstantRecruitmentStream
 from clintrials.core.tte import BayesianTimeToEvent, matrix_cohort_analysis
 
 
-def test_bayesian_time_to_event_update_and_test():  # type: ignore
+def test_bayesian_time_to_event_update_and_test():
     trial = BayesianTimeToEvent(alpha_prior=2, beta_prior=2)  # type: ignore
     trial.update([(5, 0), (10, 0)])  # type: ignore
 
@@ -19,7 +19,7 @@ def test_bayesian_time_to_event_update_and_test():  # type: ignore
     assert res["Stop"]
 
 
-def test_matrix_cohort_analysis_deterministic():  # type: ignore
+def test_matrix_cohort_analysis_deterministic():
     np.random.seed(0)
     stream = ConstantRecruitmentStream(1)  # type: ignore
     report = matrix_cohort_analysis(  # type: ignore
@@ -41,7 +41,7 @@ def test_matrix_cohort_analysis_deterministic():  # type: ignore
     assert report["FinalPatients"] == 1
 
 
-def test_matrix_cohort_analysis_multiple_runs():  # type: ignore
+def test_matrix_cohort_analysis_multiple_runs():
     np.random.seed(1)
     stream = ConstantRecruitmentStream(1)  # type: ignore
     reports = matrix_cohort_analysis(  # type: ignore
@@ -63,7 +63,7 @@ def test_matrix_cohort_analysis_multiple_runs():  # type: ignore
     assert len(reports) == 2
 
 
-def test_matrix_cohort_analysis_go_at_final():  # type: ignore
+def test_matrix_cohort_analysis_go_at_final():
     np.random.seed(0)
     stream = ConstantRecruitmentStream(1)  # type: ignore
     report = matrix_cohort_analysis(  # type: ignore

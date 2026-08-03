@@ -60,7 +60,7 @@ def render() -> None:
         st.subheader("Results")
 
         if not hasattr(st, "columns"):
-            st.columns = lambda x: (st, st)  # type: ignore[assignment,misc]
+            st.columns = lambda x: (st, st)  # type: ignore[assignment, misc]
         met_col1, met_col2 = st.columns(2)
 
         render_metric(met_col1, "Power", power)  # type: ignore
@@ -74,8 +74,8 @@ def render() -> None:
 
         df = pd.DataFrame([results_dict])
 
-        import clintrials.visualization as viz
-        fig = viz.plot_winratio_power_curve(  # type: ignore
+        from clintrials.core.viz_interface import get_visualization_provider
+        fig = get_visualization_provider().plot_winratio_power_curve(  # type: ignore
             df,
             high_contrast=False
         )

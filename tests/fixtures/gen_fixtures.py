@@ -8,7 +8,7 @@ from clintrials.core.math import inverse_logit1, logit1
 from clintrials.dosefinding.crm import crm
 
 
-def generate_fixtures():  # type: ignore
+def generate_fixtures():
     # Scenario 1
     p_tox_prior_1 = [0.1, 0.2, 0.3, 0.4]
     target_tox_1 = 0.3

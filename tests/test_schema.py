@@ -1,7 +1,7 @@
 import pytest
 
 
-def test_dynamic_bounds_enforcement():  # type: ignore
+def test_dynamic_bounds_enforcement():
     from typing import Annotated
 
     from clintrials.core.schema import BaseModel, Field, PositiveInt, Probability
@@ -60,7 +60,7 @@ def test_dynamic_bounds_enforcement():  # type: ignore
         CustomAnnotatedTypeSchema(p_custom=0.5, count_custom=50)  # type: ignore[call-arg]
 
 
-def test_version_schema_enforcement():  # type: ignore
+def test_version_schema_enforcement():
     from clintrials.core.schema import BaseModel, Field, Version
 
     class InlineVersionSchema(BaseModel):

@@ -10,6 +10,8 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 
+from typing import Any, Callable
+
 import numpy as np
 from scipy.stats import norm
 
@@ -21,7 +23,7 @@ class ProbabilityDensitySample:
     such as expectation, variance, CDF, and quantiles.
     """
 
-    def __init__(self, samp, func):  # type: ignore
+    def __init__(self, samp: Any, func: Callable[[Any], Any]) -> None:
         """Initializes a ProbabilityDensitySample object.
 
         Args:
@@ -29,9 +31,12 @@ class ProbabilityDensitySample:
             func (Callable): A function that takes the sample and returns
                 the probabilities.
         """
+        from clintrials.core.errors import ErrorTemplates
         self._samp = samp
         self._probs = func(samp)
         self._scale = self._probs.mean()
+        if self._scale <= 0:
+            raise ValueError(ErrorTemplates.GT.format(name="scale", bound=0))
 
     def expectation(self, vector):  # type: ignore
         """Calculates the expectation of a vector.
@@ -71,6 +76,12 @@ def log_scale_wald_interval(ratio: float, standard_error: float, alpha: float = 
     Returns:
         tuple[float, float]: The lower and upper bounds of the confidence interval.
     """
+    from clintrials.core.errors import ErrorTemplates
+    if ratio <= 0:
+        raise ValueError(ErrorTemplates.GT.format(name="ratio", bound=0))
+    if standard_error <= 0:
+        raise ValueError(ErrorTemplates.GT.format(name="standard_error", bound=0))
+
     z_score = norm.ppf(1 - alpha / 2)
     log_ratio = np.log(ratio)
     lower_bound_log = log_ratio - z_score * standard_error
@@ -88,6 +99,12 @@ def log_scale_p_value(ratio: float, standard_error: float) -> float:
     Returns:
         float: The p-value.
     """
+    from clintrials.core.errors import ErrorTemplates
+    if ratio <= 0:
+        raise ValueError(ErrorTemplates.GT.format(name="ratio", bound=0))
+    if standard_error <= 0:
+        raise ValueError(ErrorTemplates.GT.format(name="standard_error", bound=0))
+
     observed_z = np.log(ratio) / standard_error
     return float(2 * norm.sf(abs(observed_z)))
 

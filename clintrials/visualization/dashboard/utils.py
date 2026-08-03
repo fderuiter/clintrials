@@ -39,4 +39,4 @@ def announce_status_locally(message: str, key: str = None):  # type: ignore
         }}, 3000);
     </script>
     """
-    components.html(html_str, height=0, key=key)  # type: ignore  # type: ignore[call-arg]
+    components.html(html_str, height=0, key=key)  # type: ignore[call-arg]

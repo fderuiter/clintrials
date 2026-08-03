@@ -36,7 +36,7 @@ class EffToxView(BaseSimulationView):  # type: ignore
         prior_eff_probs = [0.2, 0.4, 0.6, 0.7, 0.8]
 
         metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
-        trial = EffTox(  # type: ignore
+        trial = EffTox(
             real_doses=real_doses,
             prior_tox_probs=prior_tox_probs,
             prior_eff_probs=prior_eff_probs,
@@ -59,8 +59,8 @@ class EffToxView(BaseSimulationView):  # type: ignore
         figures = []
         if not summary_df.empty:
             if "recommended_dose_prob" in summary_df.columns:
-                import clintrials.visualization as viz
-                fig_rec = viz.plot_bivariate_simulation_recommendation(  # type: ignore
+                from clintrials.core.viz_interface import get_visualization_provider
+                fig_rec = get_visualization_provider().plot_bivariate_simulation_recommendation(  # type: ignore
                     summary_df,
                     high_contrast=False
                 )
@@ -70,8 +70,8 @@ class EffToxView(BaseSimulationView):  # type: ignore
                 "prob_accept_tox" in summary_df.columns
                 and "prob_accept_eff" in summary_df.columns
             ):
-                import clintrials.visualization as viz
-                fig_accept = viz.plot_efftox_simulation_acceptability(  # type: ignore
+                from clintrials.core.viz_interface import get_visualization_provider
+                fig_accept = get_visualization_provider().plot_efftox_simulation_acceptability(  # type: ignore
                     summary_df,
                     high_contrast=False
                 )

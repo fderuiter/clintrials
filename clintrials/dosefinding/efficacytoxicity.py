@@ -27,11 +27,10 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
-from clintrials.core.cohort import PatientCohortTracker
-from clintrials.core.protocol import Protocol
+from clintrials.core.protocol import BaseDoseFindingTrial
 
 
-class EfficacyToxicityDoseFindingTrial(Protocol):
+class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
     """An abstract base class for dose-finding trials.
 
     Jointly monitors toxicity and efficacy.
@@ -55,54 +54,12 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         Raises:
             ValueError: If `first_dose` is greater than `num_doses`.
         """
-        if first_dose > num_doses:
-            raise ValueError("First dose must be no greater than number of doses.")
-
-        super().__init__()
-        self._first_dose = first_dose
-        self.num_doses = num_doses
-        self._max_size = max_size
-
-        # Reset
-        self._tracker = PatientCohortTracker()
-        self._next_dose = self._first_dose
-        self._status = 0
+        super().__init__(first_dose=first_dose, num_doses=num_doses, max_size=max_size)
         self._admissable_set = []  # type: ignore
-
-    @property
-    def _doses(self) -> List[int]:
-        return self._tracker.doses
-
-    @property
-    def _toxicities(self) -> List[int]:
-        return self._tracker.toxicities
 
     @property
     def _efficacies(self) -> List[int]:
         return self._tracker.efficacies
-
-    def status(self) -> int:
-        """Gets the current status of the trial.
-
-        Returns:
-            int: The trial status code.
-        """
-        return self._status
-
-    def reset(self) -> None:
-        """Resets the trial to its initial state."""
-        self._tracker.reset()
-        self._next_dose = self._first_dose
-        self._status = 0
-        self.__reset()
-
-    def number_of_doses(self) -> int:
-        """Gets the number of dose levels under investigation.
-
-        Returns:
-            int: The number of dose levels.
-        """
-        return self.num_doses
 
     def dose_levels(self) -> Iterable[int]:
         """Gets a list of the dose levels (1-based indices).
@@ -112,47 +69,6 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         return list(range(1, self.num_doses + 1))
 
-    def first_dose(self) -> int:
-        """Gets the starting dose level.
-
-        Returns:
-            int: The first dose level.
-        """
-        return self._first_dose
-
-    def size(self) -> int:
-        """Gets the current number of treated patients.
-
-        Returns:
-            int: The number of patients treated so far.
-        """
-        return len(self._doses)
-
-    def max_size(self) -> int:
-        """Gets the maximum number of patients for the trial.
-
-        Returns:
-            int: The maximum trial size.
-        """
-        return self._max_size
-
-    def doses(self) -> List[int]:
-        """Gets the list of doses given to patients.
-
-        Returns:
-            list[int]: A list of dose levels.
-        """
-        return self._doses
-
-    def toxicities(self) -> List[int]:
-        """Gets the list of observed toxicities.
-
-        Returns:
-            list[int]: A list of toxicity outcomes (1 for toxicity, 0 for no
-                toxicity).
-        """
-        return self._toxicities
-
     def efficacies(self) -> List[int]:
         """Gets the list of observed efficacies.
 
@@ -161,28 +77,6 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 efficacy).
         """
         return self._efficacies
-
-    def treated_at_dose(self, dose: int) -> int:
-        """Gets the number of patients treated at a specific dose level.
-
-        Args:
-            dose (int): The 1-based dose level.
-
-        Returns:
-            int: The number of patients treated at the given dose.
-        """
-        return int(np.sum(np.array(self._doses) == dose))  # type: ignore[call-overload,no-any-return]
-
-    def toxicities_at_dose(self, dose: int) -> int:
-        """Gets the number of toxicities observed at a specific dose level.
-
-        Args:
-            dose (int): The 1-based dose level.
-
-        Returns:
-            int: The number of toxicities at the given dose.
-        """
-        return sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose])
 
     def efficacies_at_dose(self, dose: int) -> int:
         """Gets the number of efficacies observed at a specific dose level.
@@ -194,30 +88,6 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
             int: The number of efficacies at the given dose.
         """
         return sum([e for d, e in zip(self.doses(), self.efficacies()) if d == dose])
-
-    def maximum_dose_given(self) -> Optional[int]:
-        """Gets the maximum dose level administered so far.
-
-        Returns:
-            int | None: The maximum dose level, or `None` if no patients
-                have been treated.
-        """
-        if len(self._doses) > 0:
-            return max(self._doses)
-        else:
-            return None
-
-    def minimum_dose_given(self) -> Optional[int]:
-        """Gets the minimum dose level administered so far.
-
-        Returns:
-            int | None: The minimum dose level, or `None` if no patients
-                have been treated.
-        """
-        if len(self._doses) > 0:
-            return min(self._doses)
-        else:
-            return None
 
     def tabulate(self) -> pd.DataFrame:
         """Generates a summary table of the trial data.
@@ -240,22 +110,6 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         df["EffRate"] = np.where(df.N > 0, df.Efficacies / df.N, np.nan)
         df["ToxRate"] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
         return df
-
-    def set_next_dose(self, dose: int) -> None:
-        """Sets the next dose to be administered.
-
-        Args:
-            dose (int): The next dose level.
-        """
-        self._next_dose = dose
-
-    def next_dose(self) -> int:
-        """Gets the next dose to be administered.
-
-        Returns:
-            int: The next dose level.
-        """
-        return self._next_dose
 
     def update(self, cases: List[Tuple[int, int, int]], **kwargs: Any) -> int:  # type: ignore[override]
         """Updates the trial with a list of new cases.
@@ -287,7 +141,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 efficacies.append(case[2])
 
             self._tracker.add_patients(doses=doses, toxicities=toxicities, efficacies=efficacies)
-            self._next_dose = self.__calculate_next_dose(**kwargs)
+            self._next_dose = self._calculate_next_dose(**kwargs)
         else:
             logging.warning("Cannot update design with no cases")
 
@@ -309,22 +163,6 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
                 dose is admissible.
         """
         return np.array([(x in self._admissable_set) for x in self.dose_levels()])
-
-    def observed_toxicity_rates(self) -> Any:
-        """Gets the observed toxicity rate for each dose level.
-
-        Returns:
-            numpy.ndarray: An array of observed toxicity rates.
-        """
-        tox_rates = []
-        for d in range(1, self.num_doses + 1):
-            num_treated = self.treated_at_dose(d)
-            if num_treated:
-                num_toxes = self.toxicities_at_dose(d)
-                tox_rates.append(1.0 * num_toxes / num_treated)
-            else:
-                tox_rates.append(np.nan)
-        return np.array(tox_rates)
 
     def observed_efficacy_rates(self) -> Any:
         """Gets the observed efficacy rate for each dose level.
@@ -354,12 +192,6 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         """
         raise NotImplementedError()
 
-    @abc.abstractmethod
-    def __reset(self) -> None:
-        """Performs implementation-specific reset operations."""
-        return
-
-    @abc.abstractmethod
     def has_more(self) -> bool:
         """Checks if the trial is ongoing.
 
@@ -387,7 +219,7 @@ class EfficacyToxicityDoseFindingTrial(Protocol):
         return report
 
     @abc.abstractmethod
-    def __calculate_next_dose(self, **kwargs: Any) -> Any:
+    def _calculate_next_dose(self, **kwargs: Any) -> Any:
         """Calculates the next dose to be administered.
 
         Subclasses should override this method.
@@ -502,14 +334,14 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
                         for v in zip(true_toxicities, true_efficacies)
                     ]
                 )
-                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]  # type: ignore[index]
+                tox_hat, eff_hat = tox_eff_hat[:, 0], tox_eff_hat[:, 1]
             else:
                 had_tox = lambda x: x < np.array(true_toxicities)
                 tox_horizons = np.array([had_tox(x) for x in tolerances[:, 0]])  # type: ignore
-                tox_hat = tox_horizons.mean(axis=0)  # type: ignore[attr-defined]
+                tox_hat = tox_horizons.mean(axis=0)
                 had_eff = lambda x: x < np.array(true_efficacies)
                 eff_horizons = np.array([had_eff(x) for x in tolerances[:, 1]])  # type: ignore
-                eff_hat = eff_horizons.mean(axis=0)  # type: ignore[attr-defined]
+                eff_hat = eff_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat, eff_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(  # type: ignore

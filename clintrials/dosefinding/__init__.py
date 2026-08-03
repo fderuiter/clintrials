@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -35,7 +35,7 @@ import copy
 import logging
 from collections import OrderedDict
 
-from scipy.stats import uniform
+from scipy.stats import uniform as uniform
 
 from clintrials.utils import (
     atomic_to_json,
@@ -45,11 +45,10 @@ from clintrials.utils import (
 logger = logging.getLogger(__name__)
 
 
-from clintrials.core.cohort import PatientCohortTracker
-from clintrials.core.protocol import Protocol
+from clintrials.core.protocol import BaseDoseFindingTrial
 
 
-class DoseFindingTrial(Protocol):
+class DoseFindingTrial(BaseDoseFindingTrial):
     """Base class for a dose-finding trial.
 
     Warning:
@@ -71,143 +70,7 @@ class DoseFindingTrial(Protocol):
         Raises:
             ValueError: If `first_dose` is greater than `num_doses`.
         """
-        if first_dose > num_doses:
-            raise ValueError("First dose must be no greater than number of doses.")
-
-        super().__init__()
-        self._first_dose = first_dose
-        self.num_doses = num_doses
-        self._max_size = max_size
-        # Reset
-        self._tracker = PatientCohortTracker()
-        self._next_dose = self._first_dose
-        self._status = 0
-
-    @property
-    def _doses(self) -> List[int]:
-        return self._tracker.doses
-
-    @property
-    def _toxicities(self) -> List[int]:
-        return self._tracker.toxicities
-
-    def status(self) -> int:
-        """Gets the current status of the trial.
-
-        Returns:
-            int: The trial status code.
-        """
-        return self._status
-
-    def reset(self) -> None:
-        """Resets the trial to its initial state."""
-        self._tracker.reset()
-        self._next_dose = self._first_dose
-        self._status = 0
-        self.__reset()
-
-    def number_of_doses(self) -> int:
-        """Gets the number of dose levels under investigation.
-
-        Returns:
-            int: The number of dose levels.
-        """
-        return self.num_doses
-
-    def dose_levels(self) -> Iterable[int]:
-        """Gets a list of the dose levels (1-based indices).
-
-        Returns:
-            list[int]: A list of dose levels.
-        """
-        return range(1, self.num_doses + 1)
-
-    def first_dose(self) -> int:
-        """Gets the starting dose level.
-
-        Returns:
-            int: The first dose level.
-        """
-        return self._first_dose
-
-    def size(self) -> int:
-        """Gets the current number of treated patients.
-
-        Returns:
-            int: The number of patients treated so far.
-        """
-        return len(self._doses)
-
-    def max_size(self) -> int:
-        """Gets the maximum number of patients for the trial.
-
-        Returns:
-            int: The maximum trial size.
-        """
-        return self._max_size
-
-    def doses(self) -> List[int]:
-        """Gets the list of doses given to patients.
-
-        Returns:
-            list[int]: A list of dose levels.
-        """
-        return self._doses
-
-    def toxicities(self) -> List[int]:
-        """Gets the list of observed toxicities.
-
-        Returns:
-            list[int]: A list of toxicity outcomes (1 for toxicity, 0 for no
-                toxicity).
-        """
-        return self._toxicities
-
-    def treated_at_dose(self, dose: int) -> int:
-        """Gets the number of patients treated at a specific dose level.
-
-        Args:
-            dose (int): The 1-based dose level.
-
-        Returns:
-            int: The number of patients treated at the given dose.
-        """
-        return int(np.sum(np.array(self._doses) == dose))
-
-    def toxicities_at_dose(self, dose: int) -> int:
-        """Gets the number of toxicities observed at a specific dose level.
-
-        Args:
-            dose (int): The 1-based dose level.
-
-        Returns:
-            int: The number of toxicities at the given dose.
-        """
-        return int(np.sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose]))
-
-    def maximum_dose_given(self) -> Optional[int]:
-        """Gets the maximum dose level administered so far.
-
-        Returns:
-            int | None: The maximum dose level, or `None` if no patients
-                have been treated.
-        """
-        if len(self._doses) > 0:
-            return max(self._doses)
-        else:
-            return None
-
-    def minimum_dose_given(self) -> Optional[int]:
-        """Gets the minimum dose level administered so far.
-
-        Returns:
-            int | None: The minimum dose level, or `None` if no patients
-                have been treated.
-        """
-        if len(self._doses) > 0:
-            return min(self._doses)
-        else:
-            return None
+        super().__init__(first_dose=first_dose, num_doses=num_doses, max_size=max_size)
 
     def tabulate(self) -> pd.DataFrame:
         """Generates a summary table of the trial data.
@@ -227,22 +90,6 @@ class DoseFindingTrial(Protocol):
         df = pd.DataFrame(tab_data)
         df["ToxRate"] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
         return df
-
-    def set_next_dose(self, dose: int) -> None:
-        """Sets the next dose to be administered.
-
-        Args:
-            dose (int): The next dose level.
-        """
-        self._next_dose = dose
-
-    def next_dose(self) -> int:
-        """Gets the next dose to be administered.
-
-        Returns:
-            int: The next dose level.
-        """
-        return self._next_dose
 
     def update(self, cases: List[Tuple[int, int]], **kwargs: Any) -> int:  # type: ignore[override]
         """Updates the trial with a list of new cases.
@@ -272,24 +119,8 @@ class DoseFindingTrial(Protocol):
                 toxicities.append(case[1])
             self._tracker.add_patients(doses=doses, toxicities=toxicities)
 
-        self._next_dose = self.__calculate_next_dose()
+        self._next_dose = self._calculate_next_dose(**kwargs)
         return self._next_dose
-
-    def observed_toxicity_rates(self) -> np.ndarray[Any, np.dtype[np.float64]]:
-        """Gets the observed rate of toxicity at all doses.
-
-        Returns:
-            numpy.ndarray: An array of observed toxicity rates.
-        """
-        tox_rates = []
-        for d in range(1, self.num_doses + 1):
-            num_treated = self.treated_at_dose(d)
-            if num_treated:
-                num_toxes = self.toxicities_at_dose(d)
-                tox_rates.append(1.0 * num_toxes / num_treated)
-            else:
-                tox_rates.append(np.nan)
-        return np.array(tox_rates)
 
     def optimal_decision(self, prob_tox: Sequence[float]) -> int:
         """Gets the optimal dose choice for a given dose-toxicity curve.
@@ -319,12 +150,6 @@ class DoseFindingTrial(Protocol):
 
         return viz.plot_dose_finding_outcomes(self, chart_title=chart_title)
 
-    @abc.abstractmethod
-    def __reset(self) -> None:
-        """Performs implementation-specific reset operations."""
-        return
-
-    @abc.abstractmethod
     def has_more(self) -> bool:
         """Checks if the trial is ongoing.
 
@@ -351,7 +176,7 @@ class DoseFindingTrial(Protocol):
         return report
 
     @abc.abstractmethod
-    def __calculate_next_dose(self) -> int:
+    def _calculate_next_dose(self, **kwargs: Any) -> int:
         """Calculates the next dose to be administered."""
         return -1  # Default implementation
 
@@ -380,10 +205,10 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
         # Reset
         self.max_dose_given = -1
 
-    def _DoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self.max_dose_given = -1
 
-    def _DoseFindingTrial__calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self, **kwargs: Any) -> Any:
         if self.has_more():
             self._status = 1
             if len(self.doses()) > 0:
@@ -429,13 +254,13 @@ class ThreePlusThree(DoseFindingTrial):
         # Reset
         self._continue = True
 
-    def _DoseFindingTrial__reset(self) -> Any:
+    def _reset(self) -> Any:
         self._continue = True
 
-    def _DoseFindingTrial__calculate_next_dose(self) -> Any:
+    def _calculate_next_dose(self, **kwargs: Any) -> Any:
         dose_indices = np.array(self._doses) == self._next_dose
-        toxes_at_dose = np.sum(np.array(self._toxicities)[dose_indices])  # type: ignore[index]
-        if np.sum(dose_indices) == 3:  # type: ignore[call-overload]
+        toxes_at_dose = np.sum(np.array(self._toxicities)[dose_indices])
+        if np.sum(dose_indices) == 3:
             if toxes_at_dose == 0:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -457,7 +282,7 @@ class ThreePlusThree(DoseFindingTrial):
                 else:
                     self._status = -1
                 self._continue = False
-        elif np.sum(dose_indices) == 6:  # type: ignore[call-overload]
+        elif np.sum(dose_indices) == 6:
             if toxes_at_dose <= 1:
                 if self._next_dose < self.num_doses:
                     # escalate
@@ -558,7 +383,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
         try:
             had_tox = lambda x: x < np.array(true_toxicities)
             tox_horizons = np.array([had_tox(x) for x in tolerances])  # type: ignore
-            tox_hat = tox_horizons.mean(axis=0)  # type: ignore[attr-defined]
+            tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
             report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)  # type: ignore

@@ -68,7 +68,7 @@ class CRMBuilder:
         return self
 
     def build(self) -> CRM:
-        return CRM(  # type: ignore[abstract]
+        return CRM(
             prior=self._prior,
             target=self._target,
             first_dose=self._first_dose,

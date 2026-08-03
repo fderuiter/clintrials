@@ -1,6 +1,6 @@
 
 
-def test_crm_example():  # type: ignore
+def test_crm_example():
     """
     Tests the CRM example from the README.md file.
     """
@@ -16,7 +16,7 @@ def test_crm_example():  # type: ignore
     trial_size = 30
 
     # Create a CRM trial object
-    trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)  # type: ignore
+    trial = CRM(prior_tox_probs, tox_target, first_dose, trial_size)
 
     # Get the next recommended dose
     next_dose = trial.next_dose()
@@ -28,7 +28,7 @@ def test_crm_example():  # type: ignore
     assert next_dose == 4
 
 
-def test_efftox_example():  # type: ignore
+def test_efftox_example():
     """
     Tests the EffTox example from the README.md file.
     """
@@ -58,7 +58,7 @@ def test_efftox_example():  # type: ignore
     )
 
     # Create an EffTox trial object
-    trial = EffTox(  # type: ignore
+    trial = EffTox(
         real_doses=real_doses,
         theta_priors=theta_priors,
         tox_cutoff=0.4,
@@ -73,7 +73,7 @@ def test_efftox_example():  # type: ignore
     assert trial.next_dose() == 1
 
 
-def test_gsd_example():  # type: ignore
+def test_gsd_example():
     """
     Tests the GroupSequentialDesign example from the README.md file.
     """

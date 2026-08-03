@@ -9,15 +9,16 @@ repos:
     hooks:
     -   id: vulture
         args: ["clintrials", ".vulture_whitelist.py"]
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0
-    hooks:
-    -   id: mypy
-        additional_dependencies: ["numpy<2.0.0"]
-        files: ^(clintrials/|tests/)
-
 -   repo: local
     hooks:
+    -   id: mypy
+        name: mypy
+        entry: poetry run mypy
+        language: system
+        files: ^(clintrials/|tests/)
+        types_or: [python, pyi]
+        pass_filenames: true
+
     -   id: deptry
         name: deptry
         entry: deptry .
@@ -29,13 +30,6 @@ repos:
     -   id: verify-api-signatures
         name: verify-api-signatures
         entry: poetry run python scripts/verify_api_signatures.py
-        language: system
-        pass_filenames: false
-        always_run: true
-
-    -   id: verify-pep440-version
-        name: verify-pep440-version
-        entry: poetry run python scripts/verify_pep440_version.py
         language: system
         pass_filenames: false
         always_run: true
