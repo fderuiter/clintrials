@@ -3707,6 +3707,59 @@
             }
           ]
         },
+        "create_bar_chart": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "color",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "title",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "labels",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "None"
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
         "generate_pdf_report": {
           "type": "method",
           "parameters": [
@@ -3733,6 +3786,52 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
               "default": "None"
+            }
+          ]
+        },
+        "plot_bivariate_simulation_recommendation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
+        "plot_crm_simulation_recommendation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
             }
           ]
         },
@@ -3779,6 +3878,52 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
               "default": "None"
+            }
+          ]
+        },
+        "plot_efftox_simulation_acceptability": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
+        "plot_winratio_power_curve": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
             }
           ]
         }
@@ -16151,6 +16296,59 @@
             }
           ]
         },
+        "create_bar_chart": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "color",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "title",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "labels",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "None"
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
         "generate_pdf_report": {
           "type": "method",
           "parameters": [
@@ -16177,6 +16375,52 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
               "default": "None"
+            }
+          ]
+        },
+        "plot_bivariate_simulation_recommendation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
+        "plot_crm_simulation_recommendation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
             }
           ]
         },
@@ -16229,6 +16473,52 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
               "default": "None"
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
+        "plot_efftox_simulation_acceptability": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
+        "plot_winratio_power_curve": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
             },
             {
               "name": "high_contrast",
@@ -16266,6 +16556,59 @@
             }
           ]
         },
+        "create_bar_chart": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "color",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "title",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "labels",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "None"
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
         "generate_pdf_report": {
           "type": "method",
           "parameters": [
@@ -16292,6 +16635,52 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
               "default": "None"
+            }
+          ]
+        },
+        "plot_bivariate_simulation_recommendation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
+        "plot_crm_simulation_recommendation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
             }
           ]
         },
@@ -16338,6 +16727,52 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
               "default": "None"
+            }
+          ]
+        },
+        "plot_efftox_simulation_acceptability": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "summary_df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
+            }
+          ]
+        },
+        "plot_winratio_power_curve": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "df",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "high_contrast",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "False"
             }
           ]
         }
