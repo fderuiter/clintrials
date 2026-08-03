@@ -518,11 +518,13 @@ class DefaultVisualizationProvider(VisualizationProvider):
 
     def plot_dose_finding_outcomes(self, trial, chart_title=None, high_contrast=False):  # type: ignore
         """Plot dose finding outcomes."""
-        return plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
+        import clintrials.visualization as viz
+        return viz.plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
 
     def plot_crm_toxicity_probabilities(self, trial, chart_title=None, high_contrast=False):  # type: ignore
         """Plot CRM toxicity probabilities."""
-        return plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
+        import clintrials.visualization as viz
+        return viz.plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
 
     def generate_pdf_report(self, df, design_type, text_summaries=None):  # type: ignore
         """Generates an accessibility-first PDF report for trial simulations."""
@@ -533,6 +535,31 @@ class DefaultVisualizationProvider(VisualizationProvider):
             warnings.warn("PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`.")
             return None
         return _gen_pdf(df, design_type, text_summaries)  # type: ignore
+
+    def plot_crm_simulation_recommendation(self, summary_df, high_contrast=False):  # type: ignore
+        """Plots CRM simulation recommendation probabilities."""
+        import clintrials.visualization as viz
+        return viz.plot_crm_simulation_recommendation(summary_df, high_contrast=high_contrast)  # type: ignore
+
+    def plot_bivariate_simulation_recommendation(self, summary_df, high_contrast=False):  # type: ignore
+        """Plots EffTox simulation recommendation probabilities."""
+        import clintrials.visualization as viz
+        return viz.plot_bivariate_simulation_recommendation(summary_df, high_contrast=high_contrast)  # type: ignore
+
+    def plot_efftox_simulation_acceptability(self, summary_df, high_contrast=False):  # type: ignore
+        """Plots EffTox simulation acceptability probabilities."""
+        import clintrials.visualization as viz
+        return viz.plot_efftox_simulation_acceptability(summary_df, high_contrast=high_contrast)  # type: ignore
+
+    def plot_winratio_power_curve(self, df, high_contrast=False):  # type: ignore
+        """Plots a Win Ratio simulation power curve."""
+        import clintrials.visualization as viz
+        return viz.plot_winratio_power_curve(df, high_contrast=high_contrast)  # type: ignore
+
+    def create_bar_chart(self, df, x, y, color, title, labels=None, high_contrast=False):  # type: ignore
+        """Creates a centralized bar chart with accessibility standards."""
+        import clintrials.visualization as viz
+        return viz.create_bar_chart(df, x, y, color, title, labels=labels, high_contrast=high_contrast)  # type: ignore
 
 
 def get_default_provider():  # type: ignore
