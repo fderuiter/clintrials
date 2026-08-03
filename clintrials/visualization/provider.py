@@ -372,9 +372,9 @@ def plot_efftox_density(  # type: ignore
             for j, count in enumerate(dist):
                 if count > 0:
                     samp_boot.extend([samp[j]] * count)
-            samp_boot = np.array(samp_boot)
+            samp_boot_arr = np.array(samp_boot)
 
-            vals = data_func(x, samp_boot)
+            vals = data_func(x, samp_boot_arr)
             x_boot.extend(vals)
             dose_indices.extend([str(dose_index)] * boot_samps)
 

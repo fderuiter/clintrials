@@ -839,7 +839,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.prob_acc_tox = []  # type: ignore
         self.prob_acc_eff = []  # type: ignore
         self._admissable_set = []
-        self.utility = []
+        self.utility = []  # type: ignore[assignment]
 
     def has_more(self) -> bool:
         """Checks if the trial is ongoing.

@@ -668,7 +668,7 @@ class CRM(DoseFindingTrial):
         Returns:
             list[float]: A list of posterior probabilities of toxicity.
         """
-        return list(self.post_tox)
+        return np.asarray(self.post_tox)
 
     def _prob_tox_exceeds_quadrature(self, tox_cutoff: Any, deg: Any = CORE_REGISTRY["crm_deg"]) -> Any:
         """Posterior Pr(toxicity > cutoff) using Gauss--Hermite quadrature."""
