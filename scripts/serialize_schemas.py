@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from typing import Annotated, get_args, get_origin
 
-from clintrials.core.schema import CRMSchema, EffToxSchema, FieldInfo, WinRatioSchema
+from clintrials.core.schema import BaseModel, FieldInfo
 
 
 def get_field_type_info(annotation, field_info):
@@ -107,12 +107,14 @@ def generate_schema_for_class(cls):
     return schema
 
 def main():
-    """Serialize the core simulation schemas to hub/schema.json."""
-    schemas = {
-        "WinRatioSchema": generate_schema_for_class(WinRatioSchema),
-        "CRMSchema": generate_schema_for_class(CRMSchema),
-        "EffToxSchema": generate_schema_for_class(EffToxSchema)
-    }
+    """Serialize all dynamically discovered simulation schemas to hub/schema.json."""
+    subclasses = BaseModel.__subclasses__()
+    # Sort them by name to keep output deterministic/stable
+    subclasses = sorted(subclasses, key=lambda c: c.__name__)
+    schemas = {}
+    for cls in subclasses:
+        if cls.__module__.startswith("clintrials"):
+            schemas[cls.__name__] = generate_schema_for_class(cls)
 
     out_path = os.path.join(os.path.dirname(__file__), "..", "hub", "schema.json")
     with open(out_path, "w") as f:
