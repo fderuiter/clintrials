@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 def test_service_worker_scoping_and_kill_switch() -> None:
     root = Path(__file__).parent.parent
 
@@ -7,7 +8,7 @@ def test_service_worker_scoping_and_kill_switch() -> None:
     custom_js = root / "docs" / "_static" / "custom.js"
     assert custom_js.exists()
     content_custom = custom_js.read_text()
-    
+
     assert "navigator.serviceWorker.register" not in content_custom, "custom.js should not register service workers"
     assert "getRegistrations" in content_custom, "custom.js should inspect active registrations"
     assert "unregister" in content_custom, "custom.js should unregister old root service workers"
