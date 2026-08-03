@@ -4,6 +4,20 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>Trial Simulation Hub - Dynamic Configuration</title>
+    <script>
+      if ('serviceWorker' in navigator) {
+        var isSubpath = window.location.pathname.indexOf('/clintrials/') !== -1;
+        var swUrl = isSubpath ? '/clintrials/sw.js' : '/sw.js';
+        var swScope = isSubpath ? '/clintrials/' : '/';
+        navigator.serviceWorker.register(swUrl, { scope: swScope })
+          .then(function (reg) {
+            console.log('SW registered on root scope:', reg.scope);
+          })
+          .catch(function (err) {
+            console.log('SW registration failed:', err);
+          });
+      }
+    </script>
     <style>
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
