@@ -80,3 +80,24 @@ def test_version_schema_enforcement():
 
     with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
         InlineVersionSchema(version="")  # type: ignore[call-arg]
+
+
+def test_schema_serialization():
+    from clintrials.core.schema import (
+        BaseModel,
+        WagesTaitSchema,
+    )
+    from scripts.serialize_schemas import generate_schema_for_class
+
+    subclasses = BaseModel.__subclasses__()
+    assert len(subclasses) >= 6
+    subclass_names = [cls.__name__ for cls in subclasses]
+    for expected in ["WinRatioSchema", "CRMSchema", "EffToxSchema", "WagesTaitSchema", "WATUSchema", "GroupSequentialDesignSchema"]:
+        assert expected in subclass_names
+
+    wages_tait_schema = generate_schema_for_class(WagesTaitSchema)  # type: ignore[no-untyped-call]
+    assert wages_tait_schema["type"] == "object"
+    assert "skeletons" in wages_tait_schema["properties"]
+    assert wages_tait_schema["properties"]["skeletons"]["type"] == "array"
+    assert wages_tait_schema["properties"]["skeletons"]["items"]["type"] == "array"
+

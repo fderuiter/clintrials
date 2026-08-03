@@ -50,15 +50,16 @@
         margin-bottom: 8px;
         font-style: italic;
       }
-      input {
+      input, textarea {
         width: 100%;
         padding: 10px;
         box-sizing: border-box;
         border: 1px solid #ccc;
         border-radius: 4px;
         font-size: 16px;
+        font-family: inherit;
       }
-      input.invalid {
+      input.invalid, textarea.invalid {
         border-color: #dc3545;
         background-color: #f8d7da;
       }
@@ -102,6 +103,61 @@
     </div>
 
     <script>
+      const LABEL_MAPPING = {
+        // Schema Names
+        'WinRatioSchema': 'Win Ratio',
+        'CRMSchema': 'Continual Reassessment Method',
+        'EffToxSchema': 'EffTox',
+        'WagesTaitSchema': 'Wages & Tait',
+        'WATUSchema': 'WATU',
+        'GroupSequentialDesignSchema': 'Group Sequential Designs',
+
+        // Parameters
+        'num_subjects_A': 'Number of Subjects (Group A)',
+        'num_subjects_B': 'Number of Subjects (Group B)',
+        'num_simulations': 'Number of Simulations',
+        'p_y1_A': 'Probability of y1 (Group A)',
+        'p_y1_B': 'Probability of y1 (Group B)',
+        'p_y2_A': 'Probability of y2 (Group A)',
+        'p_y2_B': 'Probability of y2 (Group B)',
+        'p_y3_A': 'Probability of y3 (Group A)',
+        'p_y3_B': 'Probability of y3 (Group B)',
+        'significance_level': 'Significance Level',
+
+        'prior': 'Prior Probabilities',
+        'target': 'Target Toxicity Probability',
+        'first_dose': 'Starting Dose Level',
+        'max_size': 'Maximum Sample Size',
+        'lowest_dose_too_toxic_hurdle': 'Lowest Dose Too Toxic Hurdle',
+        'lowest_dose_too_toxic_certainty': 'Lowest Dose Too Toxic Certainty',
+        'coherency_threshold': 'Coherency Threshold',
+        'bootstrap_samples': 'Bootstrap Samples',
+        'min_beta': 'Minimum Beta',
+        'max_beta': 'Maximum Beta',
+        'n_points': 'Number of Points',
+        'sample_size': 'Sample Size',
+
+        'real_doses': 'Real Doses',
+        'prior_tox_probs': 'Prior Toxicity Probabilities',
+        'prior_eff_probs': 'Prior Efficacy Probabilities',
+        'tox_cutoff': 'Toxicity Cutoff',
+        'eff_cutoff': 'Efficacy Cutoff',
+        'tox_certainty': 'Toxicity Certainty',
+        'eff_certainty': 'Efficacy Certainty',
+
+        'skeletons': 'Efficacy Skeletons',
+        'tox_target': 'Target Toxicity Rate',
+        'tox_limit': 'Maximum Acceptable Toxicity',
+        'eff_limit': 'Minimum Acceptable Efficacy',
+        'randomisation_stage_size': 'Randomization Stage Size',
+
+        'stage_one_size': 'Stage One Size',
+
+        'k': 'Number of Analyses (Looks)',
+        'alpha': 'Overall Significance Level (Alpha)',
+        'timing': 'Information Fractions (Timing)'
+      };
+
       let schemas = {};
 
       function showError(message) {
@@ -172,7 +228,7 @@
           for (const schemaName in schemas) {
             const option = document.createElement('option');
             option.value = schemaName;
-            option.textContent = schemaName.replace('Schema', ' Model');
+            option.textContent = LABEL_MAPPING[schemaName] || schemaName.replace('Schema', ' Model');
             selector.appendChild(option);
           }
           
@@ -194,21 +250,66 @@
            if (val.trim() === '') {
               // Not required unless specified, keeping simple
            } else {
-              const items = val.split(',').map(s => s.trim());
-              const itemSchema = prop.items;
-              if (itemSchema && (itemSchema.type === 'number' || itemSchema.type === 'integer')) {
-                 for (const item of items) {
-                    const num = Number(item);
-                    if (isNaN(num)) {
+              const isMulti = prop.items && prop.items.type === 'array';
+              if (isMulti) {
+                 try {
+                    const parsed = JSON.parse(val);
+                    if (!Array.isArray(parsed)) {
                        isValid = false;
-                       errorMsg = 'All array items must be numbers';
-                       break;
+                       errorMsg = 'Must be a valid JSON array';
+                    } else {
+                       const subItemSchema = prop.items.items;
+                       for (let i = 0; i < parsed.length; i++) {
+                          const row = parsed[i];
+                          if (!Array.isArray(row)) {
+                             isValid = false;
+                             errorMsg = 'Must be a multi-dimensional array (array of arrays)';
+                             break;
+                          }
+                          for (let j = 0; j < row.length; j++) {
+                             const num = Number(row[j]);
+                             if (isNaN(num)) {
+                                isValid = false;
+                                errorMsg = 'All array items must be numbers';
+                                break;
+                             }
+                             if (subItemSchema) {
+                                if (subItemSchema.minimum !== undefined && num < subItemSchema.minimum) {
+                                   isValid = false;
+                                   errorMsg = `Items must be >= ${subItemSchema.minimum}`;
+                                   break;
+                                }
+                                if (subItemSchema.maximum !== undefined && num > subItemSchema.maximum) {
+                                   isValid = false;
+                                   errorMsg = `Items must be <= ${subItemSchema.maximum}`;
+                                   break;
+                                }
+                             }
+                          }
+                          if (!isValid) break;
+                       }
                     }
-                    if (itemSchema.minimum !== undefined && num < itemSchema.minimum) {
-                       isValid = false; errorMsg = `Items must be >= ${itemSchema.minimum}`; break;
-                    }
-                    if (itemSchema.maximum !== undefined && num > itemSchema.maximum) {
-                       isValid = false; errorMsg = `Items must be <= ${itemSchema.maximum}`; break;
+                 } catch (err) {
+                    isValid = false;
+                    errorMsg = 'Must be a valid JSON array format';
+                 }
+              } else {
+                 const items = val.split(',').map(s => s.trim());
+                 const itemSchema = prop.items;
+                 if (itemSchema && (itemSchema.type === 'number' || itemSchema.type === 'integer')) {
+                    for (const item of items) {
+                       const num = Number(item);
+                       if (isNaN(num)) {
+                          isValid = false;
+                          errorMsg = 'All array items must be numbers';
+                          break;
+                       }
+                       if (itemSchema.minimum !== undefined && num < itemSchema.minimum) {
+                          isValid = false; errorMsg = `Items must be >= ${itemSchema.minimum}`; break;
+                       }
+                       if (itemSchema.maximum !== undefined && num > itemSchema.maximum) {
+                          isValid = false; errorMsg = `Items must be <= ${itemSchema.maximum}`; break;
+                       }
                     }
                  }
               }
@@ -287,7 +388,8 @@
           group.className = 'form-group';
 
           const label = document.createElement('label');
-          label.textContent = key + (required.includes(key) ? ' *' : '');
+          const cleanLabel = LABEL_MAPPING[key] || key;
+          label.textContent = cleanLabel + (required.includes(key) ? ' *' : '');
           label.setAttribute('for', key);
 
           if (prop.description) {
@@ -298,25 +400,35 @@
             group.appendChild(desc);
           }
 
-          const input = document.createElement('input');
+          const isMulti = prop.type === 'array' && prop.items && prop.items.type === 'array';
+          const input = isMulti ? document.createElement('textarea') : document.createElement('input');
           input.id = key;
           input.name = key;
 
-          if (prop.type === 'integer' || prop.type === 'number') {
-            input.type = 'number';
-            if (prop.type === 'number') input.step = 'any';
-            if (prop.minimum !== undefined) input.min = prop.minimum;
-            if (prop.maximum !== undefined) input.max = prop.maximum;
-          } else {
-            input.type = 'text';
-            if (prop.type === 'array') {
-              input.placeholder = 'e.g., 0.1, 0.2, 0.3';
+          if (!isMulti) {
+            if (prop.type === 'integer' || prop.type === 'number') {
+              input.type = 'number';
+              if (prop.type === 'number') input.step = 'any';
+              if (prop.minimum !== undefined) input.min = prop.minimum;
+              if (prop.maximum !== undefined) input.max = prop.maximum;
+            } else {
+              input.type = 'text';
+              if (prop.type === 'array') {
+                input.placeholder = 'e.g., 0.1, 0.2, 0.3';
+              }
             }
+          } else {
+            input.placeholder = 'e.g., [[0.1, 0.2], [0.3, 0.4]]';
+            input.rows = 4;
           }
 
           if (prop.default !== undefined) {
              if (prop.type === 'array') {
-               input.value = Array.isArray(prop.default) ? prop.default.join(', ') : prop.default;
+               if (isMulti) {
+                 input.value = JSON.stringify(prop.default);
+               } else {
+                 input.value = Array.isArray(prop.default) ? prop.default.join(', ') : prop.default;
+               }
              } else {
                input.value = prop.default;
              }
@@ -349,14 +461,47 @@
         form.onsubmit = (e) => {
            e.preventDefault();
            let allValid = true;
+           const payload = {};
+
            for (const [key, prop] of Object.entries(properties)) {
               const input = document.getElementById(key);
               const error = document.getElementById(key + '-error');
               if (!validateField(input, prop, error)) {
                  allValid = false;
+              } else {
+                 const val = input.value;
+                 if (val.trim() === '') {
+                    payload[key] = null;
+                 } else if (prop.type === 'integer' || prop.type === 'number') {
+                    payload[key] = Number(val);
+                 } else if (prop.type === 'boolean') {
+                    payload[key] = (val === 'true');
+                 } else if (prop.type === 'array') {
+                    const isMulti = prop.items && prop.items.type === 'array';
+                    if (isMulti) {
+                       payload[key] = JSON.parse(val);
+                    } else {
+                       payload[key] = val.split(',').map(s => Number(s.trim()));
+                    }
+                 } else {
+                    payload[key] = val;
+                 }
               }
            }
            if (allValid) {
+              console.log("Submitting payload:", payload);
+              fetch('api/simulate', {
+                 method: 'POST',
+                 headers: {
+                    'Content-Type': 'application/json'
+                 },
+                 body: JSON.stringify(payload)
+              }).then(res => {
+                 console.log("Response from mock backend:", res);
+              }).catch(err => {
+                 console.error("Fetch error (expected if no real backend is running):", err);
+              });
+
               alert("Simulation configuration valid and submitted!");
            } else {
               alert("Please correct validation errors before submitting.");
