@@ -9,7 +9,9 @@ from clintrials.validation import (
     validate_bounds,
     validate_positive_integer,
     validate_probability,
-    validate_version,
+)
+from clintrials.validation import (
+    validate_version as _validate_version,
 )
 
 
@@ -126,7 +128,7 @@ class BaseModel:
                     if is_pos_int:
                         validate_positive_integer(value, name)
                     if is_version:
-                        validate_version(value, name)
+                        _validate_version(value, name)
 
                     if arg.ge is not None or arg.le is not None:
                         validate_bounds(value, lower=arg.ge, upper=arg.le, name=name, exclusive=False)

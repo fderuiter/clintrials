@@ -69,6 +69,12 @@ jobs:
           # Setup Simulation Hub in /hub/
           mkdir -p public/hub
           cp -a hub/. public/hub/
+          cp dist/*.whl public/hub/
+          VERSION=$(poetry version -s)
+          echo "{\"version\": \"$VERSION\", \"wheel\": \"clintrials-$VERSION-py3-none-any.whl\"}" > public/hub/build-manifest.json
+
+      - name: Verify PEP 440 version compatibility
+        run: poetry run python scripts/verify_pep440_version.py public/hub/build-manifest.json
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

@@ -44,9 +44,9 @@ def bernoulli_likelihood(p: Union[float, np.ndarray[Any, np.dtype[np.float64]]],
     p = np.clip(p, 1e-15, 1 - 1e-15)
     log_l = y * np.log(p) + (1 - y) * np.log(1 - p)
     if log:
-        return log_l  # type: ignore[no-any-return]
+        return log_l  # type: ignore[no-any-return, return-value, unused-ignore]
     else:
-        return np.exp(np.clip(log_l, -700, 700))  # type: ignore[no-any-return]
+        return np.exp(np.clip(log_l, -700, 700))  # type: ignore[no-any-return, unused-ignore]
 
 
 def inverse_logit(x: float) -> float:
@@ -101,7 +101,7 @@ def _inverse_logistic_core(
     if np.any(x <= 0) or np.any(x >= 1):
         raise ValueError(ErrorTemplates.PROBABILITY.format(name="x"))
     beta = np.clip(beta, CORE_REGISTRY["math_clip_beta_min"], CORE_REGISTRY["math_clip_beta_max"])
-    return (np.log(x / (1 - x)) - a0) / np.exp(beta)  # type: ignore[no-any-return]
+    return (np.log(x / (1 - x)) - a0) / np.exp(beta)  # type: ignore[no-any-return, unused-ignore]
 
 
 @inject_docs()
