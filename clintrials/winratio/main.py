@@ -31,6 +31,11 @@ class WinRatioTrial(Protocol):
         self.ci = None
         self._completed = False
 
+    @property
+    def schema(self) -> WinRatioSchema:
+        """The validated WinRatio schema."""
+        return self.config
+
     def reset(self):  # type: ignore
         """Reset the simulation state."""
         self.success = False

@@ -88,7 +88,7 @@ class GroupSequentialDesign(Protocol):
         """
         from clintrials.core.schema import GroupSequentialDesignSchema
         schema_args = {"k": k, "alpha": alpha, "timing": timing}
-        GroupSequentialDesignSchema(**schema_args)
+        self._schema = GroupSequentialDesignSchema(**schema_args)
 
         self.k = k
         self.alpha = alpha
@@ -105,6 +105,11 @@ class GroupSequentialDesign(Protocol):
 
         self.efficacy_boundaries = self._compute_efficacy_boundaries()
         self.reset()  # type: ignore
+
+    @property
+    def schema(self) -> Any:
+        """The validated GroupSequentialDesign schema."""
+        return self._schema
 
     def reset(self):  # type: ignore
         """Reset the group sequential design state."""

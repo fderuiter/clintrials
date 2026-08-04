@@ -2243,6 +2243,12 @@
               "default": null
             },
             {
+              "name": "theta_priors",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
+            },
+            {
               "name": "prior_tox_probs",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Optional[List[Probability]]",
@@ -5814,6 +5820,9 @@
         "sample_size": {
           "type": "property"
         },
+        "schema": {
+          "type": "property"
+        },
         "set_next_dose": {
           "type": "method",
           "parameters": [
@@ -7577,6 +7586,9 @@
             }
           ]
         },
+        "schema": {
+          "type": "property"
+        },
         "set_next_dose": {
           "type": "method",
           "parameters": [
@@ -8578,6 +8590,9 @@
           ]
         },
         "sample_size": {
+          "type": "property"
+        },
+        "schema": {
           "type": "property"
         },
         "set_next_dose": {
@@ -9607,6 +9622,9 @@
             }
           ]
         },
+        "schema": {
+          "type": "property"
+        },
         "set_next_dose": {
           "type": "method",
           "parameters": [
@@ -10284,6 +10302,9 @@
           ]
         },
         "sample_size": {
+          "type": "property"
+        },
+        "schema": {
           "type": "property"
         },
         "set_next_dose": {
@@ -11414,6 +11435,9 @@
             }
           ]
         },
+        "schema": {
+          "type": "property"
+        },
         "set_next_dose": {
           "type": "method",
           "parameters": [
@@ -11748,6 +11772,9 @@
               "default": null
             }
           ]
+        },
+        "schema": {
+          "type": "property"
         },
         "set_rng": {
           "type": "method",
@@ -13565,6 +13592,9 @@
         "sample_size": {
           "type": "property"
         },
+        "schema": {
+          "type": "property"
+        },
         "set_next_dose": {
           "type": "method",
           "parameters": [
@@ -14279,6 +14309,9 @@
             }
           ]
         },
+        "schema": {
+          "type": "property"
+        },
         "set_next_dose": {
           "type": "method",
           "parameters": [
@@ -14826,6 +14859,9 @@
               "default": null
             }
           ]
+        },
+        "schema": {
+          "type": "property"
         },
         "set_rng": {
           "type": "method",
@@ -15732,6 +15768,9 @@
               "default": null
             }
           ]
+        },
+        "schema": {
+          "type": "property"
         },
         "set_next_dose": {
           "type": "method",
@@ -21813,6 +21852,9 @@
               "default": null
             }
           ]
+        },
+        "schema": {
+          "type": "property"
         },
         "set_rng": {
           "type": "method",

@@ -515,6 +515,7 @@ class CRM(DoseFindingTrial):
             schema_kwargs["sample_size"] = sample_size
 
         config = CRMSchema(**schema_kwargs)
+        self._schema = config
 
         DoseFindingTrial.__init__(
             self,
@@ -557,6 +558,10 @@ class CRM(DoseFindingTrial):
         self.beta_se = np.sqrt(self.beta_var) if self.beta_var is not None else None
         self.post_tox = list(self.prior)
 
+    @property
+    def schema(self) -> Any:
+        """The validated CRM schema."""
+        return self._schema
 
     @property
     def min_beta(self):  # type: ignore
