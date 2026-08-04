@@ -36,7 +36,7 @@ def extract_markdown_links(content: str) -> list[str]:
                         found_bracket_close = True
                         break
                 j += 1
-            
+
             if found_bracket_close and j + 1 < n and content[j + 1] == '(':
                 # Scan the parenthesis block
                 k = j + 2
@@ -56,7 +56,7 @@ def extract_markdown_links(content: str) -> list[str]:
                     else:
                         path_chars.append(content[k])
                     k += 1
-                
+
                 if found_paren_close:
                     path_str = "".join(path_chars).strip()
                     if path_str:
@@ -108,7 +108,7 @@ def resolve_and_verify(path_str: str, f: Path, root: Path, is_doc_role: bool = F
         resolved = cand.resolve()
         if resolved.exists():
             return True
-        
+
         # If the path has no suffix, or if we are explicitly checking a doc reference,
         # check with standard documentation extensions (.rst and .md).
         if not resolved.suffix or is_doc_role:
@@ -274,22 +274,22 @@ def test_resolve_and_verify_root_relative(tmp_path: Path) -> None:
 
 def test_validate_docs_scenarios(tmp_path: Path) -> None:
     root = tmp_path
-    
+
     # Create target files
     docs_dir = root / "docs"
     docs_dir.mkdir(parents=True, exist_ok=True)
-    
+
     getting_started = docs_dir / "getting_started.rst"
     getting_started.touch()
-    
+
     index_md = docs_dir / "index.md"
     index_md.touch()
-    
+
     tutorials_dir = docs_dir / "tutorials"
     tutorials_dir.mkdir(exist_ok=True)
     tutorial_with_parens = tutorials_dir / "EffTox - Nuts and Bolts (Simplified).ipynb"
     tutorial_with_parens.touch()
-    
+
     # Create an MD file with valid and invalid links
     md_test_file = docs_dir / "test.md"
     md_content = """
@@ -302,7 +302,7 @@ Here is a broken root-relative link: [Broken](/docs/does-not-exist.rst)
 Here is a broken parenthesized link: [Broken Parens](/docs/tutorials/EffTox - (Broken).ipynb)
     """
     md_test_file.write_text(md_content)
-    
+
     # Create an RST file with valid and invalid links/roles
     rst_test_file = docs_dir / "test.rst"
     rst_content = """
@@ -327,17 +327,17 @@ Directive tests:
   .. image:: /docs/nonexistent.png
     """
     rst_test_file.write_text(rst_content)
-    
+
     broken = validate_docs(root)
     broken_str = "\n".join(broken)
-    
+
     assert "docs/does-not-exist.rst" in broken_str
     assert "EffTox - (Broken).ipynb" in broken_str
     assert "nonexistent.rst" in broken_str
     assert "nonexistent" in broken_str
     assert "nonexistent.zip" in broken_str
     assert "nonexistent.png" in broken_str
-    
+
     # Verify that valid links do NOT show up in broken
     assert "getting_started.rst" not in broken_str
     assert "EffTox - Nuts and Bolts (Simplified).ipynb" not in broken_str
