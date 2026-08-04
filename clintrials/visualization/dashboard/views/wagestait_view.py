@@ -1,68 +1,69 @@
 """Renders the Wages & Tait simulation results view in the Streamlit dashboard."""
 
-import streamlit as st
-
-from clintrials.core.registry import PROTOCOL_REGISTRY
-from clintrials.core.simulation import extract_sim_data
-from clintrials.visualization.dashboard.views.framework import dashboard_view
+from clintrials.dosefinding.wagestait import WagesTait
+from clintrials.visualization.dashboard.views.framework import BaseSimulationView
 
 
-def wagestait_preview_sims(target_tox, cohort_size, max_size):  # type: ignore
-    """Generate preview simulations for the Wages & Tait model."""
-    from clintrials.core.simulation import run_bivariate_simulations
-    from clintrials.dosefinding.wagestait import WagesTait
+class WagesTaitView(BaseSimulationView):
+    """View class for the Wages & Tait trial model."""
 
-    skeletons = [
-        [0.60, 0.50, 0.40, 0.30, 0.20],
-        [0.50, 0.60, 0.50, 0.40, 0.30],
-        [0.40, 0.50, 0.60, 0.50, 0.40],
-        [0.30, 0.40, 0.50, 0.60, 0.50],
-        [0.20, 0.30, 0.40, 0.50, 0.60],
-    ]
-    tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
-
-    wt = WagesTait(
-        skeletons=skeletons,
-        prior_tox_probs=tox_prior,
-        tox_target=target_tox,
-        tox_limit=0.4,
-        eff_limit=0.2,
-        first_dose=1,
-        max_size=max_size,
-        randomisation_stage_size=max_size // 2,
-    )
-
-    tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
-    eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
-    return run_bivariate_simulations(wt, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
-
-@PROTOCOL_REGISTRY.register("Wages & Tait", preview_func=wagestait_preview_sims)
-@dashboard_view(title="Wages & Tait Simulation Results", model_name="Wages & Tait", file_prefix="wagestait_simulations", param_space_config={
-    "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
-    "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
-})
-def render(sims, ps):  # type: ignore
-    """Renders the Wages & Tait simulation results view."""
-    from clintrials.dosefinding.wagestait import WagesTait
-    func_map = WagesTait.get_summary_functions()  # type: ignore
-
-    var_map = {
+    model_name = "Wages & Tait"
+    title = "Wages & Tait Simulation Results"
+    file_prefix = "wagestait_simulations"
+    model_class = WagesTait  # type: ignore
+    param_space_config = {
+        "true_prob_tox": [(0.05, 0.1, 0.2, 0.3, 0.4)],
+        "true_prob_eff": [(0.2, 0.3, 0.4, 0.5, 0.6)],
+    }
+    var_map = {  # type: ignore
         "true_prob_tox": "true_prob_tox",
         "true_prob_eff": "true_prob_eff",
     }
 
-    summary_df = extract_sim_data(sims, ps, func_map, var_map=var_map, return_type="dataframe")
+    @classmethod
+    def preview_sims(cls, target_tox, cohort_size, max_size):  # type: ignore
+        """Generate preview simulations for the Wages & Tait model."""
+        from clintrials.core.simulation import run_bivariate_simulations
 
-    figures = []
-    if not summary_df.empty:
-        if "recommended_dose_prob" in summary_df.columns:
-            from clintrials.core.viz_interface import get_visualization_provider
-            fig_rec = get_visualization_provider().plot_bivariate_simulation_recommendation(  # type: ignore
-                summary_df,
-                high_contrast=False
-            )
-            figures.append(("Dose Recommendation Probability", fig_rec))
-    else:
-        st.warning("Summary dataframe is empty. Cannot generate plots.")
+        skeletons = [
+            [0.60, 0.50, 0.40, 0.30, 0.20],
+            [0.50, 0.60, 0.50, 0.40, 0.30],
+            [0.40, 0.50, 0.60, 0.50, 0.40],
+            [0.30, 0.40, 0.50, 0.60, 0.50],
+            [0.20, 0.30, 0.40, 0.50, 0.60],
+        ]
+        tox_prior = [0.05, 0.1, 0.2, 0.3, 0.4]
 
-    return summary_df, figures
+        wt = WagesTait(
+            skeletons=skeletons,
+            prior_tox_probs=tox_prior,
+            tox_target=target_tox,
+            tox_limit=0.4,
+            eff_limit=0.2,
+            first_dose=1,
+            max_size=max_size,
+            randomisation_stage_size=max_size // 2,
+        )
+
+        tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
+        eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
+        return run_bivariate_simulations(wt, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
+
+    @classmethod
+    def build_figures(cls, summary_df):  # type: ignore
+        """Generate visualization plots for the Wages & Tait summary dataframe."""
+        import streamlit as st
+        figures = []
+        if not summary_df.empty:
+            if "recommended_dose_prob" in summary_df.columns:
+                from clintrials.core.viz_interface import get_visualization_provider
+
+                fig_rec = get_visualization_provider().plot_bivariate_simulation_recommendation(  # type: ignore
+                    summary_df,
+                    high_contrast=False
+                )
+                figures.append(("Dose Recommendation Probability", fig_rec))
+        else:
+            st.warning("Summary dataframe is empty. Cannot generate plots.")
+
+        return figures

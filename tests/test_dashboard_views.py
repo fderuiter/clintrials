@@ -455,3 +455,22 @@ def test_get_preview_sims_watu(monkeypatch):
 
     assert len(sims) == 10
     assert mock_sim.call_count == 10
+
+
+def test_unified_class_based_views_subclassing():
+    """Verify that all views successfully inherit from the unified BaseSimulationView class."""
+    from clintrials.visualization.dashboard.views.crm_view import CRMView
+    from clintrials.visualization.dashboard.views.efftox_view import EffToxView
+    from clintrials.visualization.dashboard.views.framework import BaseSimulationView
+    from clintrials.visualization.dashboard.views.gsd_view import GSDView
+    from clintrials.visualization.dashboard.views.wagestait_view import WagesTaitView
+    from clintrials.visualization.dashboard.views.watu_view import WATUView
+    from clintrials.visualization.dashboard.views.winratio_view import WinRatioView
+
+    assert issubclass(CRMView, BaseSimulationView)
+    assert issubclass(EffToxView, BaseSimulationView)
+    assert issubclass(WATUView, BaseSimulationView)
+    assert issubclass(GSDView, BaseSimulationView)
+    assert issubclass(WinRatioView, BaseSimulationView)
+    assert issubclass(WagesTaitView, BaseSimulationView)
+

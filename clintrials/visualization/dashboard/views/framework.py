@@ -72,7 +72,8 @@ def render_sidebar_config(param_space_config: dict) -> ParameterSpace:  # type: 
     ps = ParameterSpace()
     for k, v in param_space_config.items():
         ps.add(k, v)
-    st.sidebar.json(param_space_config)
+    if param_space_config:
+        st.sidebar.json(param_space_config)
     return ps
 
 
