@@ -68,7 +68,7 @@ def test_plot_efftox_density():
         def resample(self, boot_samps):
             return np.random.choice([1.0, 2.0], size=boot_samps)
 
-    trial.pds = DummyPDS()  # type: ignore[no-untyped-call]
+    trial.pds = DummyPDS()
 
     def data_func(x, samp):
         return np.random.normal(0, 1, size=len(samp))

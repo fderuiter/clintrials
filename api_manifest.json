@@ -889,6 +889,32 @@
             }
           ]
         },
+        "resample": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "boot_samps",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": "None"
+            }
+          ]
+        },
+        "samples": {
+          "type": "property"
+        },
         "variance": {
           "type": "method",
           "parameters": [
@@ -3296,6 +3322,32 @@
               "default": null
             }
           ]
+        },
+        "resample": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "boot_samps",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": "None"
+            }
+          ]
+        },
+        "samples": {
+          "type": "property"
         },
         "variance": {
           "type": "method",
