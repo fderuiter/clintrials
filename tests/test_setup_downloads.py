@@ -2,6 +2,7 @@ import os
 import subprocess
 import tempfile
 
+
 def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
     # Create a temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -10,11 +11,11 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
         with open(mock_curl_path, "w") as f:
             f.write("#!/bin/bash\nexit 1\n")
         os.chmod(mock_curl_path, 0o755)
-        
+
         # Setup the environment with the temporary directory at the front of PATH
         env = os.environ.copy()
         env["PATH"] = tmpdir + os.pathsep + env.get("PATH", "")
-        
+
         # Run fetch_vendor.sh
         result = subprocess.run(
             ["./fetch_vendor.sh"],
@@ -23,17 +24,17 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
             env=env,
             cwd="/app"
         )
-        
+
         # It must exit with code 0 (soft-fail)
         assert result.returncode == 0
-        
+
         # Verify it printed the warnings to stderr
         assert "WARNING: Failed to download unreachable dependency:" in result.stderr
         assert "iframeResizer.contentWindow.min.js" in result.stderr
         assert "iframeResizer.min.js" in result.stderr
         assert "nested client-side iframe communication and automatic height resizing" in result.stderr
         assert "interactive embedded frame resizing and layout responsiveness" in result.stderr
-        
+
         # Since it retries 3 times per download (making 4 attempts total)
         # Verify curl was called 8 times total (4 for each file)
         attempts_count = result.stdout.count("attempt ")
