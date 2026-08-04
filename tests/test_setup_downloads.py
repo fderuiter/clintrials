@@ -2,6 +2,8 @@ import os
 import subprocess
 import tempfile
 
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
     # Create a temporary directory
@@ -18,7 +20,11 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
 
         # Run fetch_vendor.sh
         result = subprocess.run(
-            ["./fetch_vendor.sh"], capture_output=True, text=True, env=env, cwd="/app"
+            ["./fetch_vendor.sh"],
+            capture_output=True,
+            text=True,
+            env=env,
+            cwd=PROJECT_ROOT,
         )
 
         # It must exit with code 0 (soft-fail)
@@ -44,7 +50,7 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
 
 
 def test_setup_sh_contains_timeouts():
-    setup_sh_path = "/app/setup.sh"
+    setup_sh_path = os.path.join(PROJECT_ROOT, "setup.sh")
     with open(setup_sh_path, "r") as f:
         content = f.read()
     assert "export PIP_TIMEOUT=30" in content
@@ -53,7 +59,7 @@ def test_setup_sh_contains_timeouts():
 
 
 def test_setup_ps1_contains_timeouts():
-    setup_ps1_path = "/app/setup.ps1"
+    setup_ps1_path = os.path.join(PROJECT_ROOT, "setup.ps1")
     with open(setup_ps1_path, "r") as f:
         content = f.read()
     assert '$env:PIP_TIMEOUT = "30"' in content
