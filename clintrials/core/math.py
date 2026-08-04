@@ -234,7 +234,7 @@ def association_to_correlation(psi: Union[float, np.ndarray[Any, np.dtype[np.flo
     Returns:
         float or numpy.ndarray: The correlation coefficient.
     """
-    return (np.exp(psi) - 1) / (np.exp(psi) + 1)  # type: ignore[no-any-return]
+    return (np.exp(psi) - 1) / (np.exp(psi) + 1)
 
 
 def fgm_joint_prob(a: Union[int, np.ndarray[Any, np.dtype[np.int_]]], b: Union[int, np.ndarray[Any, np.dtype[np.int_]]], p1: Union[float, np.ndarray[Any, np.dtype[np.float64]]], p2: Union[float, np.ndarray[Any, np.dtype[np.float64]]], psi: Union[float, np.ndarray[Any, np.dtype[np.float64]]]) -> Union[float, np.ndarray[Any, np.dtype[np.float64]]]:
