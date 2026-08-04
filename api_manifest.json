@@ -851,6 +851,9 @@
             }
           ]
         },
+        "schema": {
+          "type": "property"
+        },
         "set_next_dose": {
           "type": "method",
           "parameters": [
@@ -16630,6 +16633,9 @@
               "default": null
             }
           ]
+        },
+        "schema": {
+          "type": "property"
         },
         "set_next_dose": {
           "type": "method",
