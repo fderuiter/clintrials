@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "Fetching external vendor dependencies..."
 
 # Helper function to download file with timeout and retry
@@ -47,13 +49,13 @@ download_with_retry() {
 # Hub dependencies
 download_with_retry \
     "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.contentWindow.min.js" \
-    "hub/vendor/iframeResizer.contentWindow.min.js" \
+    "$SCRIPT_DIR/hub/vendor/iframeResizer.contentWindow.min.js" \
     "nested client-side iframe communication and automatic height resizing of the embedded Simulation Hub dashboard inside parent layouts"
 
 # Docs dependencies
 download_with_retry \
     "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.min.js" \
-    "docs/_static/vendor/iframeResizer.min.js" \
+    "$SCRIPT_DIR/docs/_static/vendor/iframeResizer.min.js" \
     "interactive embedded frame resizing and layout responsiveness within clinical trials documentation pages, such as the Simulation Hub drawer"
 
 echo "Vendor dependencies fetched successfully."

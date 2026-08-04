@@ -52,12 +52,12 @@ function Download-FileWithRetry {
 
 Download-FileWithRetry `
     -Uri "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.contentWindow.min.js" `
-    -OutFile "hub/vendor/iframeResizer.contentWindow.min.js" `
+    -OutFile "$PSScriptRoot/hub/vendor/iframeResizer.contentWindow.min.js" `
     -FeatureDesc "nested client-side iframe communication and automatic height resizing of the embedded Simulation Hub dashboard inside parent layouts"
 
 Download-FileWithRetry `
     -Uri "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.min.js" `
-    -OutFile "docs/_static/vendor/iframeResizer.min.js" `
+    -OutFile "$PSScriptRoot/docs/_static/vendor/iframeResizer.min.js" `
     -FeatureDesc "interactive embedded frame resizing and layout responsiveness within clinical trials documentation pages, such as the Simulation Hub drawer"
 
 Write-Host "Vendor dependencies fetched successfully."
