@@ -52,6 +52,12 @@ class BaseModel:
 
                     if val.default is dataclasses.MISSING:
                         setattr(cls, name, dataclasses.field())
+                    elif isinstance(val.default, (list, dict, set)):
+                        import copy
+                        from typing import Callable
+                        def make_factory(d: Any) -> Callable[[], Any]:
+                            return lambda: copy.deepcopy(d)
+                        setattr(cls, name, dataclasses.field(default_factory=make_factory(val.default)))
                     else:
                         setattr(cls, name, dataclasses.field(default=val.default))
             else:
@@ -269,14 +275,42 @@ class EffToxSchema(BaseModel):
 class WagesTaitSchema(BaseModel):
     """Schema for validating Wages & Tait design parameters."""
 
-    skeletons: List[List[float]] = Field(description="A list of efficacy skeletons.")
-    prior_tox_probs: List[Probability] = Field(description="A list of prior toxicity probabilities.")
-    tox_target: Probability = Field(description="The target toxicity rate.")
-    tox_limit: Probability = Field(description="The maximum acceptable toxicity probability.")
-    eff_limit: Probability = Field(description="The minimum acceptable efficacy probability.")
-    max_size: PositiveInt = Field(description="The maximum number of patients in the trial.")
-    randomisation_stage_size: PositiveInt = Field(description="The number of patients to randomize in the first stage.")
-    first_dose: Optional[PositiveInt] = Field(default=None, description="The starting dose level (1-based).")
+    skeletons: List[List[float]] = Field(
+        default=[
+            [0.60, 0.50, 0.40, 0.30, 0.20, 0.10],
+            [0.50, 0.60, 0.50, 0.40, 0.30, 0.20],
+            [0.40, 0.50, 0.60, 0.50, 0.40, 0.30]
+        ],
+        description="A list of efficacy skeletons."
+    )
+    prior_tox_probs: List[Probability] = Field(
+        default=[0.01, 0.08, 0.15, 0.22, 0.29, 0.36],
+        description="A list of prior toxicity probabilities."
+    )
+    tox_target: Probability = Field(
+        default=0.30,
+        description="The target toxicity rate."
+    )
+    tox_limit: Probability = Field(
+        default=0.33,
+        description="The maximum acceptable toxicity probability."
+    )
+    eff_limit: Probability = Field(
+        default=0.05,
+        description="The minimum acceptable efficacy probability."
+    )
+    max_size: PositiveInt = Field(
+        default=64,
+        description="The maximum number of patients in the trial."
+    )
+    randomisation_stage_size: PositiveInt = Field(
+        default=16,
+        description="The number of patients to randomize in the first stage."
+    )
+    first_dose: Optional[PositiveInt] = Field(
+        default=1,
+        description="The starting dose level (1-based)."
+    )
 
     def __post_init__(self) -> None:
         """Performs additional validation on WagesTait parameters."""
@@ -297,16 +331,50 @@ class WagesTaitSchema(BaseModel):
 class WATUSchema(BaseModel):
     """Schema for validating WATU design parameters."""
 
-    skeletons: List[List[float]] = Field(description="A list of efficacy skeletons.")
-    prior_tox_probs: List[Probability] = Field(description="A list of prior toxicity probabilities.")
-    tox_target: Probability = Field(description="The target toxicity rate.")
-    tox_limit: Probability = Field(description="The maximum acceptable toxicity probability.")
-    eff_limit: Probability = Field(description="The minimum acceptable efficacy probability.")
-    max_size: PositiveInt = Field(description="The maximum number of patients in the trial.")
-    stage_one_size: int = Field(default=0, description="The size of the first stage of the trial.")
-    tox_certainty: Probability = Field(default=0.05, description="The posterior certainty required that toxicity is less than the cutoff.")
-    eff_certainty: Probability = Field(default=0.05, description="The posterior certainty required that efficacy is greater than the cutoff.")
-    first_dose: Optional[PositiveInt] = Field(default=None, description="The starting dose level (1-based).")
+    skeletons: List[List[float]] = Field(
+        default=[
+            [0.60, 0.50, 0.40, 0.30, 0.20, 0.10],
+            [0.50, 0.60, 0.50, 0.40, 0.30, 0.20],
+            [0.40, 0.50, 0.60, 0.50, 0.40, 0.30]
+        ],
+        description="A list of efficacy skeletons."
+    )
+    prior_tox_probs: List[Probability] = Field(
+        default=[0.01, 0.08, 0.15, 0.22, 0.29, 0.36],
+        description="A list of prior toxicity probabilities."
+    )
+    tox_target: Probability = Field(
+        default=0.30,
+        description="The target toxicity rate."
+    )
+    tox_limit: Probability = Field(
+        default=0.33,
+        description="The maximum acceptable toxicity probability."
+    )
+    eff_limit: Probability = Field(
+        default=0.05,
+        description="The minimum acceptable efficacy probability."
+    )
+    max_size: PositiveInt = Field(
+        default=64,
+        description="The maximum number of patients in the trial."
+    )
+    stage_one_size: int = Field(
+        default=16,
+        description="The size of the first stage of the trial."
+    )
+    tox_certainty: Probability = Field(
+        default=0.05,
+        description="The posterior certainty required that toxicity is less than the cutoff."
+    )
+    eff_certainty: Probability = Field(
+        default=0.05,
+        description="The posterior certainty required that efficacy is greater than the cutoff."
+    )
+    first_dose: Optional[PositiveInt] = Field(
+        default=1,
+        description="The starting dose level (1-based)."
+    )
 
     def __post_init__(self) -> None:
         """Performs additional validation on WATU parameters."""

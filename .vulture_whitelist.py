@@ -42,4 +42,7 @@ validate_version  # unused function (clintrials/validation.py:125)
 _.set_defaults  # unused method (clintrials/core/registry.py:163)
 _.simulate  # unused method (clintrials/phase3/gsd.py:217)
 _.schema  # unused property (trial classes)
+GSDView  # unused class (clintrials/visualization/dashboard/views/gsd_view.py:17)
+WagesTaitView  # unused class (clintrials/visualization/dashboard/views/wagestait_view.py:7)
+WinRatioView  # unused class (clintrials/visualization/dashboard/views/winratio_view.py:14)
 
