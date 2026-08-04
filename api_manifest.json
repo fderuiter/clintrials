@@ -3433,43 +3433,43 @@
               "name": "skeletons",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "List[List[float]]",
-              "default": null
+              "default": "<factory>"
             },
             {
               "name": "prior_tox_probs",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "List[Probability]",
-              "default": null
+              "default": "<factory>"
             },
             {
               "name": "tox_target",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Probability",
-              "default": null
+              "default": "0.3"
             },
             {
               "name": "tox_limit",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Probability",
-              "default": null
+              "default": "0.33"
             },
             {
               "name": "eff_limit",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Probability",
-              "default": null
+              "default": "0.05"
             },
             {
               "name": "max_size",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "PositiveInt",
-              "default": null
+              "default": "64"
             },
             {
               "name": "stage_one_size",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "int",
-              "default": "0"
+              "default": "16"
             },
             {
               "name": "tox_certainty",
@@ -3487,7 +3487,7 @@
               "name": "first_dose",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Optional[PositiveInt]",
-              "default": "None"
+              "default": "1"
             }
           ]
         }
@@ -3509,49 +3509,49 @@
               "name": "skeletons",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "List[List[float]]",
-              "default": null
+              "default": "<factory>"
             },
             {
               "name": "prior_tox_probs",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "List[Probability]",
-              "default": null
+              "default": "<factory>"
             },
             {
               "name": "tox_target",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Probability",
-              "default": null
+              "default": "0.3"
             },
             {
               "name": "tox_limit",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Probability",
-              "default": null
+              "default": "0.33"
             },
             {
               "name": "eff_limit",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Probability",
-              "default": null
+              "default": "0.05"
             },
             {
               "name": "max_size",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "PositiveInt",
-              "default": null
+              "default": "64"
             },
             {
               "name": "randomisation_stage_size",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "PositiveInt",
-              "default": null
+              "default": "16"
             },
             {
               "name": "first_dose",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Optional[PositiveInt]",
-              "default": "None"
+              "default": "1"
             }
           ]
         }
