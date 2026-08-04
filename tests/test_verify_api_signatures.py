@@ -4,6 +4,7 @@ from scripts.verify_api_signatures import (
     clean_dynamic_info,
     compare_manifests,
     compare_parameters,
+    generate_manifest,
     get_public_methods,
     get_signature_info,
     scan_module,
@@ -39,7 +40,6 @@ def test_get_signature_info() -> None:
 
 def test_get_public_methods() -> None:
     class DummyClass:
-
         def __init__(self, x: int) -> None:
             self.x = x
 
@@ -83,10 +83,20 @@ def test_get_public_methods() -> None:
 def test_compare_parameters() -> None:
     # Identical parameters
     p1: typing.List[typing.Dict[str, typing.Any]] = [
-        {"name": "a", "kind": "POSITIONAL_OR_KEYWORD", "annotation": "int", "default": None}
+        {
+            "name": "a",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int",
+            "default": None,
+        }
     ]
     p2: typing.List[typing.Dict[str, typing.Any]] = [
-        {"name": "a", "kind": "POSITIONAL_OR_KEYWORD", "annotation": "int", "default": None}
+        {
+            "name": "a",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": "int",
+            "default": None,
+        }
     ]
     assert compare_parameters(p1, p2) == []
 
@@ -111,12 +121,32 @@ def test_compare_parameters() -> None:
 
     # Order changed
     p_order1: typing.List[typing.Dict[str, typing.Any]] = [
-        {"name": "a", "kind": "POSITIONAL_OR_KEYWORD", "annotation": None, "default": None},
-        {"name": "b", "kind": "POSITIONAL_OR_KEYWORD", "annotation": None, "default": None},
+        {
+            "name": "a",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": None,
+            "default": None,
+        },
+        {
+            "name": "b",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": None,
+            "default": None,
+        },
     ]
     p_order2: typing.List[typing.Dict[str, typing.Any]] = [
-        {"name": "b", "kind": "POSITIONAL_OR_KEYWORD", "annotation": None, "default": None},
-        {"name": "a", "kind": "POSITIONAL_OR_KEYWORD", "annotation": None, "default": None},
+        {
+            "name": "b",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": None,
+            "default": None,
+        },
+        {
+            "name": "a",
+            "kind": "POSITIONAL_OR_KEYWORD",
+            "annotation": None,
+            "default": None,
+        },
     ]
     diffs4 = compare_parameters(p_order1, p_order2)
     assert any("order changed" in d for d in diffs4)
@@ -132,7 +162,12 @@ def test_compare_manifests() -> None:
                     "__init__": {
                         "type": "method",
                         "parameters": [
-                            {"name": "self", "kind": "POSITIONAL_OR_KEYWORD", "annotation": None, "default": None}
+                            {
+                                "name": "self",
+                                "kind": "POSITIONAL_OR_KEYWORD",
+                                "annotation": None,
+                                "default": None,
+                            }
                         ],
                     }
                 },
@@ -143,7 +178,14 @@ def test_compare_manifests() -> None:
         "module1": {
             "WATU": {
                 "type": "function",
-                "parameters": [{"name": "x", "kind": "POSITIONAL_OR_KEYWORD", "annotation": None, "default": None}],
+                "parameters": [
+                    {
+                        "name": "x",
+                        "kind": "POSITIONAL_OR_KEYWORD",
+                        "annotation": None,
+                        "default": None,
+                    }
+                ],
             }
         }
     }
@@ -165,3 +207,17 @@ def test_scan_module() -> None:
     assert "Any" not in manifest
     assert "np" not in manifest
 
+
+def test_scan_module_root() -> None:
+    manifest = scan_module("clintrials")
+    assert "fgm_joint_prob" in manifest
+    # Make sure submodules themselves are not in the exports (since we filter for class/function)
+    assert "core" not in manifest
+    assert "dosefinding" not in manifest
+
+
+def test_generate_manifest_includes_root() -> None:
+    manifest = generate_manifest()
+    assert "clintrials" in manifest
+    assert "clintrials.core" in manifest
+    assert "fgm_joint_prob" in manifest["clintrials"]

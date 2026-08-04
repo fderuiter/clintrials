@@ -360,19 +360,11 @@ def plot_efftox_density(  # type: ignore
 
     x_boot = []
     dose_indices = []
-    samp = trial.pds._samp
-    p = trial.pds._probs
-    p /= p.sum()
 
     for i, x in enumerate(trial.scaled_doses()):
         dose_index = i + 1
         if dose_index in include_doses:
-            dist = np.random.multinomial(boot_samps, p)
-            samp_boot = []
-            for j, count in enumerate(dist):
-                if count > 0:
-                    samp_boot.extend([samp[j]] * count)
-            samp_boot_arr = np.array(samp_boot)
+            samp_boot_arr = trial.pds.resample(boot_samps)
 
             vals = data_func(x, samp_boot_arr)
             x_boot.extend(vals)

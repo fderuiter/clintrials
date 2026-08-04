@@ -44,12 +44,14 @@ def get_signature_info(obj: typing.Any) -> typing.List[typing.Dict[str, typing.A
                 default = repr(param.default)
             default = clean_dynamic_info(default)
 
-            params.append({
-                "name": name,
-                "kind": param.kind.name,
-                "annotation": annotation,
-                "default": default,
-            })
+            params.append(
+                {
+                    "name": name,
+                    "kind": param.kind.name,
+                    "annotation": annotation,
+                    "default": default,
+                }
+            )
         return params
     except (ValueError, TypeError):
         return []
@@ -89,7 +91,9 @@ def scan_module(module_name: str) -> typing.Dict[str, typing.Any]:
     try:
         mod = importlib.import_module(module_name)
     except ModuleNotFoundError as e:
-        sys.stdout.write(f"Error: Missing optional dependency to scan {module_name} ({e}).\n")
+        sys.stdout.write(
+            f"Error: Missing optional dependency to scan {module_name} ({e}).\n"
+        )
         sys.stdout.write("Please install with extras, e.g.: poetry install -E viz\n")
         sys.exit(1)
 
@@ -130,8 +134,16 @@ def generate_manifest() -> typing.Dict[str, typing.Any]:
     import clintrials
 
     manifest = {}
+
+    # Explicitly scan the root module
+    root_manifest = scan_module("clintrials")
+    if root_manifest:
+        manifest["clintrials"] = root_manifest
+
     # Dynamically find all submodules under clintrials package
-    for module_info in pkgutil.walk_packages(clintrials.__path__, clintrials.__name__ + "."):
+    for module_info in pkgutil.walk_packages(
+        clintrials.__path__, clintrials.__name__ + "."
+    ):
         module_name = module_info.name
 
         # Skip private submodules
@@ -147,7 +159,9 @@ def generate_manifest() -> typing.Dict[str, typing.Any]:
     return manifest
 
 
-def compare_parameters(baseline_params: typing.Any, current_params: typing.Any) -> typing.List[str]:
+def compare_parameters(
+    baseline_params: typing.Any, current_params: typing.Any
+) -> typing.List[str]:
     """Compare two parameter lists and return a list of differences."""
     if baseline_params == current_params:
         return []
@@ -168,12 +182,18 @@ def compare_parameters(baseline_params: typing.Any, current_params: typing.Any) 
             else current_params
         )
         if baseline_params != current_names:
-            return [f"parameter list changed from names {baseline_params} to {current_names}"]
+            return [
+                f"parameter list changed from names {baseline_params} to {current_names}"
+            ]
         return []
 
     diffs = []
-    baseline_by_name = {p["name"]: p for p in baseline_params if isinstance(p, dict) and "name" in p}
-    current_by_name = {p["name"]: p for p in current_params if isinstance(p, dict) and "name" in p}
+    baseline_by_name = {
+        p["name"]: p for p in baseline_params if isinstance(p, dict) and "name" in p
+    }
+    current_by_name = {
+        p["name"]: p for p in current_params if isinstance(p, dict) and "name" in p
+    }
 
     # Check for missing parameters
     for name, b_param in baseline_by_name.items():
@@ -184,7 +204,9 @@ def compare_parameters(baseline_params: typing.Any, current_params: typing.Any) 
         c_param = current_by_name[name]
         param_changes = []
         if b_param.get("kind") != c_param.get("kind"):
-            param_changes.append(f"kind changed from {b_param.get('kind')} to {c_param.get('kind')}")
+            param_changes.append(
+                f"kind changed from {b_param.get('kind')} to {c_param.get('kind')}"
+            )
         if b_param.get("annotation") != c_param.get("annotation"):
             param_changes.append(
                 f"annotation changed from {b_param.get('annotation')} to {c_param.get('annotation')}"
@@ -203,7 +225,9 @@ def compare_parameters(baseline_params: typing.Any, current_params: typing.Any) 
             diffs.append(f"parameter '{name}' was added")
 
     # Check if order of parameters changed
-    b_names = [p["name"] for p in baseline_params if isinstance(p, dict) and "name" in p]
+    b_names = [
+        p["name"] for p in baseline_params if isinstance(p, dict) and "name" in p
+    ]
     c_names = [p["name"] for p in current_params if isinstance(p, dict) and "name" in p]
     if b_names != c_names and set(b_names) == set(c_names):
         diffs.append("parameter order changed")
@@ -212,7 +236,8 @@ def compare_parameters(baseline_params: typing.Any, current_params: typing.Any) 
 
 
 def compare_manifests(
-    baseline_manifest: typing.Dict[str, typing.Any], current_manifest: typing.Dict[str, typing.Any]
+    baseline_manifest: typing.Dict[str, typing.Any],
+    current_manifest: typing.Dict[str, typing.Any],
 ) -> typing.List[str]:
     """Compare baseline and current manifests and return a list of differences."""
     diffs = []
@@ -244,7 +269,9 @@ def compare_manifests(
 
                 for method, b_method_info in baseline_methods.items():
                     if method not in current_methods:
-                        diffs.append(f"Method/Property '{method}' missing in class '{name}'.")
+                        diffs.append(
+                            f"Method/Property '{method}' missing in class '{name}'."
+                        )
                         continue
 
                     c_method_info = current_methods[method]
@@ -270,7 +297,11 @@ def compare_manifests(
                         )
                         continue
 
-                    if b_method_info.get("type") in ("method", "classmethod", "staticmethod"):
+                    if b_method_info.get("type") in (
+                        "method",
+                        "classmethod",
+                        "staticmethod",
+                    ):
                         b_params = b_method_info.get("parameters", [])
                         c_params = c_method_info.get("parameters", [])
                         param_diffs = compare_parameters(b_params, c_params)
@@ -284,32 +315,49 @@ def compare_manifests(
                 c_params = current_obj.get("parameters", [])
                 param_diffs = compare_parameters(b_params, c_params)
                 if param_diffs:
-                    diffs.append(f"Parameters for function '{name}' changed: {'; '.join(param_diffs)}.")
+                    diffs.append(
+                        f"Parameters for function '{name}' changed: {'; '.join(param_diffs)}."
+                    )
 
     # Also check for newly added things not in baseline
     for module_name, current_exports in current_manifest.items():
         baseline_exports = baseline_manifest.get(module_name, {})
         for name, current_obj in current_exports.items():
             if name not in baseline_exports:
-                diffs.append(f"Export '{name}' is newly added to module '{module_name}'.")
+                diffs.append(
+                    f"Export '{name}' is newly added to module '{module_name}'."
+                )
                 continue
 
             baseline_obj = baseline_exports[name]
-            if baseline_obj.get("type") == "class" and current_obj.get("type") == "class":
+            if (
+                baseline_obj.get("type") == "class"
+                and current_obj.get("type") == "class"
+            ):
                 current_methods = current_obj.get("methods", {})
                 baseline_methods = baseline_obj.get("methods", {})
                 for method in current_methods:
                     if method not in baseline_methods:
-                        diffs.append(f"Method/Property '{method}' is newly added to class '{name}'.")
+                        diffs.append(
+                            f"Method/Property '{method}' is newly added to class '{name}'."
+                        )
 
     return diffs
 
 
 def main() -> None:
     """Run the API signature verification process."""
-    parser = argparse.ArgumentParser(description="Automated Package-Wide JSON Manifest Hook")
-    parser.add_argument("--generate", action="store_true", help="Recreate or update the baseline JSON manifest file")
-    parser.add_argument("--manifest", default="api_manifest.json", help="Path to the manifest file")
+    parser = argparse.ArgumentParser(
+        description="Automated Package-Wide JSON Manifest Hook"
+    )
+    parser.add_argument(
+        "--generate",
+        action="store_true",
+        help="Recreate or update the baseline JSON manifest file",
+    )
+    parser.add_argument(
+        "--manifest", default="api_manifest.json", help="Path to the manifest file"
+    )
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
@@ -318,11 +366,15 @@ def main() -> None:
     if args.generate:
         with open(manifest_path, "w") as f:
             json.dump(current_manifest, f, indent=2)
-        sys.stdout.write(f"Manifest successfully generated and saved to {manifest_path}\n")
+        sys.stdout.write(
+            f"Manifest successfully generated and saved to {manifest_path}\n"
+        )
         sys.exit(0)
 
     if not manifest_path.exists():
-        sys.stdout.write(f"Error: Manifest file {manifest_path} does not exist. Run with --generate to create it.\n")
+        sys.stdout.write(
+            f"Error: Manifest file {manifest_path} does not exist. Run with --generate to create it.\n"
+        )
         sys.exit(1)
 
     with open(manifest_path, "r") as f:
@@ -332,7 +384,9 @@ def main() -> None:
 
     if diffs:
         sys.stdout.write("API Signature Mismatch Detected!\n")
-        sys.stdout.write("The following differences were found compared to the baseline:\n")
+        sys.stdout.write(
+            "The following differences were found compared to the baseline:\n"
+        )
         for diff in diffs:
             sys.stdout.write(f" - {diff}\n")
         sys.stdout.write(

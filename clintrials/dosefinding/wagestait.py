@@ -146,6 +146,20 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
     An object-oriented implementation for molecularly targeted agents.
     """
 
+    @classmethod
+    def get_summary_functions(cls) -> Any:
+        """Get summary functions for the Wages & Tait protocol."""
+        import pandas as pd
+        return {
+            "N": lambda s, p: len(s),
+            "recommended_dose_prob": lambda s, p: pd.Series(
+                [x.get("RecommendedDose") for x in s]
+            )
+            .value_counts(normalize=True)
+            .sort_index()
+            .to_dict(),
+        }
+
     def __init__(self, skeletons: Any, prior_tox_probs: Any, tox_target: Any, tox_limit: Any, eff_limit: Any, first_dose: Any, max_size: Any, randomisation_stage_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, theta_prior: Any = norm(0, np.sqrt(1.34)), beta_prior: Any = norm(0, np.sqrt(1.34)), excess_toxicity_alpha: Any = 0.025, deficient_efficacy_alpha: Any = 0.025, model_prior_weights: Any = None, use_quick_integration: Any = False, estimate_var: Any = False) -> None:
         """Initializes a WagesTait trial object.
 

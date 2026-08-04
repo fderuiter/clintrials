@@ -79,7 +79,7 @@ def test_adaptive_integration_extreme_case(caplog):
     orig_low = norm(10, 0.1).ppf(1e-6)
     orig_high = norm(10, 0.1).ppf(1 - 1e-6)
 
-    assert np.any(pds_exp._samp < orig_low) or np.any(pds_exp._samp > orig_high)
+    assert np.any(pds_exp.samples < orig_low) or np.any(pds_exp.samples > orig_high)
 
 
 def test_efftox_class_propagation():
