@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Restrict package manager connection timeouts to 30 seconds
+export PIP_TIMEOUT=30
+export PIP_DEFAULT_TIMEOUT=30
+export POETRY_HTTP_TIMEOUT=30
+
 # Setup clintrials development environment using Poetry.
 # Ensures Poetry is installed, project dependencies are installed,
 # pre-commit hooks are configured, and the test suite runs.
