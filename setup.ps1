@@ -1,5 +1,10 @@
 $ErrorActionPreference = "Stop"
 
+# Restrict package manager connection timeouts to 30 seconds
+$env:PIP_TIMEOUT = "30"
+$env:PIP_DEFAULT_TIMEOUT = "30"
+$env:POETRY_HTTP_TIMEOUT = "30"
+
 # Setup clintrials development environment using Poetry.
 # Ensures Poetry is installed, project dependencies are installed,
 # pre-commit hooks are configured, and the test suite runs.
