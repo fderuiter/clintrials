@@ -18,11 +18,7 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
 
         # Run fetch_vendor.sh
         result = subprocess.run(
-            ["./fetch_vendor.sh"],
-            capture_output=True,
-            text=True,
-            env=env,
-            cwd="/app"
+            ["./fetch_vendor.sh"], capture_output=True, text=True, env=env, cwd="/app"
         )
 
         # It must exit with code 0 (soft-fail)
@@ -32,13 +28,20 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
         assert "WARNING: Failed to download unreachable dependency:" in result.stderr
         assert "iframeResizer.contentWindow.min.js" in result.stderr
         assert "iframeResizer.min.js" in result.stderr
-        assert "nested client-side iframe communication and automatic height resizing" in result.stderr
-        assert "interactive embedded frame resizing and layout responsiveness" in result.stderr
+        assert (
+            "nested client-side iframe communication and automatic height resizing"
+            in result.stderr
+        )
+        assert (
+            "interactive embedded frame resizing and layout responsiveness"
+            in result.stderr
+        )
 
         # Since it retries 3 times per download (making 4 attempts total)
         # Verify curl was called 8 times total (4 for each file)
         attempts_count = result.stdout.count("attempt ")
         assert attempts_count == 8
+
 
 def test_setup_sh_contains_timeouts():
     setup_sh_path = "/app/setup.sh"
@@ -48,11 +51,11 @@ def test_setup_sh_contains_timeouts():
     assert "export PIP_DEFAULT_TIMEOUT=30" in content
     assert "export POETRY_HTTP_TIMEOUT=30" in content
 
+
 def test_setup_ps1_contains_timeouts():
     setup_ps1_path = "/app/setup.ps1"
     with open(setup_ps1_path, "r") as f:
         content = f.read()
-    assert "$env:PIP_TIMEOUT = \"30\"" in content
-    assert "$env:PIP_DEFAULT_TIMEOUT = \"30\"" in content
-    assert "$env:POETRY_HTTP_TIMEOUT = \"30\"" in content
-
+    assert '$env:PIP_TIMEOUT = "30"' in content
+    assert '$env:PIP_DEFAULT_TIMEOUT = "30"' in content
+    assert '$env:POETRY_HTTP_TIMEOUT = "30"' in content
