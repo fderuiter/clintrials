@@ -64,6 +64,37 @@ class ProbabilityDensitySample:
         exp2 = self.expectation(vector**2)  # type: ignore
         return exp2 - exp**2
 
+    @property
+    def samples(self) -> Any:
+        """Exposes the samples array as a read-only property.
+
+        Returns:
+            numpy.ndarray: The sample from the distribution.
+        """
+        return self._samp
+
+    def resample(self, boot_samps: int, rng: Any = None) -> np.ndarray:
+        """Performs bootstrap resampling internally and returns the resampled distributions.
+
+        Args:
+            boot_samps (int): The number of bootstrap samples to draw.
+            rng (numpy.random.Generator, optional): Random number generator.
+
+        Returns:
+            numpy.ndarray: The resampled distribution array.
+        """
+        p = self._probs / self._probs.sum()
+        if rng is not None:
+            dist = rng.multinomial(boot_samps, p)
+        else:
+            dist = np.random.multinomial(boot_samps, p)
+
+        samp_boot = []
+        for j, count in enumerate(dist):
+            if count > 0:
+                samp_boot.extend([self._samp[j]] * count)
+        return np.array(samp_boot)
+
 
 def log_scale_wald_interval(ratio: float, standard_error: float, alpha: float = 0.05) -> tuple[float, float]:
     """Calculates the Wald confidence interval for a ratio on the log scale.
