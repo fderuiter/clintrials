@@ -73,7 +73,7 @@ class ProbabilityDensitySample:
         """
         return self._samp
 
-    def resample(self, boot_samps: int, rng: Any = None) -> np.ndarray:
+    def resample(self, boot_samps: int, rng: Any = None) -> np.ndarray[Any, Any]:
         """Performs bootstrap resampling internally and returns the resampled distributions.
 
         Args:
