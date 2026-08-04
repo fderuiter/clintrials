@@ -298,7 +298,7 @@ def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_c
         k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
     pds = _get_posterior_sample(_cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args)
-    samp = pds._samp
+    samp = pds.samples
 
     probs = []
     for x in scaled_doses:
@@ -354,7 +354,7 @@ def efftox_get_posterior_params(cases: Any, priors: Any, scaled_doses: Any, n: A
         k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
     pds = _get_posterior_sample(_cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args)
-    samp = pds._samp
+    samp = pds.samples
 
     params = []
     params.append(
@@ -939,9 +939,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         if dl1 == dl2:
             return 0
 
-        samp = self.pds._samp
-        p = self.pds._probs
-        p /= p.sum()
+        samp = self.pds.samples
 
         x1 = self.scaled_doses()[dl1 - 1]
         x1_tox_probs = _pi_T(x1, mu=samp[:, 0], beta=samp[:, 1])
@@ -953,7 +951,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         x2_eff_probs = _pi_E(x2, mu=samp[:, 2], beta1=samp[:, 3], beta2=samp[:, 4])
         u2 = self.metric(x2_eff_probs, x2_tox_probs)
 
-        return np.sum(p * (u1 > u2))
+        return float(self.pds.expectation(u1 > u2))
 
     def utility_superiority_matrix(self) -> Any:
         """Calculates the utility superiority matrix.
