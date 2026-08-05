@@ -63,8 +63,6 @@ jobs:
           poetry install --with dev -E viz
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
-      - name: Install Playwright browsers
-        run: poetry run playwright install chromium --with-deps
       - name: Run tests
         run: |
           poetry run coverage run -m pytest -q

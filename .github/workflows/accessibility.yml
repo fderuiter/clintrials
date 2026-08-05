@@ -20,7 +20,7 @@ jobs:
         run: pipx install poetry
       - name: Install dependencies
         run: |
-          poetry install --with dev -E viz
+          poetry install --with dev,a11y -E viz
       - name: Install Playwright browsers
         run: poetry run playwright install chromium --with-deps
       - name: Run Accessibility Tests
