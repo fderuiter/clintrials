@@ -207,7 +207,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             "max_size": max_size,
             "randomisation_stage_size": randomisation_stage_size,
         }
-        WagesTaitSchema(**schema_args)
+        self._schema = WagesTaitSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
@@ -215,10 +215,6 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape
-        if self.I != len(prior_tox_probs):
-            raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="prior_tox_probs", expected_length=self.I))
-        if tox_target > tox_limit:
-            raise ValueError(ErrorTemplates.LE.format(name="tox_target", bound="tox_limit"))
         self.prior_tox_probs = np.array(prior_tox_probs)
         self.tox_limit = tox_limit
         self.eff_limit = eff_limit
@@ -269,6 +265,11 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.post_tox_probs = np.zeros(self.I)
         self.post_eff_probs = np.zeros(self.I)
         self.theta_hats = np.zeros(self.K)
+
+    @property
+    def schema(self) -> Any:
+        """The validated WagesTait schema."""
+        return self._schema
 
     def dose_toxicity_lower_bound(self, dose_level: Any, alpha: Any = 0.025) -> Any:
         """Gets the lower bound of the toxicity probability for a dose level.

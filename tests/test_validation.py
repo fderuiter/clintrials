@@ -224,3 +224,57 @@ def test_new_schema_and_math_guardrails():
         compare_subjects(np.array([[1, 2]]), np.array([1, 2]))
     with pytest.raises(ValueError, match="subject1 and subject2 should be same length"):
         compare_subjects(np.array([1, 2]), np.array([1, 2, 3]))
+
+
+def test_centralized_validation_integration():
+    from clintrials.core.schema import (
+        CRMSchema,
+        GroupSequentialDesignSchema,
+        WagesTaitSchema,
+        WATUSchema,
+        WinRatioSchema,
+    )
+    from clintrials.dosefinding.crm import CRM
+    from clintrials.dosefinding.efftox import EffTox, LpNormCurve
+    from clintrials.dosefinding.wagestait import WagesTait
+    from clintrials.dosefinding.watu import WATU
+    from clintrials.phase3.gsd import GroupSequentialDesign
+    from clintrials.winratio.main import WinRatioTrial
+
+    skeletons = [[0.1, 0.2, 0.3]]
+    prior_tox_probs = [0.1, 0.2, 0.3]
+    metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
+
+    wt = WagesTait(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
+    assert isinstance(wt.schema, WagesTaitSchema)
+
+    watu = WATU(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+    assert isinstance(watu.schema, WATUSchema)
+
+    crm = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)
+    assert isinstance(crm.schema, CRMSchema)
+
+    wr = WinRatioTrial()
+    assert isinstance(wr.schema, WinRatioSchema)
+
+    gsd = GroupSequentialDesign(k=3, alpha=0.025)
+    assert isinstance(gsd.schema, GroupSequentialDesignSchema)
+
+    # EffTox sequence mismatch checks using standard helper
+    with pytest.raises(ValueError, match="prior_tox_probs should have 3 items"):
+        EffTox(real_doses=[1.0, 2.0, 3.0], prior_tox_probs=[0.1, 0.2], prior_eff_probs=[0.2, 0.3, 0.4], tox_cutoff=0.3, eff_cutoff=0.3, tox_certainty=0.1, eff_certainty=0.1, max_size=30)
+
+    # EffTox declarative schema model prior validation rule check (beta_T < 0 slope constraint)
+    # Using priors that yield a negative toxicity slope
+    from scipy.stats import norm
+    bad_priors = [
+        norm(loc=0.0, scale=1.0),
+        norm(loc=-1.0, scale=1.0), # beta_T is -1.0 < 0
+        norm(loc=0.0, scale=1.0),
+        norm(loc=0.0, scale=1.0),
+        norm(loc=0.0, scale=1.0),
+        norm(loc=0.0, scale=1.0),
+    ]
+    with pytest.raises(ValueError, match="Toxicity prior slope \\(beta_T\\) should be non-negative."):
+        EffTox(real_doses=[1.0, 2.0, 3.0], theta_priors=bad_priors, tox_cutoff=0.3, eff_cutoff=0.3, tox_certainty=0.1, eff_certainty=0.1, max_size=30)
+

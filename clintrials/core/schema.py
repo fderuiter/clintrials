@@ -215,14 +215,16 @@ class CRMSchema(BaseModel):
     def __post_init__(self) -> None:
         """Performs additional validation on CRM parameters."""
         super().__post_init__()
+        from clintrials.core.errors import ErrorTemplates
         if self.min_beta is not None and self.max_beta is not None:
             if self.min_beta >= self.max_beta:
-                raise ValueError("min_beta must be less than max_beta")
+                raise ValueError(ErrorTemplates.LT.format(name="min_beta", bound="max_beta"))
 
 class EffToxSchema(BaseModel):
     """Schema for validating EffTox design parameters."""
 
     real_doses: List[float] = Field(description="Real dose values")
+    theta_priors: Optional[Any] = Field(default=None, description="Model parameter priors")
     prior_tox_probs: Optional[List[Probability]] = Field(
         default=None, description="Prior tox probs"
     )
@@ -243,6 +245,31 @@ class EffToxSchema(BaseModel):
     )
     max_size: Optional[PositiveInt] = Field(default=None, description="Maximum size")
     first_dose: PositiveInt = Field(default=1, description="First dose level")
+
+    def __post_init__(self) -> None:
+        """Performs additional validation on EffTox parameters and prior distributions."""
+        super().__post_init__()
+        from clintrials.validation import validate_expected_length
+        if self.real_doses is not None:
+            expected_len = len(self.real_doses)
+            if self.prior_tox_probs is not None:
+                validate_expected_length(self.prior_tox_probs, expected_len, "prior_tox_probs")
+            if self.prior_eff_probs is not None:
+                validate_expected_length(self.prior_eff_probs, expected_len, "prior_eff_probs")
+
+        priors = self.theta_priors
+        if priors is None and self.real_doses is not None and self.prior_tox_probs is not None and self.prior_eff_probs is not None:
+            from clintrials.dosefinding.efftox import efftox_priors_from_skeleton
+            priors = efftox_priors_from_skeleton(
+                self.real_doses, self.prior_tox_probs, self.prior_eff_probs
+            )
+
+        if priors is not None:
+            validate_expected_length(priors, 6, "priors")
+            beta_T = priors[1].mean()
+            # Check if toxicity is non-decreasing
+            if beta_T < 0:
+                raise ValueError("Toxicity prior slope (beta_T) should be non-negative.")
 
 
 class WagesTaitSchema(BaseModel):
@@ -289,15 +316,14 @@ class WagesTaitSchema(BaseModel):
         """Performs additional validation on WagesTait parameters."""
         super().__post_init__()
         from clintrials.core.errors import ErrorTemplates
-        from clintrials.validation import validate_probability
+        from clintrials.validation import validate_expected_length, validate_probability
         if self.tox_target > self.tox_limit:
             raise ValueError(ErrorTemplates.LE.format(name="tox_target", bound="tox_limit"))
         if len(self.skeletons) == 0:
             raise ValueError("skeletons cannot be empty.")
         expected_len = len(self.prior_tox_probs)
         for idx, skeleton in enumerate(self.skeletons):
-            if len(skeleton) != expected_len:
-                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=f"skeletons[{idx}]", expected_length=expected_len))
+            validate_expected_length(skeleton, expected_len, f"skeletons[{idx}]")
             for val in skeleton:
                 validate_probability(val, "skeletons")
 
@@ -354,7 +380,7 @@ class WATUSchema(BaseModel):
         """Performs additional validation on WATU parameters."""
         super().__post_init__()
         from clintrials.core.errors import ErrorTemplates
-        from clintrials.validation import validate_probability
+        from clintrials.validation import validate_expected_length, validate_probability
         if self.tox_target > self.tox_limit:
             raise ValueError(ErrorTemplates.LE.format(name="tox_target", bound="tox_limit"))
         if self.stage_one_size < 0:
@@ -363,8 +389,7 @@ class WATUSchema(BaseModel):
             raise ValueError("skeletons cannot be empty.")
         expected_len = len(self.prior_tox_probs)
         for idx, skeleton in enumerate(self.skeletons):
-            if len(skeleton) != expected_len:
-                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=f"skeletons[{idx}]", expected_length=expected_len))
+            validate_expected_length(skeleton, expected_len, f"skeletons[{idx}]")
             for val in skeleton:
                 validate_probability(val, "skeletons")
 

@@ -153,7 +153,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             "tox_certainty": tox_certainty,
             "eff_certainty": eff_certainty,
         }
-        WATUSchema(**schema_args)
+        self._schema = WATUSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
             self, first_dose, len(prior_tox_probs), max_size
@@ -163,9 +163,6 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         self.skeletons = skeletons
         self.K, self.I = np.array(skeletons).shape
-        from clintrials.validation import validate_expected_length
-
-        validate_expected_length(prior_tox_probs, self.I, "prior_tox_probs")
         self.prior_tox_probs = prior_tox_probs
         self.tox_target = tox_target
         self.tox_limit = tox_limit
@@ -242,6 +239,11 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         self.utility: list[Any] | np.ndarray[Any, np.dtype[np.float64]] = []
         self.dose_allocation_mode = 0
+
+    @property
+    def schema(self) -> Any:
+        """The validated WATU schema."""
+        return self._schema
 
     def model_theta_hat(self) -> Any:
         """Gets the theta estimate for the most likely model.

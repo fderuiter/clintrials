@@ -699,6 +699,8 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
 
         # Build schema kwargs
         schema_kwargs = {"real_doses": real_doses}
+        if theta_priors is not None:
+            schema_kwargs["theta_priors"] = theta_priors
         if prior_tox_probs is not None:
             schema_kwargs["prior_tox_probs"] = prior_tox_probs
         if prior_eff_probs is not None:
@@ -717,6 +719,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             schema_kwargs["first_dose"] = first_dose
 
         config = EffToxSchema(**schema_kwargs)
+        self._schema = config
         first_dose = config.first_dose
 
         EfficacyToxicityDoseFindingTrial.__init__(
@@ -731,8 +734,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             theta_priors = efftox_priors_from_skeleton(
                 real_doses, config.prior_tox_probs, config.prior_eff_probs
             )
-
-        validate_efftox_priors(theta_priors, scale_doses(real_doses))
+            self._schema.theta_priors = theta_priors
 
         self.real_doses = real_doses
         self._scaled_doses = scale_doses(real_doses)
@@ -751,6 +753,11 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.mass_threshold = mass_threshold
 
         self.reset()
+
+    @property
+    def schema(self) -> Any:
+        """The validated EffTox schema."""
+        return self._schema
 
     def _update_integrals(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
         """Recalculates integrals to update probabilities and utilities."""
