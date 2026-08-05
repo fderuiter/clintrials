@@ -58,10 +58,10 @@ class BayesianTimeToEvent(Protocol):
         self.final_analysis_time_delta: float = 0.0
 
         # State tracking for simulation
-        self.interim_analyses_results: list[OrderedDict] = []
+        self.interim_analyses_results: list[OrderedDict[Any, Any]] = []
         self._checked_interims: set[int] = set()
         self._stopped_early: bool = False
-        self._final_analysis: OrderedDict | None = None
+        self._final_analysis: OrderedDict[Any, Any] | None = None
 
     def event_times(self) -> list[float]:
         """Gets the list of event times.
@@ -119,9 +119,9 @@ class BayesianTimeToEvent(Protocol):
         """Gets the maximum number of patients for the trial."""
         return self.n_patients
 
-    def report(self) -> OrderedDict:
+    def report(self) -> OrderedDict[Any, Any]:
         """Returns a standardized, ordered, JSON-serializable report."""
-        trial_report = OrderedDict()
+        trial_report: OrderedDict[str, Any] = OrderedDict()
         trial_report["MaxPatients"] = self.n_patients
         trial_report["TrueMedianEventTime"] = self.true_median
         trial_report["PriorAlpha"] = self.alpha_prior
@@ -159,7 +159,13 @@ class BayesianTimeToEvent(Protocol):
 
         return trial_report
 
-    def test(self, time, cutoff, probability, less_than=True):  # type: ignore
+    def test(
+        self,
+        time: float,
+        cutoff: float,
+        probability: float,
+        less_than: bool = True,
+    ) -> OrderedDict[Any, Any]:
         """Tests the posterior belief about the median time-to-event.
 
         This method tests whether the median time-to-event is less than or
@@ -212,7 +218,7 @@ class BayesianTimeToEvent(Protocol):
             else test_probability < probability
         )
 
-        test_report = OrderedDict()
+        test_report: OrderedDict[str, Any] = OrderedDict()
         test_report["Time"] = time
         test_report["Patients"] = sum(registered_patients)
         test_report["Events"] = sum(has_failed)
@@ -252,21 +258,21 @@ class TimeToEventOutcomeGenerator:
         return [(x, y) for x, y in zip(event_times, arrival_times)]
 
 
-def matrix_cohort_analysis(  # type: ignore
-    n_simulations,
-    n_patients,
-    true_median,
-    alpha_prior,
-    beta_prior,
-    lower_cutoff,
-    upper_cutoff,
-    interim_certainty,
-    final_certainty,
-    interim_analysis_after_patients,
-    interim_analysis_time_delta,
-    final_analysis_time_delta,
-    recruitment_stream,
-):
+def matrix_cohort_analysis(
+    n_simulations: int,
+    n_patients: int,
+    true_median: float,
+    alpha_prior: float,
+    beta_prior: float,
+    lower_cutoff: float,
+    upper_cutoff: float,
+    interim_certainty: float,
+    final_certainty: float,
+    interim_analysis_after_patients: list[int],
+    interim_analysis_time_delta: float,
+    final_analysis_time_delta: float,
+    recruitment_stream: Any,
+) -> Any:
     """Simulates time-to-event outcomes for a cohort.
 
     This function simulates a time-to-event trial based on the design of the

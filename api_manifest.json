@@ -4424,18 +4424,40 @@
             {
               "name": "alpha_prior",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "float",
               "default": null
             },
             {
               "name": "beta_prior",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "event_times": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
               "default": null
             }
           ]
         },
-        "event_times": {
+        "has_more": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "max_size": {
           "type": "method",
           "parameters": [
             {
@@ -4457,6 +4479,89 @@
             }
           ]
         },
+        "report": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "rng": {
+          "type": "property"
+        },
+        "run": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "method",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'iterative'"
+            },
+            {
+              "name": "seed",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[int]",
+              "default": "None"
+            },
+            {
+              "name": "show_progress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "set_rng": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
         "test": {
           "type": "method",
           "parameters": [
@@ -4469,25 +4574,25 @@
             {
               "name": "time",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "float",
               "default": null
             },
             {
               "name": "cutoff",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "float",
               "default": null
             },
             {
               "name": "probability",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "float",
               "default": null
             },
             {
               "name": "less_than",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "bool",
               "default": "True"
             }
           ]
@@ -4504,7 +4609,249 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "list[tuple[float, float]]",
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        }
+      }
+    },
+    "Protocol": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "has_more": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "report": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "rng": {
+          "type": "property"
+        },
+        "run": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "method",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'iterative'"
+            },
+            {
+              "name": "seed",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[int]",
+              "default": "None"
+            },
+            {
+              "name": "show_progress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "set_rng": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "update": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        }
+      }
+    },
+    "TimeToEventOutcomeGenerator": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "true_median",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        }
+      }
+    },
+    "UniversalProtocolSimulationRunner": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "design",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            },
+            {
+              "name": "outcome_generator",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "recruitment_stream",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "run": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "mode",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'iterative'"
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "1"
+            },
+            {
+              "name": "cohort_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "1"
+            },
+            {
+              "name": "show_progress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
               "default": null
             }
           ]
@@ -4539,79 +4886,79 @@
         {
           "name": "n_simulations",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "int",
           "default": null
         },
         {
           "name": "n_patients",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "int",
           "default": null
         },
         {
           "name": "true_median",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "alpha_prior",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "beta_prior",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "lower_cutoff",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "upper_cutoff",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "interim_certainty",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "final_certainty",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "interim_analysis_after_patients",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "list[int]",
           "default": null
         },
         {
           "name": "interim_analysis_time_delta",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "final_analysis_time_delta",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "float",
           "default": null
         },
         {
           "name": "recruitment_stream",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ]
