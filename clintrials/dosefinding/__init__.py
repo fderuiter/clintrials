@@ -343,7 +343,10 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
         collections.OrderedDict: A dictionary containing the simulation report.
     """
     from clintrials.core.simulation import UniversalProtocolSimulationRunner
-    from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial, _simulate_trial
+    from clintrials.dosefinding.efficacytoxicity import (
+        EfficacyToxicityDoseFindingTrial,
+        _simulate_trial,
+    )
 
     if isinstance(design, EfficacyToxicityDoseFindingTrial) or true_efficacies is not None:
         if true_efficacies is None:
