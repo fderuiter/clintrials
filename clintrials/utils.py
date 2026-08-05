@@ -331,7 +331,7 @@ def iterable_to_json(obj):  # type: ignore
         return atomic_to_json(obj)  # type: ignore
 
 def filter_kwargs_for_callable(func: Callable[..., Any], kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Filters kwargs so that only those accepted by func are returned, unless func accepts **kwargs."""
+    """Filters kwargs so that only those accepted by func are returned, unless func accepts ``**kwargs``."""
     import inspect
     try:
         sig = inspect.signature(func)
