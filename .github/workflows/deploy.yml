@@ -40,12 +40,17 @@ jobs:
         run: |
           poetry install --all-extras
 
+      - name: Install Node.js dependencies
+        run: npm install
+
       - name: Fetch Vendor Dependencies
         run: ./fetch_vendor.sh
 
       - name: Build Sphinx HTML
         env:
           SPHINX_STRICT: "1"
+          DOCS_BASE_PATH: "/${{ github.event.repository.name }}"
+          BASE_PATH: "/${{ github.event.repository.name }}"
         run: |
           poetry run sphinx-build -b html -n -W docs docs/_build/html
           npx -y pagefind --site docs/_build/html
@@ -59,11 +64,22 @@ jobs:
       - name: Serialize Python schemas to JSON
         run: poetry run python scripts/serialize_schemas.py
 
+      - name: Build MDX API Reference
+        env:
+          DOCS_BASE_PATH: "/${{ github.event.repository.name }}"
+          BASE_PATH: "/${{ github.event.repository.name }}"
+        run: |
+          npm run prebuild
+          npm run build
+
       - name: Prepare unified staging directory
         run: |
           mkdir -p public
           # Copy Sphinx documentation to the root of staging
           cp -a docs/_build/html/. public/
+          # Copy MDX reference documentation to /reference/
+          mkdir -p public/reference
+          cp -a docs/dist/. public/reference/
           # Ensure Jekyll is bypassed on GitHub Pages so _static/* is served
           touch public/.nojekyll
           # Setup Simulation Hub in /hub/
