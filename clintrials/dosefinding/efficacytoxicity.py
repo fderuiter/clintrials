@@ -111,7 +111,7 @@ class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
         df["ToxRate"] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
         return df
 
-    def update(self, cases: List[Tuple[int, int, int]], **kwargs: Any) -> int:  # type: ignore[override]
+    def update(self, cases: List[Any], **kwargs: Any) -> int:  # type: ignore[override]
         """Updates the trial with a list of new cases.
 
         Warning:
@@ -121,26 +121,16 @@ class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
             duplicate existing records.
 
         Args:
-            cases (list[tuple[int, int, int]]): A list of new cases to append, where each
-                case is a tuple of (dose, toxicity, efficacy).
+            cases (list): A list of new cases to append.
             **kwargs: Additional keyword arguments for the dose calculation.
 
         Returns:
             int: The next recommended dose level.
         """
         if len(cases) > 0:
-            doses = []
-            toxicities = []
-            efficacies = []
-            for case in cases:
-                if len(case) < 3:
-                    from clintrials.core.errors import ErrorTemplates
-                    raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="Patient outcome", expected_length=3))
-                doses.append(case[0])
-                toxicities.append(case[1])
-                efficacies.append(case[2])
-
-            self._tracker.add_patients(doses=doses, toxicities=toxicities, efficacies=efficacies)
+            from clintrials.core.cohort import parse_patient_records
+            records = parse_patient_records(cases)
+            self._tracker.add_records(records)
             self._next_dose = self._calculate_next_dose(**kwargs)
         else:
             logging.warning("Cannot update design with no cases")
@@ -519,7 +509,8 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
             if verbose:
                 logger.debug("Running %s", cases)
             trial.reset()
-            obd = trial.update(cases, **kwargs)
+            from clintrials.core.cohort import parse_patient_records
+            obd = trial.update(parse_patient_records(cases), **kwargs)
             # Collect output
             bag_o_tricks = OrderedDict(
                 [
