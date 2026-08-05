@@ -11,6 +11,17 @@ marked.setOptions({
 const referenceDir = path.resolve(__dirname, '../docs/reference');
 const distDir = path.resolve(__dirname, '../docs/dist');
 
+let basePath = process.env.DOCS_BASE_PATH || process.env.BASE_PATH || '';
+if (basePath) {
+  if (!basePath.startsWith('/')) {
+    basePath = '/' + basePath;
+  }
+  if (basePath.endsWith('/')) {
+    basePath = basePath.slice(0, -1);
+  }
+}
+const mdxPrefix = basePath + '/reference';
+
 // Create clean dist directory
 if (fs.existsSync(distDir)) {
   fs.rmSync(distDir, { recursive: true, force: true });
@@ -150,11 +161,11 @@ function walkAndCompile(currentDir, relativePath = "") {
     <div class="container">
         <nav>
             <div>
-                <a href="/index.html">🏠 Home</a>
+                <a href="${mdxPrefix}/index.html">🏠 Home</a>
                 ${breadcrumbs}
             </div>
             <div>
-                <a href="/search.html">🔍 Search Reference</a>
+                <a href="${mdxPrefix}/search.html">🔍 Search Reference</a>
             </div>
         </nav>
         <article>
@@ -176,7 +187,7 @@ function walkAndCompile(currentDir, relativePath = "") {
       if (item.name === 'index.mdx' && title.startsWith('clintrials.')) {
         publicModules.push({
           name: title,
-          url: '/' + destHtmlRelPath
+          url: mdxPrefix + '/' + destHtmlRelPath
         });
       }
 
@@ -188,7 +199,7 @@ function walkAndCompile(currentDir, relativePath = "") {
 
       searchIndex.push({
         title: title,
-        url: '/' + destHtmlRelPath,
+        url: mdxPrefix + '/' + destHtmlRelPath,
         content: cleanContent
       });
     }
@@ -280,7 +291,7 @@ const searchHtmlContent = `<!DOCTYPE html>
 <body>
     <div class="container">
         <nav>
-            <a href="/index.html">🏠 Home</a>
+            <a href="${mdxPrefix}/index.html">🏠 Home</a>
         </nav>
         <h1>Search Clintrials API Reference</h1>
         <input type="text" id="search-input" placeholder="Type to search (e.g., stats, ProbabilityDensitySample, crm, spending)..." autofocus>
@@ -289,7 +300,7 @@ const searchHtmlContent = `<!DOCTYPE html>
 
     <script>
         let index = [];
-        fetch('/search_index.json')
+        fetch('${mdxPrefix}/search_index.json')
             .then(res => res.json())
             .then(data => { index = data; })
             .catch(err => console.error('Error loading search index:', err));
@@ -417,7 +428,7 @@ const indexHtmlContent = `<!DOCTYPE html>
         <h1>Clintrials API Reference</h1>
         <p>A modernized, extremely fast, and fully searchable documentation portal generated directly from runtime docstrings.</p>
         <div>
-            <a href="/search.html" class="btn">🔍 Search Reference Pages</a>
+            <a href="${mdxPrefix}/search.html" class="btn">🔍 Search Reference Pages</a>
         </div>
         <div class="modules-list">
             <h3>Discovered Public Modules</h3>

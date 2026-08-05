@@ -3,6 +3,12 @@
 <div id="search" style="position: relative;"></div>
 <script>
     window.addEventListener('DOMContentLoaded', (event) => {
-        new PagefindUI({ element: "#search", showSubResults: true });
+        const basePath = "{{ base_path }}" || "";
+        new PagefindUI({
+            element: "#search",
+            showSubResults: true,
+            bundlePath: basePath + "/pagefind/",
+            baseUrl: basePath + "/"
+        });
     });
 </script>

@@ -64,6 +64,18 @@ html_extra_path = ["_extra"]
 html_css_files = ["custom.css"]
 html_js_files = ["custom.js"]
 
+# Expose custom base path prefix to templates
+base_path = os.environ.get("DOCS_BASE_PATH") or os.environ.get("BASE_PATH") or ""
+if base_path:
+    if not base_path.startswith("/"):
+        base_path = "/" + base_path
+    if base_path.endswith("/"):
+        base_path = base_path[:-1]
+
+html_context = {
+    "base_path": base_path
+}
+
 # Warnings as errors when running in CI
 if os.environ.get("SPHINX_STRICT", "0") == "1":
     nitpicky = True
