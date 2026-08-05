@@ -23,11 +23,12 @@ We maintain strict accessibility compliance through automated WCAG audits runnin
 Running the Tests Locally
 -------------------------
 
-Developers should verify their changes by running the automated accessibility suite:
+Since the heavy browser-testing and accessibility packages are isolated into a separate optional group to keep standard development environments lightweight, you must first install the additional browser testing package group:
 
 .. code-block:: bash
 
-   poetry run playwright install
+   poetry install --with a11y
+   poetry run playwright install chromium
    poetry run pytest tests/test_accessibility.py
 
 If any violations are reported, you must correct the component rendering or adjust the DOM structural injections in the main layout configuration before committing code.
