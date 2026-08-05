@@ -104,7 +104,7 @@ def test_custom_dual_endpoint_trial_flow() -> None:
 
 
 def test_unified_patient_records_update_types() -> None:
-    from clintrials.core.cohort import PatientRecord, parse_patient_records
+    from clintrials.core.cohort import PatientRecord
     trial = CustomSingleEndpointTrial(first_dose=1, num_doses=5, max_size=10)
 
     # Test updating with PatientRecord objects directly
@@ -122,9 +122,8 @@ def test_unified_patient_records_update_types() -> None:
 
 def test_estimator_injection_and_forwarding() -> None:
     from clintrials.dosefinding.crm import CRM
-    from clintrials.dosefinding.watu import WATU
-    from clintrials.core.math import empiric, inverse_empiric
     from clintrials.dosefinding.efftox import LpNormCurve
+    from clintrials.dosefinding.watu import WATU
 
     # Instantiate custom CRM estimator
     custom_crm = CRM(
@@ -158,8 +157,8 @@ def test_estimator_injection_and_forwarding() -> None:
 def test_consolidated_simulation_execution() -> None:
     from clintrials.dosefinding import simulate_dose_finding_trial
     from clintrials.dosefinding.crm import CRM
-    from clintrials.dosefinding.watu import WATU
     from clintrials.dosefinding.efftox import LpNormCurve
+    from clintrials.dosefinding.watu import WATU
 
     # CRM simulation
     crm_trial = CRM(

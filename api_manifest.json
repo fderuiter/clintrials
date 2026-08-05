@@ -462,6 +462,12 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Any",
               "default": "False"
+            },
+            {
+              "name": "toxicity_estimator",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
             }
           ]
         },
@@ -978,7 +984,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -1505,6 +1511,23 @@
             }
           ]
         },
+        "add_records": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "records",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Iterable",
+              "default": null
+            }
+          ]
+        },
         "doses": {
           "type": "property"
         },
@@ -1560,6 +1583,17 @@
           ]
         }
       }
+    },
+    "parse_patient_records": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "cases",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": null
+        }
+      ]
     },
     "validate_matching_lengths": {
       "type": "function",
@@ -2592,6 +2626,23 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Optional",
               "default": "None"
+            }
+          ]
+        },
+        "add_records": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "records",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Iterable",
+              "default": null
             }
           ]
         },
@@ -5346,7 +5397,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -5731,7 +5782,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -6098,7 +6149,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -6125,6 +6176,18 @@
           "kind": "POSITIONAL_OR_KEYWORD",
           "annotation": "Any",
           "default": null
+        },
+        {
+          "name": "true_efficacies",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Optional[Any]",
+          "default": "None"
+        },
+        {
+          "name": "tox_eff_odds_ratio",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": "1.0"
         },
         {
           "name": "tolerances",
@@ -6172,6 +6235,18 @@
           "kind": "POSITIONAL_OR_KEYWORD",
           "annotation": "Any",
           "default": null
+        },
+        {
+          "name": "true_efficacies",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Optional[Any]",
+          "default": "None"
+        },
+        {
+          "name": "tox_eff_odds_ratio",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": "1.0"
         },
         {
           "name": "tolerances",
@@ -6992,7 +7067,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -7881,7 +7956,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -8758,7 +8833,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -9764,7 +9839,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -10193,7 +10268,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -10347,6 +10422,12 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Any",
               "default": "False"
+            },
+            {
+              "name": "toxicity_estimator",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
             }
           ]
         },
@@ -10805,7 +10886,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -11487,7 +11568,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -11916,7 +11997,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -12102,6 +12183,12 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Any",
               "default": "False"
+            },
+            {
+              "name": "toxicity_estimator",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
             }
           ]
         },
@@ -12618,7 +12705,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -13318,6 +13405,23 @@
           "name": "obj",
           "kind": "POSITIONAL_OR_KEYWORD",
           "annotation": null,
+          "default": null
+        }
+      ]
+    },
+    "filter_kwargs_for_callable": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "func",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Callable[..., Any]",
+          "default": null
+        },
+        {
+          "name": "kwargs",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Dict[str, Any]",
           "default": null
         }
       ]
@@ -14775,7 +14879,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -15492,7 +15596,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -16303,6 +16407,12 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Any",
               "default": "False"
+            },
+            {
+              "name": "toxicity_estimator",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
             }
           ]
         },
@@ -16761,7 +16871,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {
@@ -17068,6 +17178,12 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Any",
               "default": "False"
+            },
+            {
+              "name": "toxicity_estimator",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[Any]",
+              "default": "None"
             }
           ]
         },
@@ -17584,7 +17700,7 @@
             {
               "name": "cases",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[Tuple[int, int, int]]",
+              "annotation": "List[Any]",
               "default": null
             },
             {

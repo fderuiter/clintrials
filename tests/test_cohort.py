@@ -1,6 +1,11 @@
-import pytest
 import numpy as np
-from clintrials.core.cohort import PatientRecord, PatientCohortTracker, parse_patient_records
+import pytest
+
+from clintrials.core.cohort import (
+    PatientCohortTracker,
+    PatientRecord,
+    parse_patient_records,
+)
 
 
 def test_patient_record_initialization() -> None:
