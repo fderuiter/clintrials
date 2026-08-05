@@ -84,10 +84,18 @@ def is_file_path(path_str: str, base_dir: Path) -> bool:
         return True
     if (base_dir / (path_str + '.md')).exists():
         return True
+    if (base_dir / (path_str + '.mdx')).exists():
+        return True
     return False
 
 
-def resolve_and_verify(path_str: str, f: Path, root: Path, is_doc_role: bool = False) -> bool:
+def resolve_and_verify(
+    path_str: str,
+    f: Path,
+    root: Path,
+    is_doc_role: bool = False,
+    strict_relative: bool = False
+) -> bool:
     """
     Resolve link relative to the root or current file and verify existence.
     """
@@ -100,9 +108,10 @@ def resolve_and_verify(path_str: str, f: Path, root: Path, is_doc_role: bool = F
         # Root-relative path
         candidates.append(root / clean_path.lstrip('/'))
     else:
-        # Relative path (relative to the file's parent or repository root)
+        # Relative path (relative to the file's parent)
         candidates.append(f.parent / clean_path)
-        candidates.append(root / clean_path)
+        if not strict_relative:
+            candidates.append(root / clean_path)
 
     for cand in candidates:
         resolved = cand.resolve()
@@ -110,20 +119,22 @@ def resolve_and_verify(path_str: str, f: Path, root: Path, is_doc_role: bool = F
             return True
 
         # If the path has no suffix, or if we are explicitly checking a doc reference,
-        # check with standard documentation extensions (.rst and .md).
+        # check with standard documentation extensions (.rst, .md, and .mdx).
         if not resolved.suffix or is_doc_role:
             if resolved.with_suffix('.rst').exists():
                 return True
             if resolved.with_suffix('.md').exists():
+                return True
+            if resolved.with_suffix('.mdx').exists():
                 return True
 
     return False
 
 
 def validate_docs(root: Path) -> list[str]:
-    # Gather all documentation files (.md and .rst)
+    # Gather all documentation files (.md, .rst, and .mdx)
     doc_files = []
-    for ext in ("*.md", "*.rst"):
+    for ext in ("*.md", "*.rst", "*.mdx"):
         for f in root.rglob(ext):
             # Skip virtualenvs and hidden directories
             if any(part.startswith('.') for part in f.parts):
@@ -152,11 +163,11 @@ def validate_docs(root: Path) -> list[str]:
         content = f.read_text(errors='ignore')
 
         # Check markdown links
-        if f.suffix == '.md':
+        if f.suffix in ('.md', '.mdx'):
             extracted_links = extract_markdown_links(content)
             for link in extracted_links:
                 if not is_external_or_anchor(link):
-                    if not resolve_and_verify(link, f, root):
+                    if not resolve_and_verify(link, f, root, strict_relative=True):
                         broken_paths.append(f"{f.relative_to(root)}: {link}")
 
         # Check RST-specific links and targets
@@ -166,7 +177,7 @@ def validate_docs(root: Path) -> list[str]:
                 target_path = match.group(3).strip()
                 if target_path and not is_external_or_anchor(target_path):
                     if is_file_path(target_path, f.parent):
-                        if not resolve_and_verify(target_path, f, root):
+                        if not resolve_and_verify(target_path, f, root, strict_relative=True):
                             broken_paths.append(f"{f.relative_to(root)}: {target_path}")
 
             # 2. Anonymous hyperlink targets
@@ -174,7 +185,7 @@ def validate_docs(root: Path) -> list[str]:
                 target_path = match.group(1).strip()
                 if target_path and not is_external_or_anchor(target_path):
                     if is_file_path(target_path, f.parent):
-                        if not resolve_and_verify(target_path, f, root):
+                        if not resolve_and_verify(target_path, f, root, strict_relative=True):
                             broken_paths.append(f"{f.relative_to(root)}: {target_path}")
 
             # 3. Path-based roles
@@ -183,14 +194,14 @@ def validate_docs(root: Path) -> list[str]:
                 target_path = match.group(2).strip()
                 if target_path and not is_external_or_anchor(target_path):
                     is_doc = (role_name == 'doc')
-                    if not resolve_and_verify(target_path, f, root, is_doc_role=is_doc):
+                    if not resolve_and_verify(target_path, f, root, is_doc_role=is_doc, strict_relative=True):
                         broken_paths.append(f"{f.relative_to(root)}: {target_path}")
 
             # 4. Directives
             for match in rst_directive_regex.finditer(content):
                 target_path = match.group(2).strip()
                 if target_path and not is_external_or_anchor(target_path):
-                    if not resolve_and_verify(target_path, f, root):
+                    if not resolve_and_verify(target_path, f, root, strict_relative=True):
                         broken_paths.append(f"{f.relative_to(root)}: {target_path}")
 
         # Check inline backticks (both MD and RST)
@@ -303,6 +314,15 @@ Here is a broken parenthesized link: [Broken Parens](/docs/tutorials/EffTox - (B
     """
     md_test_file.write_text(md_content)
 
+    # Create an MDX file with valid and invalid links
+    mdx_test_file = docs_dir / "test.mdx"
+    mdx_content = """
+# Test MDX
+Here is a relative link that is valid: [Getting Started](./getting_started)
+Here is a broken relative link: [Broken Class](./MissingClass)
+    """
+    mdx_test_file.write_text(mdx_content)
+
     # Create an RST file with valid and invalid links/roles
     rst_test_file = docs_dir / "test.rst"
     rst_content = """
@@ -333,12 +353,14 @@ Directive tests:
 
     assert "docs/does-not-exist.rst" in broken_str
     assert "EffTox - (Broken).ipynb" in broken_str
+    assert "MissingClass" in broken_str
     assert "nonexistent.rst" in broken_str
     assert "nonexistent" in broken_str
     assert "nonexistent.zip" in broken_str
     assert "nonexistent.png" in broken_str
 
     # Verify that valid links do NOT show up in broken
+    assert "getting_started" not in [line.split(': ')[1] for line in broken if "test.mdx" in line]
     assert "getting_started.rst" not in broken_str
     assert "EffTox - Nuts and Bolts (Simplified).ipynb" not in broken_str
     assert "https://google.com" not in broken_str
