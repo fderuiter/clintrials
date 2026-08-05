@@ -3,10 +3,8 @@ const path = require('path');
 
 function escapeMdx(str) {
   if (!str) return "";
-  // Escape braces and pipes to prevent breaking JSX and tables in MDX
+  // Escape pipes to prevent breaking tables in MDX
   return str
-    .replace(/\{/g, "&#123;")
-    .replace(/\}/g, "&#125;")
     .replace(/\|/g, "&#124;");
 }
 
