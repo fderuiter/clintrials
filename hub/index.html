@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <title>Trial Simulation Hub - Dynamic Configuration</title>
+    <!-- Include Plotly.js for rendering interactive graphs -->
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js" charset="utf-8"></script>
     <script>
       if ('serviceWorker' in navigator) {
         var isSubpath = window.location.pathname.indexOf('/clintrials/') !== -1;
@@ -96,6 +98,32 @@
       button.submit:hover {
         background-color: #365267;
       }
+      /* Styling for simulation results summary table */
+      .table {
+        width: 100%;
+        margin-bottom: 1rem;
+        color: #1e293b;
+        border-collapse: collapse;
+        font-size: 15px;
+      }
+      .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f8fafc;
+      }
+      .table th, .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-top: 1px solid #e2e8f0;
+        text-align: left;
+      }
+      .table th {
+        background-color: #496D89;
+        color: white;
+        font-weight: 600;
+        border-bottom: 2px solid #cbd5e1;
+      }
+      .table tr:hover {
+        background-color: #f1f5f9;
+      }
     </style>
   </head>
   <body>
@@ -114,6 +142,23 @@
         <div id="form-fields"></div>
         <button type="submit" class="submit">Run Simulation</button>
       </form>
+
+      <!-- Simulation progress and status region -->
+      <div id="simulation-status-container" style="display: none; margin-top: 30px; padding: 20px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <h3 style="margin-top: 0; color: #496D89;">Simulation Status</h3>
+        <div id="simulation-status-message" style="margin-bottom: 12px; font-weight: 500; color: #475569;">Preparing WebAssembly environment...</div>
+        <div style="width: 100%; background: #e2e8f0; border-radius: 4px; height: 16px; overflow: hidden; margin-bottom: 10px;">
+          <div id="simulation-progress-bar" style="width: 0%; height: 100%; background: #496D89; transition: width 0.3s ease;"></div>
+        </div>
+        <div id="simulation-progress-percent" style="font-size: 14px; color: #64748b; text-align: right; font-weight: bold;">0%</div>
+      </div>
+
+      <!-- Simulation results region -->
+      <div id="simulation-results-container" style="display: none; margin-top: 30px; padding: 25px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+        <h2 style="color: #496D89; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; margin-top: 0;">Simulation Results</h2>
+        <div id="simulation-results-summary" style="margin-top: 20px; overflow-x: auto;"></div>
+        <div id="simulation-results-figures" style="margin-top: 30px;"></div>
+      </div>
     </div>
 
     <script>
@@ -626,6 +671,102 @@
         
         triggerResize();
 
+        let simulationWorker = null;
+
+        function runSimulationInWorker(schemaName, payload) {
+          const statusContainer = document.getElementById('simulation-status-container');
+          const statusMsg = document.getElementById('simulation-status-message');
+          const progressBar = document.getElementById('simulation-progress-bar');
+          const progressPercent = document.getElementById('simulation-progress-percent');
+          const resultsContainer = document.getElementById('simulation-results-container');
+          const resultsSummary = document.getElementById('simulation-results-summary');
+          const resultsFigures = document.getElementById('simulation-results-figures');
+
+          // Show status, reset progress, hide previous results
+          statusContainer.style.display = 'block';
+          statusMsg.textContent = 'Initializing background worker...';
+          statusMsg.style.color = '#475569';
+          progressBar.style.width = '0%';
+          progressBar.style.background = '#496D89';
+          progressPercent.textContent = '0%';
+          resultsContainer.style.display = 'none';
+          resultsSummary.innerHTML = '';
+          resultsFigures.innerHTML = '';
+
+          triggerResize();
+
+          if (!simulationWorker) {
+            const isSubpath = window.location.pathname.includes('/clintrials/');
+            const workerUrl = isSubpath ? '/clintrials/hub/worker.js' : '/hub/worker.js';
+            console.log("Spawning simulation background worker at:", workerUrl);
+            simulationWorker = new Worker(workerUrl);
+          }
+
+          simulationWorker.onmessage = function(e) {
+            const msg = e.data;
+            if (msg.type === 'status') {
+              statusMsg.textContent = msg.message;
+              triggerResize();
+            } else if (msg.type === 'progress') {
+              progressBar.style.width = msg.percent + '%';
+              progressPercent.textContent = msg.percent + '%';
+            } else if (msg.type === 'success') {
+              statusMsg.textContent = 'Simulation completed successfully!';
+              statusMsg.style.color = '#15803d'; // beautiful green
+              progressBar.style.width = '100%';
+              progressBar.style.background = '#15803d';
+              progressPercent.textContent = '100%';
+
+              // Render results table
+              resultsContainer.style.display = 'block';
+              resultsSummary.innerHTML = msg.data.summary_html;
+
+              // Render figures
+              resultsFigures.innerHTML = '';
+              msg.data.figures.forEach((fig, index) => {
+                const figWrapper = document.createElement('div');
+                figWrapper.style.marginBottom = '40px';
+
+                if (fig.title) {
+                  const titleEl = document.createElement('h3');
+                  titleEl.textContent = fig.title;
+                  titleEl.style.color = '#496D89';
+                  titleEl.style.borderBottom = '1px solid #edf2f7';
+                  titleEl.style.paddingBottom = '8px';
+                  figWrapper.appendChild(titleEl);
+                }
+
+                const figId = `plotly-figure-${index}`;
+                const figDiv = document.createElement('div');
+                figDiv.id = figId;
+                figDiv.style.width = '100%';
+                figDiv.style.minHeight = '400px';
+                figWrapper.appendChild(figDiv);
+                resultsFigures.appendChild(figWrapper);
+
+                const plotlyData = JSON.parse(fig.plotly_json);
+                if (!plotlyData.layout) plotlyData.layout = {};
+                plotlyData.layout.width = undefined; // make it responsive to the container
+                plotlyData.layout.autosize = true;
+
+                Plotly.newPlot(figId, plotlyData.data, plotlyData.layout, { responsive: true });
+              });
+
+              triggerResize();
+            } else if (msg.type === 'error') {
+              statusMsg.textContent = 'Error: ' + msg.error;
+              statusMsg.style.color = '#b91c1c'; // beautiful red
+              progressBar.style.background = '#b91c1c';
+              triggerResize();
+            }
+          };
+
+          simulationWorker.postMessage({
+            schemaName: schemaName,
+            payload: payload
+          });
+        }
+
         form.onsubmit = (e) => {
            e.preventDefault();
            let allValid = true;
@@ -652,22 +793,11 @@
               }
            }
            if (allValid) {
-              console.log("Submitting payload:", payload);
-              fetch('api/simulate', {
-                 method: 'POST',
-                 headers: {
-                    'Content-Type': 'application/json'
-                 },
-                 body: JSON.stringify(payload)
-              }).then(res => {
-                 console.log("Response from mock backend:", res);
-              }).catch(err => {
-                 console.error("Fetch error (expected if no real backend is running):", err);
-              });
-
-              alert("Simulation configuration valid and submitted!");
+              clearError();
+              console.log("Executing background simulation for", schemaName, "with payload:", payload);
+              runSimulationInWorker(schemaName, payload);
            } else {
-              alert("Please correct validation errors before submitting.");
+              showError("Please correct validation errors before submitting.");
            }
         };
       }
