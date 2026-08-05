@@ -7,16 +7,16 @@ from clintrials.core.tte import BayesianTimeToEvent, matrix_cohort_analysis
 
 
 def test_bayesian_time_to_event_update_and_test():
-    trial = BayesianTimeToEvent(alpha_prior=2, beta_prior=2)  # type: ignore
-    trial.update([(5, 0), (10, 0)])  # type: ignore
+    trial = BayesianTimeToEvent(alpha_prior=2, beta_prior=2)
+    trial.update([(5, 0), (10, 0)])
 
-    res = trial.test(time=5, cutoff=8, probability=0.8, less_than=True)  # type: ignore
+    res = trial.test(time=5, cutoff=8, probability=0.8, less_than=True)
     assert res["Patients"] == 2
     assert res["Events"] == 0
     assert abs(res["Probability"] - 0.69301655) < 1e-6
     assert not res["Stop"]
 
-    res = trial.test(time=12, cutoff=8, probability=0.5, less_than=False)  # type: ignore
+    res = trial.test(time=12, cutoff=8, probability=0.5, less_than=False)
     assert res["Events"] == 2
     assert res["Stop"]
 
@@ -24,7 +24,7 @@ def test_bayesian_time_to_event_update_and_test():
 def test_matrix_cohort_analysis_deterministic():
     np.random.seed(0)
     stream = ConstantRecruitmentStream(1)  # type: ignore
-    report = matrix_cohort_analysis(  # type: ignore
+    report = matrix_cohort_analysis(
         n_simulations=1,
         n_patients=2,
         true_median=10,
@@ -46,7 +46,7 @@ def test_matrix_cohort_analysis_deterministic():
 def test_matrix_cohort_analysis_multiple_runs():
     np.random.seed(1)
     stream = ConstantRecruitmentStream(1)  # type: ignore
-    reports = matrix_cohort_analysis(  # type: ignore
+    reports = matrix_cohort_analysis(
         n_simulations=2,
         n_patients=1,
         true_median=5,
@@ -68,7 +68,7 @@ def test_matrix_cohort_analysis_multiple_runs():
 def test_matrix_cohort_analysis_go_at_final():
     np.random.seed(0)
     stream = ConstantRecruitmentStream(1)  # type: ignore
-    report = matrix_cohort_analysis(  # type: ignore
+    report = matrix_cohort_analysis(
         n_simulations=1,
         n_patients=2,
         true_median=5,
@@ -93,7 +93,7 @@ def test_matrix_cohort_analysis_early_stopping_and_multirun():
     # Run with 3 simulations, 10 patients, with interim analyses configured
     # at 3 and 6 patients. A high lower_cutoff (15.0) relative to true_median (1.0)
     # and a low interim_certainty (0.5) will trigger early stopping.
-    reports = matrix_cohort_analysis(  # type: ignore
+    reports = matrix_cohort_analysis(
         n_simulations=3,
         n_patients=10,
         true_median=1.0,
