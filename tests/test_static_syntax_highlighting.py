@@ -9,6 +9,12 @@ def test_static_syntax_highlighting_exists():
 
     # 1. Compile the documentation if it is not already built
     if not dist_dir.exists() or not list(dist_dir.glob("**/*.html")):
+        # Ensure node_modules are installed
+        if not (root_dir / "node_modules").exists():
+            try:
+                subprocess.run(["npm", "ci"], cwd=str(root_dir), check=True)
+            except subprocess.CalledProcessError:
+                subprocess.run(["npm", "install"], cwd=str(root_dir), check=True)
         subprocess.run(["npm", "run", "prebuild"], cwd=str(root_dir), check=True)
         subprocess.run(["npm", "run", "build"], cwd=str(root_dir), check=True)
 
