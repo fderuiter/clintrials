@@ -10,14 +10,17 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 from collections import OrderedDict
+from typing import Any
 
 import numpy as np
 from scipy.stats import expon, invgamma
 
+from clintrials.core.protocol import Protocol
+from clintrials.core.simulation import UniversalProtocolSimulationRunner
 from clintrials.utils import atomic_to_json, iterable_to_json
 
 
-class BayesianTimeToEvent:
+class BayesianTimeToEvent(Protocol):
     """A Bayesian design for time-to-event endpoints.
 
     This class implements a simple adaptive Bayesian design for time-to-event
@@ -28,7 +31,7 @@ class BayesianTimeToEvent:
     Times in Early Phase Clinical Trials: Some Practical Issues" for details.
     """
 
-    def __init__(self, alpha_prior, beta_prior):  # type: ignore
+    def __init__(self, alpha_prior: float, beta_prior: float) -> None:
         """Initializes a BayesianTimeToEvent object.
 
         Args:
@@ -37,12 +40,30 @@ class BayesianTimeToEvent:
             beta_prior (float): The beta parameter of the inverse-gamma prior on
                 the median time-to-event.
         """
+        super().__init__()
         self.alpha_prior = alpha_prior
         self.beta_prior = beta_prior
-        self._times_to_event = []
-        self._recruitment_times = []
+        self._times_to_event: list[float] = []
+        self._recruitment_times: list[float] = []
 
-    def event_times(self):  # type: ignore
+        # Additional simulation / trial configuration parameters
+        self.n_patients: int = 0
+        self.true_median: float = 0.0
+        self.lower_cutoff: float = 0.0
+        self.upper_cutoff: float = 0.0
+        self.interim_certainty: float = 0.0
+        self.final_certainty: float = 0.0
+        self.interim_analysis_after_patients: list[int] = []
+        self.interim_analysis_time_delta: float = 0.0
+        self.final_analysis_time_delta: float = 0.0
+
+        # State tracking for simulation
+        self.interim_analyses_results: list[OrderedDict] = []
+        self._checked_interims: set[int] = set()
+        self._stopped_early: bool = False
+        self._final_analysis: OrderedDict | None = None
+
+    def event_times(self) -> list[float]:
         """Gets the list of event times.
 
         Returns:
@@ -50,7 +71,7 @@ class BayesianTimeToEvent:
         """
         return self._times_to_event
 
-    def recruitment_times(self):  # type: ignore
+    def recruitment_times(self) -> list[float]:
         """Gets the list of recruitment times.
 
         Returns:
@@ -59,16 +80,84 @@ class BayesianTimeToEvent:
         """
         return self._recruitment_times
 
-    def update(self, cases):  # type: ignore
-        """Updates the trial with new patient cases.
+    def reset(self) -> None:
+        """Resets the trial to its initial state."""
+        self._times_to_event = []
+        self._recruitment_times = []
+        self.interim_analyses_results = []
+        self._checked_interims = set()
+        self._stopped_early = False
+        self._final_analysis = None
 
-        Args:
-            cases (list[tuple[float, float]]): A list of cases, where each case
-                is a tuple of (event_time, recruitment_time).
-        """
+    def update(self, cases: list[tuple[float, float]], *args: Any, **kwargs: Any) -> None:
+        """Updates the trial with new patient cases and runs any pending interim analyses."""
         for event_time, recruitment_time in cases:
             self._times_to_event.append(event_time)
             self._recruitment_times.append(recruitment_time)
+
+        # Run any pending interim analysis checks
+        recruitment_times = np.array(self._recruitment_times)
+        for x in self.interim_analysis_after_patients:
+            if x <= len(recruitment_times) and x < self.n_patients:
+                if x not in self._checked_interims:
+                    self._checked_interims.add(x)
+                    time = recruitment_times[x - 1] + self.interim_analysis_time_delta
+                    interim_outcome = self.test(
+                        time, self.lower_cutoff, self.interim_certainty, less_than=True
+                    )
+                    self.interim_analyses_results.append(interim_outcome)
+                    if interim_outcome["Stop"]:
+                        self._stopped_early = True
+                        self._final_analysis = interim_outcome
+                        break
+
+    def has_more(self) -> bool:
+        """Checks if the trial is ongoing (has not stopped early)."""
+        return not self._stopped_early
+
+    def max_size(self) -> int:
+        """Gets the maximum number of patients for the trial."""
+        return self.n_patients
+
+    def report(self) -> OrderedDict:
+        """Returns a standardized, ordered, JSON-serializable report."""
+        trial_report = OrderedDict()
+        trial_report["MaxPatients"] = self.n_patients
+        trial_report["TrueMedianEventTime"] = self.true_median
+        trial_report["PriorAlpha"] = self.alpha_prior
+        trial_report["PriorBeta"] = self.beta_prior
+        trial_report["LowerCutoff"] = self.lower_cutoff
+        trial_report["UpperCutoff"] = self.upper_cutoff
+        trial_report["InterimCertainty"] = self.interim_certainty
+        trial_report["FinalCertainty"] = self.final_certainty
+        trial_report["InterimAnalysisAfterPatients"] = self.interim_analysis_after_patients
+        trial_report["InterimAnalysisTimeDelta"] = self.interim_analysis_time_delta
+        trial_report["FinalAnalysisTimeDelta"] = self.final_analysis_time_delta
+
+        trial_report["RecruitmentTimes"] = iterable_to_json(self._recruitment_times)  # type: ignore
+        trial_report["EventTimes"] = iterable_to_json(self._times_to_event)  # type: ignore
+        trial_report["InterimAnalyses"] = self.interim_analyses_results
+
+        if self._stopped_early and self._final_analysis is not None:
+            trial_report["Decision"] = "StopAtInterim"
+            trial_report["FinalAnalysis"] = self._final_analysis
+            trial_report["FinalPatients"] = self._final_analysis["Patients"]
+            trial_report["FinalEvents"] = self._final_analysis["Events"]
+            trial_report["FinalTotalEventTime"] = self._final_analysis["TotalEventTime"]
+        else:
+            final_analysis_time = max(self._recruitment_times) + self.final_analysis_time_delta
+            final_outcome = self.test(
+                final_analysis_time, self.upper_cutoff, self.final_certainty, less_than=False
+            )
+            trial_report["FinalAnalysis"] = final_outcome
+            stop_trial = final_outcome["Stop"]
+            decision = "StopAtFinal" if stop_trial else "GoAtFinal"
+            trial_report["Decision"] = decision
+            trial_report["FinalPatients"] = final_outcome["Patients"]
+            trial_report["FinalEvents"] = final_outcome["Events"]
+            trial_report["FinalTotalEventTime"] = final_outcome["TotalEventTime"]
+
+        return trial_report
 
     def test(self, time, cutoff, probability, less_than=True):  # type: ignore
         """Tests the posterior belief about the median time-to-event.
@@ -140,6 +229,29 @@ class BayesianTimeToEvent:
         return test_report
 
 
+class TimeToEventOutcomeGenerator:
+    """Standard dynamic outcome generator for time-to-event simulation."""
+
+    def __init__(self, true_median: float) -> None:
+        """Initializes a TimeToEventOutcomeGenerator object.
+
+        Args:
+            true_median (float): The true median time-to-event.
+        """
+        self.true_median = true_median
+
+    def __call__(self, design: Any, current_size: int, cohort_size: int, **kwargs: Any) -> Any:
+        """Generates patient outcomes conforming to the standard OutcomeGenerator interface."""
+        true_mean = self.true_median / np.log(2)
+        arrival_times = kwargs.get("arrival_times", [])
+
+        # Determine seed/rng strategy to maintain reproducibility
+        rng = getattr(design, "_rng", None)
+
+        event_times = expon(scale=true_mean).rvs(size=cohort_size, random_state=rng)
+        return [(x, y) for x, y in zip(event_times, arrival_times)]
+
+
 def matrix_cohort_analysis(  # type: ignore
     n_simulations,
     n_patients,
@@ -187,78 +299,29 @@ def matrix_cohort_analysis(  # type: ignore
         list or dict: A list of simulation reports, or a single report if
             `n_simulations` is 1.
     """
-    reports = []
-    for i in range(n_simulations):
-        trial = BayesianTimeToEvent(alpha_prior, beta_prior)  # type: ignore
-        recruitment_stream.reset()
-        # recruitment_times = np.arange(1, n_patients+1) / recruitment
-        recruitment_times = np.array(
-            [recruitment_stream.next() for i in range(n_patients)]
-        )
-        true_mean = true_median / np.log(2)
-        event_times = expon(scale=true_mean).rvs(
-            n_patients
-        )  # Exponential survival times
-        cases = [(x, y) for (x, y) in zip(event_times, recruitment_times)]
-        trial.update(cases)  # type: ignore
-        interim_analysis_times = list(
-            {
-                recruitment_times[x - 1] + interim_analysis_time_delta
-                for x in interim_analysis_after_patients
-                if x < n_patients
-            }
-        )
+    design = BayesianTimeToEvent(alpha_prior, beta_prior)
+    design.n_patients = n_patients
+    design.true_median = true_median
+    design.lower_cutoff = lower_cutoff
+    design.upper_cutoff = upper_cutoff
+    design.interim_certainty = interim_certainty
+    design.final_certainty = final_certainty
+    design.interim_analysis_after_patients = interim_analysis_after_patients
+    design.interim_analysis_time_delta = interim_analysis_time_delta
+    design.final_analysis_time_delta = final_analysis_time_delta
 
-        trial_report = OrderedDict()
-        # Call parameters
-        trial_report["MaxPatients"] = n_patients
-        trial_report["TrueMedianEventTime"] = true_median
-        trial_report["PriorAlpha"] = alpha_prior
-        trial_report["PriorBeta"] = beta_prior
-        trial_report["LowerCutoff"] = lower_cutoff
-        trial_report["UpperCutoff"] = upper_cutoff
-        trial_report["InterimCertainty"] = interim_certainty
-        trial_report["FinalCertainty"] = final_certainty
-        trial_report["InterimAnalysisAfterPatients"] = interim_analysis_after_patients
-        trial_report["InterimAnalysisTimeDelta"] = interim_analysis_time_delta
-        trial_report["FinalAnalysisTimeDelta"] = final_analysis_time_delta
-        # trial_report['Recruitment'] = recruitment
-        # Simulated patient outcomes
-        trial_report["RecruitmentTimes"] = iterable_to_json(recruitment_times)  # type: ignore
-        trial_report["EventTimes"] = iterable_to_json(event_times)  # type: ignore
-        trial_report["InterimAnalyses"] = []
-        # Interim analyses
-        for time in interim_analysis_times:
-            interim_outcome = trial.test(  # type: ignore
-                time, lower_cutoff, interim_certainty, less_than=True
-            )
-            trial_report["InterimAnalyses"].append(interim_outcome)
-            stop_trial = interim_outcome["Stop"]
-            if stop_trial:
-                trial_report["Decision"] = "StopAtInterim"
-                trial_report["FinalAnalysis"] = interim_outcome
-                trial_report["FinalPatients"] = interim_outcome["Patients"]
-                trial_report["FinalEvents"] = interim_outcome["Events"]
-                trial_report["FinalTotalEventTime"] = interim_outcome["TotalEventTime"]
-                return trial_report
-        # Final analysis
-        final_analysis_time = max(recruitment_times) + final_analysis_time_delta
-        final_outcome = trial.test(  # type: ignore
-            final_analysis_time, upper_cutoff, final_certainty, less_than=False
-        )
-        trial_report["FinalAnalysis"] = final_outcome
-        stop_trial = final_outcome["Stop"]
-        decision = "StopAtFinal" if stop_trial else "GoAtFinal"
-        trial_report["Decision"] = decision
-        trial_report["FinalPatients"] = final_outcome["Patients"]
-        trial_report["FinalEvents"] = final_outcome["Events"]
-        trial_report["FinalTotalEventTime"] = final_outcome["TotalEventTime"]
-        reports.append(trial_report)
+    runner = UniversalProtocolSimulationRunner(
+        design=design,
+        outcome_generator=TimeToEventOutcomeGenerator(true_median),
+        recruitment_stream=recruitment_stream,
+    )
+
+    results = runner.run(mode="iterative", n_sims=n_simulations, cohort_size=n_patients)
 
     if n_simulations == 1:
-        return reports[0]
+        return results[0]
     else:
-        return reports
+        return results
 
 
 # Inject module-level docstring
