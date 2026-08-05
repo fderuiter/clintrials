@@ -1,7 +1,7 @@
 """Module containing the shared cohort tracking utility for trials."""
 
 from dataclasses import dataclass
-from typing import Iterable, List, Optional
+from typing import Any, Iterable, List, Optional
 
 from clintrials.validation import validate_matching_lengths
 
@@ -59,6 +59,10 @@ class PatientCohortTracker:
         """Clears all records from the tracker."""
         self.records.clear()
 
+    def add_records(self, records: Iterable[PatientRecord]) -> None:
+        """Adds standard patient records directly to the tracker."""
+        self.records.extend(records)
+
     @property
     def doses(self) -> List[int]:
         """Gets a derived list of doses for all patients."""
@@ -77,4 +81,62 @@ class PatientCohortTracker:
     def __len__(self) -> int:
         """Returns the total number of patients tracked."""
         return len(self.records)
+
+
+def parse_patient_records(cases: Any) -> List[PatientRecord]:
+    """Parses various formats of cases into standardized PatientRecord objects."""
+    import numpy as np
+    if cases is None:
+        return []
+    try:
+        if len(cases) == 0:
+            return []
+    except TypeError:
+        pass
+
+    records = []
+    # If a single item is passed instead of a list, wrap it
+    if isinstance(cases, (PatientRecord, dict)):
+        cases = [cases]
+    elif isinstance(cases, tuple):
+        # Could be a single tuple like (1, 0) or (1, 0, 1), or a tuple of tuples.
+        # Let's check if the first element is a number or not.
+        if len(cases) > 0 and isinstance(cases[0], (int, float, np.integer, np.floating)):
+            cases = [cases]
+
+    for case in cases:
+        if isinstance(case, PatientRecord):
+            records.append(case)
+        elif isinstance(case, dict):
+            dose = int(case["dose"])
+            toxicity = int(case["toxicity"])
+            efficacy = case.get("efficacy")
+            if efficacy is not None:
+                efficacy = int(efficacy)
+            records.append(PatientRecord(dose=dose, toxicity=toxicity, efficacy=efficacy))
+        elif isinstance(case, (tuple, list, np.ndarray)):
+            # Convert to list or standard python tuple
+            case_list = list(case)
+            if len(case_list) == 2:
+                records.append(PatientRecord(dose=int(case_list[0]), toxicity=int(case_list[1])))
+            elif len(case_list) >= 3:
+                # Could be 3 or more, e.g. (dose, toxicity, efficacy) or (dose, toxicity, efficacy, arrival_time, ...)
+                # Let's extract the first three
+                efficacy_val = case_list[2]
+                if efficacy_val is not None:
+                    efficacy_val = int(efficacy_val)
+                records.append(
+                    PatientRecord(
+                        dose=int(case_list[0]),
+                        toxicity=int(case_list[1]),
+                        efficacy=efficacy_val
+                    )
+                )
+            else:
+                from clintrials.core.errors import ErrorTemplates
+                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="Patient outcome", expected_length=2))
+        else:
+            raise TypeError(f"Unsupported patient record format: {type(case)}")
+    return records
+
 

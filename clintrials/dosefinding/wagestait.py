@@ -160,7 +160,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             .to_dict(),
         }
 
-    def __init__(self, skeletons: Any, prior_tox_probs: Any, tox_target: Any, tox_limit: Any, eff_limit: Any, first_dose: Any, max_size: Any, randomisation_stage_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, theta_prior: Any = norm(0, np.sqrt(1.34)), beta_prior: Any = norm(0, np.sqrt(1.34)), excess_toxicity_alpha: Any = 0.025, deficient_efficacy_alpha: Any = 0.025, model_prior_weights: Any = None, use_quick_integration: Any = False, estimate_var: Any = False) -> None:
+    def __init__(self, skeletons: Any, prior_tox_probs: Any, tox_target: Any, tox_limit: Any, eff_limit: Any, first_dose: Any, max_size: Any, randomisation_stage_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, theta_prior: Any = norm(0, np.sqrt(1.34)), beta_prior: Any = norm(0, np.sqrt(1.34)), excess_toxicity_alpha: Any = 0.025, deficient_efficacy_alpha: Any = 0.025, model_prior_weights: Any = None, use_quick_integration: Any = False, estimate_var: Any = False, toxicity_estimator: Optional[Any] = None) -> None:
         """Initializes a WagesTait trial object.
 
         Args:
@@ -191,6 +191,8 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 integration method. Defaults to `False`.
             estimate_var (bool, optional): If `True`, estimates the posterior
                 variance of beta and theta. Defaults to `False`.
+            toxicity_estimator (DoseFindingTrial, optional): An injected toxicity
+                estimator. Defaults to None.
 
         Raises:
             ValueError: If the dimensions of the inputs are inconsistent, or
@@ -250,18 +252,21 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             self.randomise_at_start = True
         else:
             self.randomise_at_start = False
-        self.crm = CRM(
-            prior=prior_tox_probs,
-            target=tox_target,
-            first_dose=first_dose,
-            max_size=max_size,
-            F_func=empiric,
-            inverse_F=inverse_empiric,
-            beta_prior=beta_prior,
-            use_quick_integration=use_quick_integration,
-            estimate_var=estimate_var,
-            plugin_mean=False,
-        )
+        if toxicity_estimator is not None:
+            self.crm = toxicity_estimator
+        else:
+            self.crm = CRM(
+                prior=prior_tox_probs,
+                target=tox_target,
+                first_dose=first_dose,
+                max_size=max_size,
+                F_func=empiric,
+                inverse_F=inverse_empiric,
+                beta_prior=beta_prior,
+                use_quick_integration=use_quick_integration,
+                estimate_var=estimate_var,
+                plugin_mean=False,
+            )
         self.post_tox_probs = np.zeros(self.I)
         self.post_eff_probs = np.zeros(self.I)
         self.theta_hats = np.zeros(self.K)
@@ -318,12 +323,14 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         return self.theta_hats[self.most_likely_model_index]
 
     def _calculate_next_dose(self, **kwargs: Any) -> Any:
+        from clintrials.utils import filter_kwargs_for_callable
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
             toxicity_cases.append((dose, tox))
         self.crm.reset()
-        self.crm.update(toxicity_cases)
+        filtered_kwargs = filter_kwargs_for_callable(self.crm.update, kwargs)
+        self.crm.update(toxicity_cases, **filtered_kwargs)
 
         integrals = _wt_get_theta_hat(
             cases,

@@ -101,3 +101,98 @@ def test_custom_dual_endpoint_trial_flow() -> None:
     assert report["Doses"] == [1, 1, 3]
     assert report["Toxicities"] == [0, 1, 0]
     assert report["Efficacies"] == [1, 0, 1]
+
+
+def test_unified_patient_records_update_types() -> None:
+    from clintrials.core.cohort import PatientRecord, parse_patient_records
+    trial = CustomSingleEndpointTrial(first_dose=1, num_doses=5, max_size=10)
+
+    # Test updating with PatientRecord objects directly
+    records = [PatientRecord(dose=1, toxicity=0), PatientRecord(dose=1, toxicity=1)]
+    trial.update(records)
+    assert trial.doses() == [1, 1]
+    assert trial.toxicities() == [0, 1]
+
+    # Test updating with dicts
+    dict_records = [{"dose": 2, "toxicity": 0}, {"dose": 2, "toxicity": 1, "efficacy": 1}]
+    trial.update(dict_records)
+    assert trial.doses() == [1, 1, 2, 2]
+    assert trial.toxicities() == [0, 1, 0, 1]
+
+
+def test_estimator_injection_and_forwarding() -> None:
+    from clintrials.dosefinding.crm import CRM
+    from clintrials.dosefinding.watu import WATU
+    from clintrials.core.math import empiric, inverse_empiric
+    from clintrials.dosefinding.efftox import LpNormCurve
+
+    # Instantiate custom CRM estimator
+    custom_crm = CRM(
+        prior=[0.05, 0.1, 0.2, 0.3, 0.4],
+        target=0.25,
+        first_dose=1,
+        max_size=12,
+    )
+
+    # Inject it into WATU
+    watu_trial = WATU(
+        skeletons=[[0.1, 0.2, 0.3, 0.4, 0.5]],
+        prior_tox_probs=[0.05, 0.1, 0.2, 0.3, 0.4],
+        tox_target=0.25,
+        tox_limit=0.3,
+        eff_limit=0.2,
+        metric=LpNormCurve(0.05, 0.4, 0.25, 0.15),
+        first_dose=1,
+        max_size=12,
+        toxicity_estimator=custom_crm,
+    )
+
+    assert watu_trial.crm is custom_crm
+
+    # Check that update succeeds without custom parameter-forwarding TypeErrors
+    # even when extraneous parameters are forwarded.
+    watu_trial.update([(1, 0, 1)], extraneous_param="ignored")
+    assert watu_trial.crm.doses() == [1]
+
+
+def test_consolidated_simulation_execution() -> None:
+    from clintrials.dosefinding import simulate_dose_finding_trial
+    from clintrials.dosefinding.crm import CRM
+    from clintrials.dosefinding.watu import WATU
+    from clintrials.dosefinding.efftox import LpNormCurve
+
+    # CRM simulation
+    crm_trial = CRM(
+        prior=[0.05, 0.1, 0.2, 0.3, 0.4],
+        target=0.25,
+        first_dose=1,
+        max_size=10,
+    )
+    crm_sim = simulate_dose_finding_trial(
+        design=crm_trial,
+        true_toxicities=[0.05, 0.1, 0.2, 0.3, 0.4],
+        tolerances=[0.5] * 10,
+        cohort_size=3,
+    )
+    assert "RecommendedDose" in crm_sim
+
+    # WATU joint design simulation using the exact same pathway
+    watu_trial = WATU(
+        skeletons=[[0.1, 0.2, 0.3, 0.4, 0.5]],
+        prior_tox_probs=[0.05, 0.1, 0.2, 0.3, 0.4],
+        tox_target=0.25,
+        tox_limit=0.3,
+        eff_limit=0.2,
+        metric=LpNormCurve(0.05, 0.4, 0.25, 0.15),
+        first_dose=1,
+        max_size=10,
+    )
+    watu_sim = simulate_dose_finding_trial(
+        design=watu_trial,
+        true_toxicities=[0.05, 0.1, 0.2, 0.3, 0.4],
+        true_efficacies=[0.1, 0.2, 0.3, 0.4, 0.5],
+        tolerances=[0.5] * 30,  # 3 * n_patients flat array
+        cohort_size=3,
+    )
+    assert "RecommendedDose" in watu_sim
+

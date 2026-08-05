@@ -300,7 +300,8 @@ __all__ = [
     "to_1d_list_gen",
     "to_1d_list",
     "atomic_to_json",
-    "iterable_to_json"
+    "iterable_to_json",
+    "filter_kwargs_for_callable"
 ]
 
 def to_1d_list_gen(x):  # type: ignore
@@ -328,3 +329,25 @@ def iterable_to_json(obj):  # type: ignore
         return [atomic_to_json(x) for x in obj]  # type: ignore
     else:
         return atomic_to_json(obj)  # type: ignore
+
+def filter_kwargs_for_callable(func: Callable[..., Any], kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    """Filters kwargs so that only those accepted by func are returned, unless func accepts **kwargs."""
+    import inspect
+    try:
+        sig = inspect.signature(func)
+    except (ValueError, TypeError):
+        return kwargs
+
+    has_var_keyword = any(
+        p.kind == inspect.Parameter.VAR_KEYWORD
+        for p in sig.parameters.values()
+    )
+    if has_var_keyword:
+        return kwargs
+
+    filtered = {}
+    for k, v in kwargs.items():
+        if k in sig.parameters:
+            filtered[k] = v
+    return filtered
+

@@ -91,7 +91,7 @@ class DoseFindingTrial(BaseDoseFindingTrial):
         df["ToxRate"] = np.where(df.N > 0, df.Toxicities / df.N, np.nan)
         return df
 
-    def update(self, cases: List[Tuple[int, int]], **kwargs: Any) -> int:  # type: ignore[override]
+    def update(self, cases: List[Any], **kwargs: Any) -> int:  # type: ignore[override]
         """Updates the trial with a list of new cases.
 
         Warning:
@@ -101,23 +101,16 @@ class DoseFindingTrial(BaseDoseFindingTrial):
             duplicate existing records.
 
         Args:
-            cases (list[tuple[int, int]]): A list of new cases to append, where each case
-                is a tuple of (dose, toxicity).
+            cases (list): A list of new cases to append.
             **kwargs (Any): Additional keyword arguments passed to the update logic.
 
         Returns:
             int: The next recommended dose level.
         """
         if cases:
-            doses = []
-            toxicities = []
-            for case in cases:
-                if len(case) < 2:
-                    from clintrials.core.errors import ErrorTemplates
-                    raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="Patient outcome", expected_length=2))
-                doses.append(case[0])
-                toxicities.append(case[1])
-            self._tracker.add_patients(doses=doses, toxicities=toxicities)
+            from clintrials.core.cohort import parse_patient_records
+            records = parse_patient_records(cases)
+            self._tracker.add_records(records)
 
         self._next_dose = self._calculate_next_dose(**kwargs)
         return self._next_dose
@@ -325,13 +318,16 @@ def _df_outcome_generator(design: Any, current_size: Any, cohort_size: Any, true
     ]
     return list(zip([dose_level] * cohort_size, tox))
 
-def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = True, calculate_optimal_decision: Any = True, recruitment_stream: Any = None) -> Any:
+def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficacies: Optional[Any] = None, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = True, calculate_optimal_decision: Any = True, recruitment_stream: Any = None) -> Any:
     """Simulates a dose-finding trial.
 
     Args:
         design (DoseFindingTrial): The trial design to use.
         true_toxicities (list[float]): The true toxicity rates for each
             dose level.
+        true_efficacies (list[float], optional): The true efficacy rates for each
+            dose level (for joint models).
+        tox_eff_odds_ratio (float, optional): Odds ratio for joint models.
         tolerances (list[float], optional): A list of uniform random
             numbers for simulating patient outcomes. Defaults to `None`.
         cohort_size (int, optional): The number of patients per cohort.
@@ -347,11 +343,42 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
         collections.OrderedDict: A dictionary containing the simulation report.
     """
     from clintrials.core.simulation import UniversalProtocolSimulationRunner
+    from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial, _simulate_trial
 
-    # Validate inputs
+    if isinstance(design, EfficacyToxicityDoseFindingTrial) or true_efficacies is not None:
+        if true_efficacies is None:
+            raise ValueError("true_efficacies must be provided for joint efficacy-toxicity designs.")
+        n_patients = design.max_size()
+        if tolerances is not None:
+            if isinstance(tolerances, np.ndarray) and tolerances.ndim == 2:
+                pass
+            else:
+                flat_tols = list(tolerances)
+                if len(flat_tols) >= 3 * n_patients:
+                    tolerances = np.array(flat_tols[:3 * n_patients]).reshape(n_patients, 3)
+                else:
+                    tolerances = np.random.uniform(size=3 * n_patients).reshape(n_patients, 3)
+        else:
+            tolerances = np.random.uniform(size=3 * n_patients).reshape(n_patients, 3)
+
+        return _simulate_trial(
+            design=design,
+            true_toxicities=true_toxicities,
+            true_efficacies=true_efficacies,
+            tox_eff_odds_ratio=tox_eff_odds_ratio,
+            tolerances=tolerances,
+            cohort_size=cohort_size,
+            conduct_trial=conduct_trial,
+            calculate_optimal_decision=calculate_optimal_decision,
+            recruitment_stream=recruitment_stream,
+        )
+
+    # Validate inputs for single-endpoint trials
     if tolerances is None:
         tolerances = uniform().rvs(design.max_size())
     else:
+        if isinstance(tolerances, np.ndarray) and tolerances.ndim > 1:
+            tolerances = tolerances.flatten()
         if len(tolerances) < design.max_size():
             logging.warning(
                 "You have provided fewer tolerances than maximum number of patients on trial. Beware errors!"
@@ -382,7 +409,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
     if calculate_optimal_decision:
         try:
             had_tox = lambda x: x < np.array(true_toxicities)
-            tox_horizons = np.array([had_tox(x) for x in tolerances])  # type: ignore
+            tox_horizons = np.array([had_tox(x) for x in tolerances[:design.max_size()]])  # type: ignore
             tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
@@ -394,7 +421,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, tolerances: A
     return report
 
 
-def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = True, calculate_optimal_decision: Any = True, recruitment_stream: Any = None) -> Any:
+def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, true_efficacies: Optional[Any] = None, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = True, calculate_optimal_decision: Any = True, recruitment_stream: Any = None) -> Any:
     """Simulates multiple toxicity-driven dose-finding trials.
 
     Runs simulations from the same patient data.
@@ -404,6 +431,8 @@ def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, toleranc
             design labels to trial design objects.
         true_toxicities (list[float]): The true toxicity rates for each
             dose level.
+        true_efficacies (list[float], optional): True efficacy rates.
+        tox_eff_odds_ratio (float, optional): Odds ratio for joint models.
         tolerances (list[float], optional): A list of uniform random
             numbers for simulating patient outcomes. Defaults to `None`.
         cohort_size (int, optional): The number of patients per cohort.
@@ -419,21 +448,27 @@ def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, toleranc
         collections.OrderedDict: A dictionary of simulation reports, with
             keys corresponding to the design labels.
     """
+    from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
+    has_joint = any(isinstance(design, EfficacyToxicityDoseFindingTrial) for design in design_map.values())
     max_size = max([design.max_size() for design in design_map.values()])
+
     if tolerances is None:
-        tolerances = uniform().rvs(max_size)
-    else:
-        if len(tolerances) < max_size:
-            logging.warning(
-                "You have provided fewer tolerances than maximum number of patients on trial. Beware errors!"
-            )
+        if has_joint:
+            tolerances = np.random.uniform(size=3 * max_size).reshape(max_size, 3)
+        else:
+            tolerances = uniform().rvs(max_size)
 
     report = OrderedDict()
     report["TrueToxicities"] = iterable_to_json(true_toxicities)  # type: ignore
+    if has_joint and true_efficacies is not None:
+        report["TrueEfficacies"] = iterable_to_json(true_efficacies)  # type: ignore
+
     for label, design in design_map.items():
         design_sim = simulate_dose_finding_trial(
-            design,
-            true_toxicities,
+            design=design,
+            true_toxicities=true_toxicities,
+            true_efficacies=true_efficacies,
+            tox_eff_odds_ratio=tox_eff_odds_ratio,
             tolerances=tolerances,
             cohort_size=cohort_size,
             conduct_trial=conduct_trial,
@@ -534,7 +569,8 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
             # print 'next_dose is', trial.next_dose()
             trial.set_next_dose(next_dose)
             # print 'Now next_dose is', trial.next_dose()
-            mtd = trial.update(cases, **kwargs)
+            from clintrials.core.cohort import parse_patient_records
+            mtd = trial.update(parse_patient_records(cases), **kwargs)
             # print 'And now next_dose is', trial.next_dose()
 
             # Or:

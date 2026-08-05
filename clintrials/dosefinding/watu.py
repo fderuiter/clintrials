@@ -76,6 +76,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         mc_samples_stage1: Any = None,
         mc_samples_stage2: Any = None,
         must_try_lowest_dose: Any = False,
+        toxicity_estimator: Optional[Any] = None,
     ) -> None:
         """Initializes a WATU trial object.
 
@@ -136,6 +137,8 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             must_try_lowest_dose (bool, optional): If `True`, the trial must
                 assign dose 1 to the first cohort, provided it is safe to do so.
                 Defaults to `False`.
+            toxicity_estimator (DoseFindingTrial, optional): An injected toxicity
+                estimator. Defaults to None.
 
         Raises:
             ValueError: If the dimensions of the inputs are inconsistent.
@@ -218,20 +221,23 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             1,
         )[0]
         self.w = np.zeros(self.K)
-        self.crm = CRM(
-            prior=prior_tox_probs,
-            target=tox_target,
-            first_dose=first_dose,
-            max_size=max_size,
-            F_func=empiric,
-            inverse_F=inverse_empiric,
-            beta_prior=beta_prior,
-            use_quick_integration=use_quick_integration,
-            estimate_var=estimate_var,
-            avoid_skipping_untried_escalation=avoid_skipping_untried_escalation_stage_1,
-            avoid_skipping_untried_deescalation=avoid_skipping_untried_deescalation_stage_1,
-            plugin_mean=plugin_mean,
-        )
+        if toxicity_estimator is not None:
+            self.crm = toxicity_estimator
+        else:
+            self.crm = CRM(
+                prior=prior_tox_probs,
+                target=tox_target,
+                first_dose=first_dose,
+                max_size=max_size,
+                F_func=empiric,
+                inverse_F=inverse_empiric,
+                beta_prior=beta_prior,
+                use_quick_integration=use_quick_integration,
+                estimate_var=estimate_var,
+                avoid_skipping_untried_escalation=avoid_skipping_untried_escalation_stage_1,
+                avoid_skipping_untried_deescalation=avoid_skipping_untried_deescalation_stage_1,
+                plugin_mean=plugin_mean,
+            )
         self.post_tox_probs = np.zeros(self.I)
         self.post_eff_probs = np.zeros(self.I)
         self.theta_hats = np.zeros(self.K)
@@ -277,12 +283,14 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         return lik * prior
 
     def _calculate_next_dose(self, **kwargs: Any) -> Any:
+        from clintrials.utils import filter_kwargs_for_callable
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
             toxicity_cases.append((dose, tox))
         self.crm.reset()
-        self.crm.update(toxicity_cases)
+        filtered_kwargs = filter_kwargs_for_callable(self.crm.update, kwargs)
+        self.crm.update(toxicity_cases, **filtered_kwargs)
 
         integrals = _wt_get_theta_hat(
             cases,
