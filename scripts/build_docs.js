@@ -47,7 +47,49 @@ function walkAndCompile(currentDir, relativePath = "") {
       }
 
       // Compile markdown to HTML
-      const htmlContent = marked.parse(markdownBody);
+      let htmlContent = marked.parse(markdownBody);
+
+      // Rewrite relative links to use .html extensions
+      function rewriteRelativeLink(href) {
+        if (!href) return href;
+        if (
+          href.startsWith('http://') ||
+          href.startsWith('https://') ||
+          href.startsWith('mailto:') ||
+          href.startsWith('#') ||
+          href.includes('://')
+        ) {
+          return href;
+        }
+        let [pathPart, hashPart] = href.split('#');
+        let [mainPath, queryPart] = pathPart.split('?');
+        if (!mainPath) return href;
+
+        const ext = path.extname(mainPath);
+        if (!ext) {
+          if (mainPath.endsWith('/')) {
+            mainPath = mainPath.slice(0, -1);
+          }
+          mainPath += '.html';
+        } else if (['.md', '.mdx', '.rst'].includes(ext)) {
+          mainPath = mainPath.slice(0, -ext.length) + '.html';
+        }
+
+        let newHref = mainPath;
+        if (queryPart !== undefined) {
+          newHref += '?' + queryPart;
+        }
+        if (hashPart !== undefined) {
+          newHref += '#' + hashPart;
+        }
+        return newHref;
+      }
+
+      htmlContent = htmlContent.replace(/href="([^"]*)"/g, (match, href) => {
+        return `href="${rewriteRelativeLink(href)}"`;
+      }).replace(/href='([^']*)'/g, (match, href) => {
+        return `href='${rewriteRelativeLink(href)}'`;
+      });
 
       // Simple navigation breadcrumbs
       const parts = itemRelPath.replace(/\\/g, '/').replace(/\.mdx$/, '').split('/');
