@@ -1,6 +1,6 @@
 import subprocess
-import json
 from pathlib import Path
+
 
 def test_escape_mdx_behavior_via_node():
     """
@@ -9,11 +9,11 @@ def test_escape_mdx_behavior_via_node():
     js_code = """
     const fs = require('fs');
     const path = require('path');
-    
+
     // Read generate_mdx.js and extract escapeMdx
     const mdxScriptPath = path.resolve(process.cwd(), 'scripts/generate_mdx.js');
     const content = fs.readFileSync(mdxScriptPath, 'utf8');
-    
+
     // Evaluate the file or extract escapeMdx function specifically
     // We can evaluate the function by making a simple sandbox module
     const escapeMdxMatch = content.match(/function escapeMdx\\(str\\) \\{[\\s\\S]*?\\}/);
@@ -21,10 +21,10 @@ def test_escape_mdx_behavior_via_node():
         console.error("Could not find escapeMdx function in generate_mdx.js");
         process.exit(1);
     }
-    
+
     // Create an executable function from the match
     const escapeMdx = new Function('str', escapeMdxMatch[0] + '\\nreturn escapeMdx(str);');
-    
+
     // Test cases
     const testCases = [
         { input: "hello {world}", expected: "hello {world}" },
@@ -32,7 +32,7 @@ def test_escape_mdx_behavior_via_node():
         { input: "{foo} | {bar}", expected: "{foo} &#124; {bar}" },
         { input: "", expected: "" },
     ];
-    
+
     for (const { input, expected } of testCases) {
         const actual = escapeMdx(input);
         if (actual !== expected) {
@@ -42,7 +42,7 @@ def test_escape_mdx_behavior_via_node():
     }
     console.log("SUCCESS");
     """
-    
+
     # Run node subprocess
     project_root = Path(__file__).parent.parent
     result = subprocess.run(
@@ -61,7 +61,7 @@ def test_generated_mdx_braces_preservation():
     while still containing escaped pipes.
     """
     project_root = Path(__file__).parent.parent
-    
+
     # Let's ensure build is run so files are up to date
     # Run npm run prebuild && npm run build
     build_result = subprocess.run(
@@ -71,7 +71,7 @@ def test_generated_mdx_braces_preservation():
         text=True
     )
     assert build_result.returncode == 0, f"prebuild failed: {build_result.stderr}"
-    
+
     compile_result = subprocess.run(
         ["npm", "run", "build"],
         cwd=str(project_root),
@@ -82,27 +82,27 @@ def test_generated_mdx_braces_preservation():
 
     reference_dir = project_root / "docs" / "reference"
     dist_dir = project_root / "docs" / "dist"
-    
+
     # Gather all .mdx and .html files
     mdx_files = list(reference_dir.rglob("*.mdx"))
     html_files = list(dist_dir.rglob("*.html"))
-    
+
     assert len(mdx_files) > 0, "No MDX files found"
     assert len(html_files) > 0, "No HTML files found"
-    
+
     # 1. No escaped braces (&#123; or &#125;) in any MDX or HTML file
     for f in mdx_files + html_files:
         content = f.read_text(errors="ignore")
         assert "&#123;" not in content, f"Found escaped open curly brace (&#123;) in {f.relative_to(project_root)}"
         assert "&#125;" not in content, f"Found escaped close curly brace (&#125;) in {f.relative_to(project_root)}"
-        
+
     # 2. Check that raw curly braces exist in specific files we expect them to be
     # E.g., Random Seed Strategy: {efftox_view_seed_strategy} in efftox_view/index.mdx
     efftox_view_mdx = reference_dir / "clintrials" / "visualization" / "dashboard" / "views" / "efftox_view" / "index.mdx"
     assert efftox_view_mdx.exists()
     content = efftox_view_mdx.read_text()
     assert "{efftox_view_seed_strategy}" in content, "Expected raw curly braces for {efftox_view_seed_strategy}"
-    
+
     efftox_view_html = dist_dir / "clintrials" / "visualization" / "dashboard" / "views" / "efftox_view" / "index.html"
     assert efftox_view_html.exists()
     html_content = efftox_view_html.read_text()
