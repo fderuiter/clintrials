@@ -62,6 +62,10 @@ def test_generated_mdx_braces_preservation():
     """
     project_root = Path(__file__).parent.parent
 
+    # Ensure npm packages are installed so that build scripts can run in clean environments (like Python CI)
+    if not (project_root / "node_modules" / "marked").exists():
+        subprocess.run(["npm", "install"], cwd=str(project_root), check=True, capture_output=True)
+
     # Let's ensure build is run so files are up to date
     # Run npm run prebuild && npm run build
     build_result = subprocess.run(
