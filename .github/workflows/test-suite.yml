@@ -38,7 +38,7 @@ jobs:
         run: poetry install --with dev -E viz -E docs
       - name: Run Notebook Audit
         run: |
-          poetry run python scripts/audit_notebooks.py docs/tutorials/matchpoint/ --min-coverage 1.0
+          poetry run python scripts/audit_notebooks.py docs/tutorials/ --min-coverage 1.0
       - name: Test Tutorial Notebooks
         run: |
           find docs/tutorials -name "*.ipynb" -not -name "*draft*" -not -name "*test*" | while read nb; do
