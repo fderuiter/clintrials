@@ -28,7 +28,7 @@ def test_extract_wheel_version() -> None:
 
 def test_validate_pyproject_toml_valid(tmp_path: Path) -> None:
     toml_content = """
-[tool.poetry]
+[project]
 name = "clintrials"
 version = "0.1.4"
 description = "clintrials"
@@ -42,19 +42,19 @@ description = "clintrials"
 def test_validate_pyproject_toml_invalid(tmp_path: Path) -> None:
     # "latest" version should fail
     toml_content = """
-[tool.poetry]
+[project]
 version = "latest"
 """
     p = tmp_path / "pyproject.toml"
     p.write_text(toml_content, encoding="utf-8")
 
-    with pytest.raises(ValueError, match=r"\[tool\.poetry\] version must be a valid PEP 440 version string"):
+    with pytest.raises(ValueError, match=r"\[project\] version must be a valid PEP 440 version string"):
         validate_pyproject_toml(p)
 
 
 def test_validate_pyproject_toml_missing_key(tmp_path: Path) -> None:
     toml_content = """
-[tool.not_poetry]
+[tool.poetry]
 version = "0.1.4"
 """
     p = tmp_path / "pyproject.toml"

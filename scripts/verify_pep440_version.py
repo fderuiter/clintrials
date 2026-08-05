@@ -43,7 +43,7 @@ def extract_wheel_version(wheel_filename: str) -> str:
 
 
 def validate_pyproject_toml(path: Union[str, Path]) -> str:
-    """Validates the [tool.poetry] version in pyproject.toml.
+    """Validates the [project] version in pyproject.toml.
 
     Args:
         path: The path to pyproject.toml.
@@ -53,7 +53,7 @@ def validate_pyproject_toml(path: Union[str, Path]) -> str:
 
     Raises:
         FileNotFoundError: If pyproject.toml does not exist.
-        ValueError: If the tool.poetry version is missing or invalid.
+        ValueError: If the project version is missing or invalid.
     """
     p = Path(path)
     if not p.exists():
@@ -63,8 +63,8 @@ def validate_pyproject_toml(path: Union[str, Path]) -> str:
         data = tomllib.load(f)
 
     try:
-        poetry_section = data["tool"]["poetry"]
-        version = poetry_section["version"]
+        project_section = data["project"]
+        version = project_section["version"]
     except KeyError as e:
         raise ValueError(
             f"pyproject.toml is missing expected section or key: {e}"
@@ -72,10 +72,10 @@ def validate_pyproject_toml(path: Union[str, Path]) -> str:
 
     if not isinstance(version, str):
         raise ValueError(
-            f"[tool.poetry] version must be a string, got {type(version).__name__}"
+            f"[project] version must be a string, got {type(version).__name__}"
         )
 
-    validate_version(version, "[tool.poetry] version")
+    validate_version(version, "[project] version")
     return version
 
 
