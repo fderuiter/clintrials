@@ -125,8 +125,8 @@ def validate_docs(root: Path) -> list[str]:
     doc_files = []
     for ext in ("*.md", "*.rst"):
         for f in root.rglob(ext):
-            # Skip virtualenvs and hidden directories
-            if any(part.startswith('.') for part in f.parts):
+            # Skip virtualenvs, node_modules and hidden directories
+            if any(part.startswith('.') or part == 'node_modules' for part in f.parts):
                 continue
             doc_files.append(f)
 

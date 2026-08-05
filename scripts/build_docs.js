@@ -2,10 +2,41 @@ const fs = require('fs');
 const path = require('path');
 const { marked } = require('marked');
 
+const hljs = require('highlight.js');
+
 // Configure marked options
 marked.setOptions({
   gfm: true,
   breaks: true,
+});
+
+marked.use({
+  renderer: {
+    code(code, infostring) {
+      const lang = (infostring || '').match(/\S*/)[0];
+      const normalizedLang = lang.trim().toLowerCase();
+
+      if (normalizedLang === 'python' || normalizedLang === 'py') {
+        try {
+          const highlighted = hljs.highlight(code, { language: 'python' }).value;
+          return `<pre><code class="language-python">${highlighted}</code></pre>`;
+        } catch (err) {
+          console.error('Error highlighting Python code:', err);
+        }
+      }
+
+      // Fall back to plain-text formatting for unspecified or non-python languages
+      const escapedCode = code
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+      const codeClass = normalizedLang ? `class="language-${normalizedLang}"` : '';
+      return `<pre><code ${codeClass}>${escapedCode}</code></pre>`;
+    }
+  }
 });
 
 const referenceDir = path.resolve(__dirname, '../docs/reference');
@@ -127,6 +158,78 @@ function walkAndCompile(currentDir, relativePath = "") {
             background-color: transparent;
             padding: 0;
             font-size: 0.9em;
+        }
+        /* Static Syntax Highlighting (GitHub Light Theme) */
+        .hljs-doctag,
+        .hljs-keyword,
+        .hljs-meta .hljs-keyword,
+        .hljs-template-tag,
+        .hljs-template-variable,
+        .hljs-type,
+        .hljs-variable.language_ {
+            color: #d73a49;
+        }
+        .hljs-title,
+        .hljs-title.class_,
+        .hljs-title.class_.inherited__,
+        .hljs-title.function_ {
+            color: #6f42c1;
+        }
+        .hljs-attr,
+        .hljs-attribute,
+        .hljs-literal,
+        .hljs-meta,
+        .hljs-number,
+        .hljs-operator,
+        .hljs-variable,
+        .hljs-selector-attr,
+        .hljs-selector-class,
+        .hljs-selector-id {
+            color: #005cc5;
+        }
+        .hljs-regexp,
+        .hljs-string,
+        .hljs-meta .hljs-string {
+            color: #032f62;
+        }
+        .hljs-built_in,
+        .hljs-symbol {
+            color: #e36209;
+        }
+        .hljs-comment,
+        .hljs-code,
+        .hljs-formula {
+            color: #6a737d;
+        }
+        .hljs-name,
+        .hljs-quote,
+        .hljs-selector-tag,
+        .hljs-selector-pseudo {
+            color: #22863a;
+        }
+        .hljs-subst {
+            color: #24292e;
+        }
+        .hljs-section {
+            color: #005cc5;
+            font-weight: bold;
+        }
+        .hljs-bullet {
+            color: #735c0f;
+        }
+        .hljs-emphasis {
+            font-style: italic;
+        }
+        .hljs-strong {
+            font-weight: bold;
+        }
+        .hljs-addition {
+            color: #22863a;
+            background-color: #f0fff4;
+        }
+        .hljs-deletion {
+            color: #b31d28;
+            background-color: #ffeef0;
         }
         table {
             width: 100%;
