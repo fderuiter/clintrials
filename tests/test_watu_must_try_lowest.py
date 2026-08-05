@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from clintrials.dosefinding.efftox import LpNormCurve
 from clintrials.dosefinding.watu import WATU
 

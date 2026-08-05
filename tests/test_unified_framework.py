@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Any
 
 from clintrials.dosefinding import DoseFindingTrial

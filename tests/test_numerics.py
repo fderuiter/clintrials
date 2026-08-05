@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from unittest.mock import patch
 
 import numpy as np

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Renders the CRM simulation results view in the Streamlit dashboard.
 
 Random Seed Strategy: {crm_view_seed_strategy}

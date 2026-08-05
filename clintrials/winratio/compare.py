@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Compare two subjects component-wise in a hierarchical manner.
 
 Random Seed Strategy: {compare_seed_strategy}

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Classes and methods to perform general useful statistical routines.
 
 Random Seed Strategy: {stats_seed_strategy}

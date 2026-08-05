@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Module containing the shared cohort tracking utility for trials."""
 
 from dataclasses import dataclass

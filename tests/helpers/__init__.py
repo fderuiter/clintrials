@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from .crm import CRMBuilder
 from .efftox import EffToxBuilder
 from .recruitment import QuadrilateralRecruitmentStreamBuilder

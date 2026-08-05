@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Centralized registry for all statistical constants."""
 
 from __future__ import annotations

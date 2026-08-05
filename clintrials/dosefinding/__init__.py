@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Dose finding packages and core escalation trial structures."""
 
 from __future__ import annotations

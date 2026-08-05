@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import typing
 
 from scripts.verify_api_signatures import (

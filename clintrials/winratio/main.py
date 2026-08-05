@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Command-line entry point for win-ratio power simulations.
 
 Random Seed Strategy: {main_seed_strategy}

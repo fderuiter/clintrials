@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Validation functions for the Clinical Trials library."""
 
 from __future__ import annotations

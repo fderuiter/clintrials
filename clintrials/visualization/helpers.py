@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Helper visualization utilities."""
 from __future__ import annotations
 

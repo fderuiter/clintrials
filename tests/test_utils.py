@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 
 from clintrials.utils import Memoize, filter_list_of_dicts, to_1d_list
 

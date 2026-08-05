@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Pairwise win-ratio comparisons between treatment and control subjects.
 
 Random Seed Strategy: {simulate_seed_strategy}

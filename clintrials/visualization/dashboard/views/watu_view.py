@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Renders the WATU simulation results view in the Streamlit dashboard."""
 
 import streamlit as st

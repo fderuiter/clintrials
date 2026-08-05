@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Renders the Win Ratio simulation view in the Streamlit dashboard."""
 
 from __future__ import annotations

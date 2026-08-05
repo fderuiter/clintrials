@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Renders the EffTox simulation results view in the Streamlit dashboard.
 
 Random Seed Strategy: {efftox_view_seed_strategy}

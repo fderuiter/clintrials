@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Numerical integration routines for Bayesian models.
 
 Random Seed Strategy: {numerics_seed_strategy}

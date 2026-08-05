@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Common, useful functions in the statistics and mathematics of clinical trials.
 
 Random Seed Strategy: {math_seed_strategy}

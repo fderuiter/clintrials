@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import logging
 
 from clintrials.core.simulation import run_sims

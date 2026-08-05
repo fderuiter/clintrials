@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Reporting module for generating accessible PDF summaries."""
 from __future__ import annotations
 

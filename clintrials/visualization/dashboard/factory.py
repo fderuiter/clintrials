@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Widget factories and UI components for the dashboard."""
 from __future__ import annotations
 

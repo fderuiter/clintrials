@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Main entry point for the Streamlit dashboard.
 
 Random Seed Strategy: {main_seed_strategy}

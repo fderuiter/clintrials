@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Win-ratio simulation utilities."""
 
 from __future__ import annotations

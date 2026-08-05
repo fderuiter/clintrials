@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Error templates and messages for validation and logic constraints."""
 
 from __future__ import annotations

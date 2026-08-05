@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Classes and functions for modelling recruitment to clinical trials.
 
 Random Seed Strategy: {recruitment_seed_strategy}

@@ -4,7 +4,7 @@ version = "0.1.4"
 description = "clintrials is a library of clinical trial designs and methods in Python"
 readme = "README.md"
 requires-python = ">=3.9, !=3.9.7"
-license = "GPL-3.0"
+license = "MIT"
 authors = [
     {name = "Kristian Brock", email = "kristian.brock@gmail.com"}
 ]

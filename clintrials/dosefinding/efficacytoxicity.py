@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Base classes and utilities for efficacy-toxicity dose-finding trials.
 
 Random Seed Strategy: {efficacytoxicity_seed_strategy}

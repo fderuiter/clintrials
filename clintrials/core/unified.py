@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Unified container structures for simulation results."""
 
 from __future__ import annotations

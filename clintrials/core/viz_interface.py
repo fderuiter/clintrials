@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Abstract interface for visualization providers.
 
 Random Seed Strategy: {viz_interface_seed_strategy}

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """An implementation of Thall & Cook's EffTox design for dose-finding in clinical trials.
 
 Random Seed Strategy: {efftox_seed_strategy}

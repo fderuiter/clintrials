@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Renders the Wages & Tait simulation results view in the Streamlit dashboard."""
 
 from clintrials.dosefinding.wagestait import WagesTait
