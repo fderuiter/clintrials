@@ -61,6 +61,7 @@ fs.mkdirSync(distDir, { recursive: true });
 
 const searchIndex = [];
 const publicModules = [];
+const tutorials = [];
 
 function walkAndCompile(currentDir, relativePath = "") {
   if (!fs.existsSync(currentDir)) {
@@ -336,6 +337,13 @@ function walkAndCompile(currentDir, relativePath = "") {
         });
       }
 
+      if (destHtmlRelPath.startsWith('tutorials/')) {
+        tutorials.push({
+          title: title,
+          url: mdxPrefix + '/' + destHtmlRelPath
+        });
+      }
+
       // Add clean text to search index
       const cleanContent = markdownBody
         .replace(/[#*`_\[\]()\-|]/g, ' ')
@@ -496,16 +504,19 @@ fs.writeFileSync(path.join(distDir, 'search.html'), searchHtmlContent, 'utf8');
 publicModules.sort((a, b) => a.name.localeCompare(b.name));
 const moduleLinks = publicModules.map(m => `<li><a href="${m.url}">${m.name}</a></li>`).join('\n            ');
 
+tutorials.sort((a, b) => a.title.localeCompare(b.title));
+const tutorialLinks = tutorials.map(t => `<li><a href="${t.url}">${t.title}</a></li>`).join('\n            ');
+
 const indexHtmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clintrials API Reference Portal</title>
+    <title>Clintrials Documentation Portal</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 3rem 1rem;
             background-color: #f7f9fa;
@@ -543,20 +554,38 @@ const indexHtmlContent = `<!DOCTYPE html>
         a.btn:hover {
             background: #0255b3;
         }
-        .modules-list {
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
             text-align: left;
-            max-width: 500px;
-            margin: 0 auto;
+            margin-top: 1rem;
             border-top: 1px solid #eaecef;
             padding-top: 2rem;
         }
-        .modules-list h3 {
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .tutorials-section, .modules-list {
+            background: #fafbfc;
+            padding: 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #e1e4e8;
+        }
+        .tutorials-section h3, .modules-list h3 {
             color: #24292e;
+            margin-top: 0;
             margin-bottom: 1rem;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #eaecef;
+            padding-bottom: 0.5rem;
         }
         ul {
             padding-left: 1.5rem;
             line-height: 1.8;
+            margin: 0;
         }
         ul li a {
             color: #0366d6;
@@ -570,16 +599,24 @@ const indexHtmlContent = `<!DOCTYPE html>
 </head>
 <body>
     <div class="container">
-        <h1>Clintrials API Reference</h1>
-        <p>A modernized, extremely fast, and fully searchable documentation portal generated directly from runtime docstrings.</p>
+        <h1>Clintrials Documentation Portal</h1>
+        <p>A modernized, extremely fast, and fully searchable documentation portal generated directly from runtime docstrings and clinical tutorials.</p>
         <div>
-            <a href="${mdxPrefix}/search.html" class="btn">🔍 Search Reference Pages</a>
+            <a href="${mdxPrefix}/search.html" class="btn">🔍 Search Reference & Tutorials</a>
         </div>
-        <div class="modules-list">
-            <h3>Discovered Public Modules</h3>
-            <ul>
-                ${moduleLinks}
-            </ul>
+        <div class="grid-container">
+            <div class="tutorials-section">
+                <h3>📚 Tutorials & Onboarding Guides</h3>
+                <ul>
+                    ${tutorialLinks}
+                </ul>
+            </div>
+            <div class="modules-list">
+                <h3>🔍 Discovered Public Modules</h3>
+                <ul>
+                    ${moduleLinks}
+                </ul>
+            </div>
         </div>
     </div>
 </body>

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "JS MDX API Reference Generation Pipeline",
   "scripts": {
-    "prebuild": "poetry run python scripts/generate_docs_manifest.py && node scripts/generate_mdx.js",
+    "prebuild": "poetry run python scripts/translate_notebooks.py && poetry run python scripts/generate_docs_manifest.py && node scripts/generate_mdx.js",
     "build": "node scripts/build_docs.js"
   },
   "dependencies": {

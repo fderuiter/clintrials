@@ -23,6 +23,7 @@ hub/schema.json
 # Generated documentation assets
 docs_manifest.json
 docs/reference/clintrials/
+docs/reference/tutorials/
 node_modules/
 
 
