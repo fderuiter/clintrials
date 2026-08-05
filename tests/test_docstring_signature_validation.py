@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import inspect
 import pkgutil
 import re

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 # type: ignore
 from clintrials.core.viz_interface import (
     VisualizationProvider,

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Visualization namespace. Ensure you have installed the optional viz dependencies."""
 
 from __future__ import annotations

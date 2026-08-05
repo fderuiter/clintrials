@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Framework tools for declarative and reusable simulation dashboard views."""
 
 from functools import wraps

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Core calculations and data structures for clintrials."""
 
 from __future__ import annotations

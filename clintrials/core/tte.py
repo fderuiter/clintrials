@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Time-to-event trial designs.
 
 Random Seed Strategy: {tte_seed_strategy}

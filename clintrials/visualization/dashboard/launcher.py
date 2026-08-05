@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Dashboard CLI launcher."""
 from __future__ import annotations
 

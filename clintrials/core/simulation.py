@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Functions for running and analyzing clinical trial simulations.
 
 Random Seed Strategy: {simulation_seed_strategy}

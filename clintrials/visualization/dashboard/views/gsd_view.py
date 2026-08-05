@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Renders the Group Sequential Design simulation view in the Streamlit dashboard."""
 
 from __future__ import annotations

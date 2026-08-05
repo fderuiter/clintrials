@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import numpy as np
 
 from clintrials.winratio.data_generation import generate_data

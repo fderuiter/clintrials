@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Generate synthetic data for win-ratio simulations.
 
 Random Seed Strategy: {data_generation_seed_strategy}

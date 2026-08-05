@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import numpy as np
 
 from clintrials.core.recruitment import ConstantRecruitmentStream

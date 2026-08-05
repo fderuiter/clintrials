@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Data structures and models for simulation visualization components."""
 from __future__ import annotations
 

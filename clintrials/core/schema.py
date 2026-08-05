@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Schema definitions for validating trial design parameters."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Statistical helpers for win-ratio simulations.
 
 Random Seed Strategy: {statistics_seed_strategy}

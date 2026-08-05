@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Utility functions for dashboard interactions and accessibility."""
 
 from __future__ import annotations

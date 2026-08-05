@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """An implementation of Wages & Tait's adaptive Bayesian design for dose-finding in clinical trials.
 
 Random Seed Strategy: {wagestait_seed_strategy}

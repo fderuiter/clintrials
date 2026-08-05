@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import pandas as pd
 
 from clintrials.visualization.models import (  # type: ignore

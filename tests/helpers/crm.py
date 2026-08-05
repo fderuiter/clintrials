@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Any, Callable, Dict, List
 
 import numpy as np

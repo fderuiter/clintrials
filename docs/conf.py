@@ -6,6 +6,7 @@ sys.path.insert(0, os.path.abspath(".."))
 
 project = "clintrials"
 author = "Kristian Brock"
+copyright = "2024, Kristian Brock"
 release = importlib.metadata.version("clintrials")
 
 extensions = [

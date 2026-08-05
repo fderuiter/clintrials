@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from clintrials.winratio.main import WinRatioTrial
 
 

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Seamless phase I/II trial design fusing Wages & Tait and EffTox.
 
 Random Seed Strategy: {watu_seed_strategy}

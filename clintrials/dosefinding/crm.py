@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Continual Reassessment Method (CRM) for dose-finding clinical trials.
 
 Random Seed Strategy: {crm_seed_strategy}

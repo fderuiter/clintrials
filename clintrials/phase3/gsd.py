@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Module for Group Sequential Designs (GSDs).
 
 Random Seed Strategy: {gsd_seed_strategy}

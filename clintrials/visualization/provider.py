@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 """Centralized visualization module using Plotly.
 
 Random Seed Strategy: {provider_seed_strategy}

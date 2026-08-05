@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 import json
 from types import SimpleNamespace
 from unittest.mock import MagicMock

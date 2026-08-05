@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 from typing import Any, Dict, List
 
 from scipy.stats import norm
