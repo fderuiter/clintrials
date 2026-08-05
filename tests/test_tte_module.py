@@ -84,3 +84,41 @@ def test_matrix_cohort_analysis_go_at_final():
         recruitment_stream=stream,
     )
     assert report["Decision"] == "GoAtFinal"
+
+
+def test_matrix_cohort_analysis_early_stopping_and_multirun():
+    np.random.seed(42)
+    stream = ConstantRecruitmentStream(1)  # type: ignore
+
+    # Run with 3 simulations, 10 patients, with interim analyses configured
+    # at 3 and 6 patients. A high lower_cutoff (15.0) relative to true_median (1.0)
+    # and a low interim_certainty (0.5) will trigger early stopping.
+    reports = matrix_cohort_analysis(  # type: ignore
+        n_simulations=3,
+        n_patients=10,
+        true_median=1.0,
+        alpha_prior=2.0,
+        beta_prior=2.0,
+        lower_cutoff=15.0,
+        upper_cutoff=2.0,
+        interim_certainty=0.5,
+        final_certainty=0.5,
+        interim_analysis_after_patients=[3, 6],
+        interim_analysis_time_delta=0.0,
+        final_analysis_time_delta=0.0,
+        recruitment_stream=stream,
+    )
+
+    # Verify that we get a list of results equal to n_simulations even when stopping early
+    assert isinstance(reports, list)
+    assert len(reports) == 3
+
+    # Verify that each simulation stopped at the interim and has the correct decision and interim details
+    for report in reports:
+        assert report["Decision"] == "StopAtInterim"
+        # Since we stopped at interim, the number of patients in the final analysis should be less than MaxPatients
+        assert report["FinalPatients"] < 10
+        # Check that interim analyses were actually run and stored
+        assert len(report["InterimAnalyses"]) > 0
+        assert any(interim["Stop"] for interim in report["InterimAnalyses"])
+
