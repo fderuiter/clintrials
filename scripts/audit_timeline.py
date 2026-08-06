@@ -4,16 +4,17 @@ import os
 import re
 import subprocess
 import sys
+from typing import List, Optional
 
 
-def run_git(args):
+def run_git(args: List[str]) -> str:
     """Execute a git command and return its output."""
     result = subprocess.run(['git'] + args, capture_output=True, text=True)
     if result.returncode != 0:
         raise subprocess.CalledProcessError(result.returncode, ['git'] + args, result.stdout, result.stderr)
     return result.stdout.strip()
 
-def get_module_name(file_path):
+def get_module_name(file_path: str) -> Optional[str]:
     """Extract the module name from the source file path.
 
     For example, clintrials/core/recruitment.py -> recruitment.
@@ -27,7 +28,7 @@ def get_module_name(file_path):
     basename = os.path.basename(file_path)
     return basename[:-3]
 
-def is_test_file_for_module(test_path, module_name):
+def is_test_file_for_module(test_path: str, module_name: str) -> bool:
     """Check if a given test file corresponds to the module."""
     if not test_path.startswith('tests/') or not test_path.endswith('.py'):
         return False
@@ -36,7 +37,7 @@ def is_test_file_for_module(test_path, module_name):
         return True
     return False
 
-def audit_commits(base_ref, head_ref, override_branch_name=None):
+def audit_commits(base_ref: str, head_ref: str, override_branch_name: Optional[str] = None) -> bool:
     """Audit commits to ensure tests are written before or alongside implementation."""
     # 1. Check if branch starts with hotfix/
     branch_name = override_branch_name or os.environ.get('GITHUB_HEAD_REF')
@@ -69,21 +70,45 @@ def audit_commits(base_ref, head_ref, override_branch_name=None):
             print(f"Skipping TDD audit due to skip-tdd trailer in commit {commit}.")  # noqa: T201
             return True
 
+    modified_tests_so_far = set()
+
     for commit in commits:
         # Check modified files in this commit
-        files_output = run_git(['show', '--name-only', '--format=', commit])
-        files = [f for f in files_output.split('\n') if f.strip()]
+        try:
+            files_status_output = run_git(['show', '--name-status', '--format=', commit])
+        except subprocess.CalledProcessError as e:
+            print(f"Error getting file status for commit {commit}: {e.stderr}")  # noqa: T201
+            return False
 
-        # Now check source files
-        for f in files:
+        commit_files = []
+        for line in files_status_output.split('\n'):
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split()
+            if not parts:
+                continue
+            status = parts[0]
+            if status.startswith('D'):
+                # Deleted files: if it is a test file, remove it from modified_tests_so_far
+                if len(parts) >= 2:
+                    path = parts[-1]
+                    if path.startswith('tests/') and path.endswith('.py'):
+                        modified_tests_so_far.discard(path)
+                continue
+
+            if len(parts) >= 2:
+                path = parts[-1]
+                commit_files.append((status, path))
+                # Identify test files and record them as modified/added in the range so far
+                if path.startswith('tests/') and path.endswith('.py'):
+                    modified_tests_so_far.add(path)
+
+        # Now check source files in this commit
+        for status, f in commit_files:
             module_name = get_module_name(f)
             if module_name:
-                try:
-                    tree_files = run_git(['ls-tree', '-r', '--name-only', commit, 'tests/']).split('\n')
-                except subprocess.CalledProcessError:
-                    tree_files = []
-
-                test_found = any(is_test_file_for_module(t, module_name) for t in tree_files if t.strip())
+                test_found = any(is_test_file_for_module(t, module_name) for t in modified_tests_so_far)
                 if not test_found:
                     print(f"TDD Audit Failed: Commit {commit} modifies source file '{f}' (module: '{module_name}') "  # noqa: T201
                           f"but no corresponding test file (e.g. 'tests/test_{module_name}.py') exists or was added "
