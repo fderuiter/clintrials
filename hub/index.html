@@ -322,7 +322,22 @@
           
           selector.addEventListener('change', (e) => {
             renderForm(e.target.value);
+            sendStateToParent();
           });
+
+          // Check if parent-passed sim_state is in current iframe URL query parameters on load
+          const urlParams = new URLSearchParams(window.location.search);
+          const stateStr = urlParams.get('sim_state');
+          if (stateStr) {
+            try {
+              const decodedState = JSON.parse(decodeURIComponent(stateStr));
+              if (decodedState) {
+                restoreState(decodedState);
+              }
+            } catch (e) {
+              console.error("Failed to parse stateStr from URL search params:", e);
+            }
+          }
           
           triggerResize();
         } catch (err) {
@@ -655,6 +670,7 @@
 
           input.addEventListener('input', () => {
              validateField(input, prop, error);
+             sendStateToParent();
           });
 
           group.appendChild(label);
@@ -801,6 +817,107 @@
            }
         };
       }
+
+      let isRestoring = false;
+
+      function collectFormState() {
+        const selector = document.getElementById('schema-selector');
+        const activeSchemaName = selector ? selector.value : '';
+        if (!activeSchemaName) {
+          return { model: '', params: {} };
+        }
+        const params = {};
+        const schema = schemas[activeSchemaName];
+        if (schema && schema.properties) {
+          for (const [key, prop] of Object.entries(schema.properties)) {
+            const input = document.getElementById(key);
+            if (input) {
+              const val = input.value;
+              if (val.trim() === '') {
+                params[key] = null;
+              } else if (prop.type === 'integer' || prop.type === 'number') {
+                params[key] = Number(val);
+              } else if (prop.type === 'boolean') {
+                params[key] = (val === 'true' || val === true);
+              } else if (prop.type === 'array') {
+                try {
+                  params[key] = JSON.parse(val);
+                } catch (e) {
+                  params[key] = val;
+                }
+              } else {
+                params[key] = val;
+              }
+            }
+          }
+        }
+        return {
+          model: activeSchemaName,
+          params: params
+        };
+      }
+
+      function sendStateToParent() {
+        if (isRestoring) return;
+        const state = collectFormState();
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'simulationState', state }, window.location.origin);
+        }
+      }
+
+      function restoreState(state) {
+        if (!state || !state.model) return;
+        const selector = document.getElementById('schema-selector');
+        if (!selector) return;
+        
+        isRestoring = true;
+        try {
+          selector.value = state.model;
+          renderForm(state.model);
+          
+          if (state.params) {
+            for (const [key, val] of Object.entries(state.params)) {
+              const input = document.getElementById(key);
+              if (input) {
+                const schema = schemas[state.model];
+                const prop = schema && schema.properties ? schema.properties[key] : null;
+                if (prop) {
+                  if (prop.type === 'array') {
+                    if (val !== null && val !== undefined) {
+                      input.value = typeof val === 'object' ? JSON.stringify(val, null, 2) : val;
+                    } else {
+                      input.value = '';
+                    }
+                  } else {
+                    input.value = (val !== null && val !== undefined) ? val : '';
+                  }
+                  
+                  // Trigger validation on restored fields
+                  const error = document.getElementById(key + '-error');
+                  if (error) {
+                    validateField(input, prop, error);
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Error during restoreState:", e);
+        } finally {
+          isRestoring = false;
+        }
+        triggerResize();
+      }
+
+      // Add postMessage event listener
+      window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data && event.data.type === 'restoreState') {
+          if (event.data.state) {
+            restoreState(event.data.state);
+          }
+        }
+      });
 
       window.addEventListener('DOMContentLoaded', initializeApp);
 

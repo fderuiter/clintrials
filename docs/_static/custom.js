@@ -46,6 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar = document.createElement('div');
     sidebar.id = 'hub-sidebar';
 
+    const mobileCloseBtn = document.createElement('button');
+    mobileCloseBtn.id = 'hub-mobile-close-btn';
+    mobileCloseBtn.innerHTML = '✕ Close Simulation';
+    mobileCloseBtn.setAttribute('aria-label', 'Close Simulation Hub');
+
     const resizer = document.createElement('div');
     resizer.id = 'hub-resizer';
     resizer.innerHTML = `
@@ -58,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const iframeContainer = document.createElement('div');
     iframeContainer.id = 'hub-iframe-container';
 
+    sidebar.appendChild(mobileCloseBtn);
     sidebar.appendChild(resizer);
     sidebar.appendChild(iframeContainer);
 
@@ -73,6 +79,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. State & Functions
     let isOpen = false;
+    let savedScrollY = 0;
+
+    function debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    function getQueryParam(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    function deserializeState(str) {
+        if (!str) return null;
+        try {
+            return JSON.parse(decodeURIComponent(str));
+        } catch (e) {
+            try {
+                return JSON.parse(atob(str));
+            } catch (e2) {
+                return null;
+            }
+        }
+    }
+
+    function setUrlState(state) {
+        const url = new URL(window.location.href);
+        if (state && state.model) {
+            const stateStr = encodeURIComponent(JSON.stringify(state));
+            url.searchParams.set('sim_state', stateStr);
+        } else {
+            url.searchParams.delete('sim_state');
+        }
+        
+        const urlStr = url.toString();
+        if (window.location.href !== urlStr) {
+            history.pushState({ sim_state: state }, '', urlStr);
+        }
+    }
+
+    const debouncedSetUrlState = debounce(setUrlState, 300);
 
     function getHubUrl() {
         const path = window.location.pathname;
@@ -84,6 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initIframeResizer() {
+        if (window.innerWidth < 768) return;
         if (window.iFrameResize) {
             window.iFrameResize({
                 log: false,
@@ -101,25 +152,89 @@ document.addEventListener('DOMContentLoaded', () => {
         const iframe = document.createElement('iframe');
         iframe.id = 'simulation-hub-iframe';
         iframe.title = 'Clinical Trials Simulation Hub Dashboard';
-        iframe.src = getHubUrl();
+        
+        const stateStr = getQueryParam('sim_state');
+        if (stateStr) {
+            iframe.src = getHubUrl() + '?sim_state=' + stateStr;
+        } else {
+            iframe.src = getHubUrl();
+        }
         iframeContainer.appendChild(iframe);
         initIframeResizer();
+    }
+
+    function openSidebar() {
+        if (window.innerWidth < 768) {
+            savedScrollY = window.scrollY;
+            document.body.classList.add('hub-drawer-open');
+        }
+        isOpen = true;
+        sidebar.classList.add('open');
+        createIframe();
+    }
+
+    function closeSidebar(syncUrl = true) {
+        isOpen = false;
+        sidebar.classList.remove('open');
+        if (window.innerWidth < 768) {
+            document.body.classList.remove('hub-drawer-open');
+            window.scrollTo(0, savedScrollY);
+        }
+        if (syncUrl) {
+            setUrlState(null);
+        }
     }
 
     // 3. Toggle Logic
     toggleBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        isOpen = !isOpen;
-
         if (isOpen) {
-            sidebar.classList.add('open');
-            createIframe();
+            closeSidebar(true);
         } else {
-            sidebar.classList.remove('open');
+            openSidebar();
         }
     });
 
-    // 4. Resize Logic
+    mobileCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeSidebar(true);
+    });
+
+    // 4. Message & Popstate listeners
+    window.addEventListener('message', (event) => {
+        if (event.origin !== window.location.origin) return;
+        if (event.data && event.data.type === 'simulationState') {
+            debouncedSetUrlState(event.data.state);
+        }
+    });
+
+    window.addEventListener('popstate', (event) => {
+        const stateStr = getQueryParam('sim_state');
+        if (stateStr) {
+            const state = deserializeState(stateStr);
+            if (state) {
+                if (!isOpen) {
+                    openSidebar();
+                }
+                const iframe = document.getElementById('simulation-hub-iframe');
+                if (iframe && iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'restoreState', state }, window.location.origin);
+                }
+            }
+        } else {
+            if (isOpen) {
+                closeSidebar(false);
+            }
+        }
+    });
+
+    // Handle initial state on load
+    const initialStateStr = getQueryParam('sim_state');
+    if (initialStateStr) {
+        openSidebar();
+    }
+
+    // 5. Resize Logic
     let isResizing = false;
     let startX, startWidth;
 
