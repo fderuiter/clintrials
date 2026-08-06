@@ -285,7 +285,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         return lik * prior
 
     def _calculate_next_dose(self, **kwargs: Any) -> Any:
-        from clintrials.utils import filter_kwargs_for_callable
+        from clintrials._utils import filter_kwargs_for_callable
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:

@@ -21,6 +21,7 @@ from collections import OrderedDict
 
 from scipy.optimize import minimize
 
+from clintrials._utils import atomic_to_json, iterable_to_json
 from clintrials.core.math import (
     bernoulli_likelihood,
     empiric,
@@ -32,7 +33,6 @@ from clintrials.core.numerics import posterior_expectation_gh
 from clintrials.core.registry import CORE_REGISTRY
 from clintrials.core.stats import norm  # type: ignore
 from clintrials.dosefinding import DoseFindingTrial
-from clintrials.utils import atomic_to_json, iterable_to_json
 
 
 def _toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False) -> Any:  # type: ignore

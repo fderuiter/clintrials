@@ -39,7 +39,7 @@ from collections import OrderedDict
 
 from scipy.stats import uniform as uniform
 
-from clintrials.utils import (
+from clintrials._utils import (
     atomic_to_json,
     iterable_to_json,
 )
@@ -161,7 +161,7 @@ class DoseFindingTrial(BaseDoseFindingTrial):
         """
         from collections import OrderedDict
 
-        from clintrials.utils import atomic_to_json, iterable_to_json
+        from clintrials._utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
         report["RecommendedDose"] = atomic_to_json(self.next_dose())  # type: ignore

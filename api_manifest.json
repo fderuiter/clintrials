@@ -4939,7 +4939,7 @@
         {
           "name": "obj",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ]
@@ -4950,7 +4950,7 @@
         {
           "name": "obj",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ]
@@ -8346,7 +8346,7 @@
         {
           "name": "obj",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ]
@@ -8450,7 +8450,7 @@
         {
           "name": "obj",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ]
@@ -13550,23 +13550,6 @@
         }
       ]
     },
-    "filter_list_of_dicts": {
-      "type": "function",
-      "parameters": [
-        {
-          "name": "list_of_dicts",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Any",
-          "default": null
-        },
-        {
-          "name": "filter_dict",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Any",
-          "default": null
-        }
-      ]
-    },
     "tuple_to_dataframe": {
       "type": "function",
       "parameters": [
@@ -13735,67 +13718,6 @@
           ]
         }
       }
-    },
-    "to_1d_list_gen": {
-      "type": "function",
-      "parameters": [
-        {
-          "name": "x",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
-          "default": null
-        }
-      ]
-    },
-    "to_1d_list": {
-      "type": "function",
-      "parameters": [
-        {
-          "name": "x",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
-          "default": null
-        }
-      ]
-    },
-    "atomic_to_json": {
-      "type": "function",
-      "parameters": [
-        {
-          "name": "obj",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
-          "default": null
-        }
-      ]
-    },
-    "iterable_to_json": {
-      "type": "function",
-      "parameters": [
-        {
-          "name": "obj",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
-          "default": null
-        }
-      ]
-    },
-    "filter_kwargs_for_callable": {
-      "type": "function",
-      "parameters": [
-        {
-          "name": "func",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Callable[..., Any]",
-          "default": null
-        },
-        {
-          "name": "kwargs",
-          "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Dict[str, Any]",
-          "default": null
-        }
-      ]
     }
   },
   "clintrials.validation": {

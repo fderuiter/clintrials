@@ -3,7 +3,8 @@
 
 from typing import Any, Optional
 
-from clintrials.utils import Memoize, filter_list_of_dicts, to_1d_list
+from clintrials._utils import filter_list_of_dicts, to_1d_list
+from clintrials.utils import Memoize
 
 
 def test_filter_list_of_dicts():

@@ -82,7 +82,8 @@ class TrialDesignWithBulk(TrialDesign, Protocol):
         ...
 
 
-from clintrials.utils import Memoize, filter_list_of_dicts, tuple_to_dataframe
+from clintrials._utils import filter_list_of_dicts
+from clintrials.utils import Memoize, tuple_to_dataframe
 
 __all__ = [
     "run_sims",
