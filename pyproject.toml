@@ -130,6 +130,41 @@ convention = "google"
 "scipy.stats.chi2".msg = "Redundant math: Use clintrials.core.stats.calc_pearson_chi_square instead."
 "scipy.stats.chi2.cdf".msg = "Redundant math: Use clintrials.core.stats.calc_pearson_chi_square instead."
 
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unused_ignores = true
+ignore_missing_imports = true
+disallow_any_unimported = false
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = "tests.test_accessibility"
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
+module = "scipy.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pandas.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "statsmodels.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "plotly.*"
+ignore_missing_imports = true
+
+
 [tool.coverage.run]
 source = ["clintrials"]
 branch = true
