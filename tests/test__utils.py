@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 
-from typing import Any, Optional
 
 from clintrials._utils import filter_list_of_dicts, to_1d_list
 
@@ -13,7 +12,7 @@ def test_filter_list_of_dicts():
 
 
 def test_to_1d_list():
-    assert to_1d_list(1) == [1]  # type: ignore
-    assert to_1d_list([1, 2, 3]) == [1, 2, 3]  # type: ignore
-    assert to_1d_list([1, [2, 3]]) == [1, 2, 3]  # type: ignore
-    assert to_1d_list([1, [2, [3]]]) == [1, 2, 3]  # type: ignore
+    assert to_1d_list(1) == [1]
+    assert to_1d_list([1, 2, 3]) == [1, 2, 3]
+    assert to_1d_list([1, [2, 3]]) == [1, 2, 3]
+    assert to_1d_list([1, [2, [3]]]) == [1, 2, 3]

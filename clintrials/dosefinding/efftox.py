@@ -1043,35 +1043,35 @@ def efftox_dtp_detail(trial: Any) -> Any:
     """
     to_return = OrderedDict()
 
-    to_return["Utility"] = iterable_to_json(trial.utility)  # type: ignore
+    to_return["Utility"] = iterable_to_json(trial.utility)
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"Utility{dl}"] = trial.utility[i]
 
-    to_return["ProbEff"] = iterable_to_json(trial.prob_eff)  # type: ignore
+    to_return["ProbEff"] = iterable_to_json(trial.prob_eff)
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbEff{dl}"] = trial.prob_eff[i]
 
-    to_return["ProbAccEff"] = iterable_to_json(trial.prob_acc_eff)  # type: ignore
+    to_return["ProbAccEff"] = iterable_to_json(trial.prob_acc_eff)
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbAccEff{dl}"] = trial.prob_acc_eff[i]
 
-    to_return["ProbTox"] = iterable_to_json(trial.prob_tox)  # type: ignore
+    to_return["ProbTox"] = iterable_to_json(trial.prob_tox)
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbTox{dl}"] = trial.prob_tox[i]
 
-    to_return["ProbAccTox"] = iterable_to_json(trial.prob_acc_tox)  # type: ignore
+    to_return["ProbAccTox"] = iterable_to_json(trial.prob_acc_tox)
     for i, dl in enumerate(trial.dose_levels()):
         to_return[f"ProbAccTox{dl}"] = trial.prob_acc_tox[i]
 
     sup_mat = trial.utility_superiority_matrix()
-    to_return["SuperiorityMatrix"] = [iterable_to_json(x) for x in sup_mat]  # type: ignore
+    to_return["SuperiorityMatrix"] = [iterable_to_json(x) for x in sup_mat]
 
     obd = trial.next_dose()
     if obd > 0:
         min_sup = np.nanmin(sup_mat[obd - 1])
     else:
         min_sup = np.nan
-    to_return["MinProbSuperiority"] = atomic_to_json(min_sup)  # type: ignore
+    to_return["MinProbSuperiority"] = atomic_to_json(min_sup)
 
     return to_return
 

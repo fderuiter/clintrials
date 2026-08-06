@@ -136,8 +136,8 @@ class BayesianTimeToEvent(Protocol):
         trial_report["InterimAnalysisTimeDelta"] = self.interim_analysis_time_delta
         trial_report["FinalAnalysisTimeDelta"] = self.final_analysis_time_delta
 
-        trial_report["RecruitmentTimes"] = iterable_to_json(self._recruitment_times)  # type: ignore
-        trial_report["EventTimes"] = iterable_to_json(self._times_to_event)  # type: ignore
+        trial_report["RecruitmentTimes"] = iterable_to_json(self._recruitment_times)
+        trial_report["EventTimes"] = iterable_to_json(self._times_to_event)
         trial_report["InterimAnalyses"] = self.interim_analyses_results
 
         if self._stopped_early and self._final_analysis is not None:
@@ -232,8 +232,8 @@ class BayesianTimeToEvent(Protocol):
         test_report["Cutoff"] = cutoff
         test_report["Certainty"] = probability
         test_report["Probability"] = test_probability
-        test_report["LessThan"] = atomic_to_json(less_than)  # type: ignore
-        test_report["Stop"] = atomic_to_json(stop_trial)  # type: ignore
+        test_report["LessThan"] = atomic_to_json(less_than)
+        test_report["Stop"] = atomic_to_json(stop_trial)
         return test_report
 
 

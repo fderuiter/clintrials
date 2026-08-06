@@ -150,11 +150,11 @@ class GroupSequentialDesign(Protocol):
         from clintrials._utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
-        report["Stage"] = atomic_to_json(self._stage)  # type: ignore
-        report["Stopped"] = atomic_to_json(self._stopped)  # type: ignore
-        report["Rejected"] = atomic_to_json(self._rejected)  # type: ignore
-        report["ZScores"] = iterable_to_json(self._z_scores)  # type: ignore
-        report["Information"] = iterable_to_json(self._information)  # type: ignore
+        report["Stage"] = atomic_to_json(self._stage)
+        report["Stopped"] = atomic_to_json(self._stopped)
+        report["Rejected"] = atomic_to_json(self._rejected)
+        report["ZScores"] = iterable_to_json(self._z_scores)
+        report["Information"] = iterable_to_json(self._information)
         return report
 
     def _compute_efficacy_boundaries(self) -> List[float]:

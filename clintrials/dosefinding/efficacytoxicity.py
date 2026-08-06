@@ -205,11 +205,11 @@ class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
         from clintrials._utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
-        report["RecommendedDose"] = atomic_to_json(self.next_dose())  # type: ignore
-        report["TrialStatus"] = atomic_to_json(self.status())  # type: ignore
-        report["Doses"] = iterable_to_json(self.doses())  # type: ignore
-        report["Toxicities"] = iterable_to_json(self.toxicities())  # type: ignore
-        report["Efficacies"] = iterable_to_json(self.efficacies())  # type: ignore
+        report["RecommendedDose"] = atomic_to_json(self.next_dose())
+        report["TrialStatus"] = atomic_to_json(self.status())
+        report["Doses"] = iterable_to_json(self.doses())
+        report["Toxicities"] = iterable_to_json(self.toxicities())
+        report["Efficacies"] = iterable_to_json(self.efficacies())
         return report
 
     @abc.abstractmethod
@@ -338,13 +338,13 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
                 eff_hat = eff_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat, eff_hat)
-            report["FullyInformedToxicityCurve"] = iterable_to_json(  # type: ignore
+            report["FullyInformedToxicityCurve"] = iterable_to_json(
                 np.round(tox_hat, 4)
             )
-            report["FullyInformedEfficacyCurve"] = iterable_to_json(  # type: ignore
+            report["FullyInformedEfficacyCurve"] = iterable_to_json(
                 np.round(eff_hat, 4)
             )
-            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)  # type: ignore
+            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)
         except NotImplementedError:
             pass
 
@@ -525,8 +525,8 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
             bag_o_tricks.update(
                 OrderedDict(
                     [
-                        ("DoseGiven", atomic_to_json(next_dose)),  # type: ignore
-                        ("RecommendedDose", atomic_to_json(obd)),  # type: ignore
+                        ("DoseGiven", atomic_to_json(next_dose)),
+                        ("RecommendedDose", atomic_to_json(obd)),
                         ("CohortSize", cohort_size),
                         ("NumEff", sum([x[1] for x in path])),
                         ("NumTox", sum([x[0] for x in path])),

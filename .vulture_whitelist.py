@@ -46,4 +46,6 @@ _.schema  # unused property (trial classes)
 GSDView  # unused class (clintrials/visualization/dashboard/views/gsd_view.py:17)
 WagesTaitView  # unused class (clintrials/visualization/dashboard/views/wagestait_view.py:7)
 WinRatioView  # unused class (clintrials/visualization/dashboard/views/winratio_view.py:14)
+to_1d_list  # unused function (clintrials/_utils.py:40)
+
 

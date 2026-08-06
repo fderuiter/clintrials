@@ -843,14 +843,14 @@ def crm_dtp_detail(trial: Any) -> Any:
     to_return = OrderedDict()
 
     if trial.beta_hat is not None:
-        to_return["BetaHat"] = atomic_to_json(trial.beta_hat)  # type: ignore
+        to_return["BetaHat"] = atomic_to_json(trial.beta_hat)
     if trial.beta_var is not None:
-        to_return["BetaVar"] = atomic_to_json(trial.beta_var)  # type: ignore
+        to_return["BetaVar"] = atomic_to_json(trial.beta_var)
     if hasattr(trial, "beta_se") and trial.beta_se is not None:
-        to_return["BetaSE"] = atomic_to_json(trial.beta_se)  # type: ignore
+        to_return["BetaSE"] = atomic_to_json(trial.beta_se)
 
     if trial.prob_tox() is not None:
-        to_return["ProbTox"] = iterable_to_json(trial.prob_tox())  # type: ignore
+        to_return["ProbTox"] = iterable_to_json(trial.prob_tox())
         for i, dl in enumerate(trial.dose_levels()):
             to_return[f"ProbTox{dl}"] = trial.prob_tox()[i]
 

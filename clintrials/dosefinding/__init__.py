@@ -164,10 +164,10 @@ class DoseFindingTrial(BaseDoseFindingTrial):
         from clintrials._utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
-        report["RecommendedDose"] = atomic_to_json(self.next_dose())  # type: ignore
-        report["TrialStatus"] = atomic_to_json(self.status())  # type: ignore
-        report["Doses"] = iterable_to_json(self.doses())  # type: ignore
-        report["Toxicities"] = iterable_to_json(self.toxicities())  # type: ignore
+        report["RecommendedDose"] = atomic_to_json(self.next_dose())
+        report["TrialStatus"] = atomic_to_json(self.status())
+        report["Doses"] = iterable_to_json(self.doses())
+        report["Toxicities"] = iterable_to_json(self.toxicities())
         return report
 
     @abc.abstractmethod
@@ -390,7 +390,7 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
             )
 
     report = OrderedDict()
-    report["TrueToxicities"] = iterable_to_json(true_toxicities)  # type: ignore
+    report["TrueToxicities"] = iterable_to_json(true_toxicities)
 
     # Simulate trial
     if conduct_trial:
@@ -418,8 +418,8 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
             tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
-            report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)  # type: ignore
-            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)  # type: ignore
+            report["FullyInformedToxicityCurve"] = iterable_to_json(tox_hat)
+            report["OptimalAllocation"] = atomic_to_json(optimal_allocation)
         except NotImplementedError:
             pass
 
@@ -464,9 +464,9 @@ def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, true_eff
             tolerances = uniform().rvs(max_size)
 
     report = OrderedDict()
-    report["TrueToxicities"] = iterable_to_json(true_toxicities)  # type: ignore
+    report["TrueToxicities"] = iterable_to_json(true_toxicities)
     if has_joint and true_efficacies is not None:
-        report["TrueEfficacies"] = iterable_to_json(true_efficacies)  # type: ignore
+        report["TrueEfficacies"] = iterable_to_json(true_efficacies)
 
     for label, design in design_map.items():
         design_sim = simulate_dose_finding_trial(
@@ -594,10 +594,10 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
             bag_o_tricks.update(
                 OrderedDict(
                     [
-                        ("DoseGiven", atomic_to_json(next_dose)),  # type: ignore
-                        ("RecommendedDose", atomic_to_json(mtd)),  # type: ignore
-                        ("CohortSize", cohort_size),  # type: ignore
-                        ("NumTox", atomic_to_json(num_dlts)),  # type: ignore
+                        ("DoseGiven", atomic_to_json(next_dose)),
+                        ("RecommendedDose", atomic_to_json(mtd)),
+                        ("CohortSize", cohort_size),
+                        ("NumTox", atomic_to_json(num_dlts)),
                     ]
                 )
             )
