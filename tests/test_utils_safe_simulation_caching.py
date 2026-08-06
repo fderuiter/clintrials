@@ -76,29 +76,29 @@ def test_seed_bypass() -> None:
     class Tracker:
         call_count = 0
 
-    def dummy_sim(seed: Optional[int] = None) -> List[Dict[str, int]]:
+    def dummy_sim(seed: Optional[int] = None) -> Dict[str, int]:
         Tracker.call_count += 1
-        return [{"result": Tracker.call_count}]
+        return {"result": Tracker.call_count}
 
     # run_sims is decorated with @Memoize
     # 1. Run without seed: should bypass cache
     res1 = run_sims(dummy_sim, n1=1, n2=1)
-    assert res1 == [[{"result": 1}]]
+    assert res1 == [{"result": 1}]
     assert Tracker.call_count == 1
 
     # Run without seed again: should bypass cache and return fresh result
     res2 = run_sims(dummy_sim, n1=1, n2=1)
-    assert res2 == [[{"result": 2}]]
+    assert res2 == [{"result": 2}]
     assert Tracker.call_count == 2
 
     # 2. Run with seed: should cache
     res3 = run_sims(dummy_sim, n1=1, n2=1, seed=42)
-    assert res3 == [[{"result": 3}]]
+    assert res3 == [{"result": 3}]
     assert Tracker.call_count == 3
 
     # Run with same seed again: should hit cache and return cached result
     res4 = run_sims(dummy_sim, n1=1, n2=1, seed=42)
-    assert res4 == [[{"result": 3}]]
+    assert res4 == [{"result": 3}]
     assert Tracker.call_count == 3  # call_count remains 3
 
 
