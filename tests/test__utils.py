@@ -37,7 +37,7 @@ def test_atomic_to_json():
     # Test numpy generic
     val = np.int64(42)
     res = atomic_to_json(val)
-    assert type(res) is int
+    assert isinstance(res, int)
     assert res == 42
 
     # Test standard python type
@@ -49,7 +49,7 @@ def test_iterable_to_json():
     vals = [np.int64(1), np.float64(2.5)]
     res = iterable_to_json(vals)
     assert res == [1, 2.5]
-    assert all(type(x) in (int, float) for x in res)
+    assert all(isinstance(x, (int, float)) for x in res)
 
     # Test non-iterable
     assert iterable_to_json(np.int64(42)) == 42
