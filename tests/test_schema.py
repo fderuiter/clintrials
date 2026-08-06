@@ -24,7 +24,9 @@ def test_dynamic_bounds_enforcement():
 
     # 2. Customized boundaries on the Field itself
     class CustomFieldSchema(BaseModel):
-        p_response: Probability = Field(ge=0.2, le=0.8, description="Custom response prob")
+        p_response: Probability = Field(
+            ge=0.2, le=0.8, description="Custom response prob"
+        )
         size: PositiveInt = Field(gt=5, lt=20, description="Custom size limit")
 
     # Should not raise for values strictly within the customized range
@@ -74,13 +76,19 @@ def test_version_schema_enforcement():
     InlineVersionSchema(version="1.0a1")  # type: ignore[call-arg]
 
     # Non-PEP 440 versions (like 'latest') should be rejected with the standard error
-    with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+    with pytest.raises(
+        ValueError, match="version must be a valid PEP 440 version string"
+    ):
         InlineVersionSchema(version="latest")  # type: ignore[call-arg]
 
-    with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+    with pytest.raises(
+        ValueError, match="version must be a valid PEP 440 version string"
+    ):
         InlineVersionSchema(version="invalid-version")  # type: ignore[call-arg]
 
-    with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+    with pytest.raises(
+        ValueError, match="version must be a valid PEP 440 version string"
+    ):
         InlineVersionSchema(version="")  # type: ignore[call-arg]
 
 
@@ -94,7 +102,14 @@ def test_schema_serialization():
     subclasses = BaseModel.__subclasses__()
     assert len(subclasses) >= 6
     subclass_names = [cls.__name__ for cls in subclasses]
-    for expected in ["WinRatioSchema", "CRMSchema", "EffToxSchema", "WagesTaitSchema", "WATUSchema", "GroupSequentialDesignSchema"]:
+    for expected in [
+        "WinRatioSchema",
+        "CRMSchema",
+        "EffToxSchema",
+        "WagesTaitSchema",
+        "WATUSchema",
+        "GroupSequentialDesignSchema",
+    ]:
         assert expected in subclass_names
 
     wages_tait_schema = generate_schema_for_class(WagesTaitSchema)  # type: ignore[no-untyped-call]
@@ -103,3 +118,39 @@ def test_schema_serialization():
     assert wages_tait_schema["properties"]["skeletons"]["type"] == "array"
     assert wages_tait_schema["properties"]["skeletons"]["items"]["type"] == "array"
 
+
+def test_worker_side_validation_guard():
+    from hub.runner import validate_fields
+
+    # 1. Valid CRMSchema payload
+    valid_crm = {
+        "prior": [0.1, 0.2, 0.3],
+        "target": 0.25,
+        "first_dose": 1,
+        "max_size": 30,
+    }
+    errors = validate_fields("CRMSchema", valid_crm)
+    assert not errors
+
+    # 2. Invalid CRMSchema payload (out of bounds)
+    invalid_crm = {
+        "prior": [0.1, -0.2, 0.3],  # negative probability
+        "target": 1.5,  # target > 1.0
+        "first_dose": 1,
+        "max_size": 30,
+    }
+    errors = validate_fields("CRMSchema", invalid_crm)
+    assert "prior" in errors
+    assert "target" in errors
+
+    # 3. Invalid GroupSequentialDesignSchema (alpha >= 1.0)
+    invalid_gsd = {
+        "k": 3,
+        "alpha": 1.0,
+        "timing": [0.33, 0.67, 1.0],
+        "n_sims": 1000,
+        "theta": 1.0,
+    }
+    errors = validate_fields("GroupSequentialDesignSchema", invalid_gsd)
+    assert "alpha" in errors
+    assert "alpha must be between 0.0 and 1.0" in errors["alpha"]
