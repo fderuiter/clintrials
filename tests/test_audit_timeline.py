@@ -168,8 +168,8 @@ def test_audit_commits_existing_test(temp_git_repo: str) -> None:
     run_git(['add', 'clintrials/core/recruitment.py'])
     run_git(['commit', '-m', 'Modify impl'])
 
-    # Audit should pass because test exists in tree
-    assert audit_commits('main', 'HEAD') is True
+    # Audit should fail because the existing test file was not modified/added within the evaluated commit range
+    assert audit_commits('main', 'HEAD') is False
 
 def test_audit_commits_visualization_only(temp_git_repo: str) -> None:
     run_git(['checkout', '-b', 'feature-branch'])
@@ -225,4 +225,50 @@ def test_audit_commits_combined_core_missing_test(temp_git_repo: str) -> None:
     run_git(['commit', '-m', 'Add recruitment core and visualization helper'])
 
     # Audit should fail because recruitment is missing tests (even though visualization helper is ignored)
+    assert audit_commits('main', 'HEAD') is False
+
+def test_audit_commits_chronological_failure(temp_git_repo: str) -> None:
+    run_git(['checkout', '-b', 'feature-branch'])
+
+    # Commit implementation first
+    os.makedirs('clintrials/core', exist_ok=True)
+    with open('clintrials/core/recruitment.py', 'w') as f:
+        f.write('def foo(): pass')
+    run_git(['add', 'clintrials/core/recruitment.py'])
+    run_git(['commit', '-m', 'Add impl'])
+
+    # Commit test second
+    os.makedirs('tests', exist_ok=True)
+    with open('tests/test_recruitment.py', 'w') as f:
+        f.write('def test_foo(): pass')
+    run_git(['add', 'tests/test_recruitment.py'])
+    run_git(['commit', '-m', 'Add test'])
+
+    # Audit should fail because the test was added AFTER the implementation
+    assert audit_commits('main', 'HEAD') is False
+
+def test_audit_commits_test_deleted(temp_git_repo: str) -> None:
+    run_git(['checkout', '-b', 'feature-branch'])
+
+    # Commit test and implementation together
+    os.makedirs('tests', exist_ok=True)
+    with open('tests/test_recruitment.py', 'w') as f:
+        f.write('def test_foo(): pass')
+    os.makedirs('clintrials/core', exist_ok=True)
+    with open('clintrials/core/recruitment.py', 'w') as f:
+        f.write('def foo(): pass')
+    run_git(['add', 'tests/test_recruitment.py', 'clintrials/core/recruitment.py'])
+    run_git(['commit', '-m', 'Add both'])
+
+    # Delete the test file
+    run_git(['rm', 'tests/test_recruitment.py'])
+    run_git(['commit', '-m', 'Delete test'])
+
+    # Now modify the implementation
+    with open('clintrials/core/recruitment.py', 'w') as f:
+        f.write('def foo(): return 1')
+    run_git(['add', 'clintrials/core/recruitment.py'])
+    run_git(['commit', '-m', 'Modify impl'])
+
+    # Audit should fail because the test file was deleted in the range
     assert audit_commits('main', 'HEAD') is False
