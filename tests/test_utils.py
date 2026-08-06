@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: MIT
 
 
+from typing import Any, Optional
+
 from clintrials.utils import Memoize, filter_list_of_dicts, to_1d_list
 
 
@@ -68,9 +70,9 @@ def test_deprecated_class():
     assert "Use NewClass instead" in str(record[0].message)
 
 
-def test_memoize_no_false_cache_hit_on_recycled_id(mocker):
+def test_memoize_no_false_cache_hit_on_recycled_id(mocker: Any) -> None:
     class Parameter:
-        def __init__(self, value):
+        def __init__(self, value: int) -> None:
             self.value = value
 
     p1 = Parameter(10)
@@ -101,10 +103,10 @@ def test_memoize_no_false_cache_hit_on_recycled_id(mocker):
     assert call_count == 2
 
 
-def test_memoize_fallback_on_serialization_failure():
+def test_memoize_fallback_on_serialization_failure() -> None:
     class UnserializableParameter:
         @property
-        def __dict__(self):
+        def __dict__(self) -> dict[str, Any]:  # type: ignore[override]
             raise ValueError("Serialization failed!")
 
     p = UnserializableParameter()
@@ -125,14 +127,14 @@ def test_memoize_fallback_on_serialization_failure():
     assert call_count == 2
 
 
-def test_memoize_instance_binding_and_leak_prevention():
+def test_memoize_instance_binding_and_leak_prevention() -> None:
     class MyClass:
-        def __init__(self, multiplier):
+        def __init__(self, multiplier: int) -> None:
             self.multiplier = multiplier
             self.calls = 0
 
         @Memoize(maxsize=2)
-        def compute(self, x):
+        def compute(self, x: int) -> int:
             self.calls += 1
             return x * self.multiplier
 
@@ -160,11 +162,11 @@ def test_memoize_instance_binding_and_leak_prevention():
     assert obj1.calls == 4
 
 
-def test_memoize_cycle_detection():
+def test_memoize_cycle_detection() -> None:
     class CyclicNode:
-        def __init__(self, name):
+        def __init__(self, name: str) -> None:
             self.name = name
-            self.ref = None
+            self.ref: Optional[CyclicNode] = None
 
     node1 = CyclicNode("A")
     node2 = CyclicNode("B")
