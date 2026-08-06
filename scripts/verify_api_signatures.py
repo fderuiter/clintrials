@@ -345,6 +345,22 @@ def compare_manifests(
     return diffs
 
 
+def validate_whitelist(
+    current_manifest: typing.Dict[str, typing.Any],
+    whitelist: typing.Dict[str, typing.List[str]],
+) -> typing.List[str]:
+    """Check that all exported public functions and classes in current_manifest are allowed in the whitelist."""
+    unregistered_exports = []
+    for module_name, exports in current_manifest.items():
+        allowed_exports = whitelist.get(module_name, [])
+        for name in exports:
+            if name not in allowed_exports:
+                unregistered_exports.append(
+                    f"Export '{name}' in module '{module_name}' is not in the explicit allowed-list registry."
+                )
+    return unregistered_exports
+
+
 def main() -> None:
     """Run the API signature verification process."""
     parser = argparse.ArgumentParser(
@@ -353,14 +369,18 @@ def main() -> None:
     parser.add_argument(
         "--generate",
         action="store_true",
-        help="Recreate or update the baseline JSON manifest file",
+        help="Recreate or update the baseline JSON manifest and whitelist files",
     )
     parser.add_argument(
         "--manifest", default="api_manifest.json", help="Path to the manifest file"
     )
+    parser.add_argument(
+        "--whitelist", default="api_whitelist.json", help="Path to the whitelist file"
+    )
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
+    whitelist_path = Path(args.whitelist)
     current_manifest = generate_manifest()
 
     if args.generate:
@@ -369,11 +389,44 @@ def main() -> None:
         sys.stdout.write(
             f"Manifest successfully generated and saved to {manifest_path}\n"
         )
+
+        whitelist = {}
+        for module_name, exports in current_manifest.items():
+            whitelist[module_name] = sorted(list(exports.keys()))
+
+        with open(whitelist_path, "w") as f:
+            json.dump(whitelist, f, indent=2)
+        sys.stdout.write(
+            f"Whitelist successfully generated and saved to {whitelist_path}\n"
+        )
         sys.exit(0)
 
     if not manifest_path.exists():
         sys.stdout.write(
             f"Error: Manifest file {manifest_path} does not exist. Run with --generate to create it.\n"
+        )
+        sys.exit(1)
+
+    if not whitelist_path.exists():
+        sys.stdout.write(
+            f"Error: Whitelist file {whitelist_path} does not exist. Run with --generate to create it.\n"
+        )
+        sys.exit(1)
+
+    with open(whitelist_path, "r") as f:
+        whitelist = json.load(f)
+
+    unregistered_exports = validate_whitelist(current_manifest, whitelist)
+
+    if unregistered_exports:
+        sys.stdout.write("Unregistered Public API Exports Detected!\n")
+        sys.stdout.write(
+            "The following exported public items are not listed in the allowed-list configuration file:\n"
+        )
+        for err in unregistered_exports:
+            sys.stdout.write(f" - {err}\n")
+        sys.stdout.write(
+            "\nIf these additions are intentional, run 'poetry run python scripts/verify_api_signatures.py --generate' to update both the signature manifest and the allowed-list registry.\n"
         )
         sys.exit(1)
 

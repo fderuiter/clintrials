@@ -17,9 +17,9 @@ from typing import Any
 import numpy as np
 from scipy.stats import expon, invgamma
 
+from clintrials._utils import atomic_to_json, iterable_to_json
 from clintrials.core.protocol import Protocol
 from clintrials.core.simulation import UniversalProtocolSimulationRunner
-from clintrials.utils import atomic_to_json, iterable_to_json
 
 
 class BayesianTimeToEvent(Protocol):

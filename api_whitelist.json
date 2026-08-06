@@ -1,0 +1,336 @@
+{
+  "clintrials": [
+    "WATU",
+    "adaptive_mc_integration",
+    "fgm_joint_prob",
+    "integrate_posterior_1d",
+    "integrate_posterior_1d_adaptive",
+    "integrate_posterior_1d_nonadaptive"
+  ],
+  "clintrials.core": [
+    "BaseDoseFindingTrial",
+    "Protocol"
+  ],
+  "clintrials.core.cohort": [
+    "PatientCohortTracker",
+    "PatientRecord",
+    "parse_patient_records",
+    "validate_matching_lengths"
+  ],
+  "clintrials.core.errors": [
+    "ErrorTemplates"
+  ],
+  "clintrials.core.math": [
+    "association_to_correlation",
+    "bernoulli_likelihood",
+    "empiric",
+    "fgm_joint_prob",
+    "inject_docs",
+    "inverse_empiric",
+    "inverse_logistic",
+    "inverse_logit",
+    "inverse_logit1",
+    "logistic",
+    "logit",
+    "logit1"
+  ],
+  "clintrials.core.numerics": [
+    "ProbabilityDensitySample",
+    "adaptive_mc_integration",
+    "integrate_posterior_1d",
+    "integrate_posterior_1d_adaptive",
+    "integrate_posterior_1d_nonadaptive",
+    "posterior_expectation_gh"
+  ],
+  "clintrials.core.protocol": [
+    "BaseDoseFindingTrial",
+    "PatientCohortTracker",
+    "Protocol"
+  ],
+  "clintrials.core.recruitment": [
+    "ConstantRecruitmentStream",
+    "QuadrilateralRecruitmentStream",
+    "RecruitmentStream"
+  ],
+  "clintrials.core.registry": [
+    "ProtocolRegistry",
+    "RunnerRegistry",
+    "inject_docs"
+  ],
+  "clintrials.core.rng": [
+    "get_rng"
+  ],
+  "clintrials.core.schema": [
+    "BaseModel",
+    "CRMSchema",
+    "EffToxSchema",
+    "Field",
+    "FieldInfo",
+    "GroupSequentialDesignSchema",
+    "WATUSchema",
+    "WagesTaitSchema",
+    "WinRatioSchema",
+    "validate_bounds",
+    "validate_positive_integer",
+    "validate_probability"
+  ],
+  "clintrials.core.simulation": [
+    "OutcomeGenerator",
+    "TrialDesign",
+    "TrialDesignWithBulk",
+    "TrialDesignWithEfficacyBoundaries",
+    "TrialDesignWithMaxSize",
+    "UniversalProtocolSimulationRunner",
+    "extract_sim_data",
+    "run_bivariate_simulations"
+  ],
+  "clintrials.core.stats": [
+    "ProbabilityDensitySample",
+    "log_scale_p_value",
+    "log_scale_wald_interval"
+  ],
+  "clintrials.core.tte": [
+    "BayesianTimeToEvent",
+    "Protocol",
+    "TimeToEventOutcomeGenerator",
+    "UniversalProtocolSimulationRunner",
+    "atomic_to_json",
+    "iterable_to_json",
+    "matrix_cohort_analysis"
+  ],
+  "clintrials.core.unified": [
+    "SimulationResult"
+  ],
+  "clintrials.core.viz_interface": [
+    "VisualizationProvider",
+    "get_visualization_provider",
+    "set_visualization_provider"
+  ],
+  "clintrials.dosefinding": [
+    "DoseFindingTrial",
+    "SimpleToxicityCountingDoseEscalationTrial",
+    "ThreePlusThree",
+    "dose_transition_pathways",
+    "dose_transition_pathways_to_json",
+    "dtps_to_pandas",
+    "find_mtd",
+    "print_dtps",
+    "simulate_dose_finding_trial",
+    "simulate_dose_finding_trials"
+  ],
+  "clintrials.dosefinding.crm": [
+    "CRM",
+    "crm",
+    "crm_dtp_detail"
+  ],
+  "clintrials.dosefinding.efficacytoxicity": [
+    "BaseDoseFindingTrial",
+    "EfficacyToxicityDoseFindingTrial",
+    "atomic_to_json",
+    "correlated_binary_outcomes_from_uniforms",
+    "dose_transition_pathways",
+    "get_path",
+    "iterable_to_json",
+    "print_dtps",
+    "print_dtps_verbose",
+    "simulate_efficacy_toxicity_dose_finding_trials",
+    "simulate_trial"
+  ],
+  "clintrials.dosefinding.efftox": [
+    "EffTox",
+    "InverseQuadraticCurve",
+    "LpNormCurve",
+    "efftox_dtp_detail",
+    "efftox_get_posterior_params",
+    "efftox_get_posterior_probs",
+    "efftox_priors_from_skeleton",
+    "scale_doses",
+    "solve_metrizable_efftox_scenario",
+    "validate_efftox_priors"
+  ],
+  "clintrials.dosefinding.wagestait": [
+    "CRM",
+    "EfficacyToxicityDoseFindingTrial",
+    "ErrorTemplates",
+    "WagesTait",
+    "bernoulli_likelihood",
+    "empiric",
+    "inverse_empiric"
+  ],
+  "clintrials.dosefinding.watu": [
+    "CRM",
+    "EfficacyToxicityDoseFindingTrial",
+    "WATU",
+    "empiric",
+    "inverse_empiric",
+    "solve_metrizable_efftox_scenario"
+  ],
+  "clintrials.phase3.gsd": [
+    "GroupSequentialDesign",
+    "Protocol",
+    "deprecated",
+    "inject_docs",
+    "spending_function_obrien_fleming",
+    "spending_function_pocock"
+  ],
+  "clintrials.utils": [
+    "Memoize",
+    "ParameterSpace",
+    "correlated_binary_outcomes_from_uniforms",
+    "get_logger",
+    "tuple_to_dataframe"
+  ],
+  "clintrials.validation": [
+    "ErrorTemplates",
+    "validate_bounds",
+    "validate_expected_length",
+    "validate_matching_lengths",
+    "validate_positive_integer",
+    "validate_probability",
+    "validate_version"
+  ],
+  "clintrials.visualization": [
+    "create_bar_chart",
+    "create_line_chart",
+    "generate_text_summary",
+    "plot_bivariate_simulation_recommendation",
+    "plot_crm_simulation_recommendation",
+    "plot_crm_toxicity_probabilities",
+    "plot_dose_finding_outcomes",
+    "plot_efftox_density",
+    "plot_efftox_simulation_acceptability",
+    "plot_efftox_utility_contours",
+    "plot_winratio_power_curve"
+  ],
+  "clintrials.visualization.dashboard.factory": [
+    "ScopedUIRegistry",
+    "create_widget",
+    "render_accessible_chart",
+    "render_metric"
+  ],
+  "clintrials.visualization.dashboard.launcher": [
+    "main"
+  ],
+  "clintrials.visualization.dashboard.main": [
+    "create_widget",
+    "get_design_file_mtimes",
+    "main"
+  ],
+  "clintrials.visualization.dashboard.utils": [
+    "announce_status_locally"
+  ],
+  "clintrials.visualization.dashboard.views.crm_view": [
+    "BaseSimulationView",
+    "CRM",
+    "CRMView"
+  ],
+  "clintrials.visualization.dashboard.views.efftox_view": [
+    "BaseSimulationView",
+    "EffTox",
+    "EffToxView"
+  ],
+  "clintrials.visualization.dashboard.views.framework": [
+    "BaseSimulationView",
+    "ParameterSpace",
+    "dashboard_view",
+    "get_visualization_provider",
+    "render_accessible_chart",
+    "render_sidebar_config"
+  ],
+  "clintrials.visualization.dashboard.views.gsd_view": [
+    "BaseSimulationView",
+    "GSDView",
+    "GroupSequentialDesign",
+    "create_widget",
+    "spending_function_obrien_fleming",
+    "spending_function_pocock"
+  ],
+  "clintrials.visualization.dashboard.views.wagestait_view": [
+    "BaseSimulationView",
+    "WagesTait",
+    "WagesTaitView"
+  ],
+  "clintrials.visualization.dashboard.views.watu_view": [
+    "BaseSimulationView",
+    "WATU",
+    "WATUView"
+  ],
+  "clintrials.visualization.dashboard.views.winratio_view": [
+    "BaseSimulationView",
+    "WinRatioSchema",
+    "WinRatioView",
+    "create_widget",
+    "render",
+    "render_metric"
+  ],
+  "clintrials.visualization.helpers": [
+    "build_html_table",
+    "format_label",
+    "format_labels_dict",
+    "format_number"
+  ],
+  "clintrials.visualization.models": [
+    "MultiFormatSummaryContainer",
+    "TextSection",
+    "fmt"
+  ],
+  "clintrials.visualization.provider": [
+    "DefaultVisualizationProvider",
+    "VisualizationProvider",
+    "create_bar_chart",
+    "create_line_chart",
+    "generate_text_summary",
+    "get_default_provider",
+    "plot_bivariate_simulation_recommendation",
+    "plot_crm_simulation_recommendation",
+    "plot_crm_toxicity_probabilities",
+    "plot_dose_finding_outcomes",
+    "plot_efftox_density",
+    "plot_efftox_simulation_acceptability",
+    "plot_efftox_utility_contours",
+    "plot_winratio_power_curve"
+  ],
+  "clintrials.visualization.report": [
+    "AccessiblePDF",
+    "AccessibleTable",
+    "generate_pdf_report",
+    "parse_pdf_structure",
+    "validate_pdf_ua_structure"
+  ],
+  "clintrials.winratio": [
+    "calculate_confidence_intervals",
+    "calculate_p_value",
+    "calculate_win_ratio",
+    "compare_subjects",
+    "generate_data",
+    "simulate_comparisons"
+  ],
+  "clintrials.winratio.compare": [
+    "compare_subjects"
+  ],
+  "clintrials.winratio.data_generation": [
+    "generate_data"
+  ],
+  "clintrials.winratio.main": [
+    "Memoize",
+    "Protocol",
+    "WinRatioSchema",
+    "WinRatioTrial",
+    "calculate_confidence_intervals",
+    "calculate_p_value",
+    "calculate_win_ratio",
+    "generate_data",
+    "main",
+    "simulate_comparisons"
+  ],
+  "clintrials.winratio.simulate": [
+    "simulate_comparisons"
+  ],
+  "clintrials.winratio.statistics": [
+    "calculate_confidence_intervals",
+    "calculate_p_value",
+    "calculate_win_ratio",
+    "log_scale_p_value",
+    "log_scale_wald_interval"
+  ]
+}

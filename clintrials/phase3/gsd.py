@@ -147,7 +147,7 @@ class GroupSequentialDesign(Protocol):
         """Generate a report of the trial state and results."""
         from collections import OrderedDict
 
-        from clintrials.utils import atomic_to_json, iterable_to_json
+        from clintrials._utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
         report["Stage"] = atomic_to_json(self._stage)  # type: ignore

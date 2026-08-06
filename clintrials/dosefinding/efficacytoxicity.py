@@ -20,10 +20,12 @@ import logging
 from collections import OrderedDict
 from itertools import combinations_with_replacement
 
-from clintrials.utils import (
+from clintrials._utils import (
     atomic_to_json,
-    correlated_binary_outcomes_from_uniforms,
     iterable_to_json,
+)
+from clintrials.utils import (
+    correlated_binary_outcomes_from_uniforms,
 )
 
 logger = logging.getLogger(__name__)
@@ -200,7 +202,7 @@ class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
         """
         from collections import OrderedDict
 
-        from clintrials.utils import atomic_to_json, iterable_to_json
+        from clintrials._utils import atomic_to_json, iterable_to_json
 
         report = OrderedDict()
         report["RecommendedDose"] = atomic_to_json(self.next_dose())  # type: ignore

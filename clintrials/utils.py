@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 __author__ = 'Kristian Brock'
 __contact__ = 'kristian.brock@gmail.com'
@@ -58,23 +58,6 @@ def get_logger(name: str=__name__) -> logging.Logger:
         logging.Logger: The logger instance.
     """
     return logging.getLogger(name)
-
-def filter_list_of_dicts(list_of_dicts: Any, filter_dict: Any) -> Any:
-    """Filters a list of dictionaries based on a filter dictionary.
-
-    Args:
-        list_of_dicts (list[dict]): The list of dictionaries to filter.
-        filter_dict (dict): A dictionary of key-value pairs to filter by.
-
-    Returns:
-        list[dict]: The filtered list of dictionaries.
-    """
-    for key, val in filter_dict.items():
-        if isinstance(val, tuple):
-            list_of_dicts = [x for x in list_of_dicts if x[key] == val or x[key] == list(val)]
-        else:
-            list_of_dicts = [x for x in list_of_dicts if x[key] == val]
-    return list_of_dicts
 
 def tuple_to_dataframe(row_tuples: Any, index_tuples: Any, column_names: Any=None, index_names: Any=None) -> Any:
     """Creates a pandas DataFrame from row and index tuples.
@@ -561,66 +544,12 @@ class _ParameterSpaceIter:
         return param_map
     next = __next__
 
-from collections.abc import Iterable
-
 __all__ = [
     "get_logger",
-    "filter_list_of_dicts",
     "tuple_to_dataframe",
     "correlated_binary_outcomes_from_uniforms",
     "Memoize",
-    "ParameterSpace",
-    "to_1d_list_gen",
-    "to_1d_list",
-    "atomic_to_json",
-    "iterable_to_json",
-    "filter_kwargs_for_callable"
+    "ParameterSpace"
 ]
 
-def to_1d_list_gen(x):  # type: ignore
-    """Yield items of a nested list as a 1D generator."""
-    if isinstance(x, list):
-        for y in x:
-            yield from to_1d_list_gen(y)  # type: ignore
-    else:
-        yield x
-
-def to_1d_list(x):  # type: ignore
-    """Convert a nested list into a 1D list."""
-    return list(to_1d_list_gen(x))  # type: ignore
-
-def atomic_to_json(obj):  # type: ignore
-    """Convert an atomic numpy object to a JSON-serializable type."""
-    if isinstance(obj, np.generic):
-        return obj.item()
-    else:
-        return obj
-
-def iterable_to_json(obj):  # type: ignore
-    """Convert an iterable object to a JSON-serializable list."""
-    if isinstance(obj, Iterable):
-        return [atomic_to_json(x) for x in obj]  # type: ignore
-    else:
-        return atomic_to_json(obj)  # type: ignore
-
-def filter_kwargs_for_callable(func: Callable[..., Any], kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Filters kwargs so that only those accepted by func are returned, unless func accepts ``**kwargs``."""
-    import inspect
-    try:
-        sig = inspect.signature(func)
-    except (ValueError, TypeError):
-        return kwargs
-
-    has_var_keyword = any(
-        p.kind == inspect.Parameter.VAR_KEYWORD
-        for p in sig.parameters.values()
-    )
-    if has_var_keyword:
-        return kwargs
-
-    filtered = {}
-    for k, v in kwargs.items():
-        if k in sig.parameters:
-            filtered[k] = v
-    return filtered
 
