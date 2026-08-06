@@ -47,7 +47,7 @@ class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
         method first.
     """
 
-    def __init__(self, first_dose: int, num_doses: int, max_size: int) -> None:
+    def __init__(self, *, first_dose: int, num_doses: int, max_size: int) -> None:
         """Initializes an EfficacyToxicityDoseFindingTrial object.
 
         Args:

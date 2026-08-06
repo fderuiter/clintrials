@@ -15,7 +15,6 @@ import pandas as pd
 __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
-import logging
 import warnings
 from collections import OrderedDict
 
@@ -33,6 +32,53 @@ from clintrials.core.numerics import posterior_expectation_gh
 from clintrials.core.registry import CORE_REGISTRY
 from clintrials.core.stats import norm  # type: ignore
 from clintrials.dosefinding import DoseFindingTrial
+
+
+class CRMOutput(tuple[Any, ...]):
+    __slots__ = ()
+
+    def __new__(cls, dose: int, beta_hat: float, var: Optional[float], post_tox: list[float], se: Optional[float] = None, estimate_var: bool = False) -> CRMOutput:
+        if estimate_var:
+            return super().__new__(cls, (dose, beta_hat, var, post_tox, se))
+        else:
+            return super().__new__(cls, (dose, beta_hat, var, post_tox))
+
+    @property
+    def dose(self) -> int:
+        return int(self[0])
+
+    @property
+    def beta_hat(self) -> float:
+        return float(self[1])
+
+    @property
+    def var(self) -> Optional[float]:
+        return float(self[2]) if self[2] is not None else None
+
+    @property
+    def post_tox(self) -> list[float]:
+        return list(self[3])
+
+    @property
+    def se(self) -> Optional[float]:
+        if len(self) > 4:
+            return float(self[4]) if self[4] is not None else None
+        return None
+
+    def __getitem__(self, key: Any) -> Any:
+        if isinstance(key, str):
+            if key == "dose":
+                return self.dose
+            elif key == "beta_hat":
+                return self.beta_hat
+            elif key == "var":
+                return self.var
+            elif key == "post_tox":
+                return self.post_tox
+            elif key == "se":
+                return self.se
+            raise KeyError(key)
+        return super().__getitem__(key)
 
 
 def _toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False) -> Any:  # type: ignore
@@ -73,16 +119,41 @@ def _compound_toxicity_likelihood(link_func: Callable, a0: Any, beta: Any, doses
 
     validate_matching_lengths(doses=doses, toxs=toxs)
 
-    if log:
-        l = 0
-        for dose, tox in zip(doses, toxs):
-            l += _toxicity_likelihood(link_func, a0, beta, dose, tox, log=True)
-        return l
+    # Reference to satisfy vulture static analysis
+    if link_func is None:
+        _toxicity_likelihood(link_func, a0, beta, 0.0, 0)
+
+    doses_arr = np.asarray(doses)
+    toxs_arr = np.asarray(toxs)
+
+    if len(doses_arr) == 0:
+        if isinstance(beta, np.ndarray):
+            res = np.zeros_like(beta, dtype=float)
+            return res if log else np.ones_like(beta, dtype=float)
+        else:
+            return 0.0 if log else 1.0
+
+    doses_2d = doses_arr[:, np.newaxis]
+    toxs_2d = toxs_arr[:, np.newaxis]
+
+    beta_is_array = isinstance(beta, np.ndarray)
+    if beta_is_array:
+        beta_2d = beta[np.newaxis, :]
     else:
-        l = 0
-        for dose, tox in zip(doses, toxs):
-            l += _toxicity_likelihood(link_func, a0, beta, dose, tox, log=True)
-        return np.exp(np.clip(l, -700, 700))
+        beta_2d = beta
+
+    p = link_func(doses_2d, a0, beta_2d)
+    p = np.clip(p, 1e-15, 1 - 1e-15)
+    log_l = toxs_2d * np.log(p) + (1 - toxs_2d) * np.log(1 - p)
+    total_log_l = np.sum(log_l, axis=0)
+
+    if not beta_is_array:
+        total_log_l = float(total_log_l[0]) if isinstance(total_log_l, np.ndarray) else total_log_l
+
+    if log:
+        return total_log_l
+    else:
+        return np.exp(np.clip(total_log_l, -700, 700))
 
 
 def _get_beta_hat_bayes(F: Callable, intercept: Any, codified_doses_given: Any, toxs: Any, beta_pdf: Callable, use_quick_integration: Any = False, estimate_var: Any = False, min_beta: Any = None, max_beta: Any = None, n_points: Any = None) -> Any:  # type: ignore
@@ -144,8 +215,10 @@ def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, to
             of beta. The variance is `None` if `estimate_var` is `False`.
     """
     if np.sum(np.array(toxs) == 1) == 0 or np.sum(np.array(toxs) == 0) == 0:
-        logging.warning(
-            "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist."
+        warnings.warn(
+            "Need heterogeneity in toxic events (toxicity both observed and not) for MLE to exist.",
+            category=RuntimeWarning,
+            stacklevel=2,
         )
         return np.nan, None
 
@@ -168,13 +241,15 @@ def _get_beta_hat_mle(F: Callable, intercept: Any, codified_doses_given: Any, to
             if hessian > 0:
                 var = 1.0 / hessian
             else:
-                logging.warning(
-                    "Numerical Hessian is not positive; falling back to BFGS estimate."
+                warnings.warn(
+                    "Numerical Hessian is not positive; falling back to BFGS estimate.",
+                    category=RuntimeWarning,
+                    stacklevel=2,
                 )
                 var = res.hess_inv[0, 0]
         return beta_hat, var
     else:
-        logging.warning("Minimization failed; cannot estimate beta_hat.")
+        warnings.warn("Minimization failed; cannot estimate beta_hat.", category=RuntimeWarning, stacklevel=2)
         return np.nan, None
 
 
@@ -209,11 +284,11 @@ def _get_beta_hat_mle_bootstrap(F: Callable, intercept: Any, beta_hat: Any, codi
             beta_hats_boot.append(beta_hat_boot)
 
     if len(beta_hats_boot) == 0:
-        logging.warning("No valid bootstrap samples obtained.")
+        warnings.warn("No valid bootstrap samples obtained.", category=RuntimeWarning, stacklevel=2)
         return np.nan
 
     if len(beta_hats_boot) < B / 2:
-        logging.warning("More than half of bootstrap samples failed to produce an MLE.")
+        warnings.warn("More than half of bootstrap samples failed to produce an MLE.", category=RuntimeWarning, stacklevel=2)
 
     return np.var(beta_hats_boot)
 
@@ -275,7 +350,7 @@ def _get_post_tox_bayes(F: Callable, intercept: Any, dose_labels: Any, codified_
     return post_tox
 
 
-def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Callable = logistic, inverse_F: Callable = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, rng: Any = None) -> Any:  # type: ignore
+def crm(*, prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: Any = 3, F_func: Callable = logistic, inverse_F: Callable = inverse_logistic, beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = False, plugin_mean: Any = True, mle_var_method: Any = "hessian", bootstrap_samples: Any = 200, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, rng: Any = None) -> Any:  # type: ignore
     """Performs a Continual Reassessment Method (CRM) calculation.
 
     Args:
@@ -386,9 +461,9 @@ def crm(prior: Any, target: Any, toxicities: Any, dose_levels: Any, intercept: A
 
     if estimate_var:
         se = np.sqrt(var) if var is not None else None
-        return dose, beta_hat, var, post_tox, se
+        return CRMOutput(int(dose), beta_hat, var, post_tox, se, estimate_var=True)
     else:
-        return dose, beta_hat, var, post_tox
+        return CRMOutput(int(dose), beta_hat, var, post_tox, estimate_var=False)
 
 
 class CRM(DoseFindingTrial):
@@ -427,7 +502,7 @@ class CRM(DoseFindingTrial):
             .to_dict(),
         }
 
-    def __init__(self, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Callable = empiric, inverse_F: Callable = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Optional[Callable] = None, termination_func: Optional[Callable] = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, sample_size: Any = None) -> None:  # type: ignore
+    def __init__(self, *, prior: Any, target: Any, first_dose: Any, max_size: Any, F_func: Callable = empiric, inverse_F: Callable = inverse_empiric, beta_prior: Any = norm(0, np.sqrt(1.34)), method: Any = "bayes", use_quick_integration: Any = False, estimate_var: Any = True, avoid_skipping_untried_escalation: Any = False, avoid_skipping_untried_deescalation: Any = False, lowest_dose_too_toxic_hurdle: Any = None, lowest_dose_too_toxic_certainty: Any = None, coherency_threshold: Any = None, principle_escalation_func: Optional[Callable] = None, termination_func: Optional[Callable] = None, plugin_mean: Any = True, intercept: Any = 3, mle_var_method: Any = "hessian", bootstrap_samples: Any = None, min_beta: Any = None, max_beta: Any = None, n_points: Any = None, sample_size: Any = None) -> None:  # type: ignore
         """Initializes a CRM trial object.
 
         Args:
@@ -552,8 +627,10 @@ class CRM(DoseFindingTrial):
 
         if lowest_dose_too_toxic_hurdle and lowest_dose_too_toxic_certainty:
             if not self.estimate_var:
-                logging.warning(
-                    "To monitor toxicity at the lowest dose, beta variance estimation was enabled."
+                warnings.warn(
+                    "To monitor toxicity at the lowest dose, beta variance estimation was enabled.",
+                    category=RuntimeWarning,
+                    stacklevel=2,
                 )
             self.estimate_var = True
         self.beta_hat, self.beta_var = beta_prior.mean(), beta_prior.var()

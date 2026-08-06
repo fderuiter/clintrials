@@ -61,7 +61,7 @@ class DoseFindingTrial(BaseDoseFindingTrial):
         method first.
     """
 
-    def __init__(self, first_dose: int, num_doses: int, max_size: int) -> None:
+    def __init__(self, *, first_dose: int, num_doses: int, max_size: int) -> None:
         """Initializes a DoseFindingTrial object.
 
         Args:
@@ -182,7 +182,7 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
     Escalates until a certain number of toxicities are observed.
     """
 
-    def __init__(self, first_dose: Any, num_doses: Any, max_size: Any, max_toxicities: Any = 1) -> None:
+    def __init__(self, *, first_dose: Any, num_doses: Any, max_size: Any, max_toxicities: Any = 1) -> None:
         """Initializes a SimpleToxicityCountingDoseEscalationTrial object.
 
         Args:
@@ -234,7 +234,7 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
 class ThreePlusThree(DoseFindingTrial):
     """An object-oriented implementation of the 3+3 trial design."""
 
-    def __init__(self, num_doses: Any) -> None:
+    def __init__(self, *, num_doses: Any) -> None:
         """Initializes a ThreePlusThree trial object.
 
         Args:

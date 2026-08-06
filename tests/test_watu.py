@@ -46,15 +46,15 @@ def test_watu_1():
 
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
     trial = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
-        first_dose,
-        trial_size,
-        stage1_size,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
+        first_dose=first_dose,
+        max_size=trial_size,
+        stage_one_size=stage1_size,
     )
 
     cases = [
@@ -148,15 +148,15 @@ def test_watu_2():
 
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
     trial = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
-        first_dose,
-        trial_size,
-        stage1_size,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
+        first_dose=first_dose,
+        max_size=trial_size,
+        stage_one_size=stage1_size,
     )
 
     cases = [
