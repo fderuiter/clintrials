@@ -51,7 +51,7 @@ def test_protocol():
     assert res_bulk.mode == "bulk"
 
 def test_simulation_result_dict_methods():
-    res = SimulationResult({"a": 1, "b": 2}, mode="bulk")  # type: ignore
+    res = SimulationResult({"a": 1, "b": 2}, mode="bulk")
     assert res.get("a") == 1  # type: ignore
     assert res.get("c", 3) == 3  # type: ignore
     assert list(res.keys()) == ["a", "b"]  # type: ignore
@@ -60,7 +60,7 @@ def test_simulation_result_dict_methods():
     assert res.to_list() == [{"a": 1, "b": 2}]  # type: ignore
 
 def test_simulation_result_list_methods():
-    res = SimulationResult([1, 2, 3], mode="iterative")  # type: ignore
+    res = SimulationResult([1, 2, 3], mode="iterative")
     assert len(res) == 3
     assert res[1] == 2
     assert list(iter(res)) == [1, 2, 3]

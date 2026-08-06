@@ -5031,13 +5031,13 @@
             {
               "name": "results",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "Any",
               "default": null
             },
             {
               "name": "mode",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "str",
               "default": "'iterative'"
             }
           ]
@@ -19371,7 +19371,7 @@
             {
               "name": "title",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "str",
               "default": "'Trial Simulation Report'"
             }
           ]

@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 
 class SimulationResult:
     """Unified result container for simulation runs."""

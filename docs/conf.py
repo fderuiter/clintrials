@@ -90,6 +90,7 @@ if os.environ.get("SPHINX_STRICT", "0") == "1":
         ("py:class", "numpy.int64"),
         ("py:class", "callable"),
         ("py:class", "iterator"),
+        ("py:class", "plotly.graph_objects.Figure"),
     ]
 
     nitpick_ignore_regex = [

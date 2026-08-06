@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import re
 from contextlib import contextmanager
+from typing import Any
 
 from fpdf import FPDF
 from fpdf.enums import PageMode
@@ -47,8 +48,8 @@ class AccessiblePDF(FPDF):
         self.set_lang("en-US")
         self.page_mode = PageMode.USE_OUTLINES
         self.viewer_preferences = ViewerPreferences(display_doc_title=True)
-        self.struct_stack = []
-        self.mcid_counter = {}
+        self.struct_stack: list[Any] = []
+        self.mcid_counter: dict[int, int] = {}
         self.add_page()
 
         # Patch the structure builder's iterator to support nested structure elements
@@ -148,7 +149,7 @@ def generate_pdf_report(df, design_type, text_summaries=None):  # type: ignore
     if text_summaries is None:
         text_summaries = []
 
-    pdf = AccessiblePDF(f"{design_type} Simulation Report")  # type: ignore
+    pdf = AccessiblePDF(f"{design_type} Simulation Report")
 
     pdf.add_h1(f"{design_type} Simulation Report")  # type: ignore
 

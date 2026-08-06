@@ -52,7 +52,7 @@ from clintrials.visualization.report import (
 
 def test_pdf_structural_nesting_and_mcid():
     """Validates that Tables, TR, TD are nested properly and MCIDs are assigned correctly."""
-    pdf = AccessiblePDF()  # type: ignore
+    pdf = AccessiblePDF()
     pdf.set_font("helvetica", "", 12)
     # The output stream must not be compressed for our basic parser
     pdf.set_compression(False)
@@ -98,7 +98,7 @@ def test_pdf_structural_nesting_and_mcid():
 
 def test_artifact_tagging():
     """Validates that decorative elements can be tagged as artifacts."""
-    pdf = AccessiblePDF()  # type: ignore
+    pdf = AccessiblePDF()
     pdf.set_font("helvetica", "", 12)
     pdf.set_compression(False)
 
