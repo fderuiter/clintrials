@@ -1,16 +1,19 @@
 # SPDX-License-Identifier: MIT
 
+"""Utility functions and helper classes for clinical trials simulations."""
+
 from __future__ import annotations
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, Optional
 
 __author__ = 'Kristian Brock'
 __contact__ = 'kristian.brock@gmail.com'
 import logging
+import types
 import warnings
 from collections import OrderedDict
 from copy import copy
-from functools import wraps
+from functools import lru_cache, wraps
 from itertools import product
 
 import numpy as np
@@ -19,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 def deprecated(alternative):  # type: ignore
     """Decorator to mark a function, method, or class as deprecated.
+
     Emits a DeprecationWarning pointing to the `alternative`.
 
     Args:
@@ -142,59 +146,243 @@ def correlated_binary_outcomes_from_uniforms(unifs: Any, u: Any, psi: Any) -> An
         return y
     else:
         raise ValueError('unifs must be an n*3 array')
-from functools import partial
+class _HashableArgs:
+    """A helper class that wraps unhashable arguments.
+
+    Wraps original arguments and keyword arguments together with their
+    pre-processed hashable key representation for use in `lru_cache`.
+    """
+
+    def __init__(self, args: Any, kwargs: Any, key: Any) -> None:
+        """Initializes a _HashableArgs object.
+
+        Args:
+            args (tuple): The original positional arguments.
+            kwargs (dict): The original keyword arguments.
+            key (tuple): The pre-processed, hashable representation of the arguments.
+        """
+        self.args = args
+        self.kwargs = kwargs
+        self.key = key
+
+    def __hash__(self) -> int:
+        """Returns the hash of the pre-processed key.
+
+        Returns:
+            int: The hash value.
+        """
+        return hash(self.key)
+
+    def __eq__(self, other: Any) -> bool:
+        """Checks equality against another _HashableArgs object based on their keys.
+
+        Args:
+            other (Any): The other object to compare with.
+
+        Returns:
+            bool: True if keys are equal, False otherwise.
+        """
+        if not isinstance(other, _HashableArgs):
+            return NotImplemented
+        return bool(self.key == other.key)
 
 
 class Memoize:
     """A class to cache function results with a size limit (LRU)."""
 
-    def __init__(self, f: Callable, maxsize: int = 128) -> None:  # type: ignore
+    def __init__(self, f: Optional[Callable[..., Any]] = None, maxsize: int = 128) -> None:
         """Initializes a Memoize object.
 
         Args:
-            f (Callable): The function to memoize.
+            f (Callable, optional): The function to memoize. Defaults to None.
             maxsize (int): The maximum number of entries to keep in cache.
         """
         self.f = f
         self.maxsize = maxsize
-        self.memo = OrderedDict()  # type: ignore
+        self.global_cache = None
 
-    def _make_hashable(self, obj: Any) -> Any:
-        if isinstance(obj, (tuple, list)):
-            return tuple(self._make_hashable(e) for e in obj)
-        elif isinstance(obj, dict):
-            return frozenset((k, self._make_hashable(v)) for k, v in obj.items())
-        elif isinstance(obj, (int, float, str, bool, frozenset, type(None))):
-            return obj
-        elif hasattr(obj, '__dict__'):
-            return str(id(obj))
-        else:
-            return str(obj)
+        if self.f is not None:
+            # Create a standard platform-level LRU cache for direct/uncached fallback calls
+            @lru_cache(maxsize=self.maxsize)
+            def _global_cache(hashable_args_obj: _HashableArgs) -> Any:
+                assert self.f is not None
+                return self.f(*hashable_args_obj.args, **hashable_args_obj.kwargs)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        """Calls the memoized function.
+            self.global_cache = _global_cache
+
+    def _make_hashable(self, obj: Any, seen: Any = None) -> Any:
+        """Pre-processes complex, unhashable parameters into a hashable structure.
+
+        Performs recursive attribute serialization of custom object instances
+        and nested collections, handling numpy arrays and cycle detection.
 
         Args:
-            *args: The arguments to the function.
-            **kwargs: The keyword arguments to the function.
+            obj (Any): The object/value to serialize.
+            seen (set, optional): A set of object IDs already processed in the
+                recursion stack to detect cycles. Defaults to None.
 
         Returns:
-            The result of the function call.
+            Any: A hashable, deeply-nested representation of the input.
         """
-        # Create a hashable representation of the kwargs
-        cache_key = (self._make_hashable(args), self._make_hashable(kwargs))
-        if cache_key not in self.memo:
-            if len(self.memo) >= self.maxsize:
-                self.memo.popitem(last=False)
-            self.memo[cache_key] = self.f(*args, **kwargs)
-        else:
-            # Move to the end to show it was recently used
-            self.memo.move_to_end(cache_key)
-        return self.memo[cache_key]
+        if seen is None:
+            seen = set()
 
-    def __get__(self, instance: Any, *args: Any) -> Any:
-        """Support instance methods."""
-        return partial(self, instance)
+        obj_id = id(obj)
+        if obj_id in seen:
+            return f"<cycle-{obj_id}>"
+
+        is_container = hasattr(obj, '__dict__') or isinstance(
+            obj, (list, tuple, dict, set, frozenset, np.ndarray)
+        )
+        if is_container:
+            seen.add(obj_id)
+
+        try:
+            if isinstance(obj, (tuple, list)):
+                return tuple(self._make_hashable(e, seen) for e in obj)
+            elif isinstance(obj, dict):
+                return frozenset((k, self._make_hashable(v, seen)) for k, v in obj.items())
+            elif isinstance(obj, (int, float, str, bool, frozenset, type(None))):
+                return obj
+            elif isinstance(obj, np.ndarray):
+                return tuple(self._make_hashable(e, seen) for e in obj.tolist())
+            elif isinstance(obj, type):
+                return (obj.__module__, obj.__name__)
+            elif isinstance(obj, (types.FunctionType, types.BuiltinFunctionType, types.MethodType, types.BuiltinMethodType)):
+                if hasattr(obj, '__self__') and hasattr(obj, '__func__'):
+                    return (
+                        obj.__class__.__module__,
+                        obj.__class__.__name__,
+                        self._make_hashable(obj.__self__, seen),
+                        self._make_hashable(obj.__func__, seen)
+                    )
+                elif hasattr(obj, '__code__'):
+                    closure_val = None
+                    if hasattr(obj, '__closure__') and obj.__closure__ is not None:
+                        closure_val = tuple(self._make_hashable(cell.cell_contents, seen) for cell in obj.__closure__)
+                    return (
+                        obj.__class__.__module__,
+                        obj.__class__.__name__,
+                        getattr(obj, '__module__', None),
+                        getattr(obj, '__qualname__', None),
+                        closure_val
+                    )
+                else:
+                    return (
+                        obj.__class__.__module__,
+                        obj.__class__.__name__,
+                        getattr(obj, '__module__', None),
+                        getattr(obj, '__qualname__', None)
+                    )
+            elif hasattr(obj, '__dict__'):
+                return (
+                    obj.__class__.__module__,
+                    obj.__class__.__name__,
+                    self._make_hashable(obj.__dict__, seen)
+                )
+            elif hasattr(obj, '__slots__'):
+                slots_dict = {
+                    slot: getattr(obj, slot)
+                    for slot in obj.__slots__
+                    if hasattr(obj, slot)
+                }
+                return (
+                    obj.__class__.__module__,
+                    obj.__class__.__name__,
+                    self._make_hashable(slots_dict, seen)
+                )
+            else:
+                return str(obj)
+        finally:
+            if is_container:
+                seen.remove(obj_id)
+
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Calls the memoized function or decorates a function.
+
+        Args:
+            *args (Any): The arguments to the function, or the function to decorate.
+            **kwargs (Any): The keyword arguments to the function.
+
+        Returns:
+            Any: The result of the function call, or self if decorating.
+        """
+        if self.f is None:
+            f = args[0]
+            self.f = f
+
+            # Now we can initialize the global cache
+            @lru_cache(maxsize=self.maxsize)
+            def _global_cache(hashable_args_obj: _HashableArgs) -> Any:
+                assert self.f is not None
+                return self.f(*hashable_args_obj.args, **hashable_args_obj.kwargs)
+
+            self.global_cache = _global_cache
+            return self
+
+        try:
+            serialized_args = self._make_hashable(args)
+            serialized_kwargs = self._make_hashable(kwargs)
+            cache_key = (serialized_args, serialized_kwargs)
+        except Exception:
+            return self.f(*args, **kwargs)
+
+        hashable_args_obj = _HashableArgs(args, kwargs, cache_key)
+        assert self.global_cache is not None
+        return self.global_cache(hashable_args_obj)
+
+    def __get__(self, instance: Any, owner: Any = None) -> Any:
+        """Supports binding to active object instances.
+
+        Ensures that instance methods are cached per-instance to prevent
+        cross-instance cache leaks.
+
+        Args:
+            instance (Any): The instance to bind to.
+            owner (Any, optional): The owner class. Defaults to None.
+
+        Returns:
+            Any: A bound method wrapper that performs cached execution.
+        """
+        if instance is None:
+            return self
+
+        assert self.f is not None
+        cache_attr = f"_memo_cache_{self.f.__name__}_{id(self)}"
+
+        if not hasattr(instance, cache_attr):
+            @lru_cache(maxsize=self.maxsize)
+            def instance_lru_cache(hashable_args_obj: _HashableArgs) -> Any:
+                assert self.f is not None
+                return self.f(instance, *hashable_args_obj.args, **hashable_args_obj.kwargs)
+
+            setattr(instance, cache_attr, instance_lru_cache)
+
+        instance_cache = getattr(instance, cache_attr)
+
+        def bound_method(*args: Any, **kwargs: Any) -> Any:
+            """Executes the bound method with cached results.
+
+            Args:
+                *args (Any): The positional arguments.
+                **kwargs (Any): The keyword arguments.
+
+            Returns:
+                Any: The result of the method execution.
+            """
+            try:
+                serialized_args = self._make_hashable(args)
+                serialized_kwargs = self._make_hashable(kwargs)
+                cache_key = (serialized_args, serialized_kwargs)
+            except Exception:
+                assert self.f is not None
+                return self.f(instance, *args, **kwargs)
+
+            hashable_args_obj = _HashableArgs(args, kwargs, cache_key)
+            return instance_cache(hashable_args_obj)
+
+        return bound_method
+
 
 class ParameterSpace:
     """A class to handle combinations of parameters in simulations."""

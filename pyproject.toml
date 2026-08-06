@@ -118,7 +118,6 @@ convention = "google"
 "clintrials/core/*" = ["TID251"]
 "clintrials/__init__.py" = ["D"]
 "clintrials/phase3/__init__.py" = ["D"]
-"clintrials/utils.py" = ["D"]
 "clintrials/winratio/main.py" = ["D"]
 "docs/conf.py" = ["D"]
 
