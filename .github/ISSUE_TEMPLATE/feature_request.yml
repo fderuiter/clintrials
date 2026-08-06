@@ -1,0 +1,47 @@
+name: Feature Request
+description: Propose a new clinical or technical feature/capability
+title: "[FEAT] <title>"
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: track
+    attributes:
+      label: Strategic Track Selection
+      description: Select either the Technical or Clinical track to align with our dual-track strategic framework.
+      options:
+        - "Clinical Track"
+        - "Technical Track"
+    validations:
+      required: true
+  - type: textarea
+    id: clinical_pillar
+    attributes:
+      label: Clinical Strategy Pillar / Persona Alignment
+      description: |
+        Required if Clinical Track is chosen. Specify which clinical persona (e.g., Dr. Thorne, Eleanor Vance) or validation framework pillar this feature request aligns with.
+        Note: You DO NOT need to provide low-level code implementation details or technical performance metrics.
+      placeholder: "e.g., Aligns with Persona A (Dr. Thorne) to allow clinicians to override automatic dose suggestions..."
+    validations:
+      required: false
+  - type: textarea
+    id: roadmap_milestone
+    attributes:
+      label: Roadmap Milestone Reference
+      description: Required if Technical Track is chosen. Does this feature request align with a specific milestone or item in `ROADMAP.md`?
+      placeholder: "e.g., Section 1: CRM optimizations..."
+    validations:
+      required: false
+  - type: textarea
+    id: solution_description
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Describe alternatives you've considered
+      description: Any alternative solutions or features you've considered.
+    validations:
+      required: false

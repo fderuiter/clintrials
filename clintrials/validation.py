@@ -147,3 +147,40 @@ def validate_version(value: Any, name: str) -> None:
         Version(value)
     except InvalidVersion as e:
         raise ValueError(ErrorTemplates.PEP440_VERSION.format(name=name)) from e
+
+
+def validate_feature_request(issue_data: dict[str, Any]) -> bool:
+    """Validates a feature request submission based on dual-track rules.
+
+    The Technical Track requires a roadmap milestone reference.
+    The Clinical Track bypasses the technical roadmap milestone requirement,
+    relying instead on alignment with CLINICAL_STRATEGY.md without requiring
+    low-level code or technical metrics.
+
+    Args:
+        issue_data (dict): A dictionary representing the submitted issue.
+            Expected keys: 'track', 'roadmap_milestone', 'clinical_pillar',
+            'solution_description'.
+
+    Returns:
+        bool: True if the issue data is valid.
+
+    Raises:
+        ValueError: If validation fails.
+    """
+    track = str(issue_data.get("track", "")).lower()
+    if "clinical" in track:
+        # Bypasses the technical roadmap requirement
+        # Ensures no low-level technical performance metrics or code implementation is forced
+        clinical_pillar = issue_data.get("clinical_pillar")
+        if not clinical_pillar or str(clinical_pillar).strip() in ("", "None", "N/A"):
+            raise ValueError("Clinical track requires a reference to CLINICAL_STRATEGY.md strategic pillars or personas.")
+        return True
+    elif "technical" in track:
+        roadmap_milestone = issue_data.get("roadmap_milestone")
+        if not roadmap_milestone or str(roadmap_milestone).strip() in ("", "None", "N/A"):
+            raise ValueError("Technical track requires a valid ROADMAP.md milestone reference.")
+        return True
+    else:
+        raise ValueError("Invalid track selection. Please select either 'Technical Track' or 'Clinical Track'.")
+
