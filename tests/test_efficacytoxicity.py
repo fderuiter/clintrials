@@ -33,3 +33,10 @@ def test_efficacy_toxicity_dose_finding_trial_init_validation():
     """Test validation checks during trial initialization."""
     with pytest.raises(ValueError, match="First dose must be no greater than number of doses"):
         DummyEfficacyToxicityTrial(first_dose=5, num_doses=3, max_size=20)
+
+
+def test_efficacy_toxicity_dose_finding_trial_keyword_only():
+    """Test that EfficacyToxicityDoseFindingTrial requires keyword-only arguments."""
+    with pytest.raises(TypeError):
+        DummyEfficacyToxicityTrial(1, 3, 20)
+

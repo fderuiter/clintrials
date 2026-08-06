@@ -16,7 +16,6 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
-import logging
 from collections import OrderedDict
 
 from scipy.optimize import brentq
@@ -199,11 +198,31 @@ def _L_n(D: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, 
     Returns:
         float: The compound likelihood.
     """
-    response = np.ones(len(mu_T))
-    for scaled_dose, tox, eff in D:
-        p = _pi_ab(scaled_dose, tox, eff, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi)
-        response *= p
-    return response
+    if len(D) == 0:
+        return np.ones(len(mu_T))
+
+    # Reference to satisfy vulture static analysis
+    if mu_T is None:
+        _pi_ab(0.0, 0, 0, mu_T, beta_T, mu_E, beta1_E, beta2_E, psi)
+
+    from clintrials.core.math import fgm_joint_prob
+
+    scaled_doses = np.array([x[0] for x in D])[:, np.newaxis]
+    toxs = np.array([x[1] for x in D])[:, np.newaxis]
+    effs = np.array([x[2] for x in D])[:, np.newaxis]
+
+    mu_T_2d = mu_T[np.newaxis, :]
+    beta_T_2d = beta_T[np.newaxis, :]
+    mu_E_2d = mu_E[np.newaxis, :]
+    beta1_E_2d = beta1_E[np.newaxis, :]
+    beta2_E_2d = beta2_E[np.newaxis, :]
+    psi_2d = psi[np.newaxis, :]
+
+    p_E = _pi_E(scaled_doses, mu_E_2d, beta1_E_2d, beta2_E_2d)
+    p_T = _pi_T(scaled_doses, mu_T_2d, beta_T_2d)
+
+    joint_probs = fgm_joint_prob(effs, toxs, p_E, p_T, psi_2d)
+    return np.prod(joint_probs, axis=0)
 
 
 def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10**5, epsilon: Any = 1e-6, k_sd: Any = 6.0, max_iter: Any = 3, mass_threshold: Any = 0.999999) -> Any:
@@ -646,7 +665,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             ).mean(),
         }
 
-    def __init__(self, real_doses: Any, theta_priors: Any = None, tox_cutoff: Any = None, eff_cutoff: Any = None, tox_certainty: Any = None, eff_certainty: Any = None, metric: Any = None, max_size: Any = None, first_dose: Any = None, prior_tox_probs: Any = None, prior_eff_probs: Any = None, avoid_skipping_untried_escalation: Any = True, avoid_skipping_untried_deescalation: Any = True, num_integral_steps: Any = 10**5, epsilon: Any = 1e-6, k_sd: Any = 6.0, max_iter: Any = 3, mass_threshold: Any = 0.999999) -> None:
+    def __init__(self, *, real_doses: Any, theta_priors: Any = None, tox_cutoff: Any = None, eff_cutoff: Any = None, tox_certainty: Any = None, eff_certainty: Any = None, metric: Any = None, max_size: Any = None, first_dose: Any = None, prior_tox_probs: Any = None, prior_eff_probs: Any = None, avoid_skipping_untried_escalation: Any = True, avoid_skipping_untried_deescalation: Any = True, num_integral_steps: Any = 10**5, epsilon: Any = 1e-6, k_sd: Any = 6.0, max_iter: Any = 3, mass_threshold: Any = 0.999999) -> None:
         """Initializes an EffTox trial object.
 
         Args:
@@ -725,7 +744,7 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         first_dose = config.first_dose
 
         EfficacyToxicityDoseFindingTrial.__init__(
-            self, first_dose, len(real_doses), config.max_size  # type: ignore
+            self, first_dose=first_dose, num_doses=len(real_doses), max_size=config.max_size  # type: ignore
         )
 
         if theta_priors is None:
@@ -1011,11 +1030,15 @@ def solve_metrizable_efftox_scenario(prob_tox: Any, prob_eff: Any, metric: Any, 
     conform_util = np.where(conform, util, -np.inf)
 
     if np.all(np.isnan(util)):
-        logging.warning("All NaN util encountered in solve_metrizable_efftox_scenario")
+        import warnings
+        warnings.warn("All NaN util encountered in solve_metrizable_efftox_scenario", category=RuntimeWarning, stacklevel=2)
         return conform, util, np.nan, -1, np.nan
     elif np.all(np.isnan(conform_util)):
-        logging.warning(
-            "All NaN conform_util encountered in solve_metrizable_efftox_scenario"
+        import warnings
+        warnings.warn(
+            "All NaN conform_util encountered in solve_metrizable_efftox_scenario",
+            category=RuntimeWarning,
+            stacklevel=2,
         )
         return conform, util, np.nan, -1, np.nan
     else:

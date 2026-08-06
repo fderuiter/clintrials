@@ -18,7 +18,11 @@ __contact__ = "kristian.brock@gmail.com"
 from scipy.stats import beta
 
 from clintrials.core.errors import ErrorTemplates
-from clintrials.core.math import bernoulli_likelihood, empiric, inverse_empiric
+from clintrials.core.math import (  # noqa: F401
+    bernoulli_likelihood,
+    empiric,
+    inverse_empiric,
+)
 from clintrials.core.stats import norm  # type: ignore
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
@@ -40,11 +44,34 @@ def _wt_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0
     Returns:
         float: The compound likelihood.
     """
-    l = 1
-    for dose, tox, eff in cases:
-        p = F(skeleton[dose - 1], a0=a0, beta=theta)
-        l = l * bernoulli_likelihood(p, eff, log=False)  # type: ignore
-    return l
+    if len(cases) == 0:
+        if isinstance(theta, np.ndarray):
+            return np.ones_like(theta, dtype=float)
+        return 1.0
+
+    doses, _, effs = zip(*cases)
+    skeletons_given = np.array([skeleton[d - 1] for d in doses])
+    effs_arr = np.array(effs)
+
+    skeletons_2d = skeletons_given[:, np.newaxis]
+    effs_2d = effs_arr[:, np.newaxis]
+
+    theta_is_array = isinstance(theta, np.ndarray)
+    if theta_is_array:
+        theta_2d = theta[np.newaxis, :]
+    else:
+        theta_2d = theta
+
+    p = F(skeletons_2d, a0=a0, beta=theta_2d)
+    p = np.clip(p, 1e-15, 1 - 1e-15)
+    log_l = effs_2d * np.log(p) + (1 - effs_2d) * np.log(1 - p)
+    total_log_l = np.sum(log_l, axis=0)
+
+    if not theta_is_array:
+        total_log_l = float(total_log_l[0]) if isinstance(total_log_l, np.ndarray) else total_log_l
+        return np.exp(np.clip(total_log_l, -700, 700))
+    else:
+        return np.exp(np.clip(total_log_l, -700, 700))
 
 
 def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0) -> Any:
@@ -61,11 +88,33 @@ def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any
     Returns:
         float: The compound log-likelihood.
     """
-    ll = 0
-    for dose, tox, eff in cases:
-        p = F(skeleton[dose - 1], a0=a0, beta=theta)
-        ll += bernoulli_likelihood(p, eff, log=True)  # type: ignore
-    return ll
+    if len(cases) == 0:
+        if isinstance(theta, np.ndarray):
+            return np.zeros_like(theta, dtype=float)
+        return 0.0
+
+    doses, _, effs = zip(*cases)
+    skeletons_given = np.array([skeleton[d - 1] for d in doses])
+    effs_arr = np.array(effs)
+
+    skeletons_2d = skeletons_given[:, np.newaxis]
+    effs_2d = effs_arr[:, np.newaxis]
+
+    theta_is_array = isinstance(theta, np.ndarray)
+    if theta_is_array:
+        theta_2d = theta[np.newaxis, :]
+    else:
+        theta_2d = theta
+
+    p = F(skeletons_2d, a0=a0, beta=theta_2d)
+    p = np.clip(p, 1e-15, 1 - 1e-15)
+    log_l = effs_2d * np.log(p) + (1 - effs_2d) * np.log(1 - p)
+    total_log_l = np.sum(log_l, axis=0)
+
+    if not theta_is_array:
+        return float(total_log_l[0]) if isinstance(total_log_l, np.ndarray) else total_log_l
+    else:
+        return total_log_l
 
 
 def _wt_get_theta_hat(cases: Any, skeletons: Any, theta_prior: Any, F: Any = empiric, use_quick_integration: Any = False, estimate_var: Any = False) -> Any:
@@ -162,7 +211,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
             .to_dict(),
         }
 
-    def __init__(self, skeletons: Any, prior_tox_probs: Any, tox_target: Any, tox_limit: Any, eff_limit: Any, first_dose: Any, max_size: Any, randomisation_stage_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, theta_prior: Any = norm(0, np.sqrt(1.34)), beta_prior: Any = norm(0, np.sqrt(1.34)), excess_toxicity_alpha: Any = 0.025, deficient_efficacy_alpha: Any = 0.025, model_prior_weights: Any = None, use_quick_integration: Any = False, estimate_var: Any = False, toxicity_estimator: Optional[Any] = None) -> None:
+    def __init__(self, *, skeletons: Any, prior_tox_probs: Any, tox_target: Any, tox_limit: Any, eff_limit: Any, first_dose: Any, max_size: Any, randomisation_stage_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, theta_prior: Any = norm(0, np.sqrt(1.34)), beta_prior: Any = norm(0, np.sqrt(1.34)), excess_toxicity_alpha: Any = 0.025, deficient_efficacy_alpha: Any = 0.025, model_prior_weights: Any = None, use_quick_integration: Any = False, estimate_var: Any = False, toxicity_estimator: Optional[Any] = None) -> None:
         """Initializes a WagesTait trial object.
 
         Args:
@@ -214,7 +263,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self._schema = WagesTaitSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
-            self, first_dose, len(prior_tox_probs), max_size
+            self, first_dose=first_dose, num_doses=len(prior_tox_probs), max_size=max_size
         )
 
         self.skeletons = skeletons

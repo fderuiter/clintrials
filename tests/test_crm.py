@@ -225,10 +225,10 @@ class TestCRMMLEVariance:
     def test_crm_function_se_return(self):
         # Test that crm() returns 5 elements when estimate_var=True
         res = crm(
-            self.prior,
-            self.target,
-            self.tox,
-            self.doses,
+            prior=self.prior,
+            target=self.target,
+            toxicities=self.tox,
+            dose_levels=self.doses,
             F_func=self.F_func,
             inverse_F=self.inverse_F,
             method="mle",
@@ -241,10 +241,10 @@ class TestCRMMLEVariance:
 
         # Test that crm() returns 4 elements when estimate_var=False
         res_no_var = crm(
-            self.prior,
-            self.target,
-            self.tox,
-            self.doses,
+            prior=self.prior,
+            target=self.target,
+            toxicities=self.tox,
+            dose_levels=self.doses,
             F_func=self.F_func,
             inverse_F=self.inverse_F,
             method="mle",

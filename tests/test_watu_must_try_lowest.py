@@ -14,12 +14,12 @@ def test_watu_must_try_lowest_dose():
 
     # Scenario 1: must_try_lowest_dose=True, first_dose=3
     trial_t = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
         first_dose=3,
         max_size=30,
         stage_one_size=10,
@@ -29,12 +29,12 @@ def test_watu_must_try_lowest_dose():
 
     # Scenario 2: must_try_lowest_dose=False
     trial_f = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
         first_dose=3,
         max_size=30,
         stage_one_size=10,
@@ -48,12 +48,12 @@ def test_watu_reset_honors_flag():
     skeletons = [[0.1] * 6]
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
     trial = WATU(
-        skeletons,
-        tox_prior,
-        0.30,
-        0.33,
-        0.05,
-        metric,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=0.30,
+        tox_limit=0.33,
+        eff_limit=0.05,
+        metric=metric,
         first_dose=3,
         max_size=30,
         must_try_lowest_dose=True,

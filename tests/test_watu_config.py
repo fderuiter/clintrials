@@ -30,7 +30,14 @@ def test_watu_mc_config():
 
     # Test defaults
     trial = WATU(
-        skeletons, tox_prior, tox_target, tox_cutoff, eff_cutoff, metric, 1, 64
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
+        first_dose=1,
+        max_size=64,
     )
     assert trial.mc_sample_size == 10**5
     assert trial.mc_samples_stage1 == 10**5
@@ -38,14 +45,14 @@ def test_watu_mc_config():
 
     # Test initialization with custom values
     trial2 = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
-        1,
-        64,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
+        first_dose=1,
+        max_size=64,
         mc_sample_size=2000,
         mc_samples_stage1=3000,
         mc_samples_stage2=4000,
@@ -56,14 +63,14 @@ def test_watu_mc_config():
 
     # Test clamping
     trial3 = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
-        1,
-        64,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
+        first_dose=1,
+        max_size=64,
         mc_sample_size=500,
         mc_samples_stage1=600,
         mc_samples_stage2=700,
@@ -74,14 +81,14 @@ def test_watu_mc_config():
 
     # Test propagation of defaults
     trial4 = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
-        1,
-        64,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
+        first_dose=1,
+        max_size=64,
         mc_sample_size=5000,
     )
     assert trial4.mc_sample_size == 5000
@@ -98,14 +105,14 @@ def test_watu_update_kwargs(mocker):
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
 
     trial = WATU(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        metric,
-        1,
-        64,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        metric=metric,
+        first_dose=1,
+        max_size=64,
         stage_one_size=5,
     )
 

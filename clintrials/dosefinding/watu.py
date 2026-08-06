@@ -51,6 +51,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
     def __init__(
         self,
+        *,
         skeletons: Any,
         prior_tox_probs: Any,
         tox_target: Any,
@@ -161,7 +162,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self._schema = WATUSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
-            self, first_dose, len(prior_tox_probs), max_size
+            self, first_dose=first_dose, num_doses=len(prior_tox_probs), max_size=max_size
         )
         if must_try_lowest_dose:
             self._next_dose = 1

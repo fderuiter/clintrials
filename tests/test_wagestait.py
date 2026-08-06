@@ -44,14 +44,14 @@ def test_wages_tait_1():
     ar_size = 16
 
     trial = WagesTait(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        first_dose,
-        trial_size,
-        ar_size,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        first_dose=first_dose,
+        max_size=trial_size,
+        randomisation_stage_size=ar_size,
     )
 
     cases = [
@@ -140,14 +140,14 @@ def test_wages_tait_2():
     ar_size = 16
 
     trial = WagesTait(
-        skeletons,
-        tox_prior,
-        tox_target,
-        tox_cutoff,
-        eff_cutoff,
-        first_dose,
-        trial_size,
-        ar_size,
+        skeletons=skeletons,
+        prior_tox_probs=tox_prior,
+        tox_target=tox_target,
+        tox_limit=tox_cutoff,
+        eff_limit=eff_cutoff,
+        first_dose=first_dose,
+        max_size=trial_size,
+        randomisation_stage_size=ar_size,
     )
 
     cases = [

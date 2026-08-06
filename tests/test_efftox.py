@@ -671,3 +671,11 @@ def test_efftox_missing_params():
     real_doses = [1, 2, 3]
     with pytest.raises(ValueError, match="Either theta_priors or both"):
         EffTox(real_doses=real_doses)
+
+
+def test_efftox_keyword_only():
+    """Test that EffTox requires keyword-only arguments."""
+    with pytest.raises(TypeError):
+        EffTox([1, 2, 3])  # type: ignore[misc]
+
+

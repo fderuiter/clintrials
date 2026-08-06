@@ -138,20 +138,20 @@ def test_new_schema_and_math_guardrails():
 
     # 1. WagesTait validation: tox_target > tox_limit
     with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
-        WagesTait(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
+        WagesTait(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
 
     # WagesTait validation: negative max_size (boundary check via schema)
     with pytest.raises(ValueError, match="max_size must be a positive integer"):
-        WagesTait(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=-5, randomisation_stage_size=10)
+        WagesTait(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=-5, randomisation_stage_size=10)
 
     # 2. WATU validation: tox_target > tox_limit
     with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
-        WATU(skeletons, prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+        WATU(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
 
     # WATU validation: invalid probability in skeletons
     bad_skeletons = [[-0.1, 0.2, 0.3]]
     with pytest.raises(ValueError, match="skeletons must be between 0.0 and 1.0"):
-        WATU(bad_skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+        WATU(skeletons=bad_skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
 
     # 3. GroupSequentialDesign validation: alpha <= 0
     with pytest.raises(ValueError, match="alpha must be between 0.0 and 1.0"):
@@ -247,10 +247,10 @@ def test_centralized_validation_integration():
     prior_tox_probs = [0.1, 0.2, 0.3]
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
 
-    wt = WagesTait(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
+    wt = WagesTait(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
     assert isinstance(wt.schema, WagesTaitSchema)
 
-    watu = WATU(skeletons, prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+    watu = WATU(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
     assert isinstance(watu.schema, WATUSchema)
 
     crm = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)
