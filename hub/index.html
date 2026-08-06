@@ -353,108 +353,6 @@
       }
 
       function recursiveValidate(value, schema, path = '') {
-        if (value === null || value === undefined) {
-          return { isValid: true };
-        }
-
-        const type = schema.type;
-
-        if (type === 'array') {
-          if (!Array.isArray(value)) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Array'} must be a valid JSON array`
-            };
-          }
-
-          if (schema.minItems !== undefined && value.length < schema.minItems) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Array'} must contain at least ${schema.minItems} items`
-            };
-          }
-          if (schema.maxItems !== undefined && value.length > schema.maxItems) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Array'} must contain at most ${schema.maxItems} items`
-            };
-          }
-
-          if (schema.items) {
-            for (let i = 0; i < value.length; i++) {
-              const elementPath = `${path}[${i}]`;
-              const res = recursiveValidate(value[i], schema.items, elementPath);
-              if (!res.isValid) {
-                return res;
-              }
-            }
-          }
-        } else if (type === 'integer' || type === 'number') {
-          const num = Number(value);
-          if (isNaN(num) || typeof value === 'boolean' || Array.isArray(value)) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be a valid number`
-            };
-          }
-
-          if (type === 'integer' && !Number.isInteger(num)) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be an integer`
-            };
-          }
-
-          if (schema.minimum !== undefined && num < schema.minimum) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be >= ${schema.minimum}`
-            };
-          }
-          if (schema.maximum !== undefined && num > schema.maximum) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be <= ${schema.maximum}`
-            };
-          }
-          if (schema.exclusiveMinimum !== undefined && num <= schema.exclusiveMinimum) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be strictly > ${schema.exclusiveMinimum}`
-            };
-          }
-          if (schema.exclusiveMaximum !== undefined && num >= schema.exclusiveMaximum) {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be strictly < ${schema.exclusiveMaximum}`
-            };
-          }
-
-          // Custom probability limit validation inside nested arrays (skeletons and prior_tox_probs are probability fields)
-          if (path.includes('skeletons') || path.includes('Skeletons')) {
-             if (num < 0.0 || num > 1.0) {
-                return {
-                   isValid: false,
-                   errorMsg: `${path} must be between 0.0 and 1.0`
-                };
-             }
-          }
-        } else if (type === 'boolean') {
-          if (typeof value !== 'boolean' && value !== 'true' && value !== 'false') {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be a boolean`
-            };
-          }
-        } else if (type === 'string') {
-          if (typeof value !== 'string') {
-            return {
-              isValid: false,
-              errorMsg: `${path || 'Value'} must be a string`
-            };
-          }
-        }
-
         return { isValid: true };
       }
 
@@ -471,64 +369,11 @@
                  errorMsg = 'This field is required';
               }
            } else {
-              let parsed;
               try {
-                 parsed = JSON.parse(trimmed);
+                 JSON.parse(trimmed);
               } catch (err) {
                  isValid = false;
                  errorMsg = `Invalid JSON syntax: ${err.message}`;
-              }
-
-              if (isValid) {
-                 const path = LABEL_MAPPING[input.id] || input.id;
-                 const res = recursiveValidate(parsed, prop, path);
-                 if (!res.isValid) {
-                    isValid = false;
-                    errorMsg = res.errorMsg;
-                 }
-              }
-
-              // Additional cross-field length rule validation for skeletons vs prior_tox_probs
-              if (isValid && input.id === 'skeletons') {
-                 const priorToxProbsInput = document.getElementById('prior_tox_probs');
-                 if (priorToxProbsInput) {
-                    try {
-                       const ptp = JSON.parse(priorToxProbsInput.value);
-                       if (Array.isArray(ptp)) {
-                          const expected_len = ptp.length;
-                          for (let idx = 0; idx < parsed.length; idx++) {
-                             if (Array.isArray(parsed[idx]) && parsed[idx].length !== expected_len) {
-                                isValid = false;
-                                errorMsg = `skeletons[${idx}] should have ${expected_len} items`;
-                                break;
-                             }
-                          }
-                       }
-                    } catch (e) {}
-                 }
-              }
-
-              // Let's also validate skeletons vs prior_tox_probs when prior_tox_probs changes!
-              if (isValid && input.id === 'prior_tox_probs') {
-                 const skeletonsInput = document.getElementById('skeletons');
-                 if (skeletonsInput) {
-                    try {
-                       const sk = JSON.parse(skeletonsInput.value);
-                       if (Array.isArray(sk)) {
-                          const expected_len = parsed.length;
-                          for (let idx = 0; idx < sk.length; idx++) {
-                             if (Array.isArray(sk[idx]) && sk[idx].length !== expected_len) {
-                                const skeletonsErrorEl = document.getElementById('skeletons-error');
-                                if (skeletonsErrorEl) {
-                                   skeletonsInput.classList.add('invalid');
-                                   skeletonsErrorEl.textContent = `skeletons[${idx}] should have ${expected_len} items`;
-                                   skeletonsErrorEl.style.display = 'block';
-                                }
-                             }
-                          }
-                       }
-                    } catch (e) {}
-                 }
               }
            }
         } else if (prop.type === 'integer' || prop.type === 'number') {
@@ -547,27 +392,7 @@
                  if (prop.type === 'integer' && !Number.isInteger(num)) {
                     isValid = false;
                     errorMsg = 'Must be an integer';
-                 } else {
-                    const path = LABEL_MAPPING[input.id] || input.id;
-                    const res = recursiveValidate(num, prop, path);
-                    if (!res.isValid) {
-                       isValid = false;
-                       errorMsg = res.errorMsg;
-                    }
                  }
-              }
-           }
-        }
-
-        if (isValid && (input.id === 'tox_target' || input.id === 'tox_limit')) {
-           const toxTargetInput = document.getElementById('tox_target');
-           const toxLimitInput = document.getElementById('tox_limit');
-           if (toxTargetInput && toxLimitInput && toxTargetInput.value.trim() !== '' && toxLimitInput.value.trim() !== '') {
-              const targetVal = Number(toxTargetInput.value);
-              const limitVal = Number(toxLimitInput.value);
-              if (!isNaN(targetVal) && !isNaN(limitVal) && targetVal > limitVal) {
-                 isValid = false;
-                 errorMsg = 'tox_target must be <= tox_limit';
               }
            }
         }
@@ -727,6 +552,40 @@
               progressBar.style.width = msg.percent + '%';
               progressPercent.textContent = msg.percent + '%';
             } else if (msg.type === 'success') {
+              if (msg.data && msg.data.status === 'validation_error') {
+                statusMsg.textContent = 'Validation failed.';
+                statusMsg.style.color = '#b91c1c'; // beautiful red
+                progressBar.style.width = '0%';
+                progressBar.style.background = '#b91c1c';
+                progressPercent.textContent = '0%';
+
+                // Clear any existing invalid classes on fields first
+                const formInputs = document.getElementById('form-fields').querySelectorAll('input, textarea');
+                formInputs.forEach(inp => {
+                   inp.classList.remove('invalid');
+                   const errorEl = document.getElementById(inp.id + '-error');
+                   if (errorEl) errorEl.style.display = 'none';
+                });
+
+                // Display inline errors
+                for (const [key, errorMsg] of Object.entries(msg.data.errors)) {
+                   if (key === '__all__') {
+                      showError(errorMsg);
+                      continue;
+                   }
+                   const input = document.getElementById(key);
+                   const errorEl = document.getElementById(key + '-error');
+                   if (input && errorEl) {
+                      input.classList.add('invalid');
+                      errorEl.textContent = errorMsg;
+                      errorEl.style.display = 'block';
+                   }
+                }
+                showError("Please correct validation errors before submitting.");
+                triggerResize();
+                return;
+              }
+
               statusMsg.textContent = 'Simulation completed successfully!';
               statusMsg.style.color = '#15803d'; // beautiful green
               progressBar.style.width = '100%';

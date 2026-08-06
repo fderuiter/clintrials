@@ -6,7 +6,7 @@ import os
 import sys
 
 # Add the project root to sys.path so we can import clintrials
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from typing import Annotated, get_args, get_origin
 
@@ -44,12 +44,17 @@ def get_field_type_info(annotation, field_info):
         if is_pos_int:
             info["exclusiveMinimum"] = 0
 
-    elif origin in (list, tuple) or getattr(origin, "__origin__", None) in (list, tuple):
+    elif origin in (list, tuple) or getattr(origin, "__origin__", None) in (
+        list,
+        tuple,
+    ):
         info["type"] = "array"
         args = get_args(annotation)
         if args:
             info["items"] = get_field_type_info(args[0], FieldInfo())
-    elif origin is type(None) or origin is getattr(sys.modules.get('typing'), 'Union', None): # Union / Optional
+    elif origin is type(None) or origin is getattr(
+        sys.modules.get("typing"), "Union", None
+    ):  # Union / Optional
         args = get_args(annotation)
         # simplistic handling of Optional
         non_none_args = [arg for arg in args if arg is not type(None)]
@@ -77,25 +82,26 @@ def get_field_type_info(annotation, field_info):
 
     return info
 
+
 def generate_schema_for_class(cls):
     """Generate a JSON schema representation for a given dataclass or Pydantic model."""
-    schema = {
-        "type": "object",
-        "properties": {},
-        "required": []
-    }
+    schema = {"type": "object", "properties": {}, "required": []}
 
     for name, field_info in cls.model_fields.items():
         prop = get_field_type_info(field_info.annotation, field_info)
 
-        if field_info.default is not dataclasses.MISSING and field_info.default is not None:
-            prop["default"] = field_info.default
+        default_val = field_info.default
+        if hasattr(field_info, "ui_default") and field_info.ui_default is not None:
+            default_val = field_info.ui_default
+
+        if default_val is not dataclasses.MISSING and default_val is not None:
+            prop["default"] = default_val
 
         # If it doesn't have a default and it's not Optional, it might be required
         if field_info.default is dataclasses.MISSING:
             origin = get_origin(field_info.annotation)
             is_optional = False
-            if origin is getattr(sys.modules.get('typing'), 'Union', None):
+            if origin is getattr(sys.modules.get("typing"), "Union", None):
                 args = get_args(field_info.annotation)
                 if type(None) in args:
                     is_optional = True
@@ -105,6 +111,7 @@ def generate_schema_for_class(cls):
         schema["properties"][name] = prop
 
     return schema
+
 
 def main():
     """Serialize all dynamically discovered simulation schemas to hub/schema.json."""
@@ -121,6 +128,7 @@ def main():
         json.dump(schemas, f, indent=2)
 
     print(f"Serialized schemas to {out_path}")  # noqa: T201
+
 
 if __name__ == "__main__":
     main()
