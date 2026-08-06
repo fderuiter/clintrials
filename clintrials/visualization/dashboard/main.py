@@ -6,7 +6,9 @@ Random Seed Strategy: {main_seed_strategy}
 """
 from __future__ import annotations
 
+import inspect
 import json
+import os
 
 import streamlit as st
 
@@ -14,8 +16,41 @@ from clintrials.core.registry import PROTOCOL_REGISTRY
 from clintrials.visualization.dashboard.factory import create_widget
 
 
+def get_design_file_mtimes(design_type: str) -> dict[str, float]:
+    """Retrieves file modification times for the view and underlying design model files."""
+    mtimes = {}
+    try:
+        main_file = __file__
+        if os.path.exists(main_file):
+            mtimes["main"] = os.path.getmtime(main_file)
+    except Exception:
+        pass
+
+    preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
+    if preview_func:
+        # Track the view file
+        try:
+            view_file = inspect.getfile(preview_func)
+            if os.path.exists(view_file):
+                mtimes["view"] = os.path.getmtime(view_file)
+        except Exception:
+            pass
+
+        # Track the model file
+        try:
+            cls = getattr(preview_func, "__self__", None)
+            if cls and hasattr(cls, "model_class"):
+                model_file = inspect.getfile(cls.model_class)
+                if os.path.exists(model_file):
+                    mtimes["model"] = os.path.getmtime(model_file)
+        except Exception:
+            pass
+
+    return mtimes
+
+
 @st.cache_data(show_spinner=False)
-def get_preview_sims(design_type, target_tox, cohort_size, max_size):  # type: ignore
+def get_preview_sims(design_type, target_tox, cohort_size, max_size, file_mtimes=None):  # type: ignore
     """Run and cache default preview simulations based on the selected design type and parameters."""
     preview_func = PROTOCOL_REGISTRY.get_preview(design_type)
     if preview_func:
@@ -281,7 +316,8 @@ def main():  # type: ignore
             from clintrials.visualization.dashboard.utils import announce_status_locally
             try:
                 announce_status_locally("Simulation in progress", key="preview-start")
-                sims = get_preview_sims(design_type, target_tox, cohort_size, max_size)
+                file_mtimes = get_design_file_mtimes(design_type)
+                sims = get_preview_sims(design_type, target_tox, cohort_size, max_size, file_mtimes=file_mtimes)
                 announce_status_locally("Simulation completed", key="preview-complete")
                 if render_func:
                     render_func(sims)

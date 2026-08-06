@@ -13617,7 +13617,7 @@
               "name": "maxsize",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "int",
-              "default": "128"
+              "default": "32"
             }
           ]
         }
@@ -14554,6 +14554,17 @@
           "name": "kwargs",
           "kind": "VAR_KEYWORD",
           "annotation": null,
+          "default": null
+        }
+      ]
+    },
+    "get_design_file_mtimes": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "design_type",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "str",
           "default": null
         }
       ]
@@ -23754,7 +23765,7 @@
               "name": "maxsize",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "int",
-              "default": "128"
+              "default": "32"
             }
           ]
         }

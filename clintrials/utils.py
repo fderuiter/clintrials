@@ -190,7 +190,7 @@ class _HashableArgs:
 class Memoize:
     """A class to cache function results with a size limit (LRU)."""
 
-    def __init__(self, f: Optional[Callable[..., Any]] = None, maxsize: int = 128) -> None:
+    def __init__(self, f: Optional[Callable[..., Any]] = None, maxsize: int = 32) -> None:
         """Initializes a Memoize object.
 
         Args:
@@ -198,7 +198,7 @@ class Memoize:
             maxsize (int): The maximum number of entries to keep in cache.
         """
         self.f = f
-        self.maxsize = maxsize
+        self.maxsize = min(maxsize, 32)
         self.global_cache = None
 
         if self.f is not None:
@@ -210,6 +210,75 @@ class Memoize:
 
             self.global_cache = _global_cache
 
+    def _supports_seed(self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None) -> bool:
+        """Determines if the function or its context supports/accepts a random seed."""
+        if self.f is not None:
+            name = getattr(self.f, '__name__', '')
+            if name in ('run_sims', 'sim_parameter_space', 'run_bivariate_simulations'):
+                return True
+
+            # Does the function signature have a seed/rng parameter, or has **kwargs?
+            import inspect
+            try:
+                sig = inspect.signature(self.f)
+                for param_name, param in sig.parameters.items():
+                    if any(term in param_name.lower() for term in ('seed', 'random', 'rng')):
+                        return True
+                    if param.kind == inspect.Parameter.VAR_KEYWORD:
+                        return True
+            except Exception:
+                pass
+
+        # Do any of the arguments or instance have seed/rng attributes?
+        all_objects = list(args) + list(kwargs.values())
+        if instance is not None:
+            all_objects.append(instance)
+        for obj in all_objects:
+            for attr in ('seed', 'rng', 'random_state', '_rng', '_seed'):
+                if hasattr(obj, attr):
+                    return True
+        return False
+
+    def _has_seed(self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None) -> bool:
+        """Determines if the call is made with an explicit, non-None random seed."""
+        # Check kwargs first
+        for k, v in kwargs.items():
+            if any(term in k.lower() for term in ('seed', 'random', 'rng')) and v is not None:
+                return True
+        # Check args bound to parameter names
+        if self.f is not None:
+            import inspect
+            try:
+                sig = inspect.signature(self.f)
+                bind_args = args
+                if instance is not None:
+                    params = list(sig.parameters.keys())
+                    if params and params[0] in ('self', 'cls'):
+                        bind_args = (instance,) + args
+                bound = sig.bind(*bind_args, **kwargs)
+                bound.apply_defaults()
+                for name, val in bound.arguments.items():
+                    if any(term in name.lower() for term in ('seed', 'random', 'rng')) and val is not None:
+                        return True
+            except Exception:
+                pass
+
+        # Check attributes of args, kwargs, and instance
+        all_objects = list(args) + list(kwargs.values())
+        if instance is not None:
+            all_objects.append(instance)
+        for obj in all_objects:
+            for attr in ('seed', 'rng', 'random_state', '_rng', '_seed'):
+                if hasattr(obj, attr) and getattr(obj, attr) is not None:
+                    return True
+        return False
+
+    def _should_bypass(self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None) -> bool:
+        """Decides whether to bypass cache based on seed support and seed presence."""
+        if self._supports_seed(args, kwargs, instance):
+            return not self._has_seed(args, kwargs, instance)
+        return False
+
     def _make_hashable(self, obj: Any, seen: Any = None) -> Any:
         """Pre-processes complex, unhashable parameters into a hashable structure.
 
@@ -218,28 +287,31 @@ class Memoize:
 
         Args:
             obj (Any): The object/value to serialize.
-            seen (set, optional): A set of object IDs already processed in the
-                recursion stack to detect cycles. Defaults to None.
+            seen (dict, optional): A dictionary mapping object IDs already processed in the
+                recursion stack to sequential stable identifiers. Defaults to None.
 
         Returns:
             Any: A hashable, deeply-nested representation of the input.
         """
         if seen is None:
-            seen = set()
+            seen = {"__counter__": 1}
 
         obj_id = id(obj)
         if obj_id in seen:
-            return f"<cycle-{obj_id}>"
+            return f"<cycle-{seen[obj_id]}>"
 
         is_container = hasattr(obj, '__dict__') or isinstance(
             obj, (list, tuple, dict, set, frozenset, np.ndarray)
         )
         if is_container:
-            seen.add(obj_id)
+            seen[obj_id] = seen["__counter__"]
+            seen["__counter__"] += 1
 
         try:
-            if isinstance(obj, (tuple, list)):
-                return tuple(self._make_hashable(e, seen) for e in obj)
+            if isinstance(obj, list):
+                return ("list", tuple(self._make_hashable(e, seen) for e in obj))
+            elif isinstance(obj, tuple):
+                return ("tuple", tuple(self._make_hashable(e, seen) for e in obj))
             elif isinstance(obj, dict):
                 return frozenset((k, self._make_hashable(v, seen)) for k, v in obj.items())
             elif isinstance(obj, (int, float, str, bool, frozenset, type(None))):
@@ -292,10 +364,14 @@ class Memoize:
                     self._make_hashable(slots_dict, seen)
                 )
             else:
-                return str(obj)
+                import re
+                s = str(obj)
+                s = re.sub(r' at 0x[0-9a-fA-F]+', '', s)
+                s = re.sub(r'0x[0-9a-fA-F]+', '', s)
+                return s
         finally:
             if is_container:
-                seen.remove(obj_id)
+                seen.pop(obj_id, None)
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
         """Calls the memoized function or decorates a function.
@@ -319,6 +395,9 @@ class Memoize:
 
             self.global_cache = _global_cache
             return self
+
+        if self._should_bypass(args, kwargs):
+            return self.f(*args, **kwargs)
 
         try:
             serialized_args = self._make_hashable(args)
@@ -370,6 +449,10 @@ class Memoize:
             Returns:
                 Any: The result of the method execution.
             """
+            if self._should_bypass(args, kwargs, instance):
+                assert self.f is not None
+                return self.f(instance, *args, **kwargs)
+
             try:
                 serialized_args = self._make_hashable(args)
                 serialized_kwargs = self._make_hashable(kwargs)
