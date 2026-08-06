@@ -35,8 +35,12 @@ class AccessibleTable(Table):
 class AccessiblePDF(FPDF):
     """A customized FPDF class designed for accessible PDF generation."""
 
-    def __init__(self, title="Trial Simulation Report"):  # type: ignore
-        """Initializes an accessible PDF instance."""
+    def __init__(self, title: str = "Trial Simulation Report") -> None:
+        """Initializes an accessible PDF instance.
+
+        Args:
+            title (str, optional): The document title. Defaults to "Trial Simulation Report".
+        """
         super().__init__()
         self.pdf_version = "1.7"
         self.set_title(title)
@@ -131,7 +135,16 @@ class AccessiblePDF(FPDF):
 
 
 def generate_pdf_report(df, design_type, text_summaries=None):  # type: ignore
-    """Generates an accessibility-first PDF report for trial simulations."""
+    """Generates an accessibility-first PDF report for trial simulations.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the simulation results to tabularize.
+        design_type (str): The name/type of clinical trial design (e.g. 'CRM').
+        text_summaries (List[str], optional): Extra text summaries or descriptions. Defaults to None.
+
+    Returns:
+        bytes: The generated PDF document raw bytes.
+    """
     if text_summaries is None:
         text_summaries = []
 

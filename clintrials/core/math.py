@@ -208,16 +208,43 @@ def inverse_logistic(x: float, a0: float = 0, beta: float = 0) -> float:
     return float(res)
 
 
+@inject_docs()
 def logit1(x: float, a0: float = 3.0, beta: float = 0.0) -> float:
-    """Logistic link function with an intercept default of 3."""
+    """Calculates the logistic function value with an intercept default of 3.
+
+    Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
+
+    Args:
+        x (float): The input value.
+        a0 (float, optional): Intercept parameter. Defaults to 3.0.
+        beta (float, optional): The slope parameter. Defaults to 0.0.
+
+    Returns:
+        float: The logistic function value.
+    """
     res = _logistic_core(x, a0, beta)
     if isinstance(res, np.ndarray):
         return res  # type: ignore[return-value]
     return float(res)
 
 
+@inject_docs()
 def inverse_logit1(x: float, a0: float = 3.0, beta: float = 0.0) -> float:
-    """Inverse logistic link function with an intercept default of 3."""
+    """Calculates the inverse logistic function value with an intercept default of 3.
+
+    Beta values are silently clipped to the range [{math_clip_beta_min}, {math_clip_beta_max}] to prevent overflow.
+
+    Args:
+        x (float): The input probability value, must be strictly between 0 and 1.
+        a0 (float, optional): Intercept parameter. Defaults to 3.0.
+        beta (float, optional): The slope parameter. Defaults to 0.0.
+
+    Returns:
+        float: The inverse logistic function value.
+
+    Raises:
+        ValueError: If `x` is not strictly between 0 and 1.
+    """
     res = _inverse_logistic_core(x, a0, beta)
     if isinstance(res, np.ndarray):
         return res  # type: ignore[return-value]

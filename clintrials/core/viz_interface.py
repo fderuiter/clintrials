@@ -75,7 +75,14 @@ def get_visualization_provider():  # type: ignore
 
 
 def set_visualization_provider(provider: VisualizationProvider):  # type: ignore
-    """Set the current visualization provider."""
+    """Set the current visualization provider.
+
+    Args:
+        provider (VisualizationProvider): The custom visualization provider to register.
+
+    Returns:
+        None
+    """
     global _provider
     _provider = provider
 

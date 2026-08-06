@@ -126,6 +126,16 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: i
     """Factory function to create a Streamlit widget.
 
     It automatically applies help text based on the variable name.
+
+    Args:
+        st_module (Any): The streamlit module or session context object.
+        widget_type (str): The type of widget to create (e.g. 'selectbox', 'file_uploader').
+        var_name (str): The configuration variable name.
+        *args: Additional positional arguments passed to the streamlit widget creator.
+        **kwargs: Additional keyword arguments passed to the streamlit widget creator.
+
+    Returns:
+        Any: The created streamlit widget.
     """
     design_type = kwargs.pop("design_type", None)
     if not design_type and hasattr(st_module, "session_state"):
@@ -152,7 +162,16 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: i
 
 
 def render_metric(st_module, label, value):  # type: ignore
-    """Renders a semantic metric card with configurable numeric precision for statistical floats."""
+    """Renders a semantic metric card with configurable numeric precision for statistical floats.
+
+    Args:
+        st_module (Any): The streamlit module or session context.
+        label (str): The metric label.
+        value (Any): The metric value (float, list, tuple, etc.).
+
+    Returns:
+        None
+    """
     from clintrials.visualization.helpers import format_number
     if isinstance(value, float):
         formatted_value = format_number(value)
@@ -167,7 +186,15 @@ def render_metric(st_module, label, value):  # type: ignore
 
 
 def render_accessible_chart(st_module, fig):  # type: ignore
-    """Shared utility to render a Plotly chart with an accessible Markdown table summary."""
+    """Shared utility to render a Plotly chart with an accessible Markdown table summary.
+
+    Args:
+        st_module (Any): The streamlit module or session context.
+        fig (Any): The Plotly figure object to render.
+
+    Returns:
+        None
+    """
     meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
 
     if hasattr(fig, "layout") and hasattr(fig.layout, "meta"):

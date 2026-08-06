@@ -8,8 +8,14 @@ from __future__ import annotations
 class SimulationResult:
     """Unified result container for simulation runs."""
 
-    def __init__(self, results, mode="iterative"):  # type: ignore
-        """Initialize the SimulationResult with results and execution mode."""
+    def __init__(self, results: Any, mode: str = "iterative") -> None:
+        """Initialize the SimulationResult with results and execution mode.
+
+        Args:
+            results (Any): The underlying results object (e.g. list or dict) to contain.
+            mode (str, optional): The execution mode used ('iterative' or 'vectorized').
+                Defaults to "iterative".
+        """
         self.results = results
         self.mode = mode
 

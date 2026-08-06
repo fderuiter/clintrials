@@ -10,13 +10,27 @@ import pandas as pd
 
 
 def format_label(label: str | Any) -> str | Any:
-    """Format a label by replacing underscores with spaces and applying title case."""
+    """Format a label by replacing underscores with spaces and applying title case.
+
+    Args:
+        label (str or Any): The raw label string or value.
+
+    Returns:
+        str or Any: The formatted label string, or the input value if not a string.
+    """
     if not isinstance(label, str):
         return label
     return label.replace("_", " ").title()
 
 def format_labels_dict(cols: str | List[str]) -> Dict[str, str]:
-    """Create a dictionary mapping column names to their formatted labels."""
+    """Create a dictionary mapping column names to their formatted labels.
+
+    Args:
+        cols (str or List[str]): A single column name or a list of column names.
+
+    Returns:
+        Dict[str, str]: A dictionary mapping the input columns to their formatted labels.
+    """
     if not isinstance(cols, list):
         cols = [cols]
     labels = {}
@@ -26,13 +40,27 @@ def format_labels_dict(cols: str | List[str]) -> Dict[str, str]:
     return labels
 
 def format_number(v: float | int | Any) -> str:
-    """Format numeric values to 4 decimal places, or cast to string if not float."""
+    """Format numeric values to 4 decimal places, or cast to string if not float.
+
+    Args:
+        v (float or int or Any): The numerical or arbitrary value to format.
+
+    Returns:
+        str: The formatted string.
+    """
     if isinstance(v, (float, np.float64)):
         return f"{v:.4f}"
     return str(v)
 
 def build_html_table(df: pd.DataFrame) -> str:
-    """Build a standard HTML table from a pandas DataFrame."""
+    """Build a standard HTML table from a pandas DataFrame.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to render into HTML.
+
+    Returns:
+        str: The generated HTML table markup.
+    """
     cols = list(df.columns)
     html = "<table>\n"
     html += "  <thead>\n    <tr>\n"

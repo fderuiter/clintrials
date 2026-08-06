@@ -67,7 +67,14 @@ from clintrials.utils import ParameterSpace
 
 
 def render_sidebar_config(param_space_config: dict) -> ParameterSpace:  # type: ignore
-    """Render the sidebar configuration and return the parameter space."""
+    """Render the sidebar configuration and return the parameter space.
+
+    Args:
+        param_space_config (dict): The configuration dictionary for parameter spaces.
+
+    Returns:
+        ParameterSpace: The constructed parameter space.
+    """
     import streamlit as st
 
     st.sidebar.header("Trial Parameters")
@@ -80,7 +87,20 @@ def render_sidebar_config(param_space_config: dict) -> ParameterSpace:  # type: 
 
 
 def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):  # type: ignore
-    """Decorator to generate a standard dashboard view."""
+    """Decorator to generate a standard dashboard view.
+
+    Args:
+        title (str): The title of the dashboard view.
+        model_name (str): The name of the protocol design model.
+        file_prefix (str): Prefix used for exported report files.
+        csv_index (bool, optional): Whether to include the index in CSV exports. Defaults to True.
+        skip_summary_table (bool, optional): If True, skips rendering the summary data table.
+            Defaults to False.
+        param_space_config (dict, optional): The parameter space configuration dict. Defaults to None.
+
+    Returns:
+        Callable: The decorated dashboard view function.
+    """
     def decorator(func):  # type: ignore
         @wraps(func)
         def wrapper(*args, **kwargs):  # type: ignore

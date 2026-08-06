@@ -21,7 +21,16 @@ class FieldInfo:
     """Information about a model field's constraints and metadata."""
 
     def __init__(self, default: Any = dataclasses.MISSING, description: Optional[str] = None, ge: Optional[Union[int, float]] = None, le: Optional[Union[int, float]] = None, gt: Optional[Union[int, float]] = None, lt: Optional[Union[int, float]] = None) -> None:
-        """Initializes field metadata with optional defaults and boundaries."""
+        """Initializes field metadata with optional defaults and boundaries.
+
+        Args:
+            default (Any, optional): The default value of the field.
+            description (str, optional): A description of the field.
+            ge (int or float, optional): Greater than or equal to constraint.
+            le (int or float, optional): Less than or equal to constraint.
+            gt (int or float, optional): Greater than constraint.
+            lt (int or float, optional): Less than constraint.
+        """
         self.default = default
         self.description = description
         self.ge = ge
@@ -31,7 +40,20 @@ class FieldInfo:
         self.annotation = None
 
 def Field(default: Any = dataclasses.MISSING, description: Optional[str] = None, ge: Optional[Union[int, float]] = None, le: Optional[Union[int, float]] = None, gt: Optional[Union[int, float]] = None, lt: Optional[Union[int, float]] = None, **kwargs: Any) -> Any:
-    """Create and return a FieldInfo instance."""
+    """Create and return a FieldInfo instance.
+
+    Args:
+        default (Any, optional): The default value of the field.
+        description (str, optional): A description of the field.
+        ge (int or float, optional): Greater than or equal to constraint.
+        le (int or float, optional): Less than or equal to constraint.
+        gt (int or float, optional): Greater than constraint.
+        lt (int or float, optional): Less than constraint.
+        **kwargs: Additional keyword arguments (ignored).
+
+    Returns:
+        FieldInfo: The constructed FieldInfo object.
+    """
     return FieldInfo(default=default, description=description, ge=ge, le=le, gt=gt, lt=lt)
 
 class BaseModel:

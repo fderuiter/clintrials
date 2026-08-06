@@ -187,7 +187,18 @@ def sim_parameter_space(sim_func: Callable[..., Any], ps: Any, n1: int = 1, n2: 
     return sims
 
 def run_bivariate_simulations(trial: Any, tox_scenarios: Any, eff_scenarios: Any, cohort_size: int, n_replicates: int = 10) -> Any:
-    """Shared simulation runner for bivariate trial models (EffTox/WATU)."""
+    """Shared simulation runner for bivariate trial models (EffTox/WATU).
+
+    Args:
+        trial (Any): The bivariate clinical trial design protocol instance to simulate.
+        tox_scenarios (Any): The toxicity scenarios/parameters to evaluate.
+        eff_scenarios (Any): The efficacy scenarios/parameters to evaluate.
+        cohort_size (int): The size of the patient cohort.
+        n_replicates (int, optional): The number of simulation replicates to run. Defaults to 10.
+
+    Returns:
+        Any: The simulation results and statistics.
+    """
     from clintrials.dosefinding.efficacytoxicity import simulate_trial
     from clintrials.utils import ParameterSpace
 
@@ -267,7 +278,13 @@ class UniversalProtocolSimulationRunner:
     """
 
     def __init__(self, design: Union[TrialDesign, TrialDesignWithMaxSize, TrialDesignWithEfficacyBoundaries, TrialDesignWithBulk, Any], outcome_generator: Optional[OutcomeGenerator] = None, recruitment_stream: Optional[Any] = None) -> None:
-        """Initialize the universal simulation runner."""
+        """Initialize the universal simulation runner.
+
+        Args:
+            design (TrialDesign or subclass): The clinical trial design protocol instance to simulate.
+            outcome_generator (OutcomeGenerator, optional): The dynamic patient outcome generator.
+            recruitment_stream (Any, optional): The recruitment stream model. Defaults to None.
+        """
         self.design = design
         self.outcome_generator = outcome_generator
         self.recruitment_stream = recruitment_stream

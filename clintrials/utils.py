@@ -495,7 +495,14 @@ __all__ = [
 ]
 
 def to_1d_list_gen(x):  # type: ignore
-    """Yield items of a nested list as a 1D generator."""
+    """Yield items of a nested list as a 1D generator.
+
+    Args:
+        x (Any): A potentially nested list or a scalar value.
+
+    Yields:
+        Any: Items of the nested list or the scalar itself.
+    """
     if isinstance(x, list):
         for y in x:
             yield from to_1d_list_gen(y)  # type: ignore
@@ -503,25 +510,54 @@ def to_1d_list_gen(x):  # type: ignore
         yield x
 
 def to_1d_list(x):  # type: ignore
-    """Convert a nested list into a 1D list."""
+    """Convert a nested list into a 1D list.
+
+    Args:
+        x (Any): A potentially nested list or scalar value.
+
+    Returns:
+        List[Any]: A flat 1D list.
+    """
     return list(to_1d_list_gen(x))  # type: ignore
 
 def atomic_to_json(obj):  # type: ignore
-    """Convert an atomic numpy object to a JSON-serializable type."""
+    """Convert an atomic numpy object to a JSON-serializable type.
+
+    Args:
+        obj (Any): Any value, potentially a numpy generic type.
+
+    Returns:
+        Any: The JSON-serializable scalar value.
+    """
     if isinstance(obj, np.generic):
         return obj.item()
     else:
         return obj
 
 def iterable_to_json(obj):  # type: ignore
-    """Convert an iterable object to a JSON-serializable list."""
+    """Convert an iterable object to a JSON-serializable list.
+
+    Args:
+        obj (Any): An iterable or individual scalar object.
+
+    Returns:
+        Any: A JSON-serializable list or scalar.
+    """
     if isinstance(obj, Iterable):
         return [atomic_to_json(x) for x in obj]  # type: ignore
     else:
         return atomic_to_json(obj)  # type: ignore
 
 def filter_kwargs_for_callable(func: Callable[..., Any], kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Filters kwargs so that only those accepted by func are returned, unless func accepts ``**kwargs``."""
+    """Filters kwargs so that only those accepted by func are returned, unless func accepts ``**kwargs``.
+
+    Args:
+        func (Callable): The function or callable to inspect and filter for.
+        kwargs (Dict[str, Any]): The input dictionary of keyword arguments.
+
+    Returns:
+        Dict[str, Any]: The filtered dictionary of keyword arguments.
+    """
     import inspect
     try:
         sig = inspect.signature(func)

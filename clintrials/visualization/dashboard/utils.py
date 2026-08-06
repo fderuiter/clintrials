@@ -13,6 +13,13 @@ def announce_status_locally(message: str, key: str = None):  # type: ignore
     """Renders an invisible, sandboxed ARIA live region locally to announce dynamic updates.
 
     This is SOP/CSP compliant.
+
+    Args:
+        message (str): The status message to announce.
+        key (str, optional): A unique key for the streamlit component. Defaults to None.
+
+    Returns:
+        None
     """
     if not st.session_state.get("accessibility_mode", False):
         return

@@ -49,7 +49,20 @@ from clintrials.visualization.helpers import format_labels_dict as _format_label
 
 
 def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False):  # type: ignore
-    """Creates a centralized bar chart with accessibility standards."""
+    """Creates a centralized bar chart with accessibility standards.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the chart data.
+        x (str or List[str]): Column name(s) for the x-axis.
+        y (str): Column name for the y-axis.
+        color (str): Column name for grouping and coloring.
+        title (str): Title of the chart.
+        labels (Dict[str, str], optional): Custom label mapping. Defaults to None.
+        high_contrast (bool, optional): Whether to use high contrast colors. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly bar chart figure.
+    """
     if labels is None:
         labels = {}
 
@@ -76,7 +89,20 @@ def create_bar_chart(df, x, y, color, title, labels=None, high_contrast=False): 
 
 
 def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):  # type: ignore
-    """Creates a centralized line chart with accessibility standards."""
+    """Creates a centralized line chart with accessibility standards.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing the chart data.
+        x (str or List[str]): Column name(s) for the x-axis.
+        y (str): Column name for the y-axis.
+        color (str): Column name for grouping and coloring.
+        title (str): Title of the chart.
+        labels (Dict[str, str], optional): Custom label mapping. Defaults to None.
+        high_contrast (bool, optional): Whether to use high contrast colors. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly line chart figure.
+    """
     if labels is None:
         labels = {}
 
@@ -108,13 +134,30 @@ def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):
 
 
 def generate_text_summary(df, title):  # type: ignore
-    """Generates a text summary for a chart based on its dataframe."""
+    """Generates a text summary for a chart based on its dataframe.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to generate a summary for.
+        title (str): Title of the summary container.
+
+    Returns:
+        MultiFormatSummaryContainer: The summary container object.
+    """
     from clintrials.visualization.models import MultiFormatSummaryContainer
     return MultiFormatSummaryContainer(title=title, df=df)
 
 
 def plot_dose_finding_outcomes(trial, chart_title=None, high_contrast=False):  # type: ignore
-    """Plots the dose-finding trial outcomes."""
+    """Plots the dose-finding trial outcomes.
+
+    Args:
+        trial (Any): The clinical trial design protocol instance to plot.
+        chart_title (str, optional): The chart title. Defaults to None.
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     if not chart_title:
         chart_title = "Each point represents a patient<br>A circle indicates no toxicity, a cross toxicity"
 
@@ -167,7 +210,16 @@ def plot_dose_finding_outcomes(trial, chart_title=None, high_contrast=False):  #
 
 
 def plot_crm_toxicity_probabilities(trial, chart_title=None, high_contrast=False):  # type: ignore
-    """Plots the CRM dose-toxicity probabilities."""
+    """Plots the CRM dose-toxicity probabilities.
+
+    Args:
+        trial (Any): The CRM trial design instance.
+        chart_title (str, optional): The chart title. Defaults to None.
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     if not chart_title:
         chart_title = "Prior (dashed) and posterior (solid) dose-toxicity curves"
 
@@ -266,7 +318,23 @@ def plot_efftox_utility_contours(  # type: ignore
     custom_points_label="priors",
     high_contrast=False,
 ):
-    """Plots the EffTox utility contours."""
+    """Plots the EffTox utility contours.
+
+    Args:
+        metric (Any): The utility curve/metric definition.
+        prob_eff (Any, optional): The efficacy probabilities. Defaults to None.
+        prob_tox (Any, optional): The toxicity probabilities. Defaults to None.
+        n (int, optional): The grid size. Defaults to 100.
+        util_lower (float, optional): Lower utility bound. Defaults to -0.8.
+        util_upper (float, optional): Upper utility bound. Defaults to 0.8.
+        util_delta (float, optional): Contour interval. Defaults to 0.2.
+        title (str, optional): The chart title. Defaults to "EffTox utility contours".
+        custom_points_label (str, optional): Legend label for the points. Defaults to "priors".
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     eff_vals = np.linspace(0, 1, n)
     util_vals = np.linspace(
         util_lower, util_upper, int(round((util_upper - util_lower) / util_delta)) + 1
@@ -356,7 +424,20 @@ def plot_efftox_utility_contours(  # type: ignore
 def plot_efftox_density(  # type: ignore
     data_func, trial, x_name="", plot_title="", include_doses=None, boot_samps=1000, high_contrast=False
 ):
-    """Plots the EffTox probability densities."""
+    """Plots the EffTox probability densities.
+
+    Args:
+        data_func (Callable): Function to evaluate bootstrap samples.
+        trial (Any): The EffTox trial design instance.
+        x_name (str, optional): The name of the x-axis. Defaults to "".
+        plot_title (str, optional): Title of the plot. Defaults to "".
+        include_doses (List[int], optional): Indices of doses to include in density plotting. Defaults to None.
+        boot_samps (int, optional): Number of bootstrap samples. Defaults to 1000.
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     if include_doses is None:
         include_doses = range(1, trial.num_doses + 1)
 
@@ -396,7 +477,15 @@ def plot_efftox_density(  # type: ignore
 
 
 def plot_crm_simulation_recommendation(summary_df, high_contrast=False):  # type: ignore
-    """Plots CRM simulation recommendation probabilities."""
+    """Plots CRM simulation recommendation probabilities.
+
+    Args:
+        summary_df (pandas.DataFrame): The summary DataFrame containing the recommendation statistics.
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     col_name = (
         "RecommendedDoseProb"
         if "RecommendedDoseProb" in summary_df.columns
@@ -428,7 +517,15 @@ def plot_crm_simulation_recommendation(summary_df, high_contrast=False):  # type
 
 
 def plot_bivariate_simulation_recommendation(summary_df, high_contrast=False):  # type: ignore
-    """Plots EffTox simulation recommendation probabilities."""
+    """Plots EffTox simulation recommendation probabilities.
+
+    Args:
+        summary_df (pandas.DataFrame): The summary DataFrame containing the recommendation statistics.
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     col_name = (
         "RecommendedDoseProb"
         if "RecommendedDoseProb" in summary_df.columns
@@ -456,7 +553,15 @@ def plot_bivariate_simulation_recommendation(summary_df, high_contrast=False):  
 
 
 def plot_efftox_simulation_acceptability(summary_df, high_contrast=False):  # type: ignore
-    """Plots EffTox simulation acceptability probabilities."""
+    """Plots EffTox simulation acceptability probabilities.
+
+    Args:
+        summary_df (pandas.DataFrame): The summary DataFrame containing the acceptability statistics.
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     tox_col = (
         "ProbAcceptTox" if "ProbAcceptTox" in summary_df.columns else "prob_accept_tox"
     )
@@ -489,7 +594,15 @@ def plot_efftox_simulation_acceptability(summary_df, high_contrast=False):  # ty
 
 
 def plot_winratio_power_curve(df, high_contrast=False):  # type: ignore
-    """Plots a Win Ratio simulation power curve."""
+    """Plots a Win Ratio simulation power curve.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame containing simulation power data.
+        high_contrast (bool, optional): Use high-contrast styles. Defaults to False.
+
+    Returns:
+        plotly.graph_objects.Figure: The constructed Plotly figure.
+    """
     title = "Win Ratio Simulation Power Curve"
     fig = create_line_chart(  # type: ignore
         df,

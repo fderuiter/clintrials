@@ -28,7 +28,25 @@ class PatientCohortTracker:
         toxicities: Iterable[int],
         efficacies: Optional[Iterable[int]] = None
     ) -> None:
-        """Adds a list of patients while ensuring the lists match in length."""
+        """Adds a list of patients while ensuring the lists match in length.
+
+        This method validates that the input lists (doses, toxicities, and optionally
+        efficacies) are of equal length. If a length mismatch is detected, a ValueError
+        is raised and no state changes are committed to the tracker.
+
+        Args:
+            doses (Iterable[int]): The sequence of administered doses to add.
+            toxicities (Iterable[int]): The sequence of toxicity outcomes matching the doses.
+            efficacies (Optional[Iterable[int]], optional): The sequence of efficacy outcomes
+                matching the doses. Defaults to None.
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If the length of toxicities or efficacies does not match
+                the length of doses.
+        """
         doses_list = list(doses)
         toxicities_list = list(toxicities)
 
@@ -62,7 +80,14 @@ class PatientCohortTracker:
         self.records.clear()
 
     def add_records(self, records: Iterable[PatientRecord]) -> None:
-        """Adds standard patient records directly to the tracker."""
+        """Adds standard patient records directly to the tracker.
+
+        Args:
+            records (Iterable[PatientRecord]): The structured PatientRecord objects to add.
+
+        Returns:
+            None
+        """
         self.records.extend(records)
 
     @property
@@ -86,7 +111,19 @@ class PatientCohortTracker:
 
 
 def parse_patient_records(cases: Any) -> List[PatientRecord]:
-    """Parses various formats of cases into standardized PatientRecord objects."""
+    """Parses various formats of cases into standardized PatientRecord objects.
+
+    Args:
+        cases (Any): The patient cases to parse. Can be a single case or an iterable
+            of cases. Supports PatientRecord objects, dicts, or tuples.
+
+    Returns:
+        List[PatientRecord]: A list of parsed PatientRecord objects.
+
+    Raises:
+        TypeError: If an unsupported case format is encountered.
+        ValueError: If a tuple case does not have the expected length.
+    """
     import numpy as np
     if cases is None:
         return []

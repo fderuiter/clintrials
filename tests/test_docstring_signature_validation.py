@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 
+import dataclasses
 import inspect
 import pkgutil
 import re
@@ -61,26 +62,27 @@ def test_docstring_parameter_signatures() -> None:
                 continue
             obj = getattr(mod, name)
             obj_module = getattr(obj, "__module__", "")
-            if not obj_module.startswith("clintrials"):
+            if obj_module != module_name:
                 continue
 
             # Check function
             if inspect.isfunction(obj):
                 sig_p = get_sig_params(obj)
-                doc_p = extract_docstring_params(obj.__doc__)
-                if sig_p is not None and doc_p:
-                    # check if they match
+                if sig_p:  # Has signature parameters
+                    doc_p = extract_docstring_params(obj.__doc__)
                     if set(sig_p) != set(doc_p):
                         mismatches.append(f"Function {module_name}.{name} signature {sig_p} != docstring {doc_p}")
             # Check class __init__
             elif inspect.isclass(obj):
+                if dataclasses.is_dataclass(obj):
+                    continue
                 init_func = getattr(obj, "__init__", None)
                 if init_func:
                     init_mod = getattr(init_func, "__module__", "")
                     if init_mod.startswith("clintrials"):
                         sig_p = get_sig_params(init_func)
-                        doc_p = extract_docstring_params(init_func.__doc__)
-                        if sig_p is not None and doc_p:
+                        if sig_p:  # Has signature parameters
+                            doc_p = extract_docstring_params(init_func.__doc__)
                             if set(sig_p) != set(doc_p):
                                 mismatches.append(f"Class {module_name}.{obj.__name__}.__init__ signature {sig_p} != docstring {doc_p}")
 

@@ -234,7 +234,25 @@ def integrate_posterior_1d_adaptive(  # type: ignore
     warn_on_max=True,
     return_diagnostics=False,
 ):
-    """Adaptive execution interface for posterior integration."""
+    """Adaptive execution interface for posterior integration.
+
+    Args:
+        logpost (Callable): Log posterior density function evaluated on a numpy array.
+        f (Callable): Function of the parameter to integrate with respect to the posterior density.
+        lo (float): Initial lower bound of integration.
+        hi (float): Initial upper bound of integration.
+        method (str, optional): Integration method. Only "grid" is implemented. Defaults to "grid".
+        n_points (int, optional): Number of grid points. Defaults to 2001.
+        edge_frac (float, optional): Fraction of the width considered to be the edge. Defaults to 0.02.
+        tail_mass_tol (float, optional): Tail mass tolerance for bounds expansion. Defaults to 1e-3.
+        expand_factor (float, optional): Fractional increase of the current width when expanding limits. Defaults to 1.0.
+        max_expansions (int, optional): Maximum number of expansions before giving up. Defaults to 6.
+        warn_on_max (bool, optional): Issue a warning when expansion hits max_expansions. Defaults to True.
+        return_diagnostics (bool, optional): Return a diagnostics dict if True. Defaults to False.
+
+    Returns:
+        float or tuple: The integral value, or a tuple containing the integral value and a diagnostics dictionary.
+    """
     return integrate_posterior_1d(
         logpost, f, lo, hi,
         method=method,
@@ -258,7 +276,20 @@ def integrate_posterior_1d_nonadaptive(  # type: ignore
     n_points=2001,
     return_diagnostics=False,
 ):
-    """Legacy non-adaptive execution interface for posterior integration."""
+    """Legacy non-adaptive execution interface for posterior integration.
+
+    Args:
+        logpost (Callable): Log posterior density function evaluated on a numpy array.
+        f (Callable): Function of the parameter to integrate with respect to the posterior density.
+        lo (float): Initial lower bound of integration.
+        hi (float): Initial upper bound of integration.
+        method (str, optional): Integration method. Only "grid" is implemented. Defaults to "grid".
+        n_points (int, optional): Number of grid points. Defaults to 2001.
+        return_diagnostics (bool, optional): Return a diagnostics dict if True. Defaults to False.
+
+    Returns:
+        float or tuple: The integral value, or a tuple containing the integral value and a diagnostics dictionary.
+    """
     return integrate_posterior_1d(
         logpost, f, lo, hi,
         method=method,
