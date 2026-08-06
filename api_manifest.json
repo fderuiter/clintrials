@@ -13885,6 +13885,17 @@
         }
       ]
     },
+    "validate_feature_request": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "issue_data",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "dict[str, Any]",
+          "default": null
+        }
+      ]
+    },
     "validate_matching_lengths": {
       "type": "function",
       "parameters": [
