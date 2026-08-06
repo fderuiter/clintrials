@@ -187,7 +187,11 @@ class _HashableArgs:
 
 
 class Memoize:
-    """A class to cache function results with a size limit (LRU)."""
+    """A class to cache function results with a size limit (LRU).
+
+    This decorator is fully compatible with Python 3.9+ and employs
+    recursive content-based serialization with safe fallbacks and cycle detection.
+    """
 
     def __init__(self, f: Optional[Callable[..., Any]] = None, maxsize: int = 128) -> None:
         """Initializes a Memoize object.
