@@ -10,6 +10,14 @@ import clintrials
 
 
 def extract_docstring_params(doc: Optional[str]) -> List[str]:
+    """Extract parameter names from a Google-style or standard Python docstring.
+
+    Args:
+        doc (Optional[str]): The docstring of the function or class.
+
+    Returns:
+        List[str]: A list of parameter names found under the arguments block.
+    """
     if not doc:
         return []
     lines = doc.split("\n")
@@ -33,6 +41,15 @@ def extract_docstring_params(doc: Optional[str]) -> List[str]:
     return params
 
 def get_sig_params(obj: Any) -> Optional[List[str]]:
+    """Retrieve parameter names from the signature of a given callable.
+
+    Args:
+        obj (Any): The function, method, or class object to inspect.
+
+    Returns:
+        Optional[List[str]]: A list of non-self, non-varargs, non-varkwargs parameters,
+            or None if the signature cannot be retrieved.
+    """
     try:
         sig = inspect.signature(obj)
     except (ValueError, TypeError):
@@ -47,6 +64,15 @@ def get_sig_params(obj: Any) -> Optional[List[str]]:
     return params
 
 def test_docstring_parameter_signatures() -> None:
+    """Validate that Google-style docstring parameter blocks match actual signatures.
+
+    This test dynamically walks through all public non-test modules in the clintrials
+    package, inspects every public function and class __init__ method, and asserts
+    that their parameters match their documented arguments exactly.
+
+    Raises:
+        AssertionError: If any parameter mismatches or undocumented signatures are found.
+    """
     mismatches = []
     for module_info in pkgutil.walk_packages(clintrials.__path__, clintrials.__name__ + "."):
         module_name = module_info.name
