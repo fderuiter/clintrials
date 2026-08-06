@@ -934,7 +934,7 @@ def crm_dtp_detail(trial: Any) -> Any:
     return to_return
 
 
-__all__ = ["CRM", "crm", "crm_dtp_detail"]
+__all__ = ["CRM", "crm", "crm_dtp_detail", "CRMOutput"]
 
 
 # Inject module-level docstring
