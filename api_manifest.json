@@ -3410,6 +3410,12 @@
           "default": "None"
         },
         {
+          "name": "ui_default",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Any",
+          "default": "None"
+        },
+        {
           "name": "kwargs",
           "kind": "VAR_KEYWORD",
           "annotation": "Any",
@@ -3464,6 +3470,12 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Optional[Union[int, float]]",
               "default": "None"
+            },
+            {
+              "name": "ui_default",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": "None"
             }
           ]
         }
@@ -3485,7 +3497,7 @@
               "name": "k",
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "PositiveInt",
-              "default": null
+              "default": "3"
             },
             {
               "name": "alpha",
@@ -3498,6 +3510,18 @@
               "kind": "POSITIONAL_OR_KEYWORD",
               "annotation": "Optional[List[float]]",
               "default": "None"
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "PositiveInt",
+              "default": "1000"
+            },
+            {
+              "name": "theta",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1.0"
             }
           ]
         }
