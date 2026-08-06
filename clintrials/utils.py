@@ -331,7 +331,7 @@ class Memoize:
         assert self.global_cache is not None
         return self.global_cache(hashable_args_obj)
 
-    def __get__(self, instance: Any, owner: Any = None) -> Any:
+    def __get__(self, instance: Any, _owner: Any = None) -> Any:
         """Supports binding to active object instances.
 
         Ensures that instance methods are cached per-instance to prevent
@@ -339,7 +339,7 @@ class Memoize:
 
         Args:
             instance (Any): The instance to bind to.
-            owner (Any, optional): The owner class. Defaults to None.
+            _owner (Any, optional): The owner class. Defaults to None.
 
         Returns:
             Any: A bound method wrapper that performs cached execution.

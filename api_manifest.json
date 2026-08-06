@@ -13610,8 +13610,8 @@
             {
               "name": "f",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Callable",
-              "default": null
+              "annotation": "Optional[Callable[..., Any]]",
+              "default": "None"
             },
             {
               "name": "maxsize",
@@ -23747,8 +23747,8 @@
             {
               "name": "f",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Callable",
-              "default": null
+              "annotation": "Optional[Callable[..., Any]]",
+              "default": "None"
             },
             {
               "name": "maxsize",
