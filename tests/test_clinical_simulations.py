@@ -107,7 +107,7 @@ def test_dose_transition_pathway_efftox():
 # 3. Headless Streamlit View Verification (No Runtime UI Crashes)
 # =====================================================================
 
-def _make_streamlit_mock():
+def _make_streamlit_mock() -> SimpleNamespace:
     """Helper to mock Streamlit namespace with default dashboard components."""
     sidebar = SimpleNamespace(
         header=MagicMock(),
@@ -167,22 +167,26 @@ def test_headless_dashboard_views_execute_without_crash(monkeypatch):
     monkeypatch.setattr(winratio_v, "st", st_mock)
 
     # 1. CRM view headless execution
-    crm_sims = crm_v.CRMView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)
+    crm_sims = crm_v.CRMView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)  # type: ignore[no-untyped-call]
     render_crm = PROTOCOL_REGISTRY.get_render("CRM")
+    assert render_crm is not None
     render_crm(crm_sims)  # Should render and build figures without raising exceptions
 
     # 2. EffTox view headless execution
-    efftox_sims = efftox_v.EffToxView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)
+    efftox_sims = efftox_v.EffToxView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)  # type: ignore[no-untyped-call]
     render_efftox = PROTOCOL_REGISTRY.get_render("EffTox")
+    assert render_efftox is not None
     render_efftox(efftox_sims)  # Should render and build figures without raising exceptions
 
     # 3. WATU view headless execution
-    watu_sims = watu_v.WATUView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)
+    watu_sims = watu_v.WATUView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)  # type: ignore[no-untyped-call]
     render_watu = PROTOCOL_REGISTRY.get_render("WATU")
+    assert render_watu is not None
     render_watu(watu_sims)  # Should render and build figures without raising exceptions
 
     # 4. Win Ratio view headless execution
     render_winratio = PROTOCOL_REGISTRY.get_render("Win Ratio")
+    assert render_winratio is not None
     render_winratio()  # Should run simulated trials internally and render without raising exceptions
 
     # Verify that Streamlit's header or markdown was called for views
