@@ -9,11 +9,10 @@ from typing import Any, Callable, Dict, Optional
 __author__ = 'Kristian Brock'
 __contact__ = 'kristian.brock@gmail.com'
 import logging
-import types
 import warnings
 from collections import OrderedDict
 from copy import copy
-from functools import lru_cache, wraps
+from functools import wraps
 from itertools import product
 
 import numpy as np
@@ -199,16 +198,7 @@ class Memoize:
         """
         self.f = f
         self.maxsize = maxsize
-        self.global_cache = None
-
-        if self.f is not None:
-            # Create a standard platform-level LRU cache for direct/uncached fallback calls
-            @lru_cache(maxsize=self.maxsize)
-            def _global_cache(hashable_args_obj: _HashableArgs) -> Any:
-                assert self.f is not None
-                return self.f(*hashable_args_obj.args, **hashable_args_obj.kwargs)
-
-            self.global_cache = _global_cache
+        self.cache: OrderedDict[Any, Any] = OrderedDict()
 
     def _make_hashable(self, obj: Any, seen: Any = None) -> Any:
         """Pre-processes complex, unhashable parameters into a hashable structure.
@@ -231,7 +221,7 @@ class Memoize:
         if obj_id in seen:
             return f"<cycle-{obj_id}>"
 
-        is_container = hasattr(obj, '__dict__') or isinstance(
+        is_container = (hasattr(obj, '__dict__') and not callable(obj)) or isinstance(
             obj, (list, tuple, dict, set, frozenset, np.ndarray)
         )
         if is_container:
@@ -248,18 +238,31 @@ class Memoize:
                 return tuple(self._make_hashable(e, seen) for e in obj.tolist())
             elif isinstance(obj, type):
                 return (obj.__module__, obj.__name__)
-            elif isinstance(obj, (types.FunctionType, types.BuiltinFunctionType, types.MethodType, types.BuiltinMethodType)):
+            elif callable(obj):
+                # Process dynamic callable arguments separately from standard data attributes
+                # to maintain stable key signatures and prevent serialization errors.
                 if hasattr(obj, '__self__') and hasattr(obj, '__func__'):
+                    try:
+                        self_module = obj.__self__.__class__.__module__
+                        self_class = obj.__self__.__class__.__name__
+                    except Exception:
+                        self_module = None
+                        self_class = None
                     return (
                         obj.__class__.__module__,
                         obj.__class__.__name__,
-                        self._make_hashable(obj.__self__, seen),
-                        self._make_hashable(obj.__func__, seen)
+                        self_module,
+                        self_class,
+                        getattr(obj.__func__, '__module__', None),
+                        getattr(obj.__func__, '__qualname__', None)
                     )
                 elif hasattr(obj, '__code__'):
-                    closure_val = None
+                    closure_val: Optional[Any] = None
                     if hasattr(obj, '__closure__') and obj.__closure__ is not None:
-                        closure_val = tuple(self._make_hashable(cell.cell_contents, seen) for cell in obj.__closure__)
+                        try:
+                            closure_val = tuple(self._make_hashable(cell.cell_contents, seen) for cell in obj.__closure__)
+                        except Exception:
+                            closure_val = "<unserializable-closure>"
                     return (
                         obj.__class__.__module__,
                         obj.__class__.__name__,
@@ -310,14 +313,6 @@ class Memoize:
         if self.f is None:
             f = args[0]
             self.f = f
-
-            # Now we can initialize the global cache
-            @lru_cache(maxsize=self.maxsize)
-            def _global_cache(hashable_args_obj: _HashableArgs) -> Any:
-                assert self.f is not None
-                return self.f(*hashable_args_obj.args, **hashable_args_obj.kwargs)
-
-            self.global_cache = _global_cache
             return self
 
         try:
@@ -327,9 +322,16 @@ class Memoize:
         except Exception:
             return self.f(*args, **kwargs)
 
-        hashable_args_obj = _HashableArgs(args, kwargs, cache_key)
-        assert self.global_cache is not None
-        return self.global_cache(hashable_args_obj)
+        if cache_key in self.cache:
+            val = self.cache.pop(cache_key)
+            self.cache[cache_key] = val
+            return val
+
+        result = self.f(*args, **kwargs)
+        self.cache[cache_key] = result
+        if len(self.cache) > self.maxsize:
+            self.cache.popitem(last=False)
+        return result
 
     def __get__(self, instance: Any, _owner: Any = None) -> Any:
         """Supports binding to active object instances.
@@ -351,12 +353,7 @@ class Memoize:
         cache_attr = f"_memo_cache_{self.f.__name__}_{id(self)}"
 
         if not hasattr(instance, cache_attr):
-            @lru_cache(maxsize=self.maxsize)
-            def instance_lru_cache(hashable_args_obj: _HashableArgs) -> Any:
-                assert self.f is not None
-                return self.f(instance, *hashable_args_obj.args, **hashable_args_obj.kwargs)
-
-            setattr(instance, cache_attr, instance_lru_cache)
+            setattr(instance, cache_attr, OrderedDict())
 
         instance_cache = getattr(instance, cache_attr)
 
@@ -370,16 +367,24 @@ class Memoize:
             Returns:
                 Any: The result of the method execution.
             """
+            assert self.f is not None
             try:
                 serialized_args = self._make_hashable(args)
                 serialized_kwargs = self._make_hashable(kwargs)
                 cache_key = (serialized_args, serialized_kwargs)
             except Exception:
-                assert self.f is not None
                 return self.f(instance, *args, **kwargs)
 
-            hashable_args_obj = _HashableArgs(args, kwargs, cache_key)
-            return instance_cache(hashable_args_obj)
+            if cache_key in instance_cache:
+                val = instance_cache.pop(cache_key)
+                instance_cache[cache_key] = val
+                return val
+
+            result = self.f(instance, *args, **kwargs)
+            instance_cache[cache_key] = result
+            if len(instance_cache) > self.maxsize:
+                instance_cache.popitem(last=False)
+            return result
 
         return bound_method
 
