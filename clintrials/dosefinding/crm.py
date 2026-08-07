@@ -35,9 +35,27 @@ from clintrials.utils import atomic_to_json, iterable_to_json
 
 
 class CRMOutput(tuple[Any, ...]):
+    """Output container for Continual Reassessment Method (CRM) trial results.
+
+    This class behaves like a structured tuple containing the recommended dose,
+    estimated model parameters, variance, and posterior toxicity probabilities.
+    """
     __slots__ = ()
 
     def __new__(cls, dose: int, beta_hat: float, var: Optional[float], post_tox: list[float], se: Optional[float] = None, estimate_var: bool = False) -> CRMOutput:
+        """Create a new CRMOutput instance.
+
+        Args:
+            dose (int): The recommended dose level for the next cohort.
+            beta_hat (float): The estimated parameter value (slope).
+            var (Optional[float]): The estimated variance of the parameter.
+            post_tox (list[float]): The posterior toxicity probabilities at each dose level.
+            se (Optional[float], optional): The standard error of the parameter. Defaults to None.
+            estimate_var (bool, optional): Whether variance or standard error was estimated. Defaults to False.
+
+        Returns:
+            CRMOutput: A new CRMOutput tuple instance.
+        """
         if estimate_var:
             return super().__new__(cls, (dose, beta_hat, var, post_tox, se))
         else:
@@ -45,27 +63,43 @@ class CRMOutput(tuple[Any, ...]):
 
     @property
     def dose(self) -> int:
+        """int: The recommended dose level for the next cohort."""
         return int(self[0])
 
     @property
     def beta_hat(self) -> float:
+        """float: The estimated parameter value (slope) of the dose-response model."""
         return float(self[1])
 
     @property
     def var(self) -> Optional[float]:
+        """Optional[float]: The estimated variance of the model parameter."""
         return float(self[2]) if self[2] is not None else None
 
     @property
     def post_tox(self) -> list[float]:
+        """list[float]: The posterior toxicity probabilities at each dose level."""
         return list(self[3])
 
     @property
     def se(self) -> Optional[float]:
+        """Optional[float]: The standard error of the estimated parameter."""
         if len(self) > 4:
             return float(self[4]) if self[4] is not None else None
         return None
 
     def __getitem__(self, key: Any) -> Any:
+        """Retrieve an element by index or field name.
+
+        Args:
+            key (Any): The index (int) or field name (str) to retrieve.
+
+        Returns:
+            Any: The value corresponding to the key.
+
+        Raises:
+            KeyError: If key is a string but not a valid property of CRMOutput.
+        """
         if isinstance(key, str):
             if key == "dose":
                 return self.dose
