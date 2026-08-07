@@ -56,7 +56,7 @@ class GSDView(BaseSimulationView):
             "gsd_sfu",
             "Spending Function",
             ("O'Brien-Fleming", "Pocock"),
-            index=0
+            index=0,
         )
 
         n_sims = create_widget(  # type: ignore
@@ -83,10 +83,15 @@ class GSDView(BaseSimulationView):
 
         if create_widget(st, "button", "run_simulation_button", "Run Simulation"):  # type: ignore
             from clintrials.visualization.dashboard.utils import announce_status_locally
+
             announce_status_locally("Simulation in progress", key="gsd-start")
             try:
                 with st.spinner("Running simulation..."):
-                    sfu = spending_function_pocock if sfu_name == "Pocock" else spending_function_obrien_fleming
+                    sfu = (
+                        spending_function_pocock
+                        if sfu_name == "Pocock"
+                        else spending_function_obrien_fleming
+                    )
                     gsd = GroupSequentialDesign(k=k, alpha=alpha, sfu=sfu)
                     # Ensure we use the modern, high-performance simulation engine via .run()
                     sims = gsd.run(n_sims=n_sims, method="bulk", theta=theta)
@@ -103,6 +108,7 @@ class GSDView(BaseSimulationView):
             power = sum(rejected) / len(rejected) if rejected else 0.0
 
             from clintrials.visualization.helpers import format_number
+
             st.write(f"Empirical Power / Type I Error: {format_number(power)}")
 
             results_dict = {
@@ -111,33 +117,32 @@ class GSDView(BaseSimulationView):
                 "sfu": sfu_name,
                 "n_sims": n_sims,
                 "theta": theta,
-                "power": power
+                "power": power,
             }
 
             from collections import Counter
+
             stop_stages = [sim.get("Stage", k) for sim in sims]
             stage_counts = Counter(stop_stages)
 
             stages = list(range(1, k + 1))
             counts = [stage_counts.get(s, 0) for s in stages]
 
-            plot_df = pd.DataFrame({
-                "Stage": stages,
-                "Count": counts,
-                "Outcome": ["Stop" for _ in stages]
-            })
+            plot_df = pd.DataFrame(
+                {"Stage": stages, "Count": counts, "Outcome": ["Stop" for _ in stages]}
+            )
 
             from clintrials.core.viz_interface import get_visualization_provider
+
             fig = get_visualization_provider().create_bar_chart(  # type: ignore
                 plot_df,
                 x="Stage",
                 y="Count",
                 color="Outcome",
-                title="Trial Progression (Stop Stages)"
+                title="Trial Progression (Stop Stages)",
             )
             figures = [("Trial Progression (Stop Stages)", fig)]
 
             return pd.DataFrame([results_dict]), figures, []
 
         return None
-

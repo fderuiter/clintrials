@@ -142,19 +142,20 @@ print(f"Next dose: {next_dose}")
 This example shows how to create a group sequential design with an O'Brien-Fleming-like spending function.
 
 ```python
-from clintrials.phase3.gsd import GroupSequentialDesign, spending_function_obrien_fleming
+from clintrials.phase3.gsd import (
+    GroupSequentialDesign,
+    spending_function_obrien_fleming,
+)
 import numpy as np
 
 # Create a 4-look GSD with an O'Brien-Fleming spending function
-gsd = GroupSequentialDesign(
-    k=4,
-    alpha=0.025,
-    sfu=spending_function_obrien_fleming
-)
+gsd = GroupSequentialDesign(k=4, alpha=0.025, sfu=spending_function_obrien_fleming)
 
 # Verify the efficacy boundaries
 assert len(gsd.efficacy_boundaries) == 4
-assert np.all(np.isclose(gsd.efficacy_boundaries, [4.3326, 2.9631, 2.3591, 2.0141], atol=1e-4))
+assert np.all(
+    np.isclose(gsd.efficacy_boundaries, [4.3326, 2.9631, 2.3591, 2.0141], atol=1e-4)
+)
 print("Efficacy Boundaries:", gsd.efficacy_boundaries)
 ```
 

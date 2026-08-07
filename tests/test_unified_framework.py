@@ -15,7 +15,9 @@ class CustomSingleEndpointTrial(DoseFindingTrial):
 
     def _calculate_next_dose(self, **kwargs: Any) -> int:
         multiplier = int(kwargs.get("multiplier", 1))
-        return int(min(self._first_dose + len(self.doses()) * multiplier, self.num_doses))
+        return int(
+            min(self._first_dose + len(self.doses()) * multiplier, self.num_doses)
+        )
 
 
 class CustomDualEndpointTrial(EfficacyToxicityDoseFindingTrial):
@@ -27,7 +29,9 @@ class CustomDualEndpointTrial(EfficacyToxicityDoseFindingTrial):
 
     def _calculate_next_dose(self, **kwargs: Any) -> int:
         multiplier = int(kwargs.get("multiplier", 1))
-        return int(min(self._first_dose + len(self.doses()) * multiplier, self.num_doses))
+        return int(
+            min(self._first_dose + len(self.doses()) * multiplier, self.num_doses)
+        )
 
 
 def test_custom_single_endpoint_trial_flow() -> None:
@@ -107,6 +111,7 @@ def test_custom_dual_endpoint_trial_flow() -> None:
 
 def test_unified_patient_records_update_types() -> None:
     from clintrials.core.cohort import PatientRecord
+
     trial = CustomSingleEndpointTrial(first_dose=1, num_doses=5, max_size=10)
 
     # Test updating with PatientRecord objects directly
@@ -116,7 +121,10 @@ def test_unified_patient_records_update_types() -> None:
     assert trial.toxicities() == [0, 1]
 
     # Test updating with dicts
-    dict_records = [{"dose": 2, "toxicity": 0}, {"dose": 2, "toxicity": 1, "efficacy": 1}]
+    dict_records = [
+        {"dose": 2, "toxicity": 0},
+        {"dose": 2, "toxicity": 1, "efficacy": 1},
+    ]
     trial.update(dict_records)
     assert trial.doses() == [1, 1, 2, 2]
     assert trial.toxicities() == [0, 1, 0, 1]
@@ -196,4 +204,3 @@ def test_consolidated_simulation_execution() -> None:
         cohort_size=3,
     )
     assert "RecommendedDose" in watu_sim
-

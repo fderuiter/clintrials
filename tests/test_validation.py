@@ -102,13 +102,17 @@ def test_validate_version():
     # Invalid PEP 440 versions should raise ValueError with correct message
     invalid_versions = ["latest", "stable", "", "abc"]
     for val in invalid_versions:
-        with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+        with pytest.raises(
+            ValueError, match="version must be a valid PEP 440 version string"
+        ):
             validate_version(val, "version")
 
     # Non-string values should raise ValueError with correct message
     non_strings: list[Any] = [None, 123, 1.0, [], {}, True]
     for non_str in non_strings:
-        with pytest.raises(ValueError, match="version must be a valid PEP 440 version string"):
+        with pytest.raises(
+            ValueError, match="version must be a valid PEP 440 version string"
+        ):
             validate_version(non_str, "version")
 
 
@@ -138,20 +142,56 @@ def test_new_schema_and_math_guardrails():
 
     # 1. WagesTait validation: tox_target > tox_limit
     with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
-        WagesTait(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
+        WagesTait(
+            skeletons=skeletons,
+            prior_tox_probs=prior_tox_probs,
+            tox_target=0.4,
+            tox_limit=0.3,
+            eff_limit=0.1,
+            first_dose=1,
+            max_size=30,
+            randomisation_stage_size=10,
+        )
 
     # WagesTait validation: negative max_size (boundary check via schema)
     with pytest.raises(ValueError, match="max_size must be a positive integer"):
-        WagesTait(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=-5, randomisation_stage_size=10)
+        WagesTait(
+            skeletons=skeletons,
+            prior_tox_probs=prior_tox_probs,
+            tox_target=0.2,
+            tox_limit=0.3,
+            eff_limit=0.1,
+            first_dose=1,
+            max_size=-5,
+            randomisation_stage_size=10,
+        )
 
     # 2. WATU validation: tox_target > tox_limit
     with pytest.raises(ValueError, match="tox_target must be <= tox_limit"):
-        WATU(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.4, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+        WATU(
+            skeletons=skeletons,
+            prior_tox_probs=prior_tox_probs,
+            tox_target=0.4,
+            tox_limit=0.3,
+            eff_limit=0.1,
+            metric=metric,
+            first_dose=1,
+            max_size=30,
+        )
 
     # WATU validation: invalid probability in skeletons
     bad_skeletons = [[-0.1, 0.2, 0.3]]
     with pytest.raises(ValueError, match="skeletons must be between 0.0 and 1.0"):
-        WATU(skeletons=bad_skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+        WATU(
+            skeletons=bad_skeletons,
+            prior_tox_probs=prior_tox_probs,
+            tox_target=0.2,
+            tox_limit=0.3,
+            eff_limit=0.1,
+            metric=metric,
+            first_dose=1,
+            max_size=30,
+        )
 
     # 3. GroupSequentialDesign validation: alpha <= 0
     with pytest.raises(ValueError, match="alpha must be between 0.0 and 1.0"):
@@ -172,7 +212,10 @@ def test_new_schema_and_math_guardrails():
     with pytest.raises(TypeError, match="Groups must be sequence or array types"):
         simulate_comparisons(1, [[2, 3]])
 
-    with pytest.raises(ValueError, match="treatment_group components and control_group components should be same length"):
+    with pytest.raises(
+        ValueError,
+        match="treatment_group components and control_group components should be same length",
+    ):
         simulate_comparisons([[1, 2]], [[1, 2, 3]])
 
     # 5. Statistical/math checks
@@ -247,10 +290,28 @@ def test_centralized_validation_integration():
     prior_tox_probs = [0.1, 0.2, 0.3]
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
 
-    wt = WagesTait(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, first_dose=1, max_size=30, randomisation_stage_size=10)
+    wt = WagesTait(
+        skeletons=skeletons,
+        prior_tox_probs=prior_tox_probs,
+        tox_target=0.2,
+        tox_limit=0.3,
+        eff_limit=0.1,
+        first_dose=1,
+        max_size=30,
+        randomisation_stage_size=10,
+    )
     assert isinstance(wt.schema, WagesTaitSchema)
 
-    watu = WATU(skeletons=skeletons, prior_tox_probs=prior_tox_probs, tox_target=0.2, tox_limit=0.3, eff_limit=0.1, metric=metric, first_dose=1, max_size=30)
+    watu = WATU(
+        skeletons=skeletons,
+        prior_tox_probs=prior_tox_probs,
+        tox_target=0.2,
+        tox_limit=0.3,
+        eff_limit=0.1,
+        metric=metric,
+        first_dose=1,
+        max_size=30,
+    )
     assert isinstance(watu.schema, WATUSchema)
 
     crm = CRM(prior=[0.1, 0.2, 0.3], target=0.2, first_dose=1, max_size=30)
@@ -264,19 +325,38 @@ def test_centralized_validation_integration():
 
     # EffTox sequence mismatch checks using standard helper
     with pytest.raises(ValueError, match="prior_tox_probs should have 3 items"):
-        EffTox(real_doses=[1.0, 2.0, 3.0], prior_tox_probs=[0.1, 0.2], prior_eff_probs=[0.2, 0.3, 0.4], tox_cutoff=0.3, eff_cutoff=0.3, tox_certainty=0.1, eff_certainty=0.1, max_size=30)
+        EffTox(
+            real_doses=[1.0, 2.0, 3.0],
+            prior_tox_probs=[0.1, 0.2],
+            prior_eff_probs=[0.2, 0.3, 0.4],
+            tox_cutoff=0.3,
+            eff_cutoff=0.3,
+            tox_certainty=0.1,
+            eff_certainty=0.1,
+            max_size=30,
+        )
 
     # EffTox declarative schema model prior validation rule check (beta_T < 0 slope constraint)
     # Using priors that yield a negative toxicity slope
     from scipy.stats import norm
+
     bad_priors = [
         norm(loc=0.0, scale=1.0),
-        norm(loc=-1.0, scale=1.0), # beta_T is -1.0 < 0
+        norm(loc=-1.0, scale=1.0),  # beta_T is -1.0 < 0
         norm(loc=0.0, scale=1.0),
         norm(loc=0.0, scale=1.0),
         norm(loc=0.0, scale=1.0),
         norm(loc=0.0, scale=1.0),
     ]
-    with pytest.raises(ValueError, match="Toxicity prior slope \\(beta_T\\) should be non-negative."):
-        EffTox(real_doses=[1.0, 2.0, 3.0], theta_priors=bad_priors, tox_cutoff=0.3, eff_cutoff=0.3, tox_certainty=0.1, eff_certainty=0.1, max_size=30)
-
+    with pytest.raises(
+        ValueError, match="Toxicity prior slope \\(beta_T\\) should be non-negative."
+    ):
+        EffTox(
+            real_doses=[1.0, 2.0, 3.0],
+            theta_priors=bad_priors,
+            tox_cutoff=0.3,
+            eff_cutoff=0.3,
+            tox_certainty=0.1,
+            eff_certainty=0.1,
+            max_size=30,
+        )

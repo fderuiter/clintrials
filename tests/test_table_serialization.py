@@ -29,11 +29,13 @@ def test_format_number_standard() -> None:
 
 def test_build_html_table_flat() -> None:
     """Test standard flat HTML table serialization outputs correct labels, rounded floats, and correct structure."""
-    df = pd.DataFrame({
-        "trial_phase": ["Phase I", "Phase II"],
-        "dose_level": [10.12345, 20.987654],
-        "n_patients": [15, 30]
-    })
+    df = pd.DataFrame(
+        {
+            "trial_phase": ["Phase I", "Phase II"],
+            "dose_level": [10.12345, 20.987654],
+            "n_patients": [15, 30],
+        }
+    )
 
     html = build_html_table(df)
 
@@ -57,9 +59,7 @@ def test_build_html_table_flat() -> None:
 
 def test_container_flat_table_rendering() -> None:
     """Test that MultiFormatSummaryContainer returns correct flat HTML table in standard mode."""
-    df = pd.DataFrame({
-        "dose_level": [1.123456, 2.5]
-    })
+    df = pd.DataFrame({"dose_level": [1.123456, 2.5]})
     container = MultiFormatSummaryContainer("Dose Summary", df)
     html = container.html
 
@@ -72,13 +72,16 @@ def test_container_flat_table_rendering() -> None:
 def test_container_hierarchical_rendering(monkeypatch: pytest.MonkeyPatch) -> None:
     """Test that MultiFormatSummaryContainer renders hierarchical lists with proper markup in accessibility mode."""
     import streamlit as st
+
     monkeypatch.setattr(st, "session_state", {"accessibility_mode": True})
 
-    df = pd.DataFrame({
-        "Trial": ["Trial A", "Trial A", "Trial B"],
-        "Cohort": ["Cohort 1", "Cohort 2", "Cohort 1"],
-        "Value": [1.23456, 2.34567, 3.45678]
-    })
+    df = pd.DataFrame(
+        {
+            "Trial": ["Trial A", "Trial A", "Trial B"],
+            "Cohort": ["Cohort 1", "Cohort 2", "Cohort 1"],
+            "Value": [1.23456, 2.34567, 3.45678],
+        }
+    )
 
     container = MultiFormatSummaryContainer("Accessible Trial Stats", df)
     html = container.html

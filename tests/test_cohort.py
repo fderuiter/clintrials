@@ -80,14 +80,18 @@ def test_parse_patient_records_various_formats() -> None:
     assert parse_patient_records(rec) == [rec]
 
     # Single dictionary
-    assert parse_patient_records({"dose": 2, "toxicity": 1}) == [PatientRecord(dose=2, toxicity=1)]
+    assert parse_patient_records({"dose": 2, "toxicity": 1}) == [
+        PatientRecord(dose=2, toxicity=1)
+    ]
     assert parse_patient_records({"dose": 2, "toxicity": 1, "efficacy": 0}) == [
         PatientRecord(dose=2, toxicity=1, efficacy=0)
     ]
 
     # Single 2-tuple and 3-tuple
     assert parse_patient_records((1, 0)) == [PatientRecord(dose=1, toxicity=0)]
-    assert parse_patient_records((2, 1, 0)) == [PatientRecord(dose=2, toxicity=1, efficacy=0)]
+    assert parse_patient_records((2, 1, 0)) == [
+        PatientRecord(dose=2, toxicity=1, efficacy=0)
+    ]
 
     # Tuple of tuples and list of tuples
     assert parse_patient_records([(1, 0), (2, 1, 1)]) == [

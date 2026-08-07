@@ -13,8 +13,9 @@ from playwright.sync_api import Page
 # Define viewports to test
 VIEWPORTS = [
     {"width": 375, "height": 667},  # Mobile
-    {"width": 1280, "height": 720}, # Desktop
+    {"width": 1280, "height": 720},  # Desktop
 ]
+
 
 @pytest.fixture(scope="module")
 def streamlit_server():
@@ -22,10 +23,17 @@ def streamlit_server():
     env = os.environ.copy()
 
     process = subprocess.Popen(
-        [sys.executable, "-m", "clintrials.visualization.dashboard.launcher", "--port", "8502", "--server.headless=true"],
+        [
+            sys.executable,
+            "-m",
+            "clintrials.visualization.dashboard.launcher",
+            "--port",
+            "8502",
+            "--server.headless=true",
+        ],
         env=env,
         stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
+        stderr=subprocess.DEVNULL,
     )
 
     # Wait for the server to start
@@ -47,11 +55,15 @@ def streamlit_server():
     process.terminate()
     process.wait()
 
+
 @pytest.fixture(params=VIEWPORTS, ids=["mobile", "desktop"])
 def viewport(request):
     return request.param
 
-def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: dict, tmp_path):  # type: ignore
+
+def test_dashboard_accessibility(
+    page: Page, streamlit_server: str, viewport: dict, tmp_path
+):  # type: ignore
     # Set viewport
     page.set_viewport_size(viewport)  # type: ignore[arg-type]
 
@@ -93,11 +105,16 @@ def test_dashboard_accessibility(page: Page, streamlit_server: str, viewport: di
 
     # Save standard mode report
     os.makedirs("accessibility_reports", exist_ok=True)
-    with open(f"accessibility_reports/axe_standard_{viewport['width']}x{viewport['height']}.json", "w") as f:
+    with open(
+        f"accessibility_reports/axe_standard_{viewport['width']}x{viewport['height']}.json",
+        "w",
+    ) as f:
         json.dump(violations_standard, f, indent=2)
 
     # Check specifically for ARIA table elements (Requirement 2 & 3)
     assert page.locator("thead").count() > 0, "No <thead> found in the rendered tables."
     assert page.locator("th").count() > 0, "No <th> found in the rendered tables."
 
-    assert len(violations_standard) == 0, f"Standard Mode Accessibility Violations: {violations_standard}"
+    assert len(violations_standard) == 0, (
+        f"Standard Mode Accessibility Violations: {violations_standard}"
+    )

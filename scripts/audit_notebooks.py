@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple, Union
 
-MARKDOWN_LINK_RE = re.compile(r'!?\[[^\]]*\]\(([^)]+)\)')
+MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
 
 
 def find_notebook_files(path: Union[str, Path]) -> List[Path]:
@@ -27,7 +27,12 @@ def find_notebook_files(path: Union[str, Path]) -> List[Path]:
         notebooks = []
         for sub_p in p.rglob("*.ipynb"):
             parts = sub_p.parts
-            if any(part.startswith(".") or "checkpoint" in part.lower() or part.startswith("~") for part in parts):
+            if any(
+                part.startswith(".")
+                or "checkpoint" in part.lower()
+                or part.startswith("~")
+                for part in parts
+            ):
                 continue
             notebooks.append(sub_p)
         return sorted(notebooks)
@@ -64,12 +69,16 @@ def resolve_node(node: Optional[ast.AST], bindings: Dict[str, str]) -> Optional[
 class NotebookASTVisitor(ast.NodeVisitor):
     """AST visitor to find private API violations and collect referenced clintrials elements."""
 
-    def __init__(self, manifest_elements: Set[str], bindings: Optional[Dict[str, str]] = None) -> None:
+    def __init__(
+        self, manifest_elements: Set[str], bindings: Optional[Dict[str, str]] = None
+    ) -> None:
         """Initialize the visitor with manifest elements and bindings."""
         self.manifest_elements: Set[str] = manifest_elements
         self.bindings: Dict[str, str] = bindings if bindings is not None else {}
         self.referenced: Set[str] = set()
-        self.private_violations: List[Tuple[int, str, str]] = []  # list of tuples (lineno, name, msg)
+        self.private_violations: List[
+            Tuple[int, str, str]
+        ] = []  # list of tuples (lineno, name, msg)
 
     def visit_Import(self, node: ast.Import) -> None:
         """Analyze imports to find private module imports."""
@@ -105,7 +114,9 @@ class NotebookASTVisitor(ast.NodeVisitor):
             name = alias.name
             asname = alias.asname or name
             # Check for private name import (excluding dunder like __version__)
-            if name.startswith("_") and not (name.startswith("__") and name.endswith("__")):
+            if name.startswith("_") and not (
+                name.startswith("__") and name.endswith("__")
+            ):
                 self.private_violations.append(
                     (node.lineno, name, f"Import of private name: {name}")
                 )
@@ -170,7 +181,11 @@ class NotebookASTVisitor(ast.NodeVisitor):
         if attr.startswith("_") and not (attr.startswith("__") and attr.endswith("__")):
             if val_path and val_path.startswith("clintrials"):
                 self.private_violations.append(
-                    (node.lineno, attr, f"Access to private attribute/method: {val_path}.{attr}")
+                    (
+                        node.lineno,
+                        attr,
+                        f"Access to private attribute/method: {val_path}.{attr}",
+                    )
                 )
 
         path = resolve_node(node, self.bindings)
@@ -203,7 +218,9 @@ def load_public_elements(manifest_path: Path) -> Set[str]:
     return elements
 
 
-def audit_single_notebook(notebook_path: Path, manifest_elements: Set[str]) -> Tuple[List[str], Set[str]]:
+def audit_single_notebook(
+    notebook_path: Path, manifest_elements: Set[str]
+) -> Tuple[List[str], Set[str]]:
     """Audit a single notebook and return any issues found and the referenced API elements."""
     issues: List[str] = []
     referenced_elements: Set[str] = set()
@@ -235,7 +252,11 @@ def audit_single_notebook(notebook_path: Path, manifest_elements: Set[str]) -> T
                         continue
 
                     # Exclusion Rules
-                    if "://" in clean_target or clean_target.startswith("//") or clean_target.startswith("mailto:"):
+                    if (
+                        "://" in clean_target
+                        or clean_target.startswith("//")
+                        or clean_target.startswith("mailto:")
+                    ):
                         continue
 
                     # Validation relative to the notebook file directory
@@ -243,7 +264,10 @@ def audit_single_notebook(notebook_path: Path, manifest_elements: Set[str]) -> T
                     resolved_path = (notebook_dir / clean_target).resolve()
 
                     # Exclude checkpoints/drafts if we somehow matched them
-                    if any(part.startswith(".") or "checkpoint" in part.lower() for part in resolved_path.parts):
+                    if any(
+                        part.startswith(".") or "checkpoint" in part.lower()
+                        for part in resolved_path.parts
+                    ):
                         continue
 
                     if not resolved_path.exists():
@@ -270,7 +294,11 @@ def audit_single_notebook(notebook_path: Path, manifest_elements: Set[str]) -> T
             for lineno, name, msg in visitor.private_violations:
                 # Find the offending line of code if possible
                 code_lines = source_str.splitlines()
-                offending_code = code_lines[lineno - 1].strip() if 0 <= lineno - 1 < len(code_lines) else ""
+                offending_code = (
+                    code_lines[lineno - 1].strip()
+                    if 0 <= lineno - 1 < len(code_lines)
+                    else ""
+                )
                 issues.append(
                     f"Private API violation in Cell {cell_idx}, Line {lineno}: {msg} -> `{offending_code}`"
                 )
@@ -284,10 +312,23 @@ def audit_single_notebook(notebook_path: Path, manifest_elements: Set[str]) -> T
 
 def main() -> None:
     """Audit Jupyter notebooks for quality standards."""
-    parser = argparse.ArgumentParser(description="Audit Jupyter notebooks for quality standards.")
-    parser.add_argument("path", help="Path to notebook file or directory of notebooks to audit")
-    parser.add_argument("--manifest", default="api_manifest.json", help="Path to the public API JSON manifest")
-    parser.add_argument("--min-coverage", type=float, default=0.0, help="Minimum acceptable coverage percentage")
+    parser = argparse.ArgumentParser(
+        description="Audit Jupyter notebooks for quality standards."
+    )
+    parser.add_argument(
+        "path", help="Path to notebook file or directory of notebooks to audit"
+    )
+    parser.add_argument(
+        "--manifest",
+        default="api_manifest.json",
+        help="Path to the public API JSON manifest",
+    )
+    parser.add_argument(
+        "--min-coverage",
+        type=float,
+        default=0.0,
+        help="Minimum acceptable coverage percentage",
+    )
     args = parser.parse_args()
 
     manifest_path = Path(args.manifest)
@@ -308,10 +349,16 @@ def main() -> None:
     total_issues_count = 0
     all_referenced_elements = set()
 
-    print(f"Auditing {len(notebook_files)} notebooks against {len(manifest_elements)} public API elements...\n")  # noqa: T201
+    print(  # noqa: T201
+        f"Auditing {len(notebook_files)} notebooks against {len(manifest_elements)} public API elements...\n"
+    )
 
     for nb_path in notebook_files:
-        relative_path = nb_path.relative_to(Path.cwd()) if nb_path.is_relative_to(Path.cwd()) else nb_path
+        relative_path = (
+            nb_path.relative_to(Path.cwd())
+            if nb_path.is_relative_to(Path.cwd())
+            else nb_path
+        )
         print(f"Auditing: {relative_path}")  # noqa: T201
         issues, referenced = audit_single_notebook(nb_path, manifest_elements)
         all_referenced_elements.update(referenced)
@@ -325,11 +372,15 @@ def main() -> None:
 
     # Calculate coverage
     covered_elements = manifest_elements.intersection(all_referenced_elements)
-    coverage_pct = (len(covered_elements) / len(manifest_elements)) * 100 if manifest_elements else 100.0
+    coverage_pct = (
+        (len(covered_elements) / len(manifest_elements)) * 100
+        if manifest_elements
+        else 100.0
+    )
 
-    print("\n" + "="*40)  # noqa: T201
+    print("\n" + "=" * 40)  # noqa: T201
     print("Notebook Standards and API Coverage Report")  # noqa: T201
-    print("="*40)  # noqa: T201
+    print("=" * 40)  # noqa: T201
     print(f"Total issues found: {total_issues_count}")  # noqa: T201
     print(f"Public API elements in manifest: {len(manifest_elements)}")  # noqa: T201
     print(f"Unique public API elements referenced: {len(covered_elements)}")  # noqa: T201
@@ -338,12 +389,14 @@ def main() -> None:
     # Check coverage threshold
     coverage_failed = False
     if coverage_pct < args.min_coverage:
-        print(f"  [FAIL] Coverage {coverage_pct:.2f}% is below the required minimum of {args.min_coverage:.2f}%")  # noqa: T201
+        print(  # noqa: T201
+            f"  [FAIL] Coverage {coverage_pct:.2f}% is below the required minimum of {args.min_coverage:.2f}%"
+        )
         coverage_failed = True
     else:
         print(f"  [OK] Coverage matches or exceeds target of {args.min_coverage:.2f}%")  # noqa: T201
 
-    print("="*40)  # noqa: T201
+    print("=" * 40)  # noqa: T201
 
     if total_issues_count > 0 or coverage_failed:
         print("\nAudit failed. Fix the issues or raise coverage to pass.")  # noqa: T201

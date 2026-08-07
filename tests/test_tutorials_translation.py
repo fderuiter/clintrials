@@ -10,21 +10,15 @@ from scripts.translate_notebooks import extract_title
 def test_extract_title_logic(tmp_path: Path) -> None:
     """Test various scenarios of extracting a descriptive title from Jupyter notebooks."""
     # Test metadata title
-    nb_data = {
-        "metadata": {"title": "My Metadata Title"},
-        "cells": []
-    }
+    nb_data = {"metadata": {"title": "My Metadata Title"}, "cells": []}
     assert extract_title(nb_data, tmp_path / "test.ipynb") == "My Metadata Title"
 
     # Test markdown h1 header
     nb_data_md = {
         "metadata": {},
         "cells": [
-            {
-                "cell_type": "markdown",
-                "source": ["# My Header H1\n", "Some text"]
-            }
-        ]
+            {"cell_type": "markdown", "source": ["# My Header H1\n", "Some text"]}
+        ],
     }
     assert extract_title(nb_data_md, tmp_path / "test.ipynb") == "My Header H1"
 
@@ -34,15 +28,17 @@ def test_extract_title_logic(tmp_path: Path) -> None:
         "cells": [
             {
                 "cell_type": "markdown",
-                "source": ["# Implementing the EffTox Dose-Finding Design in the Matchpoint Trials\n"]
+                "source": [
+                    "# Implementing the EffTox Dose-Finding Design in the Matchpoint Trials\n"
+                ],
             },
-            {
-                "cell_type": "markdown",
-                "source": ["## Posterior Utility\n"]
-            }
-        ]
+            {"cell_type": "markdown", "source": ["## Posterior Utility\n"]},
+        ],
     }
-    assert extract_title(nb_data_matchpoint, tmp_path / "matchpoint" / "Utility.ipynb") == "Implementing the EffTox Dose-Finding Design in the Matchpoint Trials - Posterior Utility"
+    assert (
+        extract_title(nb_data_matchpoint, tmp_path / "matchpoint" / "Utility.ipynb")
+        == "Implementing the EffTox Dose-Finding Design in the Matchpoint Trials - Posterior Utility"
+    )
 
 
 def test_translation_script_and_build(tmp_path: Path) -> None:
@@ -54,7 +50,7 @@ def test_translation_script_and_build(tmp_path: Path) -> None:
     res_translate = subprocess.run(
         ["poetry", "run", "python", str(scripts_dir / "translate_notebooks.py")],
         capture_output=True,
-        text=True
+        text=True,
     )
     assert res_translate.returncode == 0
 
@@ -71,9 +67,7 @@ def test_translation_script_and_build(tmp_path: Path) -> None:
 
     # Run build_docs.js
     res_build = subprocess.run(
-        ["node", str(scripts_dir / "build_docs.js")],
-        capture_output=True,
-        text=True
+        ["node", str(scripts_dir / "build_docs.js")], capture_output=True, text=True
     )
     assert res_build.returncode == 0
 
@@ -86,7 +80,10 @@ def test_translation_script_and_build(tmp_path: Path) -> None:
     index_html = (dist_dir / "index.html").read_text(encoding="utf-8")
     assert "Tutorials & Onboarding Guides" in index_html
     assert "Using the CRM class in clintrials" in index_html
-    assert "Implementing the EffTox Dose-Finding Design in the Matchpoint Trials - Posterior Utility" in index_html
+    assert (
+        "Implementing the EffTox Dose-Finding Design in the Matchpoint Trials - Posterior Utility"
+        in index_html
+    )
 
     # Check search index contains the tutorials
     search_index_path = dist_dir / "search_index.json"

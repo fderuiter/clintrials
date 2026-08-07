@@ -27,9 +27,7 @@ class EffToxBuilder:
             norm(loc=1.258, scale=2.0),
             norm(loc=2.071, scale=2.0),
         ]
-        self._metric = LpNormCurve(
-            0.5, 0.3, 0.7, 0.25
-        )
+        self._metric = LpNormCurve(0.5, 0.3, 0.7, 0.25)
         self._kwargs: Dict[str, Any] = {}
 
     def with_real_doses(self, real_doses: List[Any]) -> "EffToxBuilder":
@@ -41,7 +39,9 @@ class EffToxBuilder:
         self._eff_cutoff = eff_cutoff
         return self
 
-    def with_certainties(self, tox_certainty: float, eff_certainty: float) -> "EffToxBuilder":
+    def with_certainties(
+        self, tox_certainty: float, eff_certainty: float
+    ) -> "EffToxBuilder":
         self._tox_certainty = tox_certainty
         self._eff_certainty = eff_certainty
         return self
@@ -77,5 +77,5 @@ class EffToxBuilder:
             max_size=self._max_size,
             theta_priors=self._theta_priors,
             metric=self._metric,
-            **self._kwargs
+            **self._kwargs,
         )

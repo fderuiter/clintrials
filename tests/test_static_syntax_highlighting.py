@@ -36,18 +36,37 @@ def test_static_syntax_highlighting_exists():
         assert "cdnjs.cloudflare.com" not in content
         assert "unpkg.com" not in content
         assert "jsdelivr.net" not in content
-        assert "highlight.js" not in content or "highlight.js" in f.name or "class=\"language-" in content or "scripts/build_docs.js" in content
+        assert (
+            "highlight.js" not in content
+            or "highlight.js" in f.name
+            or 'class="language-' in content
+            or "scripts/build_docs.js" in content
+        )
 
         # Verify that static css highlight rules matching standard light theme are embedded
         if "index.html" not in f.name and "search.html" not in f.name:
-            assert ".hljs-keyword" in content, f"Embedded CSS missing .hljs-keyword style in {f.name}"
-            assert ".hljs-string" in content, f"Embedded CSS missing .hljs-string style in {f.name}"
-            assert ".hljs-comment" in content, f"Embedded CSS missing .hljs-comment style in {f.name}"
+            assert ".hljs-keyword" in content, (
+                f"Embedded CSS missing .hljs-keyword style in {f.name}"
+            )
+            assert ".hljs-string" in content, (
+                f"Embedded CSS missing .hljs-string style in {f.name}"
+            )
+            assert ".hljs-comment" in content, (
+                f"Embedded CSS missing .hljs-comment style in {f.name}"
+            )
 
-        if "class=\"language-python\"" in content:
+        if 'class="language-python"' in content:
             python_block_count += 1
-            if "hljs-keyword" in content or "hljs-string" in content or "hljs-number" in content:
+            if (
+                "hljs-keyword" in content
+                or "hljs-string" in content
+                or "hljs-number" in content
+            ):
                 hljs_span_count += 1
 
-    assert python_block_count > 0, "No Python code blocks (language-python) were found in compiled HTML files."
-    assert hljs_span_count > 0, "No highlight.js token span classes (e.g. hljs-keyword) were found inside code blocks."
+    assert python_block_count > 0, (
+        "No Python code blocks (language-python) were found in compiled HTML files."
+    )
+    assert hljs_span_count > 0, (
+        "No highlight.js token span classes (e.g. hljs-keyword) were found inside code blocks."
+    )

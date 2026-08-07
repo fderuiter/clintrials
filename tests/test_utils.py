@@ -9,7 +9,6 @@ from clintrials.utils import Memoize
 def test_memoize():
 
     class MyClass:
-
         def __init__(self):
             self.call_count = 0
 
@@ -17,6 +16,7 @@ def test_memoize():
         def my_method(self, x):
             self.call_count += 1
             return x * 2
+
     c = MyClass()  # type: ignore
     assert c.my_method(2) == 4
     assert c.call_count == 1
@@ -24,6 +24,7 @@ def test_memoize():
     assert c.call_count == 1
     assert c.my_method(3) == 6
     assert c.call_count == 2
+
 
 import pytest
 
@@ -42,6 +43,7 @@ def test_deprecated_function():
     assert len(record) == 1
     assert "old_func is deprecated" in str(record[0].message)
     assert "Use new_func instead" in str(record[0].message)
+
 
 def test_deprecated_class():
     @deprecated(alternative="NewClass")  # type: ignore
@@ -68,6 +70,7 @@ def test_memoize_no_false_cache_hit_on_recycled_id(mocker: Any) -> None:
 
     # Mock id() to return the same address for both parameters to simulate recycled memory
     original_id = id
+
     def mock_id(obj):
         if isinstance(obj, Parameter):
             return 999999
@@ -76,6 +79,7 @@ def test_memoize_no_false_cache_hit_on_recycled_id(mocker: Any) -> None:
     mocker.patch("clintrials.utils.id", side_effect=mock_id)
 
     call_count = 0
+
     @Memoize
     def my_func(p):
         nonlocal call_count
@@ -100,6 +104,7 @@ def test_memoize_fallback_on_serialization_failure() -> None:
     p = UnserializableParameter()
 
     call_count = 0
+
     @Memoize
     def my_func(x):
         nonlocal call_count
@@ -162,6 +167,7 @@ def test_memoize_cycle_detection() -> None:
     node2.ref = node1
 
     call_count = 0
+
     @Memoize
     def process_node(node):
         nonlocal call_count
@@ -174,4 +180,3 @@ def test_memoize_cycle_detection() -> None:
     # Second call should safely hit the cache even with cycle
     assert process_node(node1) == 1
     assert call_count == 1
-

@@ -22,7 +22,9 @@ def filter_list_of_dicts(list_of_dicts: Any, filter_dict: Any) -> Any:
     """
     for key, val in filter_dict.items():
         if isinstance(val, tuple):
-            list_of_dicts = [x for x in list_of_dicts if x[key] == val or x[key] == list(val)]
+            list_of_dicts = [
+                x for x in list_of_dicts if x[key] == val or x[key] == list(val)
+            ]
         else:
             list_of_dicts = [x for x in list_of_dicts if x[key] == val]
     return list_of_dicts
@@ -58,17 +60,19 @@ def iterable_to_json(obj: Any) -> Any:
         return atomic_to_json(obj)
 
 
-def filter_kwargs_for_callable(func: Callable[..., Any], kwargs: Dict[str, Any]) -> Dict[str, Any]:
+def filter_kwargs_for_callable(
+    func: Callable[..., Any], kwargs: Dict[str, Any]
+) -> Dict[str, Any]:
     """Filters kwargs so that only those accepted by func are returned, unless func accepts ``**kwargs``."""
     import inspect
+
     try:
         sig = inspect.signature(func)
     except (ValueError, TypeError):
         return kwargs
 
     has_var_keyword = any(
-        p.kind == inspect.Parameter.VAR_KEYWORD
-        for p in sig.parameters.values()
+        p.kind == inspect.Parameter.VAR_KEYWORD for p in sig.parameters.values()
     )
     if has_var_keyword:
         return kwargs

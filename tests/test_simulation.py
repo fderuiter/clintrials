@@ -74,7 +74,6 @@ def test_extract_sim_data_empty_sims(sample_ps):
     assert result_tuple == ([], [])
 
 
-
 def test_extract_sim_data_with_dataframe_input(sample_sims, sample_ps):
     """Test that extract_sim_data accepts a pandas DataFrame as input."""
     sims_df = pd.DataFrame(sample_sims)

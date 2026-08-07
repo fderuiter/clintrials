@@ -37,6 +37,7 @@ def test_sequence_types_distinguished() -> None:
 
 def test_recycled_memory_address_no_collision(mocker: Any) -> None:
     """Verify that custom objects with cycles or falling back to str don't collide if recycled."""
+
     class CustomObj:
         def __init__(self, val: int) -> None:
             self.val = val
@@ -47,6 +48,7 @@ def test_recycled_memory_address_no_collision(mocker: Any) -> None:
 
     # Mock id() to simulate recycled memory address
     orig_id = id
+
     def mock_id(obj: Any) -> int:
         if isinstance(obj, CustomObj):
             return 888888
@@ -73,6 +75,7 @@ def test_recycled_memory_address_no_collision(mocker: Any) -> None:
 
 def test_seed_bypass() -> None:
     """Verify running simulation with seed caches, but without seed bypasses."""
+
     class Tracker:
         call_count = 0
 
@@ -104,6 +107,7 @@ def test_seed_bypass() -> None:
 
 def test_maximum_cache_size_cap() -> None:
     """Verify Memoize strictly caps max size below 128 (e.g. at 32)."""
+
     @Memoize(maxsize=128)
     def my_func(x: int) -> int:
         return x
@@ -128,13 +132,16 @@ def test_dashboard_preview_cache_file_mtimes(monkeypatch: Any) -> None:
             model_class: Any = None
 
             @classmethod
-            def preview(cls, target_tox: float, cohort_size: int, max_size: int) -> List[Dict[str, int]]:
+            def preview(
+                cls, target_tox: float, cohort_size: int, max_size: int
+            ) -> List[Dict[str, int]]:
                 return [{"data": 123}]
 
         MockViewClass.model_class = type("MockModelClass", (), {})
 
         # Patch inspect.getfile to return our temp paths
         orig_getfile = inspect.getfile
+
         def mock_getfile(obj: Any) -> str:
             if obj is MockViewClass.preview:
                 return view_path
@@ -146,13 +153,19 @@ def test_dashboard_preview_cache_file_mtimes(monkeypatch: Any) -> None:
 
         # Mock PROTOCOL_REGISTRY.get_preview to return our mock preview
         from clintrials.core.registry import PROTOCOL_REGISTRY
-        monkeypatch.setattr(PROTOCOL_REGISTRY, "get_preview", lambda design: MockViewClass.preview)
+
+        monkeypatch.setattr(
+            PROTOCOL_REGISTRY, "get_preview", lambda design: MockViewClass.preview
+        )
 
         # 1. Get initial mtimes
         mtimes1 = get_design_file_mtimes("Mock")
 
         # 2. Wait or update mtimes manually to simulate a file edit
-        os.utime(model_path, (os.path.getatime(model_path), os.path.getmtime(model_path) + 10.0))
+        os.utime(
+            model_path,
+            (os.path.getatime(model_path), os.path.getmtime(model_path) + 10.0),
+        )
         mtimes2 = get_design_file_mtimes("Mock")
 
         assert mtimes1["model"] != mtimes2["model"]

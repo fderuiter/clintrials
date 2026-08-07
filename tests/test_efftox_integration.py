@@ -90,11 +90,21 @@ def test_efftox_class_propagation():
     metric = LpNormCurve(0.4, 0.7, 0.5, 0.4)
 
     # Test that we can pass the new parameters to EffTox
-    trial = EffToxBuilder().with_real_doses(real_doses).with_theta_priors(priors).with_cutoffs(0.3, 0.5).with_certainties(0.9, 0.9).with_metric(metric).with_max_size(30).with_kwargs(
-        k_sd=8.0,
-        max_iter=5,
-        mass_threshold=0.9999999,
-    ).build()
+    trial = (
+        EffToxBuilder()
+        .with_real_doses(real_doses)
+        .with_theta_priors(priors)
+        .with_cutoffs(0.3, 0.5)
+        .with_certainties(0.9, 0.9)
+        .with_metric(metric)
+        .with_max_size(30)
+        .with_kwargs(
+            k_sd=8.0,
+            max_iter=5,
+            mass_threshold=0.9999999,
+        )
+        .build()
+    )
 
     assert trial.k_sd == 8.0
     assert trial.max_iter == 5

@@ -73,9 +73,7 @@ if base_path:
     if base_path.endswith("/"):
         base_path = base_path[:-1]
 
-html_context = {
-    "base_path": base_path
-}
+html_context = {"base_path": base_path}
 
 # Warnings as errors when running in CI
 if os.environ.get("SPHINX_STRICT", "0") == "1":
@@ -128,16 +126,27 @@ if os.environ.get("SPHINX_STRICT", "0") == "1":
         ("py:obj", r"clintrials\._utils\..*"),
     ]
 
+
 def setup(app):  # type: ignore
     """Register custom extensions and hooks with Sphinx."""
+
     def replace_python_blocks_with_testcode(app, docname, source):  # type: ignore
-        if docname == "README" or docname.endswith(".md") or (app.env.doc2path(docname) and app.env.doc2path(docname).endswith(".md")):
+        if (
+            docname == "README"
+            or docname.endswith(".md")
+            or (app.env.doc2path(docname) and app.env.doc2path(docname).endswith(".md"))
+        ):
             import re
+
             def repl(match):  # type: ignore
                 code = match.group(1)
                 return f"```{{testcode}}\n{code}```\n\n```{{testoutput}}\n:options: +ELLIPSIS\n\n...\n```"
-            source[0] = re.sub(r"^```python\s*\n(.*?)^```\s*$", repl, source[0], flags=re.MULTILINE | re.DOTALL)
 
-    app.connect('source-read', replace_python_blocks_with_testcode)
+            source[0] = re.sub(
+                r"^```python\s*\n(.*?)^```\s*$",
+                repl,
+                source[0],
+                flags=re.MULTILINE | re.DOTALL,
+            )
 
-
+    app.connect("source-read", replace_python_blocks_with_testcode)

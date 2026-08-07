@@ -13,12 +13,18 @@ from clintrials._utils import (
 
 
 def test_filter_list_of_dicts():
-    list_of_dicts = [{'a': 1, 'b': 2}, {'a': 1, 'b': 3}, {'a': 2, 'b': 2}]
-    assert filter_list_of_dicts(list_of_dicts, {'a': 1}) == [{'a': 1, 'b': 2}, {'a': 1, 'b': 3}]
-    assert filter_list_of_dicts(list_of_dicts, {'b': 2}) == [{'a': 1, 'b': 2}, {'a': 2, 'b': 2}]
-    assert filter_list_of_dicts(list_of_dicts, {'a': 1, 'b': 2}) == [{'a': 1, 'b': 2}]
+    list_of_dicts = [{"a": 1, "b": 2}, {"a": 1, "b": 3}, {"a": 2, "b": 2}]
+    assert filter_list_of_dicts(list_of_dicts, {"a": 1}) == [
+        {"a": 1, "b": 2},
+        {"a": 1, "b": 3},
+    ]
+    assert filter_list_of_dicts(list_of_dicts, {"b": 2}) == [
+        {"a": 1, "b": 2},
+        {"a": 2, "b": 2},
+    ]
+    assert filter_list_of_dicts(list_of_dicts, {"a": 1, "b": 2}) == [{"a": 1, "b": 2}]
     # Test filtering with tuple values
-    assert filter_list_of_dicts([{'x': (1, 2)}], {'x': (1, 2)}) == [{'x': (1, 2)}]
+    assert filter_list_of_dicts([{"x": (1, 2)}], {"x": (1, 2)}) == [{"x": (1, 2)}]
 
 
 def test_to_1d_list():

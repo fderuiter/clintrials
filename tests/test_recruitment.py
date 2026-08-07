@@ -55,7 +55,13 @@ def test_quadrilateral_recruitment_stream_2():
 
 def test_quadrilateral_recruitment_stream_3():
 
-    s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10).with_initial_intensity(0.5).with_vertices([]).build()
+    s = (
+        QuadrilateralRecruitmentStreamBuilder()
+        .with_intrapatient_gap(10)
+        .with_initial_intensity(0.5)
+        .with_vertices([])
+        .build()
+    )
 
     assert s.next() == 20.0  # type: ignore
     assert s.next() == 40.0  # type: ignore
@@ -66,7 +72,14 @@ def test_quadrilateral_recruitment_stream_3():
 
 def test_quadrilateral_recruitment_stream_4():
 
-    s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10).with_initial_intensity(0.5).with_vertices([]).with_interpolate(False).build()
+    s = (
+        QuadrilateralRecruitmentStreamBuilder()
+        .with_intrapatient_gap(10)
+        .with_initial_intensity(0.5)
+        .with_vertices([])
+        .with_interpolate(False)
+        .build()
+    )
 
     assert s.next() == 20.0  # type: ignore
     assert s.next() == 40.0  # type: ignore
@@ -77,7 +90,13 @@ def test_quadrilateral_recruitment_stream_4():
 
 def test_quadrilateral_recruitment_stream_5():
 
-    s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(5).with_initial_intensity(0.1).with_vertices([(90, 0.25), (180, 1), (150, 0.75)]).build()
+    s = (
+        QuadrilateralRecruitmentStreamBuilder()
+        .with_intrapatient_gap(5)
+        .with_initial_intensity(0.1)
+        .with_vertices([(90, 0.25), (180, 1), (150, 0.75)])
+        .build()
+    )
 
     assert_almost_equal(s.next(), 37.979589711327129)  # type: ignore
     assert_almost_equal(s.next(), 64.899959967967959)  # type: ignore
@@ -101,7 +120,14 @@ def test_quadrilateral_recruitment_stream_5():
 
 def test_quadrilateral_recruitment_stream_6():
 
-    s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(5).with_initial_intensity(0.1).with_vertices([(90, 0.25), (180, 1), (150, 0.75)]).with_interpolate(False).build()
+    s = (
+        QuadrilateralRecruitmentStreamBuilder()
+        .with_intrapatient_gap(5)
+        .with_initial_intensity(0.1)
+        .with_vertices([(90, 0.25), (180, 1), (150, 0.75)])
+        .with_interpolate(False)
+        .build()
+    )
 
     assert_almost_equal(s.next(), 50.0)  # type: ignore
     assert_almost_equal(s.next(), 94.0)  # type: ignore
@@ -120,7 +146,13 @@ def test_quadrilateral_recruitment_stream_6():
 
 def test_quadrilateral_recruitment_stream_7():
 
-    s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10.0).with_initial_intensity(0.0).with_vertices([(100, 1.0)]).build()
+    s = (
+        QuadrilateralRecruitmentStreamBuilder()
+        .with_intrapatient_gap(10.0)
+        .with_initial_intensity(0.0)
+        .with_vertices([(100, 1.0)])
+        .build()
+    )
 
     assert_almost_equal(s.next(), 44.721359549995789)  # type: ignore
     assert_almost_equal(s.next(), 63.245553203367578)  # type: ignore
@@ -135,7 +167,14 @@ def test_quadrilateral_recruitment_stream_7():
 
 def test_quadrilateral_recruitment_stream_8():
 
-    s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10.0).with_initial_intensity(0.0).with_vertices([(100, 1.0), (130, 0.0), (150, 0.5)]).with_interpolate(False).build()
+    s = (
+        QuadrilateralRecruitmentStreamBuilder()
+        .with_intrapatient_gap(10.0)
+        .with_initial_intensity(0.0)
+        .with_vertices([(100, 1.0), (130, 0.0), (150, 0.5)])
+        .with_interpolate(False)
+        .build()
+    )
 
     assert_almost_equal(s.next(), 110.0)  # type: ignore
     assert_almost_equal(s.next(), 120.0)  # type: ignore
@@ -148,7 +187,13 @@ def test_quadrilateral_recruitment_stream_8():
 
 def test_quadrilateral_recruitment_stream_9():
 
-    s = QuadrilateralRecruitmentStreamBuilder().with_intrapatient_gap(10.0).with_initial_intensity(0.0).with_vertices([(100, 0.0), (200, 1.0), (250, 0.5)]).build()
+    s = (
+        QuadrilateralRecruitmentStreamBuilder()
+        .with_intrapatient_gap(10.0)
+        .with_initial_intensity(0.0)
+        .with_vertices([(100, 0.0), (200, 1.0), (250, 0.5)])
+        .build()
+    )
 
     assert_almost_equal(s.next(), 144.72135954999578)  # type: ignore
     assert_almost_equal(s.next(), 163.24555320336759)  # type: ignore

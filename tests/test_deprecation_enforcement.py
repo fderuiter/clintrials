@@ -29,10 +29,15 @@ def test_internal_deprecation():
             [sys.executable, "-m", "pytest", test_file_path, "-c", pyproject_path],
             capture_output=True,
             text=True,
-            env=env
+            env=env,
         )
-        assert result.returncode != 0, f"Expected pytest to fail on internal deprecation, but it passed.\nOutput:\n{result.stdout}\n{result.stderr}"
-        assert "DeprecationWarning" in result.stdout or "DeprecationWarning" in result.stderr
+        assert result.returncode != 0, (
+            f"Expected pytest to fail on internal deprecation, but it passed.\nOutput:\n{result.stdout}\n{result.stderr}"
+        )
+        assert (
+            "DeprecationWarning" in result.stdout
+            or "DeprecationWarning" in result.stderr
+        )
     finally:
         if os.path.exists(test_file_path):
             os.remove(test_file_path)
@@ -62,9 +67,11 @@ def test_external_deprecation():
             [sys.executable, "-m", "pytest", test_file_path, "-c", pyproject_path],
             capture_output=True,
             text=True,
-            env=env
+            env=env,
         )
-        assert result.returncode == 0, f"Expected pytest to pass on external deprecation, but it failed.\nOutput:\n{result.stdout}\n{result.stderr}"
+        assert result.returncode == 0, (
+            f"Expected pytest to pass on external deprecation, but it failed.\nOutput:\n{result.stdout}\n{result.stderr}"
+        )
     finally:
         if os.path.exists(test_file_path):
             os.remove(test_file_path)

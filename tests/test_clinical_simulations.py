@@ -12,6 +12,7 @@ from tests.helpers.efftox import EffToxBuilder
 # 1. Clinician Override Simulation Tests (Dr. Aris Thorne Persona)
 # =====================================================================
 
+
 def test_clinician_override_crm_simulation():
     """Simulates Persona A (Dr. Thorne) overriding CRM dynamic recommendations.
 
@@ -72,6 +73,7 @@ def test_clinician_override_efftox_simulation():
 # 2. Recursive Dose Transition Pathway Tests (Eleanor Vance Persona)
 # =====================================================================
 
+
 def test_dose_transition_pathway_crm():
     """Verifies recursive dose transition pathways for CRM safety model.
 
@@ -107,6 +109,7 @@ def test_dose_transition_pathway_efftox():
 # 3. Headless Streamlit View Verification (No Runtime UI Crashes)
 # =====================================================================
 
+
 def _make_streamlit_mock() -> SimpleNamespace:
     """Helper to mock Streamlit namespace with default dashboard components."""
     sidebar = SimpleNamespace(
@@ -139,7 +142,9 @@ def _make_streamlit_mock() -> SimpleNamespace:
         fragment=lambda func: func,
         columns=lambda x: (sidebar, sidebar),
         cache_data=lambda **kwargs: lambda f: f,
-        spinner=MagicMock(return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())),
+        spinner=MagicMock(
+            return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())
+        ),
         success=MagicMock(),
         metric=MagicMock(),
         session_state={},
@@ -173,13 +178,19 @@ def test_headless_dashboard_views_execute_without_crash(monkeypatch):
     render_crm(crm_sims)  # Should render and build figures without raising exceptions
 
     # 2. EffTox view headless execution
-    efftox_sims = efftox_v.EffToxView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)  # type: ignore[no-untyped-call]
+    efftox_sims = efftox_v.EffToxView.preview_sims(
+        target_tox=0.25, cohort_size=3, max_size=30
+    )  # type: ignore[no-untyped-call]
     render_efftox = PROTOCOL_REGISTRY.get_render("EffTox")
     assert render_efftox is not None
-    render_efftox(efftox_sims)  # Should render and build figures without raising exceptions
+    render_efftox(
+        efftox_sims
+    )  # Should render and build figures without raising exceptions
 
     # 3. WATU view headless execution
-    watu_sims = watu_v.WATUView.preview_sims(target_tox=0.25, cohort_size=3, max_size=30)  # type: ignore[no-untyped-call]
+    watu_sims = watu_v.WATUView.preview_sims(
+        target_tox=0.25, cohort_size=3, max_size=30
+    )  # type: ignore[no-untyped-call]
     render_watu = PROTOCOL_REGISTRY.get_render("WATU")
     assert render_watu is not None
     render_watu(watu_sims)  # Should render and build figures without raising exceptions

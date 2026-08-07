@@ -157,10 +157,46 @@ def test_CRM_bayes_again():
     doses = [1, 1, 1, 2, 2, 2]
     tox = [0, 0, 0, 1, 0, 1]
     cases = list(zip(doses, tox))
-    trial_plugin_1 = CRMBuilder().with_prior(prior).with_target(target).with_first_dose(1).with_F_func(empiric, inverse_empiric).with_use_quick_integration(False).with_kwargs(plugin_mean=True).build()
-    trial_plugin_2 = CRMBuilder().with_prior(prior).with_target(target).with_first_dose(1).with_F_func(empiric, inverse_empiric).with_use_quick_integration(True).with_kwargs(plugin_mean=True).build()
-    trial_plugin_3 = CRMBuilder().with_prior(prior).with_target(target).with_first_dose(1).with_F_func(logistic, inverse_logistic).with_use_quick_integration(False).with_kwargs(plugin_mean=True).build()
-    trial_plugin_4 = CRMBuilder().with_prior(prior).with_target(target).with_first_dose(1).with_F_func(logistic, inverse_logistic).with_use_quick_integration(True).with_kwargs(plugin_mean=True).build()
+    trial_plugin_1 = (
+        CRMBuilder()
+        .with_prior(prior)
+        .with_target(target)
+        .with_first_dose(1)
+        .with_F_func(empiric, inverse_empiric)
+        .with_use_quick_integration(False)
+        .with_kwargs(plugin_mean=True)
+        .build()
+    )
+    trial_plugin_2 = (
+        CRMBuilder()
+        .with_prior(prior)
+        .with_target(target)
+        .with_first_dose(1)
+        .with_F_func(empiric, inverse_empiric)
+        .with_use_quick_integration(True)
+        .with_kwargs(plugin_mean=True)
+        .build()
+    )
+    trial_plugin_3 = (
+        CRMBuilder()
+        .with_prior(prior)
+        .with_target(target)
+        .with_first_dose(1)
+        .with_F_func(logistic, inverse_logistic)
+        .with_use_quick_integration(False)
+        .with_kwargs(plugin_mean=True)
+        .build()
+    )
+    trial_plugin_4 = (
+        CRMBuilder()
+        .with_prior(prior)
+        .with_target(target)
+        .with_first_dose(1)
+        .with_F_func(logistic, inverse_logistic)
+        .with_use_quick_integration(True)
+        .with_kwargs(plugin_mean=True)
+        .build()
+    )
     trial_plugin_1.update(cases)
     trial_plugin_2.update(cases)
     trial_plugin_3.update(cases)
@@ -196,23 +232,53 @@ class TestCRMMLEVariance:
         self.tox = [0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0]
 
     def test_mle_variance_hessian(self):
-        trial = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("hessian").build()
+        trial = (
+            CRMBuilder()
+            .with_max_size(len(self.doses))
+            .with_method("mle")
+            .with_estimate_var(True)
+            .with_mle_var_method("hessian")
+            .build()
+        )
         trial.update(list(zip(self.doses, self.tox)))
         assert trial.beta_var is not None
         assert trial.beta_var > 0
 
     def test_mle_variance_bootstrap(self):
-        trial = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("bootstrap").with_kwargs(bootstrap_samples=50).build()
+        trial = (
+            CRMBuilder()
+            .with_max_size(len(self.doses))
+            .with_method("mle")
+            .with_estimate_var(True)
+            .with_mle_var_method("bootstrap")
+            .with_kwargs(bootstrap_samples=50)
+            .build()
+        )
         trial.set_rng(np.random.default_rng(42))
         trial.update(list(zip(self.doses, self.tox)))
         assert trial.beta_var is not None
         assert trial.beta_var > 0
 
     def test_mle_variance_comparison(self):
-        trial_hessian = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("hessian").build()
+        trial_hessian = (
+            CRMBuilder()
+            .with_max_size(len(self.doses))
+            .with_method("mle")
+            .with_estimate_var(True)
+            .with_mle_var_method("hessian")
+            .build()
+        )
         trial_hessian.update(list(zip(self.doses, self.tox)))
 
-        trial_bootstrap = CRMBuilder().with_max_size(len(self.doses)).with_method("mle").with_estimate_var(True).with_mle_var_method("bootstrap").with_kwargs(bootstrap_samples=200).build()
+        trial_bootstrap = (
+            CRMBuilder()
+            .with_max_size(len(self.doses))
+            .with_method("mle")
+            .with_estimate_var(True)
+            .with_mle_var_method("bootstrap")
+            .with_kwargs(bootstrap_samples=200)
+            .build()
+        )
         trial_bootstrap.set_rng(np.random.default_rng(42))
         trial_bootstrap.update(list(zip(self.doses, self.tox)))
 
@@ -265,7 +331,15 @@ def test_CRM_class_with_generated_fixtures():
     dlt_1 = [0, 0, 0, 1, 1, 1]
     cases_1 = list(zip(doses_1, dlt_1))
 
-    trial1 = CRMBuilder().with_prior(p_tox_prior_1).with_target(target_tox_1).with_first_dose(1).with_F_func(logit1, inverse_logit1).with_kwargs(plugin_mean=False).build()
+    trial1 = (
+        CRMBuilder()
+        .with_prior(p_tox_prior_1)
+        .with_target(target_tox_1)
+        .with_first_dose(1)
+        .with_F_func(logit1, inverse_logit1)
+        .with_kwargs(plugin_mean=False)
+        .build()
+    )
     trial1.update(cases_1)
     prob_tox_1 = trial1.prob_tox()
     recommended_dose_1 = trial1.next_dose()
@@ -285,7 +359,15 @@ def test_CRM_class_with_generated_fixtures():
     dlt_2 = [0, 0, 0, 0, 0, 0]
     cases_2 = list(zip(doses_2, dlt_2))
 
-    trial2 = CRMBuilder().with_prior(p_tox_prior_2).with_target(target_tox_2).with_first_dose(1).with_F_func(logit1, inverse_logit1).with_kwargs(plugin_mean=False).build()
+    trial2 = (
+        CRMBuilder()
+        .with_prior(p_tox_prior_2)
+        .with_target(target_tox_2)
+        .with_first_dose(1)
+        .with_F_func(logit1, inverse_logit1)
+        .with_kwargs(plugin_mean=False)
+        .build()
+    )
     trial2.update(cases_2)
     prob_tox_2 = trial2.prob_tox()
     recommended_dose_2 = trial2.next_dose()
@@ -299,8 +381,6 @@ def test_CRM_class_with_generated_fixtures():
     assert recommended_dose_2 == expected_next_dose_2
 
 
-
-
 def test_prob_tox_exceeds_bootstrap_deprecation():
     # Instantiate CRM model
     prior = [0.1, 0.2, 0.3, 0.4]
@@ -308,7 +388,14 @@ def test_prob_tox_exceeds_bootstrap_deprecation():
     dose_levels = [1, 2, 3]
     toxicities = [0, 0, 1]
 
-    model = CRMBuilder().with_prior(prior).with_target(target).with_first_dose(1).with_max_size(3).build()
+    model = (
+        CRMBuilder()
+        .with_prior(prior)
+        .with_target(target)
+        .with_first_dose(1)
+        .with_max_size(3)
+        .build()
+    )
     model.update(list(zip(dose_levels, toxicities)))
     model.estimate_var = True
     model.beta_hat = 0.5

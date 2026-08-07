@@ -11,9 +11,11 @@ from clintrials.validation import validate_matching_lengths
 @dataclass
 class PatientRecord:
     """A structured representation of a patient's outcomes."""
+
     dose: int
     toxicity: int
     efficacy: Optional[int] = None
+
 
 class PatientCohortTracker:
     """A shared utility to track patient outcomes in unified records."""
@@ -26,7 +28,7 @@ class PatientCohortTracker:
         self,
         doses: Iterable[int],
         toxicities: Iterable[int],
-        efficacies: Optional[Iterable[int]] = None
+        efficacies: Optional[Iterable[int]] = None,
     ) -> None:
         """Adds a list of patients while ensuring the lists match in length."""
         doses_list = list(doses)
@@ -36,19 +38,14 @@ class PatientCohortTracker:
         if efficacies is not None:
             efficacies_list = list(efficacies)
             validate_matching_lengths(
-                doses=doses_list,
-                toxicities=toxicities_list,
-                efficacies=efficacies_list
+                doses=doses_list, toxicities=toxicities_list, efficacies=efficacies_list
             )
             new_records = [
                 PatientRecord(dose=d, toxicity=t, efficacy=e)
                 for d, t, e in zip(doses_list, toxicities_list, efficacies_list)
             ]
         else:
-            validate_matching_lengths(
-                doses=doses_list,
-                toxicities=toxicities_list
-            )
+            validate_matching_lengths(doses=doses_list, toxicities=toxicities_list)
             new_records = [
                 PatientRecord(dose=d, toxicity=t)
                 for d, t in zip(doses_list, toxicities_list)
@@ -88,6 +85,7 @@ class PatientCohortTracker:
 def parse_patient_records(cases: Any) -> List[PatientRecord]:
     """Parses various formats of cases into standardized PatientRecord objects."""
     import numpy as np
+
     if cases is None:
         return []
     try:
@@ -103,7 +101,9 @@ def parse_patient_records(cases: Any) -> List[PatientRecord]:
     elif isinstance(cases, tuple):
         # Could be a single tuple like (1, 0) or (1, 0, 1), or a tuple of tuples.
         # Let's check if the first element is a number or not.
-        if len(cases) > 0 and isinstance(cases[0], (int, float, np.integer, np.floating)):
+        if len(cases) > 0 and isinstance(
+            cases[0], (int, float, np.integer, np.floating)
+        ):
             cases = [cases]
 
     for case in cases:
@@ -115,12 +115,16 @@ def parse_patient_records(cases: Any) -> List[PatientRecord]:
             efficacy = case.get("efficacy")
             if efficacy is not None:
                 efficacy = int(efficacy)
-            records.append(PatientRecord(dose=dose, toxicity=toxicity, efficacy=efficacy))
+            records.append(
+                PatientRecord(dose=dose, toxicity=toxicity, efficacy=efficacy)
+            )
         elif isinstance(case, (tuple, list, np.ndarray)):
             # Convert to list or standard python tuple
             case_list = list(case)
             if len(case_list) == 2:
-                records.append(PatientRecord(dose=int(case_list[0]), toxicity=int(case_list[1])))
+                records.append(
+                    PatientRecord(dose=int(case_list[0]), toxicity=int(case_list[1]))
+                )
             elif len(case_list) >= 3:
                 # Could be 3 or more, e.g. (dose, toxicity, efficacy) or (dose, toxicity, efficacy, arrival_time, ...)
                 # Let's extract the first three
@@ -131,14 +135,17 @@ def parse_patient_records(cases: Any) -> List[PatientRecord]:
                     PatientRecord(
                         dose=int(case_list[0]),
                         toxicity=int(case_list[1]),
-                        efficacy=efficacy_val
+                        efficacy=efficacy_val,
                     )
                 )
             else:
                 from clintrials.core.errors import ErrorTemplates
-                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="Patient outcome", expected_length=2))
+
+                raise ValueError(
+                    ErrorTemplates.EXPECTED_LENGTH.format(
+                        name="Patient outcome", expected_length=2
+                    )
+                )
         else:
             raise TypeError(f"Unsupported patient record format: {type(case)}")
     return records
-
-

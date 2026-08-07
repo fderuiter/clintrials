@@ -36,10 +36,14 @@ def validate_matching_lengths(**kwargs: Sequence[Any]) -> None:
 
     for name, arr in iterator:
         if len(arr) != expected_len:
-            raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name=first_name, name=name))
+            raise ValueError(
+                ErrorTemplates.MATCHING_LENGTHS.format(first_name=first_name, name=name)
+            )
 
 
-def validate_expected_length(array: Sequence[Any], expected_length: int, name: str) -> None:
+def validate_expected_length(
+    array: Sequence[Any], expected_length: int, name: str
+) -> None:
     """Validates that an array has exactly the expected length.
 
     Args:
@@ -54,10 +58,20 @@ def validate_expected_length(array: Sequence[Any], expected_length: int, name: s
         ValueError: If the array length does not match the expected length.
     """
     if len(array) != expected_length:
-        raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name=name, expected_length=expected_length))
+        raise ValueError(
+            ErrorTemplates.EXPECTED_LENGTH.format(
+                name=name, expected_length=expected_length
+            )
+        )
 
 
-def validate_bounds(value: Union[float, int], lower: Optional[Union[float, int]], upper: Optional[Union[float, int]], name: str, exclusive: bool = False) -> None:
+def validate_bounds(
+    value: Union[float, int],
+    lower: Optional[Union[float, int]],
+    upper: Optional[Union[float, int]],
+    name: str,
+    exclusive: bool = False,
+) -> None:
     """Validates that a numerical value is within the specified bounds.
 
     Args:
@@ -174,13 +188,22 @@ def validate_feature_request(issue_data: dict[str, Any]) -> bool:
         # Ensures no low-level technical performance metrics or code implementation is forced
         clinical_pillar = issue_data.get("clinical_pillar")
         if not clinical_pillar or str(clinical_pillar).strip() in ("", "None", "N/A"):
-            raise ValueError("Clinical track requires a reference to CLINICAL_STRATEGY.md strategic pillars or personas.")
+            raise ValueError(
+                "Clinical track requires a reference to CLINICAL_STRATEGY.md strategic pillars or personas."
+            )
         return True
     elif "technical" in track:
         roadmap_milestone = issue_data.get("roadmap_milestone")
-        if not roadmap_milestone or str(roadmap_milestone).strip() in ("", "None", "N/A"):
-            raise ValueError("Technical track requires a valid ROADMAP.md milestone reference.")
+        if not roadmap_milestone or str(roadmap_milestone).strip() in (
+            "",
+            "None",
+            "N/A",
+        ):
+            raise ValueError(
+                "Technical track requires a valid ROADMAP.md milestone reference."
+            )
         return True
     else:
-        raise ValueError("Invalid track selection. Please select either 'Technical Track' or 'Clinical Track'.")
-
+        raise ValueError(
+            "Invalid track selection. Please select either 'Technical Track' or 'Clinical Track'."
+        )

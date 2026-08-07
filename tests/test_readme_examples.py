@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: MIT
 
 
-
 def test_crm_example():
     """
     Tests the CRM example from the README.md file.
@@ -18,7 +17,12 @@ def test_crm_example():
     trial_size = 30
 
     # Create a CRM trial object
-    trial = CRM(prior=prior_tox_probs, target=tox_target, first_dose=first_dose, max_size=trial_size)
+    trial = CRM(
+        prior=prior_tox_probs,
+        target=tox_target,
+        first_dose=first_dose,
+        max_size=trial_size,
+    )
 
     # Get the next recommended dose
     next_dose = trial.next_dose()

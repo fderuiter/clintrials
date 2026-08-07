@@ -83,4 +83,3 @@ def test_winratio_trial():
 )
 def test_main_cli():
     main()
-
