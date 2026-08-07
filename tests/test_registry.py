@@ -40,8 +40,15 @@ class CustomTestRunner:
     def set_rng(self, rng: Any) -> None:
         self.rng = rng
 
-    def run(self, mode: str, n_sims: int, show_progress: bool, times: int = 1, **kwargs: Any) -> Dict[str, Any]:
-        return {"mode": mode, "n_sims": n_sims, "times": times, "rng_set": self.rng is not None}
+    def run(
+        self, mode: str, n_sims: int, show_progress: bool, times: int = 1, **kwargs: Any
+    ) -> Dict[str, Any]:
+        return {
+            "mode": mode,
+            "n_sims": n_sims,
+            "times": times,
+            "rng_set": self.rng is not None,
+        }
 
 
 class CustomTestResult:
@@ -80,17 +87,26 @@ def test_custom_runner_decorator_registration() -> None:
     """Verify registry decorator-based registration style works correctly."""
 
     class DecoratorTestTrial(Protocol):
-        def reset(self) -> None: pass
-        def update(self, *args: Any, **kwargs: Any) -> None: pass
-        def has_more(self) -> bool: return False
-        def report(self) -> Dict[str, str]: return {}
+        def reset(self) -> None:
+            pass
+
+        def update(self, *args: Any, **kwargs: Any) -> None:
+            pass
+
+        def has_more(self) -> bool:
+            return False
+
+        def report(self) -> Dict[str, str]:
+            return {}
 
     @RUNNER_REGISTRY.register(DecoratorTestTrial)
     class DecoratorRunner:
         def __init__(self, design: Any) -> None:
             self.design = design
 
-        def run(self, mode: str, n_sims: int, show_progress: bool, **kwargs: Any) -> str:
+        def run(
+            self, mode: str, n_sims: int, show_progress: bool, **kwargs: Any
+        ) -> str:
             return "decorated_success"
 
     try:
@@ -107,25 +123,36 @@ def test_invalid_registration_validation() -> None:
     # 1. Design is None
     with pytest.raises(ValueError) as exc_info_val:
         RUNNER_REGISTRY.register(None, CustomTestRunner)
-    assert "Unable to register: The 'design' parameter cannot be None." in str(exc_info_val.value)
+    assert "Unable to register: The 'design' parameter cannot be None." in str(
+        exc_info_val.value
+    )
     assert "Troubleshooting:" in str(exc_info_val.value)
 
     # 2. Design is wrong type (e.g., list or integer)
     with pytest.raises(TypeError) as exc_info_type:
         RUNNER_REGISTRY.register(123, CustomTestRunner)
-    assert "Unable to register: Invalid 'design' parameter type 'int'." in str(exc_info_type.value)
+    assert "Unable to register: Invalid 'design' parameter type 'int'." in str(
+        exc_info_type.value
+    )
     assert "Troubleshooting:" in str(exc_info_type.value)
 
     # 3. Runner is wrong type (non-callable)
     with pytest.raises(TypeError) as exc_info_runner:
         RUNNER_REGISTRY.register(LookupTestTrial, runner="not_callable")
-    assert "Unable to register: The 'runner' parameter must be callable" in str(exc_info_runner.value)
+    assert "Unable to register: The 'runner' parameter must be callable" in str(
+        exc_info_runner.value
+    )
     assert "Troubleshooting:" in str(exc_info_runner.value)
 
     # 4. Result container is not callable
     with pytest.raises(TypeError) as exc_info_res:
-        RUNNER_REGISTRY.register(LookupTestTrial, runner=CustomTestRunner, result_container="not_callable")
-    assert "Unable to register: The 'result_container' parameter must be callable" in str(exc_info_res.value)
+        RUNNER_REGISTRY.register(
+            LookupTestTrial, runner=CustomTestRunner, result_container="not_callable"
+        )
+    assert (
+        "Unable to register: The 'result_container' parameter must be callable"
+        in str(exc_info_res.value)
+    )
     assert "Troubleshooting:" in str(exc_info_res.value)
 
 
@@ -133,10 +160,17 @@ def test_config_map_callable_support() -> None:
     """Verify custom config_map callable works correctly."""
 
     class CallableMapTrial(Protocol):
-        def reset(self) -> None: pass
-        def update(self, *args: Any, **kwargs: Any) -> None: pass
-        def has_more(self) -> bool: return False
-        def report(self) -> Dict[str, str]: return {}
+        def reset(self) -> None:
+            pass
+
+        def update(self, *args: Any, **kwargs: Any) -> None:
+            pass
+
+        def has_more(self) -> bool:
+            return False
+
+        def report(self) -> Dict[str, str]:
+            return {}
 
     class CustomCallableRunner:
         # custom config_map as callable
@@ -150,7 +184,14 @@ def test_config_map_callable_support() -> None:
         def __init__(self, design: Any) -> None:
             self.design = design
 
-        def run(self, mode: str, n_sims: int, show_progress: bool, scale: int = 0, **kwargs: Any) -> Dict[str, int]:
+        def run(
+            self,
+            mode: str,
+            n_sims: int,
+            show_progress: bool,
+            scale: int = 0,
+            **kwargs: Any,
+        ) -> Dict[str, int]:
             return {"scale": scale}
 
     RUNNER_REGISTRY.register(CallableMapTrial, CustomCallableRunner)

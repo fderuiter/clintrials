@@ -41,12 +41,12 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         """Get summary functions for the WATU protocol."""
         return {
             "N": lambda s, p: len(s),
-            "recommended_dose_prob": lambda s, p: pd.Series(
-                [x.get("RecommendedDose") for x in s]
-            )
-            .value_counts(normalize=True)
-            .sort_index()
-            .to_dict(),
+            "recommended_dose_prob": lambda s, p: (
+                pd.Series([x.get("RecommendedDose") for x in s])
+                .value_counts(normalize=True)
+                .sort_index()
+                .to_dict()
+            ),
         }
 
     def __init__(
@@ -147,6 +147,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
             ValueError: If the dimensions of the inputs are inconsistent.
         """
         from clintrials.core.schema import WATUSchema
+
         schema_args = {
             "skeletons": skeletons,
             "prior_tox_probs": prior_tox_probs,
@@ -162,7 +163,10 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         self._schema = WATUSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
-            self, first_dose=first_dose, num_doses=len(prior_tox_probs), max_size=max_size
+            self,
+            first_dose=first_dose,
+            num_doses=len(prior_tox_probs),
+            max_size=max_size,
         )
         if must_try_lowest_dose:
             self._next_dose = 1
@@ -270,7 +274,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         """
         return self.theta_vars[self.most_likely_model_index]
 
-    def _theta_posterior_unnormalized_pdf(self, theta: Any, cases: Any, skeleton: Any) -> Any:
+    def _theta_posterior_unnormalized_pdf(
+        self, theta: Any, cases: Any, skeleton: Any
+    ) -> Any:
         """Calculates the unnormalized posterior PDF for theta.
 
         Args:
@@ -287,6 +293,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
     def _calculate_next_dose(self, **kwargs: Any) -> Any:
         from clintrials._utils import filter_kwargs_for_callable
+
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
@@ -364,7 +371,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
-    def optimal_decision(self, prob_tox: Sequence[float], prob_eff: Sequence[float]) -> int:
+    def optimal_decision(
+        self, prob_tox: Sequence[float], prob_eff: Sequence[float]
+    ) -> int:
         """Determines the optimal biological dose.
 
         Args:
@@ -379,7 +388,15 @@ class WATU(EfficacyToxicityDoseFindingTrial):
         )
         return obd  # type: ignore
 
-    def prob_eff_exceeds(self, eff_cutoff: Any, backend: Any = "analytic", n: Any = None, epsabs: Any = 1.49e-8, epsrel: Any = 1.49e-8, **kwargs: Any) -> Any:
+    def prob_eff_exceeds(
+        self,
+        eff_cutoff: Any,
+        backend: Any = "analytic",
+        n: Any = None,
+        epsabs: Any = 1.49e-8,
+        epsrel: Any = 1.49e-8,
+        **kwargs: Any,
+    ) -> Any:
         """Calculates the probability that efficacy exceeds a cutoff.
 
         Args:
@@ -609,7 +626,9 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         return self._next_dose
 
-    def _stage_two_next_dose(self, tox_probs: Any, eff_probs: Any, **kwargs: Any) -> Any:
+    def _stage_two_next_dose(
+        self, tox_probs: Any, eff_probs: Any, **kwargs: Any
+    ) -> Any:
         """Determines the next dose for stage 2 of the trial.
 
         Args:

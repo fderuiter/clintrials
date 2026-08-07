@@ -121,4 +121,3 @@ def test_matrix_cohort_analysis_early_stopping_and_multirun():
         # Check that interim analyses were actually run and stored
         assert len(report["InterimAnalyses"]) > 0
         assert any(interim["Stop"] for interim in report["InterimAnalyses"])
-

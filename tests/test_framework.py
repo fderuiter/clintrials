@@ -51,7 +51,9 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         sidebar=sidebar,
         fragment=lambda func: func,
         cache_data=lambda **kwargs: lambda f: f,
-        spinner=MagicMock(return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())),
+        spinner=MagicMock(
+            return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())
+        ),
         session_state={},
     )
     return st

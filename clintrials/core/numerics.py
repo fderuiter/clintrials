@@ -219,6 +219,7 @@ def integrate_posterior_1d(  # type: ignore
         hi += expand_factor * width / 2
         expansions += 1
 
+
 def integrate_posterior_1d_adaptive(  # type: ignore
     logpost,
     f,
@@ -236,7 +237,10 @@ def integrate_posterior_1d_adaptive(  # type: ignore
 ):
     """Adaptive execution interface for posterior integration."""
     return integrate_posterior_1d(
-        logpost, f, lo, hi,
+        logpost,
+        f,
+        lo,
+        hi,
         method=method,
         n_points=n_points,
         adaptive_limits=True,
@@ -247,6 +251,7 @@ def integrate_posterior_1d_adaptive(  # type: ignore
         warn_on_max=warn_on_max,
         return_diagnostics=return_diagnostics,
     )
+
 
 def integrate_posterior_1d_nonadaptive(  # type: ignore
     logpost,
@@ -260,14 +265,19 @@ def integrate_posterior_1d_nonadaptive(  # type: ignore
 ):
     """Legacy non-adaptive execution interface for posterior integration."""
     return integrate_posterior_1d(
-        logpost, f, lo, hi,
+        logpost,
+        f,
+        lo,
+        hi,
         method=method,
         n_points=n_points,
         adaptive_limits=False,
         return_diagnostics=return_diagnostics,
     )
 
+
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

@@ -115,8 +115,10 @@ def run_winratio_simulations(**kwargs):  # type: ignore
     trial = WinRatioTrial(**kwargs)
 
     # Run bulk simulations via unified runner
-    num_simulations = getattr(trial.config, 'num_simulations', 1)
-    results = trial.run(n_sims=num_simulations, method="iterative", seed=kwargs.get("seed"))
+    num_simulations = getattr(trial.config, "num_simulations", 1)
+    results = trial.run(
+        n_sims=num_simulations, method="iterative", seed=kwargs.get("seed")
+    )
 
     # Extract list of result dicts, depending on if SimulationResult is iterable or has a property
     # SimulationResult is iterable
@@ -140,11 +142,8 @@ def run_winratio_simulations(**kwargs):  # type: ignore
     else:
         average_ci = (0, 0)
 
-    return {
-        "power": power,
-        "average_ci": average_ci,
-        "results": results_list
-    }
+    return {"power": power, "average_ci": average_ci, "results": results_list}
+
 
 def main() -> None:
     """Parse command-line arguments and run the simulation."""
@@ -177,7 +176,7 @@ def main() -> None:
 
     print(f"Power of the test: {power:.4f}")  # noqa: T201
     print(  # noqa: T201
-        "Average confidence interval: " f"({average_ci[0]:.4f}, {average_ci[1]:.4f})"
+        f"Average confidence interval: ({average_ci[0]:.4f}, {average_ci[1]:.4f})"
     )
 
 
@@ -188,4 +187,5 @@ if __name__ == "__main__":  # pragma: no cover - CLI entry
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

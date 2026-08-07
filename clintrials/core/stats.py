@@ -11,7 +11,6 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 
-
 from typing import Any, Callable
 
 import numpy as np
@@ -34,6 +33,7 @@ class ProbabilityDensitySample:
                 the probabilities.
         """
         from clintrials.core.errors import ErrorTemplates
+
         self._samp = samp
         self._probs = func(samp)
         self._scale = self._probs.mean()
@@ -98,7 +98,9 @@ class ProbabilityDensitySample:
         return np.array(samp_boot)
 
 
-def log_scale_wald_interval(ratio: float, standard_error: float, alpha: float = 0.05) -> tuple[float, float]:
+def log_scale_wald_interval(
+    ratio: float, standard_error: float, alpha: float = 0.05
+) -> tuple[float, float]:
     """Calculates the Wald confidence interval for a ratio on the log scale.
 
     Args:
@@ -110,6 +112,7 @@ def log_scale_wald_interval(ratio: float, standard_error: float, alpha: float = 
         tuple[float, float]: The lower and upper bounds of the confidence interval.
     """
     from clintrials.core.errors import ErrorTemplates
+
     if ratio <= 0:
         raise ValueError(ErrorTemplates.GT.format(name="ratio", bound=0))
     if standard_error <= 0:
@@ -133,6 +136,7 @@ def log_scale_p_value(ratio: float, standard_error: float) -> float:
         float: The p-value.
     """
     from clintrials.core.errors import ErrorTemplates
+
     if ratio <= 0:
         raise ValueError(ErrorTemplates.GT.format(name="ratio", bound=0))
     if standard_error <= 0:
@@ -145,4 +149,5 @@ def log_scale_p_value(ratio: float, standard_error: float) -> float:
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

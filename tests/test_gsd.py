@@ -155,9 +155,11 @@ def test_gsd_update_and_report():
 def test_gsd_run_bulk_invalid_sims():
     design = GroupSequentialDesign(k=3)
     with pytest.raises(
-        ValueError, match="Number of simulations must be a positive integer|must be positive"
+        ValueError,
+        match="Number of simulations must be a positive integer|must be positive",
     ):
         design.run(0, method="bulk")
+
 
 from unittest.mock import patch
 
@@ -170,6 +172,7 @@ def test_gsd_brentq_fallback():
         design = GroupSequentialDesign(k=1, alpha=0.025)
         assert design.efficacy_boundaries[0] == 2.0
 
+
 def test_gsd_brentq_fallback_failure():
     import pytest
 
@@ -177,14 +180,15 @@ def test_gsd_brentq_fallback_failure():
 
     with patch("clintrials.phase3.gsd.brentq") as mock_brentq:
         mock_brentq.side_effect = ValueError("Both intervals failed")
-        with pytest.raises(RuntimeError, match="Could not find a valid final boundary."):
+        with pytest.raises(
+            RuntimeError, match="Could not find a valid final boundary."
+        ):
             GroupSequentialDesign(k=1, alpha=0.025)
+
 
 def test_gsd_simulate_deprecation():
     design = GroupSequentialDesign(
-        k=2,
-        alpha=0.025,
-        sfu=spending_function_obrien_fleming
+        k=2, alpha=0.025, sfu=spending_function_obrien_fleming
     )
     with pytest.warns(DeprecationWarning) as record:
         design.simulate(n_sims=1)

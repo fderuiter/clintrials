@@ -91,7 +91,9 @@ class BayesianTimeToEvent(Protocol):
         self._stopped_early = False
         self._final_analysis = None
 
-    def update(self, cases: list[tuple[float, float]], *args: Any, **kwargs: Any) -> None:
+    def update(
+        self, cases: list[tuple[float, float]], *args: Any, **kwargs: Any
+    ) -> None:
         """Updates the trial with new patient cases and runs any pending interim analyses."""
         for event_time, recruitment_time in cases:
             self._times_to_event.append(event_time)
@@ -132,7 +134,9 @@ class BayesianTimeToEvent(Protocol):
         trial_report["UpperCutoff"] = self.upper_cutoff
         trial_report["InterimCertainty"] = self.interim_certainty
         trial_report["FinalCertainty"] = self.final_certainty
-        trial_report["InterimAnalysisAfterPatients"] = self.interim_analysis_after_patients
+        trial_report["InterimAnalysisAfterPatients"] = (
+            self.interim_analysis_after_patients
+        )
         trial_report["InterimAnalysisTimeDelta"] = self.interim_analysis_time_delta
         trial_report["FinalAnalysisTimeDelta"] = self.final_analysis_time_delta
 
@@ -147,9 +151,14 @@ class BayesianTimeToEvent(Protocol):
             trial_report["FinalEvents"] = self._final_analysis["Events"]
             trial_report["FinalTotalEventTime"] = self._final_analysis["TotalEventTime"]
         else:
-            final_analysis_time = max(self._recruitment_times) + self.final_analysis_time_delta
+            final_analysis_time = (
+                max(self._recruitment_times) + self.final_analysis_time_delta
+            )
             final_outcome = self.test(
-                final_analysis_time, self.upper_cutoff, self.final_certainty, less_than=False
+                final_analysis_time,
+                self.upper_cutoff,
+                self.final_certainty,
+                less_than=False,
             )
             trial_report["FinalAnalysis"] = final_outcome
             stop_trial = final_outcome["Stop"]
@@ -248,7 +257,9 @@ class TimeToEventOutcomeGenerator:
         """
         self.true_median = true_median
 
-    def __call__(self, design: Any, current_size: int, cohort_size: int, **kwargs: Any) -> Any:
+    def __call__(
+        self, design: Any, current_size: int, cohort_size: int, **kwargs: Any
+    ) -> Any:
         """Generates patient outcomes conforming to the standard OutcomeGenerator interface."""
         true_mean = self.true_median / np.log(2)
         arrival_times = kwargs.get("arrival_times", [])
@@ -335,4 +346,5 @@ def matrix_cohort_analysis(
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

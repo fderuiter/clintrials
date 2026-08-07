@@ -20,7 +20,16 @@ def parse_docstring_to_params(doc: Optional[str]) -> List[Dict[str, Any]]:
     in_args = False
     current_param = None
 
-    terminators = {"returns:", "raises:", "examples:", "yields:", "warns:", "note:", "warning:", "type:"}
+    terminators = {
+        "returns:",
+        "raises:",
+        "examples:",
+        "yields:",
+        "warns:",
+        "note:",
+        "warning:",
+        "type:",
+    }
     exclude_keywords = {"note", "example", "warning", "caution", "todo", "fixme"}
 
     for line in lines:
@@ -41,7 +50,9 @@ def parse_docstring_to_params(doc: Optional[str]) -> List[Dict[str, Any]]:
 
             # Match: parameter_name (type): description or parameter_name: description
             # Capture Group 1: Name, Group 2: Type (optional), Group 3: Description (optional)
-            m = re.match(r"^\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\(([^)]+)\))?\s*:\s*(.*)", line)
+            m = re.match(
+                r"^\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\(([^)]+)\))?\s*:\s*(.*)", line
+            )
             if m:
                 param_name = m.group(1)
                 param_type = m.group(2) or ""
@@ -53,7 +64,7 @@ def parse_docstring_to_params(doc: Optional[str]) -> List[Dict[str, Any]]:
                 current_param = {
                     "name": param_name,
                     "type": param_type,
-                    "description": param_desc
+                    "description": param_desc,
                 }
                 params.append(current_param)
             else:
@@ -93,7 +104,7 @@ def get_signature_info(obj: Any) -> Dict[str, Any]:
             "name": name,
             "default": default_val,
             "kind": str(param.kind),
-            "annotation": annotation_str
+            "annotation": annotation_str,
         }
     return params_info
 
@@ -141,18 +152,20 @@ def extract_class_metadata(cls_obj: Any) -> Dict[str, Any]:
             except (ValueError, TypeError):
                 pass
 
-            methods.append({
-                "name": name,
-                "signature": sig_str,
-                "docstring": method_obj.__doc__ or "",
-                "parameters": extract_parameters_metadata(method_obj)
-            })
+            methods.append(
+                {
+                    "name": name,
+                    "signature": sig_str,
+                    "docstring": method_obj.__doc__ or "",
+                    "parameters": extract_parameters_metadata(method_obj),
+                }
+            )
 
     return {
         "name": cls_name,
         "docstring": cls_doc,
         "parameters": parameters,
-        "methods": methods
+        "methods": methods,
     }
 
 
@@ -164,7 +177,9 @@ def main() -> None:
     modules_to_process = []
 
     # Process package root if needed, but it only exports submodules
-    for module_info in pkgutil.walk_packages(clintrials.__path__, clintrials.__name__ + "."):
+    for module_info in pkgutil.walk_packages(
+        clintrials.__path__, clintrials.__name__ + "."
+    ):
         module_name = module_info.name
         if "test" in module_name:
             continue
@@ -204,18 +219,20 @@ def main() -> None:
                 except (ValueError, TypeError):
                     pass
 
-                functions.append({
-                    "name": name,
-                    "signature": sig_str,
-                    "docstring": obj.__doc__ or "",
-                    "parameters": extract_parameters_metadata(obj)
-                })
+                functions.append(
+                    {
+                        "name": name,
+                        "signature": sig_str,
+                        "docstring": obj.__doc__ or "",
+                        "parameters": extract_parameters_metadata(obj),
+                    }
+                )
 
         manifest["modules"][module_name] = {
             "name": module_name,
             "docstring": mod_doc,
             "classes": classes,
-            "functions": functions
+            "functions": functions,
         }
 
     # Write intermediate manifest JSON

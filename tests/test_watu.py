@@ -194,7 +194,9 @@ def test_watu_2():
     assert np.all(
         np.abs(
             trial.post_eff_probs
-            - np.array([0.3999842, 0.4935573, 0.5830683, 0.6697644, 0.5830683, 0.4935573])
+            - np.array(
+                [0.3999842, 0.4935573, 0.5830683, 0.6697644, 0.5830683, 0.4935573]
+            )
         )
         < 0.00001
     )
@@ -295,9 +297,7 @@ def test_watu_prob_eff_exceeds_backends():
 
 def test_watu_prob_eff_exceeds_boundaries():
     tox_prior = [0.01, 0.08, 0.15, 0.22, 0.29, 0.36]
-    skeletons = [
-        [1.0, 0.60, 0.50, 0.40, 0.10, 0.0]
-    ]
+    skeletons = [[1.0, 0.60, 0.50, 0.40, 0.10, 0.0]]
     metric = LpNormCurve(0.05, 0.4, 0.25, 0.15)
     trial = WATU(
         skeletons=skeletons,
@@ -335,4 +335,3 @@ def test_watu_prob_eff_exceeds_boundaries():
     probs_mc = trial.prob_eff_exceeds(0.2, backend="mc")
     assert probs_mc[0] == 1.0
     assert probs_mc[5] == 0.0
-

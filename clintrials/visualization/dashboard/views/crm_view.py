@@ -33,14 +33,16 @@ class CRMView(BaseSimulationView):  # type: ignore
             prior=[0.05, 0.1, 0.2, 0.3, 0.4],
             target=target_tox,
             first_dose=1,
-            max_size=max_size
+            max_size=max_size,
         )
 
         ps = ParameterSpace()
         ps.add("true_tox", [(0.05, 0.1, 0.2, 0.3, 0.4), (0.1, 0.2, 0.3, 0.4, 0.5)])
 
         def wrapped_sim_func(true_tox):  # type: ignore
-            report = simulate_dose_finding_trial(crm, true_toxicities=true_tox, cohort_size=cohort_size)
+            report = simulate_dose_finding_trial(
+                crm, true_toxicities=true_tox, cohort_size=cohort_size
+            )
             report["true_tox"] = true_tox
             return report
 
@@ -54,7 +56,9 @@ class CRMView(BaseSimulationView):  # type: ignore
         if not summary_df.empty and "recommended_dose_prob" in summary_df.columns:
             from clintrials.core.viz_interface import get_visualization_provider
 
-            fig = get_visualization_provider().plot_crm_simulation_recommendation(summary_df, high_contrast=False)  # type: ignore
+            fig = get_visualization_provider().plot_crm_simulation_recommendation(
+                summary_df, high_contrast=False
+            )  # type: ignore
             figures.append(("Dose Recommendation Probability", fig))
         else:
             st.warning(

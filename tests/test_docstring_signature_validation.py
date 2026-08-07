@@ -20,16 +20,33 @@ def extract_docstring_params(doc: Optional[str]) -> List[str]:
             in_args = True
             continue
         if in_args:
-            if stripped.lower() in ("returns:", "raises:", "examples:", "yields:", "warns:", "note:", "warning:", "type:"):
+            if stripped.lower() in (
+                "returns:",
+                "raises:",
+                "examples:",
+                "yields:",
+                "warns:",
+                "note:",
+                "warning:",
+                "type:",
+            ):
                 in_args = False
                 continue
             # Regex to match: parameter_name (type): description or parameter_name: description
             m = re.match(r"^\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:\([^)]+\))?\s*:", line)
             if m:
                 param_name = m.group(1)
-                if param_name.lower() not in ("note", "example", "warning", "caution", "todo", "fixme"):
+                if param_name.lower() not in (
+                    "note",
+                    "example",
+                    "warning",
+                    "caution",
+                    "todo",
+                    "fixme",
+                ):
                     params.append(param_name)
     return params
+
 
 def get_sig_params(obj: Any) -> Optional[List[str]]:
     try:
@@ -40,14 +57,20 @@ def get_sig_params(obj: Any) -> Optional[List[str]]:
     for name, param in sig.parameters.items():
         if name in ("self", "cls"):
             continue
-        if param.kind in (inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD):
+        if param.kind in (
+            inspect.Parameter.VAR_POSITIONAL,
+            inspect.Parameter.VAR_KEYWORD,
+        ):
             continue
         params.append(name)
     return params
 
+
 def test_docstring_parameter_signatures() -> None:
     mismatches = []
-    for module_info in pkgutil.walk_packages(clintrials.__path__, clintrials.__name__ + "."):
+    for module_info in pkgutil.walk_packages(
+        clintrials.__path__, clintrials.__name__ + "."
+    ):
         module_name = module_info.name
         if "test" in module_name:
             continue
@@ -71,7 +94,9 @@ def test_docstring_parameter_signatures() -> None:
                 if sig_p is not None and doc_p:
                     # check if they match
                     if set(sig_p) != set(doc_p):
-                        mismatches.append(f"Function {module_name}.{name} signature {sig_p} != docstring {doc_p}")
+                        mismatches.append(
+                            f"Function {module_name}.{name} signature {sig_p} != docstring {doc_p}"
+                        )
             # Check class __init__
             elif inspect.isclass(obj):
                 init_func = getattr(obj, "__init__", None)
@@ -82,6 +107,11 @@ def test_docstring_parameter_signatures() -> None:
                         doc_p = extract_docstring_params(init_func.__doc__)
                         if sig_p is not None and doc_p:
                             if set(sig_p) != set(doc_p):
-                                mismatches.append(f"Class {module_name}.{obj.__name__}.__init__ signature {sig_p} != docstring {doc_p}")
+                                mismatches.append(
+                                    f"Class {module_name}.{obj.__name__}.__init__ signature {sig_p} != docstring {doc_p}"
+                                )
 
-    assert not mismatches, "Docstring-to-signature parameter name mismatches found:\n" + "\n".join(mismatches)
+    assert not mismatches, (
+        "Docstring-to-signature parameter name mismatches found:\n"
+        + "\n".join(mismatches)
+    )

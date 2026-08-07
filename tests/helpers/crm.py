@@ -40,7 +40,9 @@ class CRMBuilder:
         self._max_size = max_size
         return self
 
-    def with_F_func(self, F_func: Callable[..., Any], inverse_F: Any = None) -> "CRMBuilder":
+    def with_F_func(
+        self, F_func: Callable[..., Any], inverse_F: Any = None
+    ) -> "CRMBuilder":
         self._F_func = F_func
         self._inverse_F = inverse_F
         return self
@@ -82,5 +84,5 @@ class CRMBuilder:
             use_quick_integration=self._use_quick_integration,
             estimate_var=self._estimate_var,
             mle_var_method=self._mle_var_method,
-            **self._kwargs
+            **self._kwargs,
         )

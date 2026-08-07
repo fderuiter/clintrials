@@ -10,19 +10,27 @@ class QuadrilateralRecruitmentStreamBuilder:
         self._vertices: list[tuple[float, float]] = [(90.0, 1.0)]
         self._interpolate = True
 
-    def with_intrapatient_gap(self, intrapatient_gap: float) -> "QuadrilateralRecruitmentStreamBuilder":
+    def with_intrapatient_gap(
+        self, intrapatient_gap: float
+    ) -> "QuadrilateralRecruitmentStreamBuilder":
         self._intrapatient_gap = intrapatient_gap
         return self
 
-    def with_initial_intensity(self, initial_intensity: float) -> "QuadrilateralRecruitmentStreamBuilder":
+    def with_initial_intensity(
+        self, initial_intensity: float
+    ) -> "QuadrilateralRecruitmentStreamBuilder":
         self._initial_intensity = initial_intensity
         return self
 
-    def with_vertices(self, vertices: list[tuple[float, float]]) -> "QuadrilateralRecruitmentStreamBuilder":
+    def with_vertices(
+        self, vertices: list[tuple[float, float]]
+    ) -> "QuadrilateralRecruitmentStreamBuilder":
         self._vertices = vertices
         return self
 
-    def with_interpolate(self, interpolate: bool) -> "QuadrilateralRecruitmentStreamBuilder":
+    def with_interpolate(
+        self, interpolate: bool
+    ) -> "QuadrilateralRecruitmentStreamBuilder":
         self._interpolate = interpolate
         return self
 
@@ -31,5 +39,5 @@ class QuadrilateralRecruitmentStreamBuilder:
             intrapatient_gap=self._intrapatient_gap,
             initial_intensity=self._initial_intensity,
             vertices=self._vertices,
-            interpolate=self._interpolate
+            interpolate=self._interpolate,
         )

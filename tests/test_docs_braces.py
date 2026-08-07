@@ -48,12 +48,11 @@ def test_escape_mdx_behavior_via_node():
     # Run node subprocess
     project_root = Path(__file__).parent.parent
     result = subprocess.run(
-        ["node", "-e", js_code],
-        cwd=str(project_root),
-        capture_output=True,
-        text=True
+        ["node", "-e", js_code], cwd=str(project_root), capture_output=True, text=True
     )
-    assert result.returncode == 0, f"Node script failed with stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    assert result.returncode == 0, (
+        f"Node script failed with stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
+    )
     assert "SUCCESS" in result.stdout
 
 
@@ -66,7 +65,9 @@ def test_generated_mdx_braces_preservation():
 
     # Ensure npm packages are installed so that build scripts can run in clean environments (like Python CI)
     if not (project_root / "node_modules" / "marked").exists():
-        subprocess.run(["npm", "install"], cwd=str(project_root), check=True, capture_output=True)
+        subprocess.run(
+            ["npm", "install"], cwd=str(project_root), check=True, capture_output=True
+        )
 
     # Let's ensure build is run so files are up to date
     # Run npm run prebuild && npm run build
@@ -74,15 +75,12 @@ def test_generated_mdx_braces_preservation():
         ["npm", "run", "prebuild"],
         cwd=str(project_root),
         capture_output=True,
-        text=True
+        text=True,
     )
     assert build_result.returncode == 0, f"prebuild failed: {build_result.stderr}"
 
     compile_result = subprocess.run(
-        ["npm", "run", "build"],
-        cwd=str(project_root),
-        capture_output=True,
-        text=True
+        ["npm", "run", "build"], cwd=str(project_root), capture_output=True, text=True
     )
     assert compile_result.returncode == 0, f"build failed: {compile_result.stderr}"
 
@@ -99,23 +97,51 @@ def test_generated_mdx_braces_preservation():
     # 1. No escaped braces (&#123; or &#125;) in any MDX or HTML file
     for f in mdx_files + html_files:
         content = f.read_text(errors="ignore")
-        assert "&#123;" not in content, f"Found escaped open curly brace (&#123;) in {f.relative_to(project_root)}"
-        assert "&#125;" not in content, f"Found escaped close curly brace (&#125;) in {f.relative_to(project_root)}"
+        assert "&#123;" not in content, (
+            f"Found escaped open curly brace (&#123;) in {f.relative_to(project_root)}"
+        )
+        assert "&#125;" not in content, (
+            f"Found escaped close curly brace (&#125;) in {f.relative_to(project_root)}"
+        )
 
     # 2. Check that raw curly braces exist in specific files we expect them to be
     # E.g., Random Seed Strategy: {efftox_view_seed_strategy} in efftox_view/index.mdx
-    efftox_view_mdx = reference_dir / "clintrials" / "visualization" / "dashboard" / "views" / "efftox_view" / "index.mdx"
+    efftox_view_mdx = (
+        reference_dir
+        / "clintrials"
+        / "visualization"
+        / "dashboard"
+        / "views"
+        / "efftox_view"
+        / "index.mdx"
+    )
     assert efftox_view_mdx.exists()
     content = efftox_view_mdx.read_text()
-    assert "{efftox_view_seed_strategy}" in content, "Expected raw curly braces for {efftox_view_seed_strategy}"
+    assert "{efftox_view_seed_strategy}" in content, (
+        "Expected raw curly braces for {efftox_view_seed_strategy}"
+    )
 
-    efftox_view_html = dist_dir / "clintrials" / "visualization" / "dashboard" / "views" / "efftox_view" / "index.html"
+    efftox_view_html = (
+        dist_dir
+        / "clintrials"
+        / "visualization"
+        / "dashboard"
+        / "views"
+        / "efftox_view"
+        / "index.html"
+    )
     assert efftox_view_html.exists()
     html_content = efftox_view_html.read_text()
-    assert "{efftox_view_seed_strategy}" in html_content, "Expected raw curly braces for {efftox_view_seed_strategy} in HTML output"
+    assert "{efftox_view_seed_strategy}" in html_content, (
+        "Expected raw curly braces for {efftox_view_seed_strategy} in HTML output"
+    )
 
     # 3. Check that escaped pipes (&#124;) exist in some files (like BaseDoseFindingTrial.mdx)
-    base_trial_mdx = reference_dir / "clintrials" / "core" / "protocol" / "BaseDoseFindingTrial.mdx"
+    base_trial_mdx = (
+        reference_dir / "clintrials" / "core" / "protocol" / "BaseDoseFindingTrial.mdx"
+    )
     if base_trial_mdx.exists():
         trial_content = base_trial_mdx.read_text()
-        assert "&#124;" in trial_content, "Expected escaped pipe characters in BaseDoseFindingTrial.mdx"
+        assert "&#124;" in trial_content, (
+            "Expected escaped pipe characters in BaseDoseFindingTrial.mdx"
+        )

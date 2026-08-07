@@ -44,6 +44,7 @@ def generate_data(  # type: ignore
     """
     if rng is None:
         from clintrials.core.rng import get_rng
+
         rng = get_rng()
 
     group_A = np.vstack(
@@ -68,4 +69,5 @@ def generate_data(  # type: ignore
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

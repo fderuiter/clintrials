@@ -56,7 +56,9 @@ def _make_streamlit_mock(selectbox_return="CRM", file_data=None):
         sidebar=sidebar,
         fragment=lambda func: func,
         cache_data=lambda **kwargs: lambda f: f,
-        spinner=MagicMock(return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())),
+        spinner=MagicMock(
+            return_value=MagicMock(__enter__=MagicMock(), __exit__=MagicMock())
+        ),
         session_state={},
     )
     return st
@@ -122,7 +124,9 @@ def test_dashboard_main_routes_to_efftox(monkeypatch):
     def fake_render(data):
         called["data"] = data
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["EffTox"], "render", fake_render)  # type: ignore
+    monkeypatch.setitem(
+        main.PROTOCOL_REGISTRY._designs["EffTox"], "render", fake_render
+    )  # type: ignore
     main.main()  # type: ignore
     assert called["data"] == [{"foo": "bar"}]
 
@@ -152,7 +156,9 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):
     def fake_render():
         called["called"] = True
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["Win Ratio"], "render", fake_render)  # type: ignore
+    monkeypatch.setitem(
+        main.PROTOCOL_REGISTRY._designs["Win Ratio"], "render", fake_render
+    )  # type: ignore
     main.main()  # type: ignore
     assert called["called"]
 
@@ -168,6 +174,7 @@ def test_crm_view_render_success(monkeypatch):
 
     import clintrials.core.simulation as sim
     import clintrials.utils as utils
+
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(crm_view, "st", st_mock)
 
@@ -207,10 +214,12 @@ def test_crm_view_warns_without_recommended(monkeypatch):
     st_mock = _make_streamlit_mock()  # type: ignore[no-untyped-call]
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
+
     importlib.reload(crm_view)
     monkeypatch.setattr(crm_view, "st", st_mock)
     import clintrials.core.simulation as sim
     import clintrials.utils as utils
+
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
 
     summary_df = pd.DataFrame({"N": [1]}, index=pd.Index([0.1], name="true_tox"))
@@ -232,6 +241,7 @@ def test_efftox_view_render_success(monkeypatch):
 
     import clintrials.core.simulation as sim
     import clintrials.utils as utils
+
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(efftox_view, "st", st_mock)
 
@@ -247,9 +257,7 @@ def test_efftox_view_render_success(monkeypatch):
         },
         index=index,
     )
-    monkeypatch.setattr(
-        sim, "extract_sim_data", MagicMock(return_value=summary_df)
-    )
+    monkeypatch.setattr(sim, "extract_sim_data", MagicMock(return_value=summary_df))
 
     import clintrials.visualization as viz
 
@@ -277,14 +285,14 @@ def test_efftox_view_warns_when_empty(monkeypatch):
     st_mock = _make_streamlit_mock()  # type: ignore[no-untyped-call]
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
+
     importlib.reload(efftox_view)
     monkeypatch.setattr(efftox_view, "st", st_mock)
     import clintrials.core.simulation as sim
     import clintrials.utils as utils
+
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
-    monkeypatch.setattr(
-        sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
-    )
+    monkeypatch.setattr(sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame()))
 
     render_func = PROTOCOL_REGISTRY.get_render("EffTox")
     render_func([{}])  # type: ignore[misc]
@@ -301,11 +309,7 @@ def test_winratio_view_render_success(monkeypatch):
     importlib.reload(winratio_view)
     monkeypatch.setattr(winratio_view, "st", st_mock)
     run_sim = MagicMock()
-    run_sim.return_value = {
-        "power": 0.8,
-        "average_ci": (0.1, 0.2),
-        "results": []
-    }
+    run_sim.return_value = {"power": 0.8, "average_ci": (0.1, 0.2), "results": []}
     monkeypatch.setattr(winratio_view, "run_winratio_simulations", run_sim)
 
     winratio_view.render()
@@ -340,6 +344,7 @@ def test_watu_view_render_success(monkeypatch):
 
     import clintrials.core.simulation as sim
     import clintrials.utils as utils
+
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
     monkeypatch.setattr(watu_view, "st", st_mock)
 
@@ -353,9 +358,7 @@ def test_watu_view_render_success(monkeypatch):
         },
         index=index,
     )
-    monkeypatch.setattr(
-        sim, "extract_sim_data", MagicMock(return_value=summary_df)
-    )
+    monkeypatch.setattr(sim, "extract_sim_data", MagicMock(return_value=summary_df))
 
     import clintrials.visualization as viz
 
@@ -380,14 +383,14 @@ def test_watu_view_warns_when_empty(monkeypatch):
     st_mock = _make_streamlit_mock()  # type: ignore[no-untyped-call]
     monkeypatch.setitem(sys.modules, "streamlit", st_mock)
     import importlib
+
     importlib.reload(watu_view)
     monkeypatch.setattr(watu_view, "st", st_mock)
     import clintrials.core.simulation as sim
     import clintrials.utils as utils
+
     monkeypatch.setattr(utils, "ParameterSpace", MagicMock())
-    monkeypatch.setattr(
-        sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame())
-    )
+    monkeypatch.setattr(sim, "extract_sim_data", MagicMock(return_value=pd.DataFrame()))
 
     render_func = PROTOCOL_REGISTRY.get_render("WATU")
     render_func([{}])  # type: ignore[misc]
@@ -400,10 +403,14 @@ def test_main_preview_mode_crm(monkeypatch):
     monkeypatch.setattr(main, "st", st_mock)
 
     monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())  # type: ignore
-    monkeypatch.setattr(main, "get_preview_sims", MagicMock(return_value=[{"preview": True}]))
+    monkeypatch.setattr(
+        main, "get_preview_sims", MagicMock(return_value=[{"preview": True}])
+    )
     main.main()  # type: ignore
     main.get_preview_sims.assert_called_once()  # type: ignore[attr-defined]
-    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with([{"preview": True}])  # type: ignore
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with(
+        [{"preview": True}]
+    )  # type: ignore
 
 
 def test_main_preview_mode_exception(monkeypatch):
@@ -421,6 +428,7 @@ def test_main_preview_mode_exception(monkeypatch):
 
 def test_get_preview_sims_crm(monkeypatch):
     import clintrials.dosefinding as df
+
     func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
 
     mock_sim = MagicMock(side_effect=lambda *args, **kwargs: {"recommended_dose": 1})
@@ -435,6 +443,7 @@ def test_get_preview_sims_crm(monkeypatch):
 
 def test_get_preview_sims_efftox(monkeypatch):
     import clintrials.dosefinding.efficacytoxicity as et
+
     func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
 
     mock_sim = MagicMock(side_effect=lambda *args, **kwargs: {"recommended_dose": 2})
@@ -448,6 +457,7 @@ def test_get_preview_sims_efftox(monkeypatch):
 
 def test_get_preview_sims_watu(monkeypatch):
     import clintrials.dosefinding.efficacytoxicity as et
+
     func = getattr(main.get_preview_sims, "__wrapped__", main.get_preview_sims)
 
     mock_sim = MagicMock(side_effect=lambda *args, **kwargs: {"recommended_dose": 3})
@@ -475,4 +485,3 @@ def test_unified_class_based_views_subclassing():
     assert issubclass(GSDView, BaseSimulationView)
     assert issubclass(WinRatioView, BaseSimulationView)
     assert issubclass(WagesTaitView, BaseSimulationView)
-

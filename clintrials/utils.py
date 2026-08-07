@@ -6,8 +6,8 @@ from __future__ import annotations
 
 from typing import Any, Callable, Optional
 
-__author__ = 'Kristian Brock'
-__contact__ = 'kristian.brock@gmail.com'
+__author__ = "Kristian Brock"
+__contact__ = "kristian.brock@gmail.com"
 import logging
 import types
 import warnings
@@ -19,6 +19,7 @@ from itertools import product
 import numpy as np
 
 logger = logging.getLogger(__name__)
+
 
 def deprecated(alternative):  # type: ignore
     """Decorator to mark a function, method, or class as deprecated.
@@ -35,20 +36,32 @@ def deprecated(alternative):  # type: ignore
 
             @wraps(orig_init)
             def new_init(self, *args, **kwargs):  # type: ignore
-                warnings.warn(f'{obj.__name__} is deprecated and will be removed in a future version. Use {alternative} instead.', category=DeprecationWarning, stacklevel=2)
+                warnings.warn(
+                    f"{obj.__name__} is deprecated and will be removed in a future version. Use {alternative} instead.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
+                )
                 orig_init(self, *args, **kwargs)
+
             obj.__init__ = new_init  # type: ignore
             return obj
         else:
 
             @wraps(obj)
             def wrapper(*args, **kwargs):  # type: ignore
-                warnings.warn(f'{obj.__name__} is deprecated and will be removed in a future version. Use {alternative} instead.', category=DeprecationWarning, stacklevel=2)
+                warnings.warn(
+                    f"{obj.__name__} is deprecated and will be removed in a future version. Use {alternative} instead.",
+                    category=DeprecationWarning,
+                    stacklevel=2,
+                )
                 return obj(*args, **kwargs)
+
             return wrapper
+
     return decorator
 
-def get_logger(name: str=__name__) -> logging.Logger:
+
+def get_logger(name: str = __name__) -> logging.Logger:
     """Gets a logger instance.
 
     Args:
@@ -59,7 +72,13 @@ def get_logger(name: str=__name__) -> logging.Logger:
     """
     return logging.getLogger(name)
 
-def tuple_to_dataframe(row_tuples: Any, index_tuples: Any, column_names: Any=None, index_names: Any=None) -> Any:
+
+def tuple_to_dataframe(
+    row_tuples: Any,
+    index_tuples: Any,
+    column_names: Any = None,
+    index_names: Any = None,
+) -> Any:
     """Creates a pandas DataFrame from row and index tuples.
 
     Args:
@@ -73,6 +92,7 @@ def tuple_to_dataframe(row_tuples: Any, index_tuples: Any, column_names: Any=Non
         pandas.DataFrame: The resulting DataFrame.
     """
     import pandas as pd
+
     if not row_tuples:
         df = pd.DataFrame(columns=column_names)
         if index_names:
@@ -80,6 +100,7 @@ def tuple_to_dataframe(row_tuples: Any, index_tuples: Any, column_names: Any=Non
         return df
     i = pd.MultiIndex.from_tuples(index_tuples, names=index_names)
     return pd.DataFrame(row_tuples, index=i)
+
 
 def _correlated_binary_outcomes_mardia(a: Any, b: Any, c: Any) -> Any:
     """Helper function for `correlated_binary_outcomes`."""
@@ -91,11 +112,12 @@ def _correlated_binary_outcomes_mardia(a: Any, b: Any, c: Any) -> Any:
         k = -1
     else:
         k = 0
-    p = -0.5 * (b + k * np.sqrt(b ** 2 - 4 * a * c))
+    p = -0.5 * (b + k * np.sqrt(b**2 - 4 * a * c))
     r1 = 1.0 * p / a
     r2 = 1.0 * c / p
     r = r2 if r2 > 0 else r1
     return r
+
 
 def _correlated_binary_outcomes_solve2(mui: Any, muj: Any, psi: Any) -> Any:
     """Helper function for `correlated_binary_outcomes`."""
@@ -107,6 +129,7 @@ def _correlated_binary_outcomes_solve2(mui: Any, muj: Any, psi: Any) -> Any:
         c = -psi * (mui * muj)
         muij = _correlated_binary_outcomes_mardia(a, b, c)
     return muij
+
 
 def correlated_binary_outcomes_from_uniforms(unifs: Any, u: Any, psi: Any) -> Any:
     """Generates correlated binary outcomes from uniform random numbers.
@@ -125,10 +148,14 @@ def correlated_binary_outcomes_from_uniforms(unifs: Any, u: Any, psi: Any) -> An
         n = unifs.shape[0]
         y = np.full((n, 2), -1, dtype=int)
         y[:, 0] = (unifs[:, 0] < u[0]).astype(int)
-        y[:, 1] = y[:, 0] * (unifs[:, 1] <= u12 / u[0]) + (1 - y[:, 0]) * (unifs[:, 2] <= (u[1] - u12) / (1 - u[0]))
+        y[:, 1] = y[:, 0] * (unifs[:, 1] <= u12 / u[0]) + (1 - y[:, 0]) * (
+            unifs[:, 2] <= (u[1] - u12) / (1 - u[0])
+        )
         return y
     else:
-        raise ValueError('unifs must be an n*3 array')
+        raise ValueError("unifs must be an n*3 array")
+
+
 class _HashableArgs:
     """A helper class that wraps unhashable arguments.
 
@@ -173,7 +200,9 @@ class _HashableArgs:
 class Memoize:
     """A class to cache function results with a size limit (LRU)."""
 
-    def __init__(self, f: Optional[Callable[..., Any]] = None, maxsize: int = 32) -> None:
+    def __init__(
+        self, f: Optional[Callable[..., Any]] = None, maxsize: int = 32
+    ) -> None:
         """Initializes a Memoize object.
 
         Args:
@@ -193,19 +222,24 @@ class Memoize:
 
             self.global_cache = _global_cache
 
-    def _supports_seed(self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None) -> bool:
+    def _supports_seed(
+        self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None
+    ) -> bool:
         """Determines if the function or its context supports/accepts a random seed."""
         if self.f is not None:
-            name = getattr(self.f, '__name__', '')
-            if name in ('run_sims', 'sim_parameter_space', 'run_bivariate_simulations'):
+            name = getattr(self.f, "__name__", "")
+            if name in ("run_sims", "sim_parameter_space", "run_bivariate_simulations"):
                 return True
 
             # Does the function signature have a seed/rng parameter, or has **kwargs?
             import inspect
+
             try:
                 sig = inspect.signature(self.f)
                 for param_name, param in sig.parameters.items():
-                    if any(term in param_name.lower() for term in ('seed', 'random', 'rng')):
+                    if any(
+                        term in param_name.lower() for term in ("seed", "random", "rng")
+                    ):
                         return True
                     if param.kind == inspect.Parameter.VAR_KEYWORD:
                         return True
@@ -217,31 +251,40 @@ class Memoize:
         if instance is not None:
             all_objects.append(instance)
         for obj in all_objects:
-            for attr in ('seed', 'rng', 'random_state', '_rng', '_seed'):
+            for attr in ("seed", "rng", "random_state", "_rng", "_seed"):
                 if hasattr(obj, attr):
                     return True
         return False
 
-    def _has_seed(self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None) -> bool:
+    def _has_seed(
+        self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None
+    ) -> bool:
         """Determines if the call is made with an explicit, non-None random seed."""
         # Check kwargs first
         for k, v in kwargs.items():
-            if any(term in k.lower() for term in ('seed', 'random', 'rng')) and v is not None:
+            if (
+                any(term in k.lower() for term in ("seed", "random", "rng"))
+                and v is not None
+            ):
                 return True
         # Check args bound to parameter names
         if self.f is not None:
             import inspect
+
             try:
                 sig = inspect.signature(self.f)
                 bind_args = args
                 if instance is not None:
                     params = list(sig.parameters.keys())
-                    if params and params[0] in ('self', 'cls'):
+                    if params and params[0] in ("self", "cls"):
                         bind_args = (instance,) + args
                 bound = sig.bind(*bind_args, **kwargs)
                 bound.apply_defaults()
                 for name, val in bound.arguments.items():
-                    if any(term in name.lower() for term in ('seed', 'random', 'rng')) and val is not None:
+                    if (
+                        any(term in name.lower() for term in ("seed", "random", "rng"))
+                        and val is not None
+                    ):
                         return True
             except Exception:
                 pass
@@ -251,12 +294,14 @@ class Memoize:
         if instance is not None:
             all_objects.append(instance)
         for obj in all_objects:
-            for attr in ('seed', 'rng', 'random_state', '_rng', '_seed'):
+            for attr in ("seed", "rng", "random_state", "_rng", "_seed"):
                 if hasattr(obj, attr) and getattr(obj, attr) is not None:
                     return True
         return False
 
-    def _should_bypass(self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None) -> bool:
+    def _should_bypass(
+        self, args: tuple[Any, ...], kwargs: dict[str, Any], instance: Any = None
+    ) -> bool:
         """Decides whether to bypass cache based on seed support and seed presence."""
         if self._supports_seed(args, kwargs, instance):
             return not self._has_seed(args, kwargs, instance)
@@ -283,7 +328,7 @@ class Memoize:
         if obj_id in seen:
             return f"<cycle-{seen[obj_id]}>"
 
-        is_container = hasattr(obj, '__dict__') or isinstance(
+        is_container = hasattr(obj, "__dict__") or isinstance(
             obj, (list, tuple, dict, set, frozenset, np.ndarray)
         )
         if is_container:
@@ -296,46 +341,59 @@ class Memoize:
             elif isinstance(obj, tuple):
                 return ("tuple", tuple(self._make_hashable(e, seen) for e in obj))
             elif isinstance(obj, dict):
-                return frozenset((k, self._make_hashable(v, seen)) for k, v in obj.items())
+                return frozenset(
+                    (k, self._make_hashable(v, seen)) for k, v in obj.items()
+                )
             elif isinstance(obj, (int, float, str, bool, frozenset, type(None))):
                 return obj
             elif isinstance(obj, np.ndarray):
                 return tuple(self._make_hashable(e, seen) for e in obj.tolist())
             elif isinstance(obj, type):
                 return (obj.__module__, obj.__name__)
-            elif isinstance(obj, (types.FunctionType, types.BuiltinFunctionType, types.MethodType, types.BuiltinMethodType)):
-                if hasattr(obj, '__self__') and hasattr(obj, '__func__'):
+            elif isinstance(
+                obj,
+                (
+                    types.FunctionType,
+                    types.BuiltinFunctionType,
+                    types.MethodType,
+                    types.BuiltinMethodType,
+                ),
+            ):
+                if hasattr(obj, "__self__") and hasattr(obj, "__func__"):
                     return (
                         obj.__class__.__module__,
                         obj.__class__.__name__,
                         self._make_hashable(obj.__self__, seen),
-                        self._make_hashable(obj.__func__, seen)
+                        self._make_hashable(obj.__func__, seen),
                     )
-                elif hasattr(obj, '__code__'):
+                elif hasattr(obj, "__code__"):
                     closure_val = None
-                    if hasattr(obj, '__closure__') and obj.__closure__ is not None:
-                        closure_val = tuple(self._make_hashable(cell.cell_contents, seen) for cell in obj.__closure__)
+                    if hasattr(obj, "__closure__") and obj.__closure__ is not None:
+                        closure_val = tuple(
+                            self._make_hashable(cell.cell_contents, seen)
+                            for cell in obj.__closure__
+                        )
                     return (
                         obj.__class__.__module__,
                         obj.__class__.__name__,
-                        getattr(obj, '__module__', None),
-                        getattr(obj, '__qualname__', None),
-                        closure_val
+                        getattr(obj, "__module__", None),
+                        getattr(obj, "__qualname__", None),
+                        closure_val,
                     )
                 else:
                     return (
                         obj.__class__.__module__,
                         obj.__class__.__name__,
-                        getattr(obj, '__module__', None),
-                        getattr(obj, '__qualname__', None)
+                        getattr(obj, "__module__", None),
+                        getattr(obj, "__qualname__", None),
                     )
-            elif hasattr(obj, '__dict__'):
+            elif hasattr(obj, "__dict__"):
                 return (
                     obj.__class__.__module__,
                     obj.__class__.__name__,
-                    self._make_hashable(obj.__dict__, seen)
+                    self._make_hashable(obj.__dict__, seen),
                 )
-            elif hasattr(obj, '__slots__'):
+            elif hasattr(obj, "__slots__"):
                 slots_dict = {
                     slot: getattr(obj, slot)
                     for slot in obj.__slots__
@@ -344,13 +402,14 @@ class Memoize:
                 return (
                     obj.__class__.__module__,
                     obj.__class__.__name__,
-                    self._make_hashable(slots_dict, seen)
+                    self._make_hashable(slots_dict, seen),
                 )
             else:
                 import re
+
                 s = str(obj)
-                s = re.sub(r' at 0x[0-9a-fA-F]+', '', s)
-                s = re.sub(r'0x[0-9a-fA-F]+', '', s)
+                s = re.sub(r" at 0x[0-9a-fA-F]+", "", s)
+                s = re.sub(r"0x[0-9a-fA-F]+", "", s)
                 return s
         finally:
             if is_container:
@@ -413,10 +472,13 @@ class Memoize:
         cache_attr = f"_memo_cache_{self.f.__name__}_{id(self)}"
 
         if not hasattr(instance, cache_attr):
+
             @lru_cache(maxsize=self.maxsize)
             def instance_lru_cache(hashable_args_obj: _HashableArgs) -> Any:
                 assert self.f is not None
-                return self.f(instance, *hashable_args_obj.args, **hashable_args_obj.kwargs)
+                return self.f(
+                    instance, *hashable_args_obj.args, **hashable_args_obj.kwargs
+                )
 
             setattr(instance, cache_attr, instance_lru_cache)
 
@@ -466,7 +528,7 @@ class ParameterSpace:
         """
         self.vals_map[label] = values
 
-    def get_cyclical_iterator(self, limit: Any=-1) -> Any:
+    def get_cyclical_iterator(self, limit: Any = -1) -> Any:
         """Gets a cyclical iterator for the parameter space.
 
         Args:
@@ -514,6 +576,7 @@ class ParameterSpace:
         """
         return self.vals_map[key]
 
+
 class _ParameterSpaceIter:
     """An iterator for the ParameterSpace class."""
 
@@ -542,14 +605,14 @@ class _ParameterSpaceIter:
             param_map[label] = self.vals_map[label][path[j]]
         self.cursor += 1
         return param_map
+
     next = __next__
+
 
 __all__ = [
     "get_logger",
     "tuple_to_dataframe",
     "correlated_binary_outcomes_from_uniforms",
     "Memoize",
-    "ParameterSpace"
+    "ParameterSpace",
 ]
-
-

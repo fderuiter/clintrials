@@ -50,18 +50,20 @@ def generate_fixtures():
     recommended_dose_2 = np.argmin(np.abs(np.array(prob_tox_2) - target_tox_2)) + 1
 
     # Combine the results into data frames
-    posterior_dlt_probs_df = pd.DataFrame({
-        "scenario": [1] * len(prob_tox_1) + [2] * len(prob_tox_2),
-        "dose": list(range(1, len(prob_tox_1) + 1)) + list(range(1, len(prob_tox_2) + 1)),
-        "prob": list(prob_tox_1) + list(prob_tox_2)
-    })
+    posterior_dlt_probs_df = pd.DataFrame(
+        {
+            "scenario": [1] * len(prob_tox_1) + [2] * len(prob_tox_2),
+            "dose": list(range(1, len(prob_tox_1) + 1))
+            + list(range(1, len(prob_tox_2) + 1)),
+            "prob": list(prob_tox_1) + list(prob_tox_2),
+        }
+    )
     # Round to 10 decimal places for numerical stability across environments
     posterior_dlt_probs_df["prob"] = posterior_dlt_probs_df["prob"].round(10)
 
-    next_dose_df = pd.DataFrame({
-        "scenario": [1, 2],
-        "next_dose": [recommended_dose_1, recommended_dose_2]
-    })
+    next_dose_df = pd.DataFrame(
+        {"scenario": [1, 2], "next_dose": [recommended_dose_1, recommended_dose_2]}
+    )
 
     # Write the data frames to CSV files
     out_probs = os.path.join("tests", "fixtures", "expected_posterior_dlt_probs.csv")
@@ -71,6 +73,7 @@ def generate_fixtures():
 
     posterior_dlt_probs_df.to_csv(out_probs, index=False)
     next_dose_df.to_csv(out_next, index=False)
+
 
 if __name__ == "__main__":
     generate_fixtures()  # type: ignore

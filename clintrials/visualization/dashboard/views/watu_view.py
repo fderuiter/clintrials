@@ -49,12 +49,14 @@ class WATUView(BaseSimulationView):  # type: ignore
             eff_limit=0.2,
             metric=metric,
             first_dose=1,
-            max_size=max_size
+            max_size=max_size,
         )
 
         tox_scenarios = [(0.05, 0.1, 0.2, 0.3, 0.4)]
         eff_scenarios = [(0.2, 0.3, 0.4, 0.5, 0.6)]
-        return run_bivariate_simulations(watu, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10)
+        return run_bivariate_simulations(
+            watu, tox_scenarios, eff_scenarios, cohort_size, n_replicates=10
+        )
 
     @classmethod
     def build_figures(cls, summary_df):  # type: ignore
@@ -65,8 +67,7 @@ class WATUView(BaseSimulationView):  # type: ignore
                 from clintrials.core.viz_interface import get_visualization_provider
 
                 fig_rec = get_visualization_provider().plot_bivariate_simulation_recommendation(  # type: ignore
-                    summary_df,
-                    high_contrast=False
+                    summary_df, high_contrast=False
                 )
                 figures.append(("Dose Recommendation Probability", fig_rec))
         else:

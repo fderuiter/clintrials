@@ -62,13 +62,37 @@ def test_custom_provider_selective_override_and_fallback(monkeypatch):
         # Non-overridden methods should fallback to the default provider
         # Mock default provider methods to verify routing
         import clintrials.visualization as viz
-        monkeypatch.setattr(viz, "plot_bivariate_simulation_recommendation", lambda df, high_contrast=False: "default_bivariate_rec")
-        monkeypatch.setattr(viz, "plot_efftox_simulation_acceptability", lambda df, high_contrast=False: "default_efftox_accept")
-        monkeypatch.setattr(viz, "create_bar_chart", lambda df, x, y, color, title, labels=None, high_contrast=False: "default_bar_chart")
 
-        assert current.plot_bivariate_simulation_recommendation(None) == "default_bivariate_rec"
-        assert current.plot_efftox_simulation_acceptability(None) == "default_efftox_accept"
-        assert current.create_bar_chart(None, None, None, None, None) == "default_bar_chart"
+        monkeypatch.setattr(
+            viz,
+            "plot_bivariate_simulation_recommendation",
+            lambda df, high_contrast=False: "default_bivariate_rec",
+        )
+        monkeypatch.setattr(
+            viz,
+            "plot_efftox_simulation_acceptability",
+            lambda df, high_contrast=False: "default_efftox_accept",
+        )
+        monkeypatch.setattr(
+            viz,
+            "create_bar_chart",
+            lambda df, x, y, color, title, labels=None, high_contrast=False: (
+                "default_bar_chart"
+            ),
+        )
+
+        assert (
+            current.plot_bivariate_simulation_recommendation(None)
+            == "default_bivariate_rec"
+        )
+        assert (
+            current.plot_efftox_simulation_acceptability(None)
+            == "default_efftox_accept"
+        )
+        assert (
+            current.create_bar_chart(None, None, None, None, None)
+            == "default_bar_chart"
+        )
     finally:
         set_visualization_provider(old_provider)
 
@@ -78,10 +102,12 @@ def test_default_provider_routing_without_custom_provider():
     old_provider = get_visualization_provider()
     try:
         from clintrials.visualization.provider import get_default_provider
+
         set_visualization_provider(get_default_provider())
 
         current = get_visualization_provider()
         from clintrials.visualization.provider import DefaultVisualizationProvider
+
         assert isinstance(current, DefaultVisualizationProvider)
     finally:
         set_visualization_provider(old_provider)

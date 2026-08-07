@@ -38,7 +38,9 @@ def scale_doses(real_doses: Any) -> Any:
     return np.log(real_doses) - np.mean(np.log(real_doses))
 
 
-def efftox_priors_from_skeleton(real_doses: Any, prior_tox_probs: Any, prior_eff_probs: Any) -> Any:
+def efftox_priors_from_skeleton(
+    real_doses: Any, prior_tox_probs: Any, prior_eff_probs: Any
+) -> Any:
     """Elicits principled EffTox priors from a dose-response skeleton.
 
     This function fits the EffTox link functions to the provided prior
@@ -157,7 +159,17 @@ def _pi_E(scaled_dose: Any, mu: Any, beta1: Any, beta2: Any) -> Any:
     return inverse_logit(_eta_E(scaled_dose, mu, beta1, beta2))
 
 
-def _pi_ab(scaled_dose: Any, tox: Any, eff: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, psi: Any) -> Any:
+def _pi_ab(
+    scaled_dose: Any,
+    tox: Any,
+    eff: Any,
+    mu_T: Any,
+    beta_T: Any,
+    mu_E: Any,
+    beta1_E: Any,
+    beta2_E: Any,
+    psi: Any,
+) -> Any:
     """Calculates the likelihood of a joint toxicity-efficacy outcome.
 
     Args:
@@ -181,7 +193,9 @@ def _pi_ab(scaled_dose: Any, tox: Any, eff: Any, mu_T: Any, beta_T: Any, mu_E: A
     return fgm_joint_prob(eff, tox, p_E, p_T, psi)
 
 
-def _L_n(D: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, psi: Any) -> Any:
+def _L_n(
+    D: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, psi: Any
+) -> Any:
     """Calculates the compound likelihood for a set of observations.
 
     Args:
@@ -225,7 +239,16 @@ def _L_n(D: Any, mu_T: Any, beta_T: Any, mu_E: Any, beta1_E: Any, beta2_E: Any, 
     return np.prod(joint_probs, axis=0)
 
 
-def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10**5, epsilon: Any = 1e-6, k_sd: Any = 6.0, max_iter: Any = 3, mass_threshold: Any = 0.999999) -> Any:
+def _get_posterior_sample(
+    cases: Any,
+    priors: Any,
+    rng: Any = None,
+    n: Any = 10**5,
+    epsilon: Any = 1e-6,
+    k_sd: Any = 6.0,
+    max_iter: Any = 3,
+    mass_threshold: Any = 0.999999,
+) -> Any:
     """Generates a posterior sample with adaptive integration limits.
 
     Args:
@@ -248,12 +271,13 @@ def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10*
     """
     if rng is None:
         from clintrials.core.rng import get_rng
+
         rng = get_rng()
 
     limits = [(dist.ppf(epsilon), dist.ppf(1 - epsilon)) for dist in priors]
 
-    lik_integrand = (
-        lambda x: _L_n(cases, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4], x[:, 5])
+    lik_integrand = lambda x: (
+        _L_n(cases, x[:, 0], x[:, 1], x[:, 2], x[:, 3], x[:, 4], x[:, 5])
         * priors[0].pdf(x[:, 0])
         * priors[1].pdf(x[:, 1])
         * priors[2].pdf(x[:, 2])
@@ -277,7 +301,17 @@ def _get_posterior_sample(cases: Any, priors: Any, rng: Any = None, n: Any = 10*
     return pds
 
 
-def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_cutoff: Any, eff_cutoff: Any, n: Any = 10**5, epsilon: Any = 1e-6, rng: Any = None, **kwargs: Any) -> Any:
+def efftox_get_posterior_probs(
+    cases: Any,
+    priors: Any,
+    scaled_doses: Any,
+    tox_cutoff: Any,
+    eff_cutoff: Any,
+    n: Any = 10**5,
+    epsilon: Any = 1e-6,
+    rng: Any = None,
+    **kwargs: Any,
+) -> Any:
     """Calculates posterior probabilities for an EffTox trial.
 
     This function uses Monte Carlo integration to evaluate the posterior
@@ -318,7 +352,9 @@ def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_c
     limit_args = {
         k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
-    pds = _get_posterior_sample(_cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args)
+    pds = _get_posterior_sample(
+        _cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args
+    )
     samp = pds.samples
 
     probs = []
@@ -337,7 +373,15 @@ def efftox_get_posterior_probs(cases: Any, priors: Any, scaled_doses: Any, tox_c
     return probs, pds
 
 
-def efftox_get_posterior_params(cases: Any, priors: Any, scaled_doses: Any, n: Any = 10**5, epsilon: Any = 1e-6, rng: Any = None, **kwargs: Any) -> Any:
+def efftox_get_posterior_params(
+    cases: Any,
+    priors: Any,
+    scaled_doses: Any,
+    n: Any = 10**5,
+    epsilon: Any = 1e-6,
+    rng: Any = None,
+    **kwargs: Any,
+) -> Any:
     """Calculates posterior parameter estimates for an EffTox trial.
 
     This function uses Monte Carlo integration to evaluate the posterior
@@ -374,7 +418,9 @@ def efftox_get_posterior_params(cases: Any, priors: Any, scaled_doses: Any, n: A
     limit_args = {
         k: v for k, v in kwargs.items() if k in ["k_sd", "max_iter", "mass_threshold"]
     }
-    pds = _get_posterior_sample(_cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args)
+    pds = _get_posterior_sample(
+        _cases, priors, rng=rng, n=n, epsilon=epsilon, **limit_args
+    )
     samp = pds.samples
 
     params = []
@@ -401,7 +447,13 @@ class LpNormCurve:
     - An equally desirable hinge point.
     """
 
-    def __init__(self, minimum_tolerable_efficacy: Any, maximum_tolerable_toxicity: Any, hinge_prob_eff: Any, hinge_prob_tox: Any) -> None:
+    def __init__(
+        self,
+        minimum_tolerable_efficacy: Any,
+        maximum_tolerable_toxicity: Any,
+        hinge_prob_eff: Any,
+        hinge_prob_tox: Any,
+    ) -> None:
         """Initializes an LpNormCurve object.
 
         Args:
@@ -463,7 +515,16 @@ class LpNormCurve:
             response *= np.nan
             return response
 
-    def solve(self, delta: Any, *, prob_eff: Any = None, prob_tox: Any = None, bounds: Any = (0, 1), tol: Any = 1e-6, maxiter: Any = 100) -> Any:
+    def solve(
+        self,
+        delta: Any,
+        *,
+        prob_eff: Any = None,
+        prob_tox: Any = None,
+        bounds: Any = (0, 1),
+        tol: Any = 1e-6,
+        maxiter: Any = 100,
+    ) -> Any:
         """Solves for one probability given the other and a utility delta.
 
         Args:
@@ -521,7 +582,6 @@ class LpNormCurve:
         tox1 = self.maximum_tolerable_toxicity
         a = (1 - eff) / (1 - eff0)
         return tox1 * ((1 - util) ** p - a**p) ** (1 / p)
-
 
 
 class InverseQuadraticCurve:
@@ -592,7 +652,16 @@ class InverseQuadraticCurve:
         else:
             return np.nan
 
-    def solve(self, delta: Any, *, prob_eff: Any = None, prob_tox: Any = None, bounds: Any = (0, 1), tol: Any = 1e-6, maxiter: Any = 100) -> Any:
+    def solve(
+        self,
+        delta: Any,
+        *,
+        prob_eff: Any = None,
+        prob_tox: Any = None,
+        bounds: Any = (0, 1),
+        tol: Any = 1e-6,
+        maxiter: Any = 100,
+    ) -> Any:
         """Solves for one probability given the other and a utility delta.
 
         Args:
@@ -636,9 +705,6 @@ class InverseQuadraticCurve:
             ) from e
 
 
-
-
-
 class EffTox(EfficacyToxicityDoseFindingTrial):
     """An object-oriented implementation of Thall & Cook's EffTox trial design.
 
@@ -651,12 +717,12 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         """Get summary functions for the EffTox protocol."""
         return {
             "N": lambda s, p: len(s),
-            "recommended_dose_prob": lambda s, p: pd.Series(
-                [x.get("RecommendedDose") for x in s]
-            )
-            .value_counts(normalize=True)
-            .sort_index()
-            .to_dict(),
+            "recommended_dose_prob": lambda s, p: (
+                pd.Series([x.get("RecommendedDose") for x in s])
+                .value_counts(normalize=True)
+                .sort_index()
+                .to_dict()
+            ),
             "prob_accept_tox": lambda s, p: pd.Series(
                 [x.get(f"ProbAccTox{x.get('RecommendedDose')}", 0) > 0.5 for x in s]
             ).mean(),
@@ -665,7 +731,28 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             ).mean(),
         }
 
-    def __init__(self, *, real_doses: Any, theta_priors: Any = None, tox_cutoff: Any = None, eff_cutoff: Any = None, tox_certainty: Any = None, eff_certainty: Any = None, metric: Any = None, max_size: Any = None, first_dose: Any = None, prior_tox_probs: Any = None, prior_eff_probs: Any = None, avoid_skipping_untried_escalation: Any = True, avoid_skipping_untried_deescalation: Any = True, num_integral_steps: Any = 10**5, epsilon: Any = 1e-6, k_sd: Any = 6.0, max_iter: Any = 3, mass_threshold: Any = 0.999999) -> None:
+    def __init__(
+        self,
+        *,
+        real_doses: Any,
+        theta_priors: Any = None,
+        tox_cutoff: Any = None,
+        eff_cutoff: Any = None,
+        tox_certainty: Any = None,
+        eff_certainty: Any = None,
+        metric: Any = None,
+        max_size: Any = None,
+        first_dose: Any = None,
+        prior_tox_probs: Any = None,
+        prior_eff_probs: Any = None,
+        avoid_skipping_untried_escalation: Any = True,
+        avoid_skipping_untried_deescalation: Any = True,
+        num_integral_steps: Any = 10**5,
+        epsilon: Any = 1e-6,
+        k_sd: Any = 6.0,
+        max_iter: Any = 3,
+        mass_threshold: Any = 0.999999,
+    ) -> None:
         """Initializes an EffTox trial object.
 
         Args:
@@ -744,7 +831,10 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         first_dose = config.first_dose
 
         EfficacyToxicityDoseFindingTrial.__init__(
-            self, first_dose=first_dose, num_doses=len(real_doses), max_size=config.max_size  # type: ignore
+            self,
+            first_dose=first_dose,
+            num_doses=len(real_doses),
+            max_size=config.max_size,  # type: ignore
         )
 
         if theta_priors is None:
@@ -823,7 +913,9 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         self.utility = utility
         self.pds = _pds
 
-    def _calculate_next_dose(self, n: Any = None, rng: Any = None, **kwargs: Any) -> Any:
+    def _calculate_next_dose(
+        self, n: Any = None, rng: Any = None, **kwargs: Any
+    ) -> Any:
         if n is None:
             n = self.num_integral_steps
         self._update_integrals(n, rng, **kwargs)
@@ -952,7 +1044,6 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         """
         return self._scaled_doses
 
-
     def prob_superior_utility(self, dl1: Any, dl2: Any) -> Any:
         """Calculates the probability that one dose has superior utility over another.
 
@@ -998,7 +1089,9 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
         return superiority_mat
 
 
-def solve_metrizable_efftox_scenario(prob_tox: Any, prob_eff: Any, metric: Any, tox_cutoff: Any, eff_cutoff: Any) -> Any:
+def solve_metrizable_efftox_scenario(
+    prob_tox: Any, prob_eff: Any, metric: Any, tox_cutoff: Any, eff_cutoff: Any
+) -> Any:
     """Solves a metrizable efficacy-toxicity dose-finding scenario.
 
     Args:
@@ -1031,10 +1124,16 @@ def solve_metrizable_efftox_scenario(prob_tox: Any, prob_eff: Any, metric: Any, 
 
     if np.all(np.isnan(util)):
         import warnings
-        warnings.warn("All NaN util encountered in solve_metrizable_efftox_scenario", category=RuntimeWarning, stacklevel=2)
+
+        warnings.warn(
+            "All NaN util encountered in solve_metrizable_efftox_scenario",
+            category=RuntimeWarning,
+            stacklevel=2,
+        )
         return conform, util, np.nan, -1, np.nan
     elif np.all(np.isnan(conform_util)):
         import warnings
+
         warnings.warn(
             "All NaN conform_util encountered in solve_metrizable_efftox_scenario",
             category=RuntimeWarning,
@@ -1116,4 +1215,5 @@ __all__ = [
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)
