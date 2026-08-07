@@ -7574,6 +7574,95 @@
           "default": null
         }
       ]
+    },
+    "CRMOutput": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_ONLY",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "beta_hat": {
+          "type": "property"
+        },
+        "count": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_ONLY",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "value",
+              "kind": "POSITIONAL_ONLY",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "dose": {
+          "type": "property"
+        },
+        "index": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_ONLY",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "value",
+              "kind": "POSITIONAL_ONLY",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "start",
+              "kind": "POSITIONAL_ONLY",
+              "annotation": null,
+              "default": "0"
+            },
+            {
+              "name": "stop",
+              "kind": "POSITIONAL_ONLY",
+              "annotation": null,
+              "default": "9223372036854775807"
+            }
+          ]
+        },
+        "post_tox": {
+          "type": "property"
+        },
+        "se": {
+          "type": "property"
+        },
+        "var": {
+          "type": "property"
+        }
+      }
     }
   },
   "clintrials.dosefinding.efficacytoxicity": {
