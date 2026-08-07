@@ -433,7 +433,7 @@ class WATU(EfficacyToxicityDoseFindingTrial):
 
         sub_skeleton = skeleton[middle_mask]
         eff_cutoff_clipped = np.maximum(eff_cutoff, 1e-9)
-        thresholds = np.log(eff_cutoff_clipped) / np.log(sub_skeleton)
+        thresholds = np.log(np.log(eff_cutoff_clipped) / np.log(sub_skeleton))
 
         if backend == "analytic":
             theta_sd = np.sqrt(self.model_theta_var())
