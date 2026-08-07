@@ -19,7 +19,7 @@ __contact__ = "kristian.brock@gmail.com"
 from scipy.integrate import quad
 
 from clintrials.core.math import empiric, inverse_empiric
-from clintrials.core.stats import norm  # type: ignore
+from clintrials.core.stats import norm
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 from clintrials.dosefinding.efftox import solve_metrizable_efftox_scenario

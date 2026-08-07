@@ -14,7 +14,7 @@ from scipy.optimize import brentq
 from scipy.stats import multivariate_normal
 
 from clintrials.core.registry import CORE_REGISTRY, inject_docs
-from clintrials.core.stats import norm  # type: ignore
+from clintrials.core.stats import norm
 from clintrials.utils import deprecated
 
 

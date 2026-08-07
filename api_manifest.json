@@ -998,6 +998,4238 @@
       }
     }
   },
+  "clintrials.cli.validation_runner": {
+    "AccessiblePDF": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "title",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'Trial Simulation Report'"
+            }
+          ]
+        },
+        "accept_page_break": {
+          "type": "property"
+        },
+        "accessible_table": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "add_action": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "action",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Action",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "add_font": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "family",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            },
+            {
+              "name": "fname",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "unicode_range",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "variations",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "palette",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "collection_font_number",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "int",
+              "default": "0"
+            }
+          ]
+        },
+        "add_h1": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "add_highlight": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "add_link": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "page",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "-1"
+            },
+            {
+              "name": "zoom",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | float",
+              "default": "'null'"
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "add_output_intent": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "subtype",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "OutputIntentSubType",
+              "default": null
+            },
+            {
+              "name": "output_condition_identifier",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "output_condition",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "registry_name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "dest_output_profile",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "info",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "add_p": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "add_page": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "orientation",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            },
+            {
+              "name": "format",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            },
+            {
+              "name": "same",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "duration",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "transition",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "label_style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "label_prefix",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "label_start",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "add_text_markup_annotation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "type",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "fpdf.enums.TextMarkupType | str",
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "quad_points",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Sequence",
+              "default": null
+            },
+            {
+              "name": "color",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple",
+              "default": "(1, 1, 0)"
+            },
+            {
+              "name": "modification_time",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "page",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "alias_nb_pages": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "alias",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'{nb}'"
+            }
+          ]
+        },
+        "arc": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "a",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "start_angle",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "end_angle",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "b",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "inclination",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "clockwise",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "start_from_center",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "end_at_center",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "artifact": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "artifact_type",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "'Layout'"
+            }
+          ]
+        },
+        "bezier": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "point_list",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Sequence",
+              "default": null
+            },
+            {
+              "name": "closed",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "cell": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            },
+            {
+              "name": "border",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "0"
+            },
+            {
+              "name": "ln",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Literal",
+              "default": "'DEPRECATED'"
+            },
+            {
+              "name": "align",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | fpdf.enums.Align",
+              "default": "<Align.L: 'LEFT'>"
+            },
+            {
+              "name": "fill",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "link",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "''"
+            },
+            {
+              "name": "center",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "markdown",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "new_x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | fpdf.enums.XPos",
+              "default": "<XPos.RIGHT: 'RIGHT'>"
+            },
+            {
+              "name": "new_y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | fpdf.enums.YPos",
+              "default": "<YPos.TOP: 'TOP'>"
+            }
+          ]
+        },
+        "char_spacing": {
+          "type": "property"
+        },
+        "char_vpos": {
+          "type": "property"
+        },
+        "circle": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "radius",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "clear_text_region": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "code39": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1.5"
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "5"
+            }
+          ]
+        },
+        "current_font": {
+          "type": "property"
+        },
+        "current_font_is_set_on_page": {
+          "type": "property"
+        },
+        "dash_pattern": {
+          "type": "property"
+        },
+        "dashed_line": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x1",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y1",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "x2",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y2",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "dash_length",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            },
+            {
+              "name": "space_length",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            }
+          ]
+        },
+        "default_page_dimensions": {
+          "type": "property"
+        },
+        "denom_lift": {
+          "type": "property"
+        },
+        "denom_scale": {
+          "type": "property"
+        },
+        "draw_color": {
+          "type": "property"
+        },
+        "draw_path": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "path",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "GraphicsContext",
+              "default": null
+            },
+            {
+              "name": "debug_stream",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "copy",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        "draw_vector_glyph": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "path",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            },
+            {
+              "name": "font",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Type3Font",
+              "default": null
+            }
+          ]
+        },
+        "drawing_context": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "debug_stream",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "ellipse": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "elliptic_clip": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "embed_file": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "file_path",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "bytes",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "basename",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "modification_date",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "mime_type",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "associated_file_relationship",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "emphasis": {
+          "type": "property"
+        },
+        "eph": {
+          "type": "property"
+        },
+        "epw": {
+          "type": "property"
+        },
+        "file_attachment_annotation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "file_path",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | pathlib.Path",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "flags",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple",
+              "default": "(<AnnotationFlag.PRINT: 4>,)"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "file_id": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "fill_color": {
+          "type": "property"
+        },
+        "font_face": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "font_family": {
+          "type": "property"
+        },
+        "font_size": {
+          "type": "property"
+        },
+        "font_size_pt": {
+          "type": "property"
+        },
+        "font_stretching": {
+          "type": "property"
+        },
+        "font_style": {
+          "type": "property"
+        },
+        "fonts": {
+          "type": "property"
+        },
+        "footer": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "free_text_annotation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "get_fallback_font": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "char",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            }
+          ]
+        },
+        "get_named_destination": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "get_page_label": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "get_string_width": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "s",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "normalized",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "markdown",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        "get_x": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "get_y": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "glyph_drawing_context": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "header": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "highlight": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "type",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "fpdf.enums.TextMarkupType | str",
+              "default": "'Highlight'"
+            },
+            {
+              "name": "color",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple",
+              "default": "(1, 1, 0)"
+            },
+            {
+              "name": "modification_time",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "image": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "type",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "''"
+            },
+            {
+              "name": "link",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "''"
+            },
+            {
+              "name": "title",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "alt_text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "dims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "keep_aspect_ratio",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        "ink_annotation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "coords",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Sequence",
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            },
+            {
+              "name": "color",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple",
+              "default": "(1, 1, 0)"
+            },
+            {
+              "name": "border_width",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "insert_toc_placeholder": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "render_toc_function",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Callable",
+              "default": null
+            },
+            {
+              "name": "pages",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "1"
+            },
+            {
+              "name": "allow_extra_pages",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "reset_page_indices",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        "interleaved2of5": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "10"
+            }
+          ]
+        },
+        "is_current_text_region": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "region",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            }
+          ]
+        },
+        "is_ttf_font": {
+          "type": "property"
+        },
+        "line": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x1",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y1",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "x2",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y2",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "line_width": {
+          "type": "property"
+        },
+        "link": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "link",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | int",
+              "default": null
+            },
+            {
+              "name": "alt_text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "ln": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "local_context": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "mark_text": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "struct_type",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": "'/P'"
+            }
+          ]
+        },
+        "mirror": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "origin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple",
+              "default": null
+            },
+            {
+              "name": "angle",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "fpdf.enums.Angle | str | float",
+              "default": null
+            }
+          ]
+        },
+        "multi_cell": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            },
+            {
+              "name": "border",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "0"
+            },
+            {
+              "name": "align",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | fpdf.enums.Align",
+              "default": "<Align.J: 'JUSTIFY'>"
+            },
+            {
+              "name": "fill",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "split_only",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "link",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "ln",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Literal",
+              "default": "'DEPRECATED'"
+            },
+            {
+              "name": "max_line_height",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "markdown",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "print_sh",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "new_x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | fpdf.enums.XPos",
+              "default": "<XPos.RIGHT: 'RIGHT'>"
+            },
+            {
+              "name": "new_y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | fpdf.enums.YPos",
+              "default": "<YPos.NEXT: 'NEXT'>"
+            },
+            {
+              "name": "wrapmode",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "WrapMode",
+              "default": "<WrapMode.WORD: 'WORD'>"
+            },
+            {
+              "name": "dry_run",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "output",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | fpdf.enums.MethodReturnValue",
+              "default": "<MethodReturnValue.PAGE_BREAK: 1>"
+            },
+            {
+              "name": "center",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "padding",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "0"
+            }
+          ]
+        },
+        "new_path": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "paint_rule",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "PathPaintRule",
+              "default": "<PathPaintRule.AUTO: 'auto'>"
+            },
+            {
+              "name": "debug_stream",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "nom_lift": {
+          "type": "property"
+        },
+        "nom_scale": {
+          "type": "property"
+        },
+        "normalize_text": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "offset_rendering": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "output": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "''"
+            },
+            {
+              "name": "linearize",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "output_producer_class",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Type",
+              "default": "<class 'fpdf.output.OutputProducer'>"
+            }
+          ]
+        },
+        "output_intents": {
+          "type": "property"
+        },
+        "page_layout": {
+          "type": "property"
+        },
+        "page_mode": {
+          "type": "property"
+        },
+        "page_no": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "pages_count": {
+          "type": "property"
+        },
+        "polygon": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "point_list",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Sequence",
+              "default": null
+            },
+            {
+              "name": "fill",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "polyline": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "point_list",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Sequence",
+              "default": null
+            },
+            {
+              "name": "fill",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "polygon",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "preload_glyph_image": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "glyph_image_bytes",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bytes | typing.BinaryIO",
+              "default": null
+            }
+          ]
+        },
+        "preload_image": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | bytes | typing.BinaryIO | PIL.Image.Image | pathlib.Path",
+              "default": null
+            },
+            {
+              "name": "dims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple[float, float] | None",
+              "default": "None"
+            }
+          ]
+        },
+        "rect": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "round_corners",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "corner_radius",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            }
+          ]
+        },
+        "rect_clip": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "register_text_region": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "region",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            }
+          ]
+        },
+        "regular_polygon": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "numSides",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "polyWidth",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "rotateDegrees",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "rotate": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "angle",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "rotation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "angle",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "round_clip": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "r",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_author": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "author",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            }
+          ]
+        },
+        "set_auto_page_break": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "auto",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": null
+            },
+            {
+              "name": "margin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            }
+          ]
+        },
+        "set_char_spacing": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "spacing",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_compression": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "compress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": null
+            }
+          ]
+        },
+        "set_creation_date": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "date",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "set_creator": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "creator",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_dash_pattern": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "dash",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "gap",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "phase",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            }
+          ]
+        },
+        "set_display_mode": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "zoom",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | float",
+              "default": null
+            },
+            {
+              "name": "layout",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'continuous'"
+            }
+          ]
+        },
+        "set_doc_option": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "opt",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Literal",
+              "default": null
+            },
+            {
+              "name": "value",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_draw_color": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "r",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            },
+            {
+              "name": "g",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "-1"
+            },
+            {
+              "name": "b",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "-1"
+            }
+          ]
+        },
+        "set_encryption": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "owner_password",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "user_password",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "encryption_method",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "EncryptionMethod",
+              "default": "<EncryptionMethod.RC4: 1>"
+            },
+            {
+              "name": "permissions",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "3900"
+            },
+            {
+              "name": "encrypt_metadata",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        "set_fallback_fonts": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "fallback_fonts",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Sequence",
+              "default": null
+            },
+            {
+              "name": "exact_match",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        "set_fill_color": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "r",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            },
+            {
+              "name": "g",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "-1"
+            },
+            {
+              "name": "b",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "-1"
+            }
+          ]
+        },
+        "set_font": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "family",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "''"
+            },
+            {
+              "name": "size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            }
+          ]
+        },
+        "set_font_size": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_image_filter": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "image_filter",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_keywords": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "keywords",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            }
+          ]
+        },
+        "set_lang": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "lang",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_left_margin": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "margin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_line_width": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "width",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_link": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "link",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "page",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "-1"
+            },
+            {
+              "name": "zoom",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float | str",
+              "default": "'null'"
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "set_margin": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "margin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_margins": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "left",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "top",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "right",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "-1"
+            }
+          ]
+        },
+        "set_page_background": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "background",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            }
+          ]
+        },
+        "set_page_label": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "label_style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "label_prefix",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "label_start",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "set_producer": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "producer",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_right_margin": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "margin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_section_title_styles": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "level0",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "TextStyle",
+              "default": null
+            },
+            {
+              "name": "level1",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "level2",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "level3",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "level4",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "level5",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "level6",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "set_stretching": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "stretching",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_subject": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "subject",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_text_color": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "r",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": null
+            },
+            {
+              "name": "g",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "-1"
+            },
+            {
+              "name": "b",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "-1"
+            }
+          ]
+        },
+        "set_text_shaping": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "use_shaping_engine",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            },
+            {
+              "name": "features",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "direction",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "script",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "language",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "set_title": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "title",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_top_margin": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "margin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_x": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_xmp_metadata": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "xmp_metadata",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            }
+          ]
+        },
+        "set_xy": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "set_y": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "sign": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "key",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": null
+            },
+            {
+              "name": "cert",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Certificate",
+              "default": null
+            },
+            {
+              "name": "extra_certs",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "hashalgo",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'sha256'"
+            },
+            {
+              "name": "contact_info",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "location",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "signing_time",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "reason",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "flags",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple",
+              "default": "(<AnnotationFlag.PRINT: 4>, <AnnotationFlag.LOCKED: 128>)"
+            }
+          ]
+        },
+        "sign_pkcs12": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "pkcs_filepath",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str | pathlib.Path",
+              "default": null
+            },
+            {
+              "name": "password",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "hashalgo",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'sha256'"
+            },
+            {
+              "name": "contact_info",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "location",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "signing_time",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "reason",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "flags",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "tuple",
+              "default": "(<AnnotationFlag.PRINT: 4>, <AnnotationFlag.LOCKED: 128>)"
+            }
+          ]
+        },
+        "skew": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "ax",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "ay",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            }
+          ]
+        },
+        "solid_arc": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "a",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "start_angle",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "end_angle",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "b",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "inclination",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "clockwise",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "star": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "r_in",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "r_out",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "corners",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "rotate_degrees",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0"
+            },
+            {
+              "name": "style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            }
+          ]
+        },
+        "start_section": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "level",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "0"
+            },
+            {
+              "name": "strict",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ]
+        },
+        "strikethrough": {
+          "type": "property"
+        },
+        "sub_lift": {
+          "type": "property"
+        },
+        "sub_scale": {
+          "type": "property"
+        },
+        "sup_lift": {
+          "type": "property"
+        },
+        "sup_scale": {
+          "type": "property"
+        },
+        "table": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "text": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            }
+          ]
+        },
+        "text_annotation": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "y",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "1"
+            },
+            {
+              "name": "name",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "None"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "text_color": {
+          "type": "property"
+        },
+        "text_columns": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "img",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "img_fill_width",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "ncols",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": "1"
+            },
+            {
+              "name": "gutter",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "10"
+            },
+            {
+              "name": "balance",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "text_align",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "'LEFT'"
+            },
+            {
+              "name": "line_height",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "1"
+            },
+            {
+              "name": "l_margin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "r_margin",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "print_sh",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "False"
+            },
+            {
+              "name": "wrapmode",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "<WrapMode.WORD: 'WORD'>"
+            },
+            {
+              "name": "skip_leading_spaces",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "False"
+            }
+          ]
+        },
+        "text_mode": {
+          "type": "property"
+        },
+        "text_shaping": {
+          "type": "property"
+        },
+        "transform": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "transform",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Transform",
+              "default": null
+            }
+          ]
+        },
+        "unbreakable": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "underline": {
+          "type": "property"
+        },
+        "use_font_face": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "font_face",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "FontFace",
+              "default": null
+            }
+          ]
+        },
+        "use_pattern": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "shading",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Gradient",
+              "default": null
+            }
+          ]
+        },
+        "use_text_style": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text_style",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "TextStyle",
+              "default": null
+            }
+          ]
+        },
+        "will_page_break": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "height",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            }
+          ]
+        },
+        "write": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "''"
+            },
+            {
+              "name": "link",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Union",
+              "default": "''"
+            },
+            {
+              "name": "print_sh",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "wrapmode",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "WrapMode",
+              "default": "<WrapMode.WORD: 'WORD'>"
+            }
+          ]
+        },
+        "write_html": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "text",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": null
+            },
+            {
+              "name": "args",
+              "kind": "VAR_POSITIONAL",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "x_by_align": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "x",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "fpdf.enums.Align | str",
+              "default": null
+            },
+            {
+              "name": "w",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "h",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "img_info",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "fpdf.image_datastructures.RasterImageInfo | fpdf.image_datastructures.VectorImageInfo",
+              "default": null
+            },
+            {
+              "name": "keep_aspect_ratio",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": null
+            }
+          ]
+        }
+      }
+    },
+    "GroupSequentialDesign": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "k",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "alpha",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0.025"
+            },
+            {
+              "name": "sfu",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Callable[[float, float], float]",
+              "default": "<function spending_function_obrien_fleming at 0x...>"
+            },
+            {
+              "name": "timing",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "List[float]",
+              "default": "None"
+            }
+          ]
+        },
+        "has_more": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "report": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        },
+        "rng": {
+          "type": "property"
+        },
+        "run": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "method",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "str",
+              "default": "'iterative'"
+            },
+            {
+              "name": "seed",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Optional[int]",
+              "default": "None"
+            },
+            {
+              "name": "show_progress",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "False"
+            },
+            {
+              "name": "kwargs",
+              "kind": "VAR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "schema": {
+          "type": "property"
+        },
+        "set_rng": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "rng",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "simulate": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "n_sims",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            },
+            {
+              "name": "theta",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "0.0"
+            }
+          ]
+        },
+        "update": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "z_score",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "info",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": "None"
+            }
+          ]
+        }
+      }
+    },
+    "LpNormCurve": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "minimum_tolerable_efficacy",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "maximum_tolerable_toxicity",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "hinge_prob_eff",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "hinge_prob_tox",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            }
+          ]
+        },
+        "get_tox": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "eff",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "util",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": "0.0"
+            }
+          ]
+        },
+        "solve": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "delta",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "prob_eff",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Any",
+              "default": "None"
+            },
+            {
+              "name": "prob_tox",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Any",
+              "default": "None"
+            },
+            {
+              "name": "bounds",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Any",
+              "default": "(0, 1)"
+            },
+            {
+              "name": "tol",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Any",
+              "default": "1e-06"
+            },
+            {
+              "name": "maxiter",
+              "kind": "KEYWORD_ONLY",
+              "annotation": "Any",
+              "default": "100"
+            }
+          ]
+        }
+      }
+    },
+    "calculate_codebase_hash": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "root_dir",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Path",
+          "default": null
+        }
+      ]
+    },
+    "get_environment_info": {
+      "type": "function",
+      "parameters": []
+    },
+    "main": {
+      "type": "function",
+      "parameters": []
+    },
+    "run_validations": {
+      "type": "function",
+      "parameters": []
+    },
+    "spending_function_obrien_fleming": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "t",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "alpha",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        }
+      ]
+    }
+  },
   "clintrials.core": {
     "Protocol": {
       "type": "class",
@@ -19428,7 +23660,7 @@
             {
               "name": "title",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "str",
               "default": "'Trial Simulation Report'"
             }
           ]
@@ -19571,7 +23803,7 @@
             {
               "name": "text",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "str",
               "default": null
             }
           ]
@@ -19699,7 +23931,7 @@
             {
               "name": "text",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": null,
+              "annotation": "str",
               "default": null
             }
           ]
@@ -23510,19 +27742,19 @@
         {
           "name": "df",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "design_type",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "text_summaries",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "list[Any] | None",
           "default": "None"
         }
       ]

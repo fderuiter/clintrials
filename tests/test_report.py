@@ -40,7 +40,7 @@ def test_generate_pdf_report():
         TextSection("This is a paragraph."),
         MultiFormatSummaryContainer(title="Table 1", df=df)
     ]
-    pdf_bytes = generate_pdf_report(df=df, design_type="My Design", text_summaries=text_summaries)  # type: ignore
+    pdf_bytes = generate_pdf_report(df=df, design_type="My Design", text_summaries=text_summaries)
     assert isinstance(pdf_bytes, bytearray) or isinstance(pdf_bytes, bytes)
 
 from clintrials.visualization.report import (
@@ -52,7 +52,7 @@ from clintrials.visualization.report import (
 
 def test_pdf_structural_nesting_and_mcid():
     """Validates that Tables, TR, TD are nested properly and MCIDs are assigned correctly."""
-    pdf = AccessiblePDF()  # type: ignore
+    pdf = AccessiblePDF()
     pdf.set_font("helvetica", "", 12)
     # The output stream must not be compressed for our basic parser
     pdf.set_compression(False)
@@ -98,7 +98,7 @@ def test_pdf_structural_nesting_and_mcid():
 
 def test_artifact_tagging():
     """Validates that decorative elements can be tagged as artifacts."""
-    pdf = AccessiblePDF()  # type: ignore
+    pdf = AccessiblePDF()
     pdf.set_font("helvetica", "", 12)
     pdf.set_compression(False)
 

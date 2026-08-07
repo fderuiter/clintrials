@@ -15,7 +15,7 @@ __contact__ = "kristian.brock@gmail.com"
 from typing import Any, Callable
 
 import numpy as np
-from scipy.stats import norm
+from scipy.stats import norm as norm
 
 
 class ProbabilityDensitySample:

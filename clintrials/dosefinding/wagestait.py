@@ -23,7 +23,7 @@ from clintrials.core.math import (  # noqa: F401
     empiric,
     inverse_empiric,
 )
-from clintrials.core.stats import norm  # type: ignore
+from clintrials.core.stats import norm
 from clintrials.dosefinding.crm import CRM
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 

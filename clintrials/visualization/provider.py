@@ -528,7 +528,7 @@ class DefaultVisualizationProvider(VisualizationProvider):
             import warnings
             warnings.warn("PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`.")
             return None
-        return _gen_pdf(df, design_type, text_summaries)  # type: ignore
+        return _gen_pdf(df, design_type, text_summaries)
 
     def plot_crm_simulation_recommendation(self, summary_df, high_contrast=False):  # type: ignore
         """Plots CRM simulation recommendation probabilities."""
