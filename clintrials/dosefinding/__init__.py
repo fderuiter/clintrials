@@ -443,6 +443,7 @@ def simulate_dose_finding_trial(
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
         try:
+
             def had_tox(x: Any) -> Any:
                 return x < np.array(true_toxicities)
 

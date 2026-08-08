@@ -62,7 +62,7 @@ class VisualizationProvider(abc.ABC):
         )
 
     def create_bar_chart(  # type: ignore
-         self, df, x, y, color, title, labels=None, high_contrast=False
+        self, df, x, y, color, title, labels=None, high_contrast=False
     ):
         """Creates a centralized bar chart with accessibility standards."""
         from clintrials.visualization.provider import get_default_provider

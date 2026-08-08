@@ -43,7 +43,9 @@ def test_generate_pdf_report():
         TextSection("This is a paragraph."),
         MultiFormatSummaryContainer(title="Table 1", df=df),
     ]
-    pdf_bytes = generate_pdf_report(df=df, design_type="My Design", text_summaries=text_summaries)
+    pdf_bytes = generate_pdf_report(
+        df=df, design_type="My Design", text_summaries=text_summaries
+    )
     assert isinstance(pdf_bytes, bytearray) or isinstance(pdf_bytes, bytes)
 
 

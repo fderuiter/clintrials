@@ -125,7 +125,10 @@ class ProtocolRegistry:
         return decorator
 
     def register_manual(
-        self, name: str, render_func: Callable[..., Any], preview_func: Optional[Callable[..., Any]] = None
+        self,
+        name: str,
+        render_func: Callable[..., Any],
+        preview_func: Optional[Callable[..., Any]] = None,
     ) -> None:
         """Manually register a protocol design with its render and preview functions."""
         if name in self._designs:

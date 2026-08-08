@@ -351,7 +351,9 @@ def compare_manifests(
                     b_ret = b_method_info.get("returns")
                     c_ret_exists = "returns" in c_method_info
                     c_ret = c_method_info.get("returns")
-                    ret_diffs = compare_return_types(b_ret_exists, b_ret, c_ret_exists, c_ret)
+                    ret_diffs = compare_return_types(
+                        b_ret_exists, b_ret, c_ret_exists, c_ret
+                    )
                     for r_diff in ret_diffs:
                         diffs.append(
                             f"Return type for member '{name}.{method}' changed: {r_diff}."
@@ -376,7 +378,9 @@ def compare_manifests(
                 b_ret = baseline_obj.get("returns")
                 c_ret_exists = "returns" in current_obj
                 c_ret = current_obj.get("returns")
-                ret_diffs = compare_return_types(b_ret_exists, b_ret, c_ret_exists, c_ret)
+                ret_diffs = compare_return_types(
+                    b_ret_exists, b_ret, c_ret_exists, c_ret
+                )
                 for r_diff in ret_diffs:
                     diffs.append(
                         f"Return type for function '{name}' changed: {r_diff}."

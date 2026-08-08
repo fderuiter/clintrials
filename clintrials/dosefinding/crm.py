@@ -125,7 +125,12 @@ class CRMOutput(tuple[Any, ...]):
 
 
 def _toxicity_likelihood(
-    link_func: Callable[..., Any], a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False
+    link_func: Callable[..., Any],
+    a0: Any,
+    beta: Any,
+    dose: Any,
+    tox: Any,
+    log: Any = False,
 ) -> Any:
     """Calculates the likelihood of a single toxicity outcome.
 
@@ -146,7 +151,12 @@ def _toxicity_likelihood(
 
 
 def _compound_toxicity_likelihood(
-    link_func: Callable[..., Any], a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False
+    link_func: Callable[..., Any],
+    a0: Any,
+    beta: Any,
+    doses: Any,
+    toxs: Any,
+    log: Any = False,
 ) -> Any:
     """Calculates the compound likelihood of multiple toxicity outcomes.
 
