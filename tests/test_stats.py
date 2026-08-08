@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT
+"""Unit tests for statistical utility functions and probability density samples."""
 
 
 import numpy as np
