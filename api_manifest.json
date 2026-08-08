@@ -1059,10 +1059,12 @@
               "annotation": "str",
               "default": "'Trial Simulation Report'"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "accept_page_break": {
-          "type": "property"
+          "type": "property",
+          "returns": "bool"
         },
         "accessible_table": {
           "type": "method",
@@ -1085,7 +1087,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": null
         },
         "add_action": {
           "type": "method",
@@ -1132,7 +1135,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "AnnotationDict"
         },
         "add_font": {
           "type": "method",
@@ -1185,7 +1189,8 @@
               "annotation": "int",
               "default": "0"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "add_h1": {
           "type": "method",
@@ -1202,7 +1207,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "add_highlight": {
           "type": "method",
@@ -1225,7 +1231,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "add_link": {
           "type": "method",
@@ -1266,7 +1273,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "int"
         },
         "add_output_intent": {
           "type": "method",
@@ -1313,7 +1321,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "add_p": {
           "type": "method",
@@ -1330,7 +1339,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "add_page": {
           "type": "method",
@@ -1389,7 +1399,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "add_text_markup_annotation": {
           "type": "method",
@@ -1442,7 +1453,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "AnnotationDict"
         },
         "alias_nb_pages": {
           "type": "method",
@@ -1459,7 +1471,8 @@
               "annotation": "str",
               "default": "'{nb}'"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "arc": {
           "type": "method",
@@ -1536,7 +1549,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "artifact": {
           "type": "method",
@@ -1553,7 +1567,8 @@
               "annotation": null,
               "default": "'Layout'"
             }
-          ]
+          ],
+          "returns": null
         },
         "bezier": {
           "type": "method",
@@ -1582,7 +1597,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "cell": {
           "type": "method",
@@ -1665,13 +1681,16 @@
               "annotation": "str | fpdf.enums.YPos",
               "default": "<YPos.TOP: 'TOP'>"
             }
-          ]
+          ],
+          "returns": "bool"
         },
         "char_spacing": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "char_vpos": {
-          "type": "property"
+          "type": "property",
+          "returns": "CharVPos"
         },
         "circle": {
           "type": "method",
@@ -1706,7 +1725,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "clear_text_region": {
           "type": "method",
@@ -1717,7 +1737,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "code39": {
           "type": "method",
@@ -1758,16 +1779,20 @@
               "annotation": "float",
               "default": "5"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "current_font": {
-          "type": "property"
+          "type": "property",
+          "returns": "Union"
         },
         "current_font_is_set_on_page": {
-          "type": "property"
+          "type": "property",
+          "returns": "bool"
         },
         "dash_pattern": {
-          "type": "property"
+          "type": "property",
+          "returns": "dict"
         },
         "dashed_line": {
           "type": "method",
@@ -1814,19 +1839,24 @@
               "annotation": "float",
               "default": "1"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "default_page_dimensions": {
-          "type": "property"
+          "type": "property",
+          "returns": "tuple"
         },
         "denom_lift": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "denom_scale": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "draw_color": {
-          "type": "property"
+          "type": "property",
+          "returns": "Union"
         },
         "draw_path": {
           "type": "method",
@@ -1855,7 +1885,8 @@
               "annotation": "bool",
               "default": "True"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "draw_vector_glyph": {
           "type": "method",
@@ -1878,7 +1909,8 @@
               "annotation": "Type3Font",
               "default": null
             }
-          ]
+          ],
+          "returns": "str"
         },
         "drawing_context": {
           "type": "method",
@@ -1895,7 +1927,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "ellipse": {
           "type": "method",
@@ -1936,7 +1969,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "elliptic_clip": {
           "type": "method",
@@ -1971,7 +2005,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "embed_file": {
           "type": "method",
@@ -2024,16 +2059,20 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "PDFEmbeddedFile"
         },
         "emphasis": {
-          "type": "property"
+          "type": "property",
+          "returns": "TextEmphasis"
         },
         "eph": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "epw": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "file_attachment_annotation": {
           "type": "method",
@@ -2092,7 +2131,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "AnnotationDict"
         },
         "file_id": {
           "type": "method",
@@ -2103,10 +2143,12 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "Union"
         },
         "fill_color": {
-          "type": "property"
+          "type": "property",
+          "returns": "Union"
         },
         "font_face": {
           "type": "method",
@@ -2117,25 +2159,32 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "FontFace"
         },
         "font_family": {
-          "type": "property"
+          "type": "property",
+          "returns": "str"
         },
         "font_size": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "font_size_pt": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "font_stretching": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "font_style": {
-          "type": "property"
+          "type": "property",
+          "returns": "str"
         },
         "fonts": {
-          "type": "property"
+          "type": "property",
+          "returns": "dict"
         },
         "footer": {
           "type": "method",
@@ -2146,7 +2195,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "free_text_annotation": {
           "type": "method",
@@ -2193,7 +2243,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "AnnotationDict"
         },
         "get_fallback_font": {
           "type": "method",
@@ -2216,7 +2267,8 @@
               "annotation": "str",
               "default": "''"
             }
-          ]
+          ],
+          "returns": "Optional"
         },
         "get_named_destination": {
           "type": "method",
@@ -2233,7 +2285,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "str"
         },
         "get_page_label": {
           "type": "method",
@@ -2244,7 +2297,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "str"
         },
         "get_string_width": {
           "type": "method",
@@ -2273,7 +2327,8 @@
               "annotation": "bool",
               "default": "False"
             }
-          ]
+          ],
+          "returns": "float"
         },
         "get_x": {
           "type": "method",
@@ -2284,7 +2339,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "float"
         },
         "get_y": {
           "type": "method",
@@ -2295,7 +2351,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "float"
         },
         "glyph_drawing_context": {
           "type": "method",
@@ -2306,7 +2363,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "header": {
           "type": "method",
@@ -2317,7 +2375,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "highlight": {
           "type": "method",
@@ -2358,7 +2417,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "image": {
           "type": "method",
@@ -2435,7 +2495,8 @@
               "annotation": "bool",
               "default": "False"
             }
-          ]
+          ],
+          "returns": "fpdf.image_datastructures.RasterImageInfo | fpdf.image_datastructures.VectorImageInfo"
         },
         "ink_annotation": {
           "type": "method",
@@ -2476,7 +2537,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "AnnotationDict"
         },
         "insert_toc_placeholder": {
           "type": "method",
@@ -2511,7 +2573,8 @@
               "annotation": "bool",
               "default": "True"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "interleaved2of5": {
           "type": "method",
@@ -2552,7 +2615,8 @@
               "annotation": "float",
               "default": "10"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "is_current_text_region": {
           "type": "method",
@@ -2569,10 +2633,12 @@
               "annotation": "Union",
               "default": null
             }
-          ]
+          ],
+          "returns": "bool"
         },
         "is_ttf_font": {
-          "type": "property"
+          "type": "property",
+          "returns": "bool"
         },
         "line": {
           "type": "method",
@@ -2607,10 +2673,12 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "line_width": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "link": {
           "type": "method",
@@ -2663,7 +2731,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "AnnotationDict"
         },
         "ln": {
           "type": "method",
@@ -2680,7 +2749,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "local_context": {
           "type": "method",
@@ -2697,7 +2767,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "mark_text": {
           "type": "method",
@@ -2714,7 +2785,8 @@
               "annotation": null,
               "default": "'/P'"
             }
-          ]
+          ],
+          "returns": null
         },
         "mirror": {
           "type": "method",
@@ -2737,7 +2809,8 @@
               "annotation": "fpdf.enums.Angle | str | float",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "multi_cell": {
           "type": "method",
@@ -2862,7 +2935,8 @@
               "annotation": "Union",
               "default": "0"
             }
-          ]
+          ],
+          "returns": "bool | list[str] | float | tuple[bool, list[str]] | tuple[bool, float] | tuple[list[str], float] | tuple[bool, list[str], float]"
         },
         "new_path": {
           "type": "method",
@@ -2897,13 +2971,16 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "nom_lift": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "nom_scale": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "normalize_text": {
           "type": "method",
@@ -2920,7 +2997,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "str"
         },
         "offset_rendering": {
           "type": "method",
@@ -2931,7 +3009,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "output": {
           "type": "method",
@@ -2960,16 +3039,20 @@
               "annotation": "Type",
               "default": "<class 'fpdf.output.OutputProducer'>"
             }
-          ]
+          ],
+          "returns": "Optional"
         },
         "output_intents": {
-          "type": "property"
+          "type": "property",
+          "returns": "ValuesView"
         },
         "page_layout": {
-          "type": "property"
+          "type": "property",
+          "returns": "Optional"
         },
         "page_mode": {
-          "type": "property"
+          "type": "property",
+          "returns": "Optional"
         },
         "page_no": {
           "type": "method",
@@ -2980,10 +3063,12 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "int"
         },
         "pages_count": {
-          "type": "property"
+          "type": "property",
+          "returns": "int"
         },
         "polygon": {
           "type": "method",
@@ -3012,7 +3097,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "polyline": {
           "type": "method",
@@ -3047,7 +3133,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "preload_glyph_image": {
           "type": "method",
@@ -3064,7 +3151,8 @@
               "annotation": "bytes | typing.BinaryIO",
               "default": null
             }
-          ]
+          ],
+          "returns": "tuple"
         },
         "preload_image": {
           "type": "method",
@@ -3087,7 +3175,8 @@
               "annotation": "tuple[float, float] | None",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "tuple"
         },
         "rect": {
           "type": "method",
@@ -3140,7 +3229,8 @@
               "annotation": "float",
               "default": "0"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "rect_clip": {
           "type": "method",
@@ -3175,7 +3265,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "register_text_region": {
           "type": "method",
@@ -3192,7 +3283,8 @@
               "annotation": "Union",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "regular_polygon": {
           "type": "method",
@@ -3239,7 +3331,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "rotate": {
           "type": "method",
@@ -3268,7 +3361,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "rotation": {
           "type": "method",
@@ -3297,7 +3391,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "round_clip": {
           "type": "method",
@@ -3326,7 +3421,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "set_author": {
           "type": "method",
@@ -3343,7 +3439,8 @@
               "annotation": "Union",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_auto_page_break": {
           "type": "method",
@@ -3366,7 +3463,8 @@
               "annotation": "float",
               "default": "0"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_char_spacing": {
           "type": "method",
@@ -3383,7 +3481,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_compression": {
           "type": "method",
@@ -3400,7 +3499,8 @@
               "annotation": "bool",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_creation_date": {
           "type": "method",
@@ -3417,7 +3517,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_creator": {
           "type": "method",
@@ -3434,7 +3535,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_dash_pattern": {
           "type": "method",
@@ -3463,7 +3565,8 @@
               "annotation": "float",
               "default": "0"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_display_mode": {
           "type": "method",
@@ -3486,7 +3589,8 @@
               "annotation": "str",
               "default": "'continuous'"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_doc_option": {
           "type": "method",
@@ -3509,7 +3613,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_draw_color": {
           "type": "method",
@@ -3538,7 +3643,8 @@
               "annotation": "Union",
               "default": "-1"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_encryption": {
           "type": "method",
@@ -3579,7 +3685,8 @@
               "annotation": "bool",
               "default": "False"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_fallback_fonts": {
           "type": "method",
@@ -3602,7 +3709,8 @@
               "annotation": "bool",
               "default": "True"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_fill_color": {
           "type": "method",
@@ -3631,7 +3739,8 @@
               "annotation": "Union",
               "default": "-1"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_font": {
           "type": "method",
@@ -3660,7 +3769,8 @@
               "annotation": "float",
               "default": "0"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_font_size": {
           "type": "method",
@@ -3677,7 +3787,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_image_filter": {
           "type": "method",
@@ -3694,7 +3805,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_keywords": {
           "type": "method",
@@ -3711,7 +3823,8 @@
               "annotation": "Union",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_lang": {
           "type": "method",
@@ -3728,7 +3841,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_left_margin": {
           "type": "method",
@@ -3745,7 +3859,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_line_width": {
           "type": "method",
@@ -3762,7 +3877,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_link": {
           "type": "method",
@@ -3809,7 +3925,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "fpdf.syntax.DestinationXYZ | str"
         },
         "set_margin": {
           "type": "method",
@@ -3826,7 +3943,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_margins": {
           "type": "method",
@@ -3855,7 +3973,8 @@
               "annotation": "float",
               "default": "-1"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_page_background": {
           "type": "method",
@@ -3872,7 +3991,8 @@
               "annotation": "Union",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_page_label": {
           "type": "method",
@@ -3901,7 +4021,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_producer": {
           "type": "method",
@@ -3918,7 +4039,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_right_margin": {
           "type": "method",
@@ -3935,7 +4057,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_section_title_styles": {
           "type": "method",
@@ -3988,7 +4111,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_stretching": {
           "type": "method",
@@ -4005,7 +4129,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_subject": {
           "type": "method",
@@ -4022,7 +4147,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_text_color": {
           "type": "method",
@@ -4051,7 +4177,8 @@
               "annotation": "Union",
               "default": "-1"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_text_shaping": {
           "type": "method",
@@ -4092,7 +4219,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_title": {
           "type": "method",
@@ -4109,7 +4237,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_top_margin": {
           "type": "method",
@@ -4126,7 +4255,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_x": {
           "type": "method",
@@ -4143,7 +4273,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_xmp_metadata": {
           "type": "method",
@@ -4160,7 +4291,8 @@
               "annotation": "str",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_xy": {
           "type": "method",
@@ -4183,7 +4315,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "set_y": {
           "type": "method",
@@ -4200,7 +4333,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "sign": {
           "type": "method",
@@ -4265,7 +4399,8 @@
               "annotation": "tuple",
               "default": "(<AnnotationFlag.PRINT: 4>, <AnnotationFlag.LOCKED: 128>)"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "sign_pkcs12": {
           "type": "method",
@@ -4324,7 +4459,8 @@
               "annotation": "tuple",
               "default": "(<AnnotationFlag.PRINT: 4>, <AnnotationFlag.LOCKED: 128>)"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "skew": {
           "type": "method",
@@ -4359,7 +4495,8 @@
               "annotation": "Optional",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "solid_arc": {
           "type": "method",
@@ -4424,7 +4561,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "star": {
           "type": "method",
@@ -4477,7 +4615,8 @@
               "annotation": "Union",
               "default": "None"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "start_section": {
           "type": "method",
@@ -4506,22 +4645,28 @@
               "annotation": "bool",
               "default": "True"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "strikethrough": {
-          "type": "property"
+          "type": "property",
+          "returns": "bool"
         },
         "sub_lift": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "sub_scale": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "sup_lift": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "sup_scale": {
-          "type": "property"
+          "type": "property",
+          "returns": "float"
         },
         "table": {
           "type": "method",
@@ -4544,7 +4689,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "text": {
           "type": "method",
@@ -4573,7 +4719,8 @@
               "annotation": "str",
               "default": "''"
             }
-          ]
+          ],
+          "returns": "None"
         },
         "text_annotation": {
           "type": "method",
@@ -4626,10 +4773,12 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "AnnotationDict"
         },
         "text_color": {
-          "type": "property"
+          "type": "property",
+          "returns": "Union"
         },
         "text_columns": {
           "type": "method",
@@ -4718,13 +4867,16 @@
               "annotation": "Optional",
               "default": "False"
             }
-          ]
+          ],
+          "returns": "TextColumns"
         },
         "text_mode": {
-          "type": "property"
+          "type": "property",
+          "returns": "TextMode"
         },
         "text_shaping": {
-          "type": "property"
+          "type": "property",
+          "returns": "Optional"
         },
         "transform": {
           "type": "method",
@@ -4741,7 +4893,8 @@
               "annotation": "Transform",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "unbreakable": {
           "type": "method",
@@ -4752,10 +4905,12 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "underline": {
-          "type": "property"
+          "type": "property",
+          "returns": "bool"
         },
         "use_font_face": {
           "type": "method",
@@ -4772,7 +4927,8 @@
               "annotation": "FontFace",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "use_pattern": {
           "type": "method",
@@ -4789,7 +4945,8 @@
               "annotation": "Gradient",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "use_text_style": {
           "type": "method",
@@ -4806,7 +4963,8 @@
               "annotation": "TextStyle",
               "default": null
             }
-          ]
+          ],
+          "returns": "Iterator"
         },
         "will_page_break": {
           "type": "method",
@@ -4823,7 +4981,8 @@
               "annotation": "float",
               "default": null
             }
-          ]
+          ],
+          "returns": "bool"
         },
         "write": {
           "type": "method",
@@ -4864,7 +5023,8 @@
               "annotation": "WrapMode",
               "default": "<WrapMode.WORD: 'WORD'>"
             }
-          ]
+          ],
+          "returns": "bool"
         },
         "write_html": {
           "type": "method",
@@ -4893,7 +5053,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "x_by_align": {
           "type": "method",
@@ -4934,7 +5095,8 @@
               "annotation": "bool",
               "default": null
             }
-          ]
+          ],
+          "returns": "float"
         }
       }
     },
@@ -4974,7 +5136,8 @@
               "annotation": "List[float]",
               "default": "None"
             }
-          ]
+          ],
+          "returns": null
         },
         "has_more": {
           "type": "method",
@@ -4985,7 +5148,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": null
         },
         "report": {
           "type": "method",
@@ -4996,7 +5160,8 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": null
         },
         "reset": {
           "type": "method",
@@ -5007,10 +5172,12 @@
               "annotation": null,
               "default": null
             }
-          ]
+          ],
+          "returns": null
         },
         "rng": {
-          "type": "property"
+          "type": "property",
+          "returns": "Any"
         },
         "run": {
           "type": "method",
@@ -5051,10 +5218,12 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "Any"
         },
         "schema": {
-          "type": "property"
+          "type": "property",
+          "returns": "Any"
         },
         "set_rng": {
           "type": "method",
@@ -5071,7 +5240,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "simulate": {
           "type": "method",
@@ -5094,7 +5264,8 @@
               "annotation": "float",
               "default": "0.0"
             }
-          ]
+          ],
+          "returns": "Any"
         },
         "update": {
           "type": "method",
@@ -5117,7 +5288,8 @@
               "annotation": "float",
               "default": "None"
             }
-          ]
+          ],
+          "returns": null
         }
       }
     },
@@ -5157,7 +5329,8 @@
               "annotation": "Any",
               "default": null
             }
-          ]
+          ],
+          "returns": "None"
         },
         "get_tox": {
           "type": "method",
@@ -5180,7 +5353,8 @@
               "annotation": "Any",
               "default": "0.0"
             }
-          ]
+          ],
+          "returns": "Any"
         },
         "solve": {
           "type": "method",
@@ -5227,7 +5401,8 @@
               "annotation": "Any",
               "default": "100"
             }
-          ]
+          ],
+          "returns": "Any"
         }
       }
     },
@@ -5240,19 +5415,23 @@
           "annotation": "Path",
           "default": null
         }
-      ]
+      ],
+      "returns": "str"
     },
     "get_environment_info": {
       "type": "function",
-      "parameters": []
+      "parameters": [],
+      "returns": "dict[str, str]"
     },
     "main": {
       "type": "function",
-      "parameters": []
+      "parameters": [],
+      "returns": "None"
     },
     "run_validations": {
       "type": "function",
-      "parameters": []
+      "parameters": [],
+      "returns": "list[dict[str, Any]]"
     },
     "spending_function_obrien_fleming": {
       "type": "function",
@@ -5269,7 +5448,8 @@
           "annotation": "float",
           "default": null
         }
-      ]
+      ],
+      "returns": "float"
     }
   },
   "clintrials.core": {
@@ -24683,7 +24863,7 @@
               "default": "'Trial Simulation Report'"
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "accept_page_break": {
           "type": "property",
@@ -24831,7 +25011,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "add_highlight": {
           "type": "method",
@@ -24963,7 +25143,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "add_page": {
           "type": "method",
@@ -28942,7 +29122,7 @@
           "default": "None"
         }
       ],
-      "returns": null
+      "returns": "bytes"
     },
     "parse_pdf_structure": {
       "type": "function",
@@ -28954,7 +29134,7 @@
           "default": null
         }
       ],
-      "returns": "dict"
+      "returns": "dict[Any, Any]"
     },
     "validate_pdf_ua_structure": {
       "type": "function",
