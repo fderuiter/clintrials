@@ -11,6 +11,8 @@ from scripts.verify_api_signatures import (
     get_signature_info,
     scan_module,
     validate_whitelist,
+    compare_return_types,
+    get_return_type,
 )
 
 
@@ -241,3 +243,82 @@ def test_validate_whitelist() -> None:
     unregistered = validate_whitelist(mock_manifest, mock_whitelist)
     assert len(unregistered) == 1
     assert "Export 'unapproved_func' in module 'module1'" in unregistered[0]
+
+
+def test_get_return_type() -> None:
+    def no_ann():
+        pass
+    def with_ann() -> int:
+        return 42
+    assert get_return_type(no_ann) is None
+    assert get_return_type(with_ann) == "int"
+
+
+def test_compare_return_types() -> None:
+    # Match cases
+    assert compare_return_types(True, "int", True, "int") == []
+    assert compare_return_types(False, None, True, None) == []
+    assert compare_return_types(True, None, True, None) == []
+
+    # Added / missing cases
+    diff1 = compare_return_types(False, None, True, "int")
+    assert any("added" in d for d in diff1)
+    diff2 = compare_return_types(True, None, True, "int")
+    assert any("added" in d for d in diff2)
+
+    # Removed cases
+    diff3 = compare_return_types(True, "int", False, None)
+    assert any("removed" in d for d in diff3)
+    diff4 = compare_return_types(True, "int", True, None)
+    assert any("removed" in d for d in diff4)
+
+    # Changed cases
+    diff5 = compare_return_types(True, "int", True, "str")
+    assert any("changed" in d for d in diff5)
+
+
+def test_compare_manifests_return_types() -> None:
+    baseline = {
+        "module1": {
+            "func_mismatch": {
+                "type": "function",
+                "parameters": [],
+                "returns": "int"
+            },
+            "class_mismatch": {
+                "type": "class",
+                "methods": {
+                    "method1": {
+                        "type": "method",
+                        "parameters": [],
+                        "returns": "float"
+                    }
+                }
+            }
+        }
+    }
+
+    current = {
+        "module1": {
+            "func_mismatch": {
+                "type": "function",
+                "parameters": [],
+                "returns": "str"
+            },
+            "class_mismatch": {
+                "type": "class",
+                "methods": {
+                    "method1": {
+                        "type": "method",
+                        "parameters": [],
+                        "returns": "int"
+                    }
+                }
+            }
+        }
+    }
+
+    diffs = compare_manifests(baseline, current)
+    assert len(diffs) == 2
+    assert any("Return type for function 'func_mismatch' changed" in d for d in diffs)
+    assert any("Return type for member 'class_mismatch.method1' changed" in d for d in diffs)

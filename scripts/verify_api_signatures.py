@@ -22,6 +22,21 @@ def clean_dynamic_info(val: typing.Optional[str]) -> typing.Optional[str]:
     return re.sub(r"at 0x[0-9a-fA-F]+", "at 0x...", val)
 
 
+def get_return_type(obj: typing.Any) -> typing.Optional[str]:
+    """Extract return-type annotation of a callable or property getter fget."""
+    try:
+        sig = inspect.signature(obj)
+        if sig.return_annotation is not inspect.Signature.empty:
+            if hasattr(sig.return_annotation, "__name__"):
+                ret_ann = sig.return_annotation.__name__
+            else:
+                ret_ann = str(sig.return_annotation)
+            return clean_dynamic_info(ret_ann)
+    except (ValueError, TypeError):
+        pass
+    return None
+
+
 def get_signature_info(obj: typing.Any) -> typing.List[typing.Dict[str, typing.Any]]:
     """Extract parameters, annotations, kinds, and default values from a callable object."""
     try:
@@ -67,21 +82,30 @@ def get_public_methods(cls: typing.Any) -> typing.Dict[str, typing.Any]:
         static_val = inspect.getattr_static(cls, name)
 
         if isinstance(static_val, property):
-            methods[name] = {"type": "property"}
+            ret_type = None
+            if hasattr(static_val, "fget") and static_val.fget is not None:
+                ret_type = get_return_type(static_val.fget)
+            methods[name] = {
+                "type": "property",
+                "returns": ret_type,
+            }
         elif isinstance(static_val, classmethod):
             methods[name] = {
                 "type": "classmethod",
                 "parameters": get_signature_info(static_val.__func__),
+                "returns": get_return_type(static_val.__func__),
             }
         elif isinstance(static_val, staticmethod):
             methods[name] = {
                 "type": "staticmethod",
                 "parameters": get_signature_info(static_val.__func__),
+                "returns": get_return_type(static_val.__func__),
             }
         elif inspect.isroutine(value):
             methods[name] = {
                 "type": "method",
                 "parameters": get_signature_info(value),
+                "returns": get_return_type(value),
             }
     return methods
 
@@ -123,6 +147,7 @@ def scan_module(module_name: str) -> typing.Dict[str, typing.Any]:
             manifest[name] = {
                 "type": "function",
                 "parameters": get_signature_info(obj),
+                "returns": get_return_type(obj),
             }
     return manifest
 
@@ -235,6 +260,30 @@ def compare_parameters(
     return diffs
 
 
+def compare_return_types(
+    b_returns_exists: bool,
+    b_returns: typing.Optional[str],
+    c_returns_exists: bool,
+    c_returns: typing.Optional[str],
+) -> typing.List[str]:
+    """Compare return types and return a list of differences if any."""
+    val_b = b_returns if b_returns_exists else None
+    val_c = c_returns if c_returns_exists else None
+
+    if val_b != val_c:
+        if not b_returns_exists and val_c is not None:
+            return [f"return type was added (missing key to '{val_c}')"]
+        elif not c_returns_exists and val_b is not None:
+            return [f"return type was removed (changed to missing key)"]
+        elif val_b is None and val_c is not None:
+            return [f"return type was added (None to '{val_c}')"]
+        elif val_b is not None and val_c is None:
+            return [f"return type was removed ('{val_b}' to None)"]
+        else:
+            return [f"return type changed from '{val_b}' to '{val_c}'"]
+    return []
+
+
 def compare_manifests(
     baseline_manifest: typing.Dict[str, typing.Any],
     current_manifest: typing.Dict[str, typing.Any],
@@ -297,6 +346,17 @@ def compare_manifests(
                         )
                         continue
 
+                    # Validate returns for class member properties and callables
+                    b_ret_exists = "returns" in b_method_info
+                    b_ret = b_method_info.get("returns")
+                    c_ret_exists = "returns" in c_method_info
+                    c_ret = c_method_info.get("returns")
+                    ret_diffs = compare_return_types(b_ret_exists, b_ret, c_ret_exists, c_ret)
+                    for r_diff in ret_diffs:
+                        diffs.append(
+                            f"Return type for member '{name}.{method}' changed: {r_diff}."
+                        )
+
                     if b_method_info.get("type") in (
                         "method",
                         "classmethod",
@@ -311,6 +371,17 @@ def compare_manifests(
                             )
 
             elif baseline_obj.get("type") == "function":
+                # Validate returns for function
+                b_ret_exists = "returns" in baseline_obj
+                b_ret = baseline_obj.get("returns")
+                c_ret_exists = "returns" in current_obj
+                c_ret = current_obj.get("returns")
+                ret_diffs = compare_return_types(b_ret_exists, b_ret, c_ret_exists, c_ret)
+                for r_diff in ret_diffs:
+                    diffs.append(
+                        f"Return type for function '{name}' changed: {r_diff}."
+                    )
+
                 b_params = baseline_obj.get("parameters", [])
                 c_params = current_obj.get("parameters", [])
                 param_diffs = compare_parameters(b_params, c_params)
