@@ -120,6 +120,7 @@
   ],
   "clintrials.dosefinding.crm": [
     "CRM",
+    "CRMOutput",
     "crm",
     "crm_dtp_detail"
   ],
@@ -184,6 +185,7 @@
     "ErrorTemplates",
     "validate_bounds",
     "validate_expected_length",
+    "validate_feature_request",
     "validate_matching_lengths",
     "validate_positive_integer",
     "validate_probability",

@@ -597,7 +597,7 @@ class DefaultVisualizationProvider(VisualizationProvider):
         )  # type: ignore
 
 
-def get_default_provider():  # type: ignore
+def get_default_provider() -> "VisualizationProvider":
     """Get default visualization provider."""
     return DefaultVisualizationProvider()
 
