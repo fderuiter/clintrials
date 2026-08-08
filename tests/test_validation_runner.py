@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: MIT
 
-"""Tests for clintrials.cli.validation_runner."""
+"""Tests for clintrials.cli.validation_runner.
+
+This test module verifies the correctness and output of the GxP qualification validation CLI runner.
+"""
 
 from __future__ import annotations
 
