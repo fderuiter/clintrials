@@ -78,7 +78,7 @@ class WinRatioView(BaseSimulationView):
 
             from clintrials.core.viz_interface import get_visualization_provider
 
-            fig = get_visualization_provider().plot_winratio_power_curve(  # type: ignore
+            fig = get_visualization_provider().plot_winratio_power_curve(
                 df, high_contrast=False
             )
             figures = [(None, fig)]

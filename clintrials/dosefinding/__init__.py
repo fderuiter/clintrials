@@ -142,7 +142,7 @@ class DoseFindingTrial(BaseDoseFindingTrial):
         """
         from clintrials.core.viz_interface import get_visualization_provider
 
-        viz = get_visualization_provider()  # type: ignore
+        viz = get_visualization_provider()
 
         return viz.plot_dose_finding_outcomes(self, chart_title=chart_title)
 
@@ -443,10 +443,12 @@ def simulate_dose_finding_trial(
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
         try:
-            had_tox = lambda x: x < np.array(true_toxicities)
+            def had_tox(x: Any) -> Any:
+                return x < np.array(true_toxicities)
+
             tox_horizons = np.array(
                 [had_tox(x) for x in tolerances[: design.max_size()]]
-            )  # type: ignore
+            )
             tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
@@ -584,11 +586,11 @@ def dose_transition_pathways_to_json(
     next_dose: int,
     cohort_sizes: List[int],
     cohort_number: int = 1,
-    cases_already_observed: List[Tuple] = [],
-    custom_output_func: Optional[Callable] = None,
+    cases_already_observed: List[Tuple[Any, ...]] = [],
+    custom_output_func: Optional[Callable[..., Any]] = None,
     verbose: bool = False,
     **kwargs: Any,
-) -> Any:  # type: ignore
+) -> Any:
     """Calculates the dose-transition pathways of a dose-finding trial.
 
     Args:
@@ -686,10 +688,10 @@ dose_transition_pathways = dose_transition_pathways_to_json
 def print_dtps(
     dtps: Any,
     indent: int = 0,
-    dose_label_func: Optional[Callable] = None,
-    row_formatter: Optional[Callable] = None,
+    dose_label_func: Optional[Callable[..., Any]] = None,
+    row_formatter: Optional[Callable[..., Any]] = None,
     verbose: bool = False,
-) -> Any:  # type: ignore
+) -> Any:
     """Prints the dose-transition pathways.
 
     Args:

@@ -65,7 +65,7 @@ class EffToxView(BaseSimulationView):  # type: ignore
             if "recommended_dose_prob" in summary_df.columns:
                 from clintrials.core.viz_interface import get_visualization_provider
 
-                fig_rec = get_visualization_provider().plot_bivariate_simulation_recommendation(  # type: ignore
+                fig_rec = get_visualization_provider().plot_bivariate_simulation_recommendation(
                     summary_df, high_contrast=False
                 )
                 figures.append(("Dose Recommendation Probability", fig_rec))
@@ -77,7 +77,7 @@ class EffToxView(BaseSimulationView):  # type: ignore
                 from clintrials.core.viz_interface import get_visualization_provider
 
                 fig_accept = (
-                    get_visualization_provider().plot_efftox_simulation_acceptability(  # type: ignore
+                    get_visualization_provider().plot_efftox_simulation_acceptability(
                         summary_df, high_contrast=False
                     )
                 )

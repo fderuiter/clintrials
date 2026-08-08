@@ -58,7 +58,7 @@ class CRMView(BaseSimulationView):  # type: ignore
 
             fig = get_visualization_provider().plot_crm_simulation_recommendation(
                 summary_df, high_contrast=False
-            )  # type: ignore
+            )
             figures.append(("Dose Recommendation Probability", fig))
         else:
             st.warning(

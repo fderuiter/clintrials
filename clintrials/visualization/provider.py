@@ -5,6 +5,8 @@
 Random Seed Strategy: {provider_seed_strategy}
 """
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -533,9 +535,9 @@ class DefaultVisualizationProvider(VisualizationProvider):
             trial, chart_title=chart_title, high_contrast=high_contrast
         )  # type: ignore
 
-    def plot_crm_toxicity_probabilities(
+    def plot_crm_toxicity_probabilities(  # type: ignore
         self, trial, chart_title=None, high_contrast=False
-    ):  # type: ignore
+    ):
         """Plot CRM toxicity probabilities."""
         import clintrials.visualization as viz
 
@@ -586,9 +588,9 @@ class DefaultVisualizationProvider(VisualizationProvider):
 
         return viz.plot_winratio_power_curve(df, high_contrast=high_contrast)  # type: ignore
 
-    def create_bar_chart(
+    def create_bar_chart(  # type: ignore
         self, df, x, y, color, title, labels=None, high_contrast=False
-    ):  # type: ignore
+    ):
         """Creates a centralized bar chart with accessibility standards."""
         import clintrials.visualization as viz
 
@@ -597,7 +599,7 @@ class DefaultVisualizationProvider(VisualizationProvider):
         )  # type: ignore
 
 
-def get_default_provider() -> "VisualizationProvider":
+def get_default_provider() -> Any:
     """Get default visualization provider."""
     return DefaultVisualizationProvider()
 

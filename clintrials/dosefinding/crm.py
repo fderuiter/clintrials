@@ -125,8 +125,8 @@ class CRMOutput(tuple[Any, ...]):
 
 
 def _toxicity_likelihood(
-    link_func: Callable, a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False
-) -> Any:  # type: ignore
+    link_func: Callable[..., Any], a0: Any, beta: Any, dose: Any, tox: Any, log: Any = False
+) -> Any:
     """Calculates the likelihood of a single toxicity outcome.
 
     Args:
@@ -146,8 +146,8 @@ def _toxicity_likelihood(
 
 
 def _compound_toxicity_likelihood(
-    link_func: Callable, a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False
-) -> Any:  # type: ignore
+    link_func: Callable[..., Any], a0: Any, beta: Any, doses: Any, toxs: Any, log: Any = False
+) -> Any:
     """Calculates the compound likelihood of multiple toxicity outcomes.
 
     Args:
@@ -208,17 +208,17 @@ def _compound_toxicity_likelihood(
 
 
 def _get_beta_hat_bayes(
-    F: Callable,
+    F: Callable[..., Any],
     intercept: Any,
     codified_doses_given: Any,
     toxs: Any,
-    beta_pdf: Callable,
+    beta_pdf: Callable[..., Any],
     use_quick_integration: Any = False,
     estimate_var: Any = False,
     min_beta: Any = None,
     max_beta: Any = None,
     n_points: Any = None,
-) -> Any:  # type: ignore
+) -> Any:
     """Estimates the beta parameter using Bayesian inference.
 
     Args:
@@ -266,12 +266,12 @@ def _get_beta_hat_bayes(
 
 
 def _get_beta_hat_mle(
-    F: Callable,
+    F: Callable[..., Any],
     intercept: Any,
     codified_doses_given: Any,
     toxs: Any,
     estimate_var: Any = False,
-) -> Any:  # type: ignore
+) -> Any:
     """Estimates the beta parameter using maximum likelihood estimation (MLE).
 
     Args:
@@ -333,13 +333,13 @@ def _get_beta_hat_mle(
 
 
 def _get_beta_hat_mle_bootstrap(
-    F: Callable,
+    F: Callable[..., Any],
     intercept: Any,
     beta_hat: Any,
     codified_doses_given: Any,
     B: Any = 200,
     rng: Any = None,
-) -> Any:  # type: ignore
+) -> Any:
     """Estimates the variance of the beta MLE using parametric bootstrap.
 
     Args:
@@ -389,8 +389,8 @@ def _get_beta_hat_mle_bootstrap(
 
 
 def _estimate_prob_tox_from_param(
-    F: Callable, intercept: Any, beta_hat: Any, dose_labels: Any
-) -> Any:  # type: ignore
+    F: Callable[..., Any], intercept: Any, beta_hat: Any, dose_labels: Any
+) -> Any:
     """Estimates the probability of toxicity by plugging in a beta estimate.
 
     Args:
@@ -408,17 +408,17 @@ def _estimate_prob_tox_from_param(
 
 
 def _get_post_tox_bayes(
-    F: Callable,
+    F: Callable[..., Any],
     intercept: Any,
     dose_labels: Any,
     codified_doses_given: Any,
     toxs: Any,
-    beta_pdf: Callable,
+    beta_pdf: Callable[..., Any],
     use_quick_integration: Any = False,
     min_beta: Any = None,
     max_beta: Any = None,
     n_points: Any = None,
-) -> Any:  # type: ignore
+) -> Any:
     """Calculates the posterior probability of toxicity using Bayesian integration.
 
     Args:
@@ -465,8 +465,8 @@ def crm(
     toxicities: Any,
     dose_levels: Any,
     intercept: Any = 3,
-    F_func: Callable = logistic,
-    inverse_F: Callable = inverse_logistic,
+    F_func: Callable[..., Any] = logistic,
+    inverse_F: Callable[..., Any] = inverse_logistic,
     beta_dist: Any = norm(loc=0, scale=np.sqrt(1.34)),
     method: Any = "bayes",
     use_quick_integration: Any = False,
@@ -478,7 +478,7 @@ def crm(
     max_beta: Any = None,
     n_points: Any = None,
     rng: Any = None,
-) -> Any:  # type: ignore
+) -> Any:
     """Performs a Continual Reassessment Method (CRM) calculation.
 
     Args:
@@ -642,8 +642,8 @@ class CRM(DoseFindingTrial):
         target: Any,
         first_dose: Any,
         max_size: Any,
-        F_func: Callable = empiric,
-        inverse_F: Callable = inverse_empiric,
+        F_func: Callable[..., Any] = empiric,
+        inverse_F: Callable[..., Any] = inverse_empiric,
         beta_prior: Any = norm(0, np.sqrt(1.34)),
         method: Any = "bayes",
         use_quick_integration: Any = False,
@@ -653,8 +653,8 @@ class CRM(DoseFindingTrial):
         lowest_dose_too_toxic_hurdle: Any = None,
         lowest_dose_too_toxic_certainty: Any = None,
         coherency_threshold: Any = None,
-        principle_escalation_func: Optional[Callable] = None,
-        termination_func: Optional[Callable] = None,
+        principle_escalation_func: Optional[Callable[..., Any]] = None,
+        termination_func: Optional[Callable[..., Any]] = None,
         plugin_mean: Any = True,
         intercept: Any = 3,
         mle_var_method: Any = "hessian",
@@ -663,7 +663,7 @@ class CRM(DoseFindingTrial):
         max_beta: Any = None,
         n_points: Any = None,
         sample_size: Any = None,
-    ) -> None:  # type: ignore
+    ) -> None:
         """Initializes a CRM trial object.
 
         Args:
@@ -1086,7 +1086,7 @@ class CRM(DoseFindingTrial):
         """
         from clintrials.core.viz_interface import get_visualization_provider
 
-        viz = get_visualization_provider()  # type: ignore
+        viz = get_visualization_provider()
 
         return viz.plot_crm_toxicity_probabilities(self, chart_title=chart_title)
 

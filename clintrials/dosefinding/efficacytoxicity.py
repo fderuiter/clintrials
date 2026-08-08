@@ -674,8 +674,8 @@ def _efftox_row_formatter(x: Any, dose_label_func: Any, verbose: Any = False) ->
 
 
 def print_dtps(
-    dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None
-) -> Any:  # type: ignore
+    dtps: Any, indent: int = 0, dose_label_func: Optional[Callable[..., Any]] = None
+) -> Any:
     """Prints the dose-transition pathways.
 
     Args:
@@ -696,8 +696,8 @@ def print_dtps(
 
 
 def print_dtps_verbose(
-    dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None
-) -> Any:  # type: ignore
+    dtps: Any, indent: int = 0, dose_label_func: Optional[Callable[..., Any]] = None
+) -> Any:
     """Prints the dose-transition pathways with verbose information.
 
     Args:

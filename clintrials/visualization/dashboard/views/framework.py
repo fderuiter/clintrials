@@ -3,6 +3,7 @@
 """Framework tools for declarative and reusable simulation dashboard views."""
 
 from functools import wraps
+from typing import Any, Callable, Optional
 
 from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
@@ -85,8 +86,8 @@ def dashboard_view(
     file_prefix: str,
     csv_index: bool = True,
     skip_summary_table: bool = False,
-    param_space_config: dict = None,
-):  # type: ignore
+    param_space_config: Optional[dict[Any, Any]] = None,
+) -> Callable[..., Any]:
     """Decorator to generate a standard dashboard view."""
 
     def decorator(func):  # type: ignore
@@ -187,7 +188,7 @@ def dashboard_view(
                     mime="text/csv",
                 )
 
-                viz_provider = get_visualization_provider()  # type: ignore
+                viz_provider = get_visualization_provider()
                 pdf_data = (
                     viz_provider.generate_pdf_report(
                         summary_df, model_name, text_summaries=text_summaries
