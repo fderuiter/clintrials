@@ -25,6 +25,9 @@ if (typeof window.iFrameResize === 'undefined') {
         const path = window.location.pathname;
         if (path.includes('/clintrials/')) {
             return window.location.origin + '/clintrials/_static/vendor/iframeResizer.min.js';
+        } else if (path.includes('/_build/html/')) {
+            const idx = path.indexOf('/_build/html/');
+            return window.location.origin + path.substring(0, idx + '/_build/html/'.length) + '_static/vendor/iframeResizer.min.js';
         } else {
             return '/_static/vendor/iframeResizer.min.js';
         }
@@ -112,8 +115,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state && state.model) {
             const stateStr = encodeURIComponent(JSON.stringify(state));
             url.searchParams.set('sim_state', stateStr);
+            sessionStorage.setItem('sim_state', stateStr);
         } else {
             url.searchParams.delete('sim_state');
+            sessionStorage.removeItem('sim_state');
+        }
+        if (isOpen) {
+            url.searchParams.set('sim_open', 'true');
+        } else {
+            url.searchParams.delete('sim_open');
         }
         
         const urlStr = url.toString();
@@ -128,6 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const path = window.location.pathname;
         if (path.includes('/clintrials/')) {
             return window.location.origin + '/clintrials/hub/';
+        } else if (path.includes('/_build/html/')) {
+            const idx = path.indexOf('/_build/html/');
+            return window.location.origin + path.substring(0, idx + '/_build/html/'.length) + 'hub/';
         } else {
             return '/hub/';
         }
@@ -153,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
         iframe.id = 'simulation-hub-iframe';
         iframe.title = 'Clinical Trials Simulation Hub Dashboard';
         
-        const stateStr = getQueryParam('sim_state');
+        const stateStr = getQueryParam('sim_state') || sessionStorage.getItem('sim_state');
         if (stateStr) {
             iframe.src = getHubUrl() + '?sim_state=' + stateStr;
         } else {
@@ -171,6 +184,20 @@ document.addEventListener('DOMContentLoaded', () => {
         isOpen = true;
         sidebar.classList.add('open');
         createIframe();
+
+        // Save state in session storage
+        sessionStorage.setItem('sim_open', 'true');
+        
+        // Update URL query parameters
+        const url = new URL(window.location.href);
+        url.searchParams.set('sim_open', 'true');
+        const currentState = getQueryParam('sim_state') || sessionStorage.getItem('sim_state');
+        if (currentState) {
+            url.searchParams.set('sim_state', currentState);
+        }
+        if (window.location.href !== url.toString()) {
+            history.replaceState({ ...history.state, sim_open: true }, '', url.toString());
+        }
     }
 
     function closeSidebar(syncUrl = true) {
@@ -180,8 +207,19 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.classList.remove('hub-drawer-open');
             window.scrollTo(0, savedScrollY);
         }
+        // Save state in session storage
+        sessionStorage.setItem('sim_open', 'false');
+        sessionStorage.removeItem('sim_state');
+
         if (syncUrl) {
             setUrlState(null);
+            // Also remove sim_open from current page URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('sim_open');
+            url.searchParams.delete('sim_state');
+            if (window.location.href !== url.toString()) {
+                history.replaceState({ ...history.state, sim_open: false }, '', url.toString());
+            }
         }
     }
 
@@ -210,15 +248,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('popstate', (event) => {
         const stateStr = getQueryParam('sim_state');
-        if (stateStr) {
-            const state = deserializeState(stateStr);
-            if (state) {
+        const isSimOpenParam = getQueryParam('sim_open') === 'true';
+        if (stateStr || isSimOpenParam) {
+            if (stateStr) {
+                const state = deserializeState(stateStr);
+                if (state) {
+                    if (!isOpen) {
+                        openSidebar();
+                    }
+                    const iframe = document.getElementById('simulation-hub-iframe');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage({ type: 'restoreState', state }, window.location.origin);
+                    }
+                }
+            } else {
                 if (!isOpen) {
                     openSidebar();
-                }
-                const iframe = document.getElementById('simulation-hub-iframe');
-                if (iframe && iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'restoreState', state }, window.location.origin);
                 }
             }
         } else {
@@ -229,10 +274,46 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Handle initial state on load
-    const initialStateStr = getQueryParam('sim_state');
-    if (initialStateStr) {
+    const initialStateStr = getQueryParam('sim_state') || sessionStorage.getItem('sim_state');
+    const isSimOpenParam = getQueryParam('sim_open') === 'true' || sessionStorage.getItem('sim_open') === 'true';
+    if (initialStateStr || isSimOpenParam) {
+        if (initialStateStr && !getQueryParam('sim_state')) {
+            // Sync parameter to URL if not present
+            const url = new URL(window.location.href);
+            url.searchParams.set('sim_state', initialStateStr);
+            url.searchParams.set('sim_open', 'true');
+            history.replaceState({ ...history.state, sim_state: deserializeState(initialStateStr) }, '', url.toString());
+        } else if (isSimOpenParam && !getQueryParam('sim_open')) {
+            // Sync parameter to URL if not present
+            const url = new URL(window.location.href);
+            url.searchParams.set('sim_open', 'true');
+            history.replaceState({ ...history.state, sim_open: true }, '', url.toString());
+        }
         openSidebar();
     }
+
+    // Intercept internal link clicks to propagate the active drawer state
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.href) {
+            try {
+                const url = new URL(link.href, window.location.href);
+                // Only for same-origin links
+                if (url.origin === window.location.origin) {
+                    if (isOpen) {
+                        url.searchParams.set('sim_open', 'true');
+                        const currentState = getQueryParam('sim_state') || sessionStorage.getItem('sim_state');
+                        if (currentState) {
+                            url.searchParams.set('sim_state', currentState);
+                        }
+                        link.href = url.toString();
+                    }
+                }
+            } catch (err) {
+                // Ignore invalid URLs
+            }
+        }
+    });
 
     // 5. Resize Logic
     let isResizing = false;
