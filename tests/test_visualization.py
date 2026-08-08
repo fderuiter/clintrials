@@ -164,10 +164,10 @@ def test_generate_pdf_report():
     table_sec = MultiFormatSummaryContainer("My Table", df)
     text_sec = TextSection("My Text")
 
-    pdf_bytes = generate_pdf_report(df, "CRM", text_summaries=[text_sec, table_sec])  # type: ignore[no-untyped-call]
+    pdf_bytes = generate_pdf_report(df, "CRM", text_summaries=[text_sec, table_sec])
     assert pdf_bytes is not None
     assert isinstance(pdf_bytes, bytearray) or isinstance(pdf_bytes, bytes)
 
     # Test None summaries
-    pdf_bytes2 = generate_pdf_report(df, "CRM", text_summaries=None)  # type: ignore[no-untyped-call]
+    pdf_bytes2 = generate_pdf_report(df, "CRM", text_summaries=None)
     assert pdf_bytes2 is not None

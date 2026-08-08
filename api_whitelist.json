@@ -7,6 +7,16 @@
     "integrate_posterior_1d_adaptive",
     "integrate_posterior_1d_nonadaptive"
   ],
+  "clintrials.cli.validation_runner": [
+    "AccessiblePDF",
+    "GroupSequentialDesign",
+    "LpNormCurve",
+    "calculate_codebase_hash",
+    "get_environment_info",
+    "main",
+    "run_validations",
+    "spending_function_obrien_fleming"
+  ],
   "clintrials.core": [
     "BaseDoseFindingTrial",
     "Protocol"

@@ -45,6 +45,7 @@ repository = "https://github.com/brockk/clintrials"
 
 [project.scripts]
 dashboard = "clintrials.visualization.dashboard.launcher:main"
+clintrials-validate = "clintrials.cli.validation_runner:main"
 
 
 [tool.poetry.group.dev.dependencies]

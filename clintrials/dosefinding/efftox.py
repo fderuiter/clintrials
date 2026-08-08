@@ -22,7 +22,7 @@ from scipy.optimize import brentq
 
 from clintrials._utils import atomic_to_json, iterable_to_json
 from clintrials.core.math import inverse_logit, logit
-from clintrials.core.stats import norm  # type: ignore
+from clintrials.core.stats import norm
 from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
 
 
