@@ -6,13 +6,13 @@ from scripts.verify_api_signatures import (
     clean_dynamic_info,
     compare_manifests,
     compare_parameters,
+    compare_return_types,
     generate_manifest,
     get_public_methods,
+    get_return_type,
     get_signature_info,
     scan_module,
     validate_whitelist,
-    compare_return_types,
-    get_return_type,
 )
 
 

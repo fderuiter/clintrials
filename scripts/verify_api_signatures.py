@@ -274,7 +274,7 @@ def compare_return_types(
         if not b_returns_exists and val_c is not None:
             return [f"return type was added (missing key to '{val_c}')"]
         elif not c_returns_exists and val_b is not None:
-            return [f"return type was removed (changed to missing key)"]
+            return ["return type was removed (changed to missing key)"]
         elif val_b is None and val_c is not None:
             return [f"return type was added (None to '{val_c}')"]
         elif val_b is not None and val_c is None:
