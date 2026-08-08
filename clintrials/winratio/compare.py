@@ -26,8 +26,12 @@ def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
 
     from clintrials.core.errors import ErrorTemplates
 
-    if not isinstance(subject1, (list, tuple, np.ndarray)) or not isinstance(subject2, (list, tuple, np.ndarray)):
-        raise TypeError("Subject outcomes must be sequence types (list, tuple, or numpy array).")
+    if not isinstance(subject1, (list, tuple, np.ndarray)) or not isinstance(
+        subject2, (list, tuple, np.ndarray)
+    ):
+        raise TypeError(
+            "Subject outcomes must be sequence types (list, tuple, or numpy array)."
+        )
 
     s1_arr = np.asarray(subject1)
     s2_arr = np.asarray(subject2)
@@ -35,7 +39,11 @@ def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
         raise ValueError("Subject outcomes must be 1D sequences.")
 
     if s1_arr.shape != s2_arr.shape:
-        raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name="subject1", name="subject2"))
+        raise ValueError(
+            ErrorTemplates.MATCHING_LENGTHS.format(
+                first_name="subject1", name="subject2"
+            )
+        )
 
     for i in range(len(subject1)):
         if subject1[i] > subject2[i]:
@@ -48,4 +56,5 @@ def compare_subjects(subject1: Iterable[int], subject2: Iterable[int]) -> str:
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

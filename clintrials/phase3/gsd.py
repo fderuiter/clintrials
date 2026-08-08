@@ -89,6 +89,7 @@ class GroupSequentialDesign(Protocol):
             sequence of length `k` ending in 1.0.
         """
         from clintrials.core.schema import GroupSequentialDesignSchema
+
         schema_args = {"k": k, "alpha": alpha, "timing": timing}
         self._schema = GroupSequentialDesignSchema(**schema_args)
 
@@ -196,7 +197,7 @@ class GroupSequentialDesign(Protocol):
                 boundary = brentq(
                     root_func,
                     CORE_REGISTRY["gsd_brentq_first_min"],
-                    CORE_REGISTRY["gsd_brentq_first_max"]
+                    CORE_REGISTRY["gsd_brentq_first_max"],
                 )
             except ValueError:
                 boundary = np.inf
@@ -208,7 +209,7 @@ class GroupSequentialDesign(Protocol):
                 boundary = brentq(
                     root_func,
                     CORE_REGISTRY["gsd_brentq_second_min"],
-                    CORE_REGISTRY["gsd_brentq_second_max"]
+                    CORE_REGISTRY["gsd_brentq_second_max"],
                 )
                 boundaries[-1] = boundary
             except ValueError:
@@ -221,6 +222,7 @@ class GroupSequentialDesign(Protocol):
         """Legacy method for backward compatibility."""
         # Calling run without a seed keeps it stochastic, but we can just use the protocol's runner.
         return self.run(n_sims=n_sims, method="bulk", theta=theta)
+
 
 # Inject module-level docstring
 if __doc__:

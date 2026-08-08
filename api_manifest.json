@@ -7293,13 +7293,13 @@
             {
               "name": "render_func",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": null
             },
             {
               "name": "preview_func",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             }
           ]
@@ -10942,13 +10942,13 @@
         {
           "name": "cases_already_observed",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "List[Tuple]",
+          "annotation": "List[Tuple[Any, ...]]",
           "default": "[]"
         },
         {
           "name": "custom_output_func",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Optional[Callable]",
+          "annotation": "Optional[Callable[..., Any]]",
           "default": "None"
         },
         {
@@ -10995,13 +10995,13 @@
         {
           "name": "cases_already_observed",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "List[Tuple]",
+          "annotation": "List[Tuple[Any, ...]]",
           "default": "[]"
         },
         {
           "name": "custom_output_func",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Optional[Callable]",
+          "annotation": "Optional[Callable[..., Any]]",
           "default": "None"
         },
         {
@@ -11036,13 +11036,13 @@
         {
           "name": "dose_label_func",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Optional[Callable]",
+          "annotation": "Optional[Callable[..., Any]]",
           "default": "None"
         },
         {
           "name": "row_formatter",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Optional[Callable]",
+          "annotation": "Optional[Callable[..., Any]]",
           "default": "None"
         },
         {
@@ -11111,13 +11111,13 @@
             {
               "name": "F_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function empiric at 0x...>"
             },
             {
               "name": "inverse_F",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function inverse_empiric at 0x...>"
             },
             {
@@ -11177,13 +11177,13 @@
             {
               "name": "principle_escalation_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
               "name": "termination_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
@@ -11719,13 +11719,13 @@
         {
           "name": "F_func",
           "kind": "KEYWORD_ONLY",
-          "annotation": "Callable",
+          "annotation": "Callable[..., Any]",
           "default": "<function logistic at 0x...>"
         },
         {
           "name": "inverse_F",
           "kind": "KEYWORD_ONLY",
-          "annotation": "Callable",
+          "annotation": "Callable[..., Any]",
           "default": "<function inverse_logistic at 0x...>"
         },
         {
@@ -12794,7 +12794,7 @@
         {
           "name": "dose_label_func",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Optional[Callable]",
+          "annotation": "Optional[Callable[..., Any]]",
           "default": "None"
         }
       ]
@@ -12817,7 +12817,7 @@
         {
           "name": "dose_label_func",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "Optional[Callable]",
+          "annotation": "Optional[Callable[..., Any]]",
           "default": "None"
         }
       ]
@@ -13972,13 +13972,13 @@
             {
               "name": "F_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function empiric at 0x...>"
             },
             {
               "name": "inverse_F",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function inverse_empiric at 0x...>"
             },
             {
@@ -14038,13 +14038,13 @@
             {
               "name": "principle_escalation_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
               "name": "termination_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
@@ -15701,13 +15701,13 @@
             {
               "name": "F_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function empiric at 0x...>"
             },
             {
               "name": "inverse_F",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function inverse_empiric at 0x...>"
             },
             {
@@ -15767,13 +15767,13 @@
             {
               "name": "principle_escalation_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
               "name": "termination_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
@@ -18956,13 +18956,13 @@
             {
               "name": "F_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function empiric at 0x...>"
             },
             {
               "name": "inverse_F",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Callable",
+              "annotation": "Callable[..., Any]",
               "default": "<function inverse_empiric at 0x...>"
             },
             {
@@ -19022,13 +19022,13 @@
             {
               "name": "principle_escalation_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
               "name": "termination_func",
               "kind": "KEYWORD_ONLY",
-              "annotation": "Optional[Callable]",
+              "annotation": "Optional[Callable[..., Any]]",
               "default": "None"
             },
             {
@@ -20502,7 +20502,7 @@
         {
           "name": "param_space_config",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": "dict",
+          "annotation": "Optional",
           "default": "None"
         }
       ]

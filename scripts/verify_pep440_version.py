@@ -127,7 +127,12 @@ def main(argv: list[str] | None = None) -> None:
             argv = sys.argv[1:]
 
     parser = argparse.ArgumentParser(description="PEP 440 version verification tool.")
-    parser.add_argument("manifest_path", nargs="?", default=None, help="Optional alternative path to build-manifest.json")
+    parser.add_argument(
+        "manifest_path",
+        nargs="?",
+        default=None,
+        help="Optional alternative path to build-manifest.json",
+    )
     args = parser.parse_args(argv)
 
     script_dir = Path(__file__).parent.resolve()
@@ -159,9 +164,7 @@ def main(argv: list[str] | None = None) -> None:
     if manifest_path.exists():
         try:
             manifest_version, wheel_version = validate_build_manifest(manifest_path)
-            sys.stdout.write(
-                f"Validated {display_path} version: {manifest_version}\n"
-            )
+            sys.stdout.write(f"Validated {display_path} version: {manifest_version}\n")
             sys.stdout.write(f"Validated wheel version segment: {wheel_version}\n")
         except Exception as e:
             errors.append(f"{display_path} validation failed: {e}")

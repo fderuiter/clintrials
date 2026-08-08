@@ -3,6 +3,7 @@
 """Framework tools for declarative and reusable simulation dashboard views."""
 
 from functools import wraps
+from typing import Any, Callable, Optional
 
 from clintrials.core.viz_interface import get_visualization_provider
 from clintrials.visualization.dashboard.factory import render_accessible_chart
@@ -79,8 +80,16 @@ def render_sidebar_config(param_space_config: dict) -> ParameterSpace:  # type: 
     return ps
 
 
-def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: bool = True, skip_summary_table: bool = False, param_space_config: dict = None):  # type: ignore
+def dashboard_view(
+    title: str,
+    model_name: str,
+    file_prefix: str,
+    csv_index: bool = True,
+    skip_summary_table: bool = False,
+    param_space_config: Optional[dict[Any, Any]] = None,
+) -> Callable[..., Any]:
     """Decorator to generate a standard dashboard view."""
+
     def decorator(func):  # type: ignore
         @wraps(func)
         def wrapper(*args, **kwargs):  # type: ignore
@@ -117,6 +126,7 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                         from clintrials.visualization.models import (
                             MultiFormatSummaryContainer,
                         )
+
                         df_for_rendering = summary_df.reset_index()
                         rename_map = {}
                         for c in df_for_rendering.columns:
@@ -128,9 +138,13 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                             try:
                                 df_for_rendering[col].nunique()
                             except TypeError:
-                                df_for_rendering[col] = df_for_rendering[col].astype(str)
+                                df_for_rendering[col] = df_for_rendering[col].astype(
+                                    str
+                                )
 
-                        container = MultiFormatSummaryContainer(title="Simulation Summary", df=df_for_rendering)
+                        container = MultiFormatSummaryContainer(
+                            title="Simulation Summary", df=df_for_rendering
+                        )
                         st.markdown(container.html, unsafe_allow_html=True)
 
                 text_summaries = []
@@ -141,12 +155,20 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                         text_summaries.append(extra_text_summaries)
 
                 if figures:
-                    st.header("Operating Characteristics" if model_name != "Win Ratio" else "Visualizations")
+                    st.header(
+                        "Operating Characteristics"
+                        if model_name != "Win Ratio"
+                        else "Visualizations"
+                    )
                     for fig_title, fig in figures:
                         if fig_title:
                             st.subheader(fig_title)
 
-                        meta = getattr(getattr(fig, "layout", None), "meta", "No data summary available.")
+                        meta = getattr(
+                            getattr(fig, "layout", None),
+                            "meta",
+                            "No data summary available.",
+                        )
                         text_summaries.append(meta)
                         render_accessible_chart(st, fig)  # type: ignore
                 elif summary_df is not None and not summary_df.empty:
@@ -166,10 +188,14 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
                     mime="text/csv",
                 )
 
-                viz_provider = get_visualization_provider()  # type: ignore
-                pdf_data = viz_provider.generate_pdf_report(
-                    summary_df, model_name, text_summaries=text_summaries
-                ) if viz_provider else None
+                viz_provider = get_visualization_provider()
+                pdf_data = (
+                    viz_provider.generate_pdf_report(
+                        summary_df, model_name, text_summaries=text_summaries
+                    )
+                    if viz_provider
+                    else None
+                )
 
                 if pdf_data is not None:
                     getattr(col2, "download_button", lambda *args, **kwargs: None)(
@@ -190,13 +216,16 @@ def dashboard_view(title: str, model_name: str, file_prefix: str, csv_index: boo
         # Module docstring injection with CORE_REGISTRY
         if func.__module__:
             import sys
+
             mod = sys.modules[func.__module__]
             if mod.__doc__ and "CORE_REGISTRY" not in mod.__doc__:
                 try:
                     from clintrials.core.registry import CORE_REGISTRY
+
                     mod.__doc__ = mod.__doc__.format(**CORE_REGISTRY)
                 except Exception:
                     pass
 
         return wrapper
+
     return decorator

@@ -46,6 +46,7 @@ class WinRatioView(BaseSimulationView):
 
         if create_widget(st, "button", "run_simulation_button", "Run Simulation"):  # type: ignore
             from clintrials.visualization.dashboard.utils import announce_status_locally
+
             announce_status_locally("Simulation in progress", key="winratio-start")
             try:
                 with st.spinner("Running simulation..."):
@@ -76,14 +77,17 @@ class WinRatioView(BaseSimulationView):
             df = pd.DataFrame([results_dict])
 
             from clintrials.core.viz_interface import get_visualization_provider
-            fig = get_visualization_provider().plot_winratio_power_curve(  # type: ignore
-                df,
-                high_contrast=False
+
+            fig = get_visualization_provider().plot_winratio_power_curve(
+                df, high_contrast=False
             )
             figures = [(None, fig)]
 
             from clintrials.visualization.helpers import format_number
-            extra_text_summaries = [f"Power: {format_number(power)}\n95% CI: ({format_number(average_ci[0])}, {format_number(average_ci[1])})"]
+
+            extra_text_summaries = [
+                f"Power: {format_number(power)}\n95% CI: ({format_number(average_ci[0])}, {format_number(average_ci[1])})"
+            ]
 
             return df, figures, extra_text_summaries
 
@@ -93,7 +97,7 @@ class WinRatioView(BaseSimulationView):
 def render(*args: Any, **kwargs: Any) -> Any:
     """Module-level wrapper for backward compatibility and testing."""
     from clintrials.core.registry import PROTOCOL_REGISTRY
+
     render_func = PROTOCOL_REGISTRY.get_render("Win Ratio")
     if render_func:
         return render_func(*args, **kwargs)
-

@@ -143,10 +143,7 @@ def test_visualization_models():
     assert str(ts) == "Hello World"
 
     # Test MultiFormatSummaryContainer
-    df = pd.DataFrame({
-        "col_a": [1.12345, 2.5],
-        "col_b": ["x", "y"]
-    })
+    df = pd.DataFrame({"col_a": [1.12345, 2.5], "col_b": ["x", "y"]})
     table = MultiFormatSummaryContainer("My Title", df)
 
     table_str = str(table)
@@ -163,10 +160,7 @@ def test_generate_pdf_report():
     from clintrials.visualization.models import MultiFormatSummaryContainer, TextSection
     from clintrials.visualization.report import generate_pdf_report
 
-    df = pd.DataFrame({
-        "scenario": [1, 2],
-        "prob_tox": [0.1, 0.2]
-    })
+    df = pd.DataFrame({"scenario": [1, 2], "prob_tox": [0.1, 0.2]})
     table_sec = MultiFormatSummaryContainer("My Table", df)
     text_sec = TextSection("My Text")
 

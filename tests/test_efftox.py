@@ -4,6 +4,7 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 from collections import OrderedDict
+from typing import Any
 from unittest.mock import patch
 
 import numpy as np
@@ -37,7 +38,7 @@ def assess_efftox_trial(et):
     return to_return
 
 
-def run_trial(trial, cases, summary_func, **kwargs):
+def run_trial(trial: Any, cases: Any, summary_func: Any, **kwargs: Any) -> Any:
     trial.reset()
     trial.update(cases, **kwargs)
     return summary_func(trial)
@@ -73,7 +74,17 @@ def test_thall2014_efftox():
         hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1]
     )
 
-    et = EffToxBuilder().with_real_doses(real_doses).with_theta_priors(efftox_priors).with_cutoffs(tox_cutoff, eff_cutoff).with_certainties(tox_certainty, eff_certainty).with_metric(metric).with_max_size(trial_size).with_first_dose(first_dose).build()
+    et = (
+        EffToxBuilder()
+        .with_real_doses(real_doses)
+        .with_theta_priors(efftox_priors)
+        .with_cutoffs(tox_cutoff, eff_cutoff)
+        .with_certainties(tox_certainty, eff_certainty)
+        .with_metric(metric)
+        .with_max_size(trial_size)
+        .with_first_dose(first_dose)
+        .build()
+    )
 
     epsilon1 = 0.05
     epsilon2 = 0.05
@@ -83,7 +94,8 @@ def test_thall2014_efftox():
     # Cohort 1 - No responses or tox at dose 1
     cases = [(1, 0, 0), (1, 0, 0), (1, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(5)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(5)
     ]
 
     assert np.all([o["NextDose"] == 2 for o in trial_outcomes])
@@ -116,7 +128,8 @@ def test_thall2014_efftox():
     # Cohort 2 - Singled response but no tox at dose 2
     cases = cases + [(2, 0, 1), (2, 0, 0), (2, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(5)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(5)
     ]
 
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
@@ -149,7 +162,8 @@ def test_thall2014_efftox():
     # Cohort 3 - Eff, Tox and a Both at dose level 3
     cases = cases + [(3, 0, 1), (3, 1, 0), (3, 1, 1)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(20)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(20)
     ]
 
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
@@ -209,12 +223,23 @@ def test_matchpoint_efftox():
         norm(loc=mp_beta_e_2_mean, scale=mp_beta_e_2_sd),
         norm(loc=mp_psi_mean, scale=mp_psi_sd),
     ]
-    et = EffToxBuilder().with_real_doses(mp_real_doses).with_theta_priors(mp_efftox_priors).with_cutoffs(mp_tox_cutoff, mp_eff_cutoff).with_certainties(mp_tox_certainty, mp_eff_certainty).with_metric(mp_metric).with_max_size(mp_trial_size).with_first_dose(mp_first_dose).build()
+    et = (
+        EffToxBuilder()
+        .with_real_doses(mp_real_doses)
+        .with_theta_priors(mp_efftox_priors)
+        .with_cutoffs(mp_tox_cutoff, mp_eff_cutoff)
+        .with_certainties(mp_tox_certainty, mp_eff_certainty)
+        .with_metric(mp_metric)
+        .with_max_size(mp_trial_size)
+        .with_first_dose(mp_first_dose)
+        .build()
+    )
     epsilon1 = 0.05
     epsilon2 = 0.05
     cases = [(3, 0, 0), (3, 1, 0), (3, 1, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(10)
     ]
     assert np.all(
         np.array([list(o["ProbEff"]) for o in trial_outcomes]).mean(axis=0)
@@ -264,12 +289,23 @@ def test_thall2014_efftox_v2():
     metric = LpNormCurve(
         hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1]
     )
-    et = EffToxBuilder().with_real_doses(real_doses).with_theta_priors(efftox_priors).with_cutoffs(tox_cutoff, eff_cutoff).with_certainties(tox_certainty, eff_certainty).with_metric(metric).with_max_size(trial_size).with_first_dose(first_dose).build()
+    et = (
+        EffToxBuilder()
+        .with_real_doses(real_doses)
+        .with_theta_priors(efftox_priors)
+        .with_cutoffs(tox_cutoff, eff_cutoff)
+        .with_certainties(tox_certainty, eff_certainty)
+        .with_metric(metric)
+        .with_max_size(trial_size)
+        .with_first_dose(first_dose)
+        .build()
+    )
     epsilon1 = 0.10
     epsilon2 = 0.10
     cases = [(4, 1, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(10)
     ]
     assert np.all([o["NextDose"] == 1 for o in trial_outcomes])
     assert np.all(
@@ -299,17 +335,20 @@ def test_thall2014_efftox_v2():
     )
     cases = cases + [(2, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(10)
     ]
     assert np.all([o["NextDose"] == 1 for o in trial_outcomes])
     cases = cases + [(1, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(10)
     ]
     assert np.all([o["NextDose"] in [3, 4] for o in trial_outcomes])
     cases = cases + [(5, 1, 1)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(5)  # type: ignore
+        run_trial(et, cases, assess_efftox_trial, n=10**6)
+        for i in range(5)
     ]
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
 
@@ -449,7 +488,16 @@ class TestCoreMaths:
 
 @pytest.fixture
 def efftox_trial():
-    return EffToxBuilder().with_real_doses([1, 2, 4, 6.6, 10]).with_theta_priors([norm()] * 6).with_cutoffs(0.3, 0.5).with_certainties(0.9, 0.85).with_metric(LpNormCurve(0.5, 0.3, 0.7, 0.25)).with_max_size(30).build()
+    return (
+        EffToxBuilder()
+        .with_real_doses([1, 2, 4, 6.6, 10])
+        .with_theta_priors([norm()] * 6)
+        .with_cutoffs(0.3, 0.5)
+        .with_certainties(0.9, 0.85)
+        .with_metric(LpNormCurve(0.5, 0.3, 0.7, 0.25))
+        .with_max_size(30)
+        .build()
+    )
 
 
 class TestInverseQuadraticCurve:
@@ -511,8 +559,30 @@ class TestEffToxAdmissibleSet:
             hinge_points[2][0],
             hinge_points[2][1],
         )
-        trial1 = EffToxBuilder().with_real_doses(real_doses).with_theta_priors(theta_priors).with_cutoffs(tox_cutoff, eff_cutoff).with_certainties(tox_certainty, eff_certainty).with_metric(metric).with_max_size(30).with_first_dose(3).with_kwargs(num_integral_steps=10**3, epsilon=1e-6).build()
-        trial2 = EffToxBuilder().with_real_doses(real_doses).with_theta_priors(theta_priors).with_cutoffs(tox_cutoff, eff_cutoff).with_certainties(tox_certainty, eff_certainty).with_metric(metric).with_max_size(30).with_first_dose(3).with_kwargs(num_integral_steps=10**3, epsilon=1e-2).build()
+        trial1 = (
+            EffToxBuilder()
+            .with_real_doses(real_doses)
+            .with_theta_priors(theta_priors)
+            .with_cutoffs(tox_cutoff, eff_cutoff)
+            .with_certainties(tox_certainty, eff_certainty)
+            .with_metric(metric)
+            .with_max_size(30)
+            .with_first_dose(3)
+            .with_kwargs(num_integral_steps=10**3, epsilon=1e-6)
+            .build()
+        )
+        trial2 = (
+            EffToxBuilder()
+            .with_real_doses(real_doses)
+            .with_theta_priors(theta_priors)
+            .with_cutoffs(tox_cutoff, eff_cutoff)
+            .with_certainties(tox_certainty, eff_certainty)
+            .with_metric(metric)
+            .with_max_size(30)
+            .with_first_dose(3)
+            .with_kwargs(num_integral_steps=10**3, epsilon=1e-2)
+            .build()
+        )
         cases = [(3, 0, 1), (3, 1, 1), (3, 0, 0)]
         trial1.update(cases)
         trial2.update(cases)
@@ -553,7 +623,17 @@ def test_myeloma_integration_deterministic(mocker):
         norm(loc=0, scale=1),
     ]
     metric = LpNormCurve(0.2, 0.3, 0.5, 0.15)
-    trial = EffToxBuilder().with_real_doses(real_doses).with_theta_priors(priors).with_cutoffs(0.3, 0.2).with_certainties(0.9, 0.8).with_metric(metric).with_max_size(30).with_first_dose(1).build()
+    trial = (
+        EffToxBuilder()
+        .with_real_doses(real_doses)
+        .with_theta_priors(priors)
+        .with_cutoffs(0.3, 0.2)
+        .with_certainties(0.9, 0.8)
+        .with_metric(metric)
+        .with_max_size(30)
+        .with_first_dose(1)
+        .build()
+    )
     mock_post_probs = mocker.patch(
         "clintrials.dosefinding.efftox.efftox_get_posterior_probs"
     )
@@ -614,7 +694,18 @@ def test_efftox_docstring_example():
     metric = LpNormCurve(
         hinge_points[0][0], hinge_points[1][1], hinge_points[2][0], hinge_points[2][1]
     )
-    trial = EffToxBuilder().with_real_doses(real_doses).with_theta_priors(theta_priors).with_cutoffs(tox_cutoff, eff_cutoff).with_certainties(tox_certainty, eff_certainty).with_metric(metric).with_max_size(30).with_first_dose(3).with_kwargs(num_integral_steps=10**5).build()
+    trial = (
+        EffToxBuilder()
+        .with_real_doses(real_doses)
+        .with_theta_priors(theta_priors)
+        .with_cutoffs(tox_cutoff, eff_cutoff)
+        .with_certainties(tox_certainty, eff_certainty)
+        .with_metric(metric)
+        .with_max_size(30)
+        .with_first_dose(3)
+        .with_kwargs(num_integral_steps=10**5)
+        .build()
+    )
     assert trial.next_dose() == 3
     trial.update([(3, 0, 1), (3, 1, 1), (3, 0, 0)])
     assert trial.next_dose() == 3
@@ -642,7 +733,16 @@ def test_efftox_initialization_with_skeleton():
     prior_eff_probs = [0.2, 0.4, 0.6, 0.7]
     metric = LpNormCurve(0.2, 0.4, 0.5, 0.2)
 
-    trial = EffToxBuilder().with_real_doses(real_doses).with_cutoffs(0.4, 0.2).with_certainties(0.8, 0.8).with_metric(metric).with_max_size(30).with_kwargs(prior_tox_probs=prior_tox_probs, prior_eff_probs=prior_eff_probs).build()
+    trial = (
+        EffToxBuilder()
+        .with_real_doses(real_doses)
+        .with_cutoffs(0.4, 0.2)
+        .with_certainties(0.8, 0.8)
+        .with_metric(metric)
+        .with_max_size(30)
+        .with_kwargs(prior_tox_probs=prior_tox_probs, prior_eff_probs=prior_eff_probs)
+        .build()
+    )
 
     assert len(trial.priors) == 6
     assert trial.priors[1].mean() > 0
@@ -677,5 +777,3 @@ def test_efftox_keyword_only():
     """Test that EffTox requires keyword-only arguments."""
     with pytest.raises(TypeError):
         EffTox([1, 2, 3])  # type: ignore[misc]
-
-

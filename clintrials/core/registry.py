@@ -10,26 +10,21 @@ CORE_REGISTRY: Dict[str, Any] = {
     # Integration limits
     "gsd_maxpts": 1000000,
     "gsd_abseps": 1e-5,
-
     # Quadrature nodes
     "crm_deg": 40,
-
     # CRM Integration parameters
     "crm_min_beta": -10,
     "crm_max_beta": 10,
     "crm_n_points": 2001,
     "crm_sample_size": 1000000,
-
     # Search intervals
     "gsd_brentq_first_min": -5,
     "gsd_brentq_first_max": 15,
     "gsd_brentq_second_min": -50,
     "gsd_brentq_second_max": 50,
-
     # Math constants (beta clipping)
     "math_clip_beta_min": -10,
     "math_clip_beta_max": 10,
-
     # Random seeds
     "gsd_multivariate_normal_seed": 42,
     "gsd_seed_strategy": "fixed seed (42)",
@@ -66,7 +61,6 @@ CORE_REGISTRY: Dict[str, Any] = {
     "efficacytoxicity_seed_strategy": "not applicable",
     "watu_seed_strategy": "not applicable",
     "wagestait_seed_strategy": "not applicable",
-
 }
 
 import importlib
@@ -78,6 +72,7 @@ logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     pass
+
 
 class ProtocolRegistry:
     """A registry for clinical trial protocol designs and their visualization methods."""
@@ -93,10 +88,13 @@ class ProtocolRegistry:
         self._discovered = True
         try:
             import clintrials.visualization.dashboard.views as views
+
             if views.__path__:
                 for _, name, _ in pkgutil.iter_modules(views.__path__):
                     if name.endswith("_view"):
-                        importlib.import_module(f"clintrials.visualization.dashboard.views.{name}")
+                        importlib.import_module(
+                            f"clintrials.visualization.dashboard.views.{name}"
+                        )
         except Exception:
             pass
 
@@ -111,21 +109,29 @@ class ProtocolRegistry:
         Returns:
             callable: A decorator function for registering the render method.
         """
+
         def decorator(render_func: Callable) -> Callable:  # type: ignore
             if name in self._designs:
-                logger.warning(f"Duplicate registration encountered for design name: {name}")
+                logger.warning(
+                    f"Duplicate registration encountered for design name: {name}"
+                )
             else:
                 self._designs[name] = {}
             self._designs[name]["render"] = render_func
             if preview_func:
                 self._designs[name]["preview"] = preview_func
             return render_func
+
         return decorator
 
-    def register_manual(self, name: str, render_func: Callable, preview_func: Optional[Callable] = None) -> None:  # type: ignore
+    def register_manual(
+        self, name: str, render_func: Callable[..., Any], preview_func: Optional[Callable[..., Any]] = None
+    ) -> None:
         """Manually register a protocol design with its render and preview functions."""
         if name in self._designs:
-            logger.warning(f"Duplicate manual registration encountered for design name: {name}")
+            logger.warning(
+                f"Duplicate manual registration encountered for design name: {name}"
+            )
         self._designs[name] = {"render": render_func, "preview": preview_func}
 
     def get_designs(self) -> List[str]:
@@ -143,14 +149,18 @@ class ProtocolRegistry:
         self._discover()
         return self._designs.get(name, {}).get("preview")
 
+
 PROTOCOL_REGISTRY = ProtocolRegistry()
+
 
 def inject_docs() -> Callable:  # type: ignore
     """Decorator to inject registry constants into docstrings."""
+
     def decorator(obj: Any) -> Any:
         if obj.__doc__:
             obj.__doc__ = obj.__doc__.format(**CORE_REGISTRY)
         return obj
+
     return decorator
 
 
@@ -168,7 +178,12 @@ class RunnerRegistry:
         self._default_runner = runner
         self._default_result_container = result_container
 
-    def register(self, design: Any, runner: Optional[Any] = None, result_container: Optional[Any] = None) -> Any:
+    def register(
+        self,
+        design: Any,
+        runner: Optional[Any] = None,
+        result_container: Optional[Any] = None,
+    ) -> Any:
         """Register a runner and optional result container for a specific trial design.
 
         Can be used as a function call or as a decorator on the runner class.
@@ -183,6 +198,7 @@ class RunnerRegistry:
             def decorator(runner_cls: Any) -> Any:
                 self.register(design, runner_cls, result_container)
                 return runner_cls
+
             return decorator
 
         # Validation
@@ -236,7 +252,10 @@ class RunnerRegistry:
             return runner, result_container or self._default_result_container
 
         # 2. Try resolving by string representation or name
-        if hasattr(design_class, "__name__") and design_class.__name__ in self._registry:
+        if (
+            hasattr(design_class, "__name__")
+            and design_class.__name__ in self._registry
+        ):
             runner, result_container = self._registry[design_class.__name__]
             if self._default_runner is None or self._default_result_container is None:
                 self._load_defaults()
@@ -247,7 +266,10 @@ class RunnerRegistry:
             for parent in design_class.__mro__:
                 if parent in self._registry:
                     runner, result_container = self._registry[parent]
-                    if self._default_runner is None or self._default_result_container is None:
+                    if (
+                        self._default_runner is None
+                        or self._default_result_container is None
+                    ):
                         self._load_defaults()
                     return runner, result_container or self._default_result_container
 
@@ -260,12 +282,12 @@ class RunnerRegistry:
     def _load_defaults(self) -> None:
         if self._default_runner is None:
             from clintrials.core.simulation import UniversalProtocolSimulationRunner
+
             self._default_runner = UniversalProtocolSimulationRunner
         if self._default_result_container is None:
             from clintrials.core.unified import SimulationResult
+
             self._default_result_container = SimulationResult
 
 
 RUNNER_REGISTRY = RunnerRegistry()
-
-

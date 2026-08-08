@@ -25,7 +25,9 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # t
     """
     from clintrials.core.errors import ErrorTemplates
 
-    if not isinstance(treatment_group, (list, tuple, np.ndarray)) or not isinstance(control_group, (list, tuple, np.ndarray)):
+    if not isinstance(treatment_group, (list, tuple, np.ndarray)) or not isinstance(
+        control_group, (list, tuple, np.ndarray)
+    ):
         raise TypeError("Groups must be sequence or array types.")
 
     t_group = np.asarray(treatment_group)
@@ -38,7 +40,11 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # t
         raise ValueError("Groups must be 2D arrays or sequences of sequences.")
 
     if t_group.shape[1] != c_group.shape[1]:
-        raise ValueError(ErrorTemplates.MATCHING_LENGTHS.format(first_name="treatment_group components", name="control_group components"))
+        raise ValueError(
+            ErrorTemplates.MATCHING_LENGTHS.format(
+                first_name="treatment_group components", name="control_group components"
+            )
+        )
 
     diff = t_group[:, np.newaxis, :] - c_group[np.newaxis, :, :]
 
@@ -47,7 +53,9 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # t
 
     first_non_zero_idx = np.argmax(non_zero, axis=2)
 
-    first_diff = np.take_along_axis(diff, first_non_zero_idx[:, :, np.newaxis], axis=2).squeeze(axis=2)
+    first_diff = np.take_along_axis(
+        diff, first_non_zero_idx[:, :, np.newaxis], axis=2
+    ).squeeze(axis=2)
 
     wins = np.sum((first_diff > 0) & has_non_zero)
     losses = np.sum((first_diff < 0) & has_non_zero)
@@ -56,8 +64,8 @@ def simulate_comparisons(treatment_group, control_group) -> dict[str, int]:  # t
     return {"wins": int(wins), "losses": int(losses), "ties": int(ties)}
 
 
-
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

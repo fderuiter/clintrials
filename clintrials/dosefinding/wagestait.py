@@ -30,7 +30,9 @@ from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingT
 _min_theta, _max_theta = -10, 10
 
 
-def _wt_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0) -> Any:
+def _wt_lik(
+    cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0
+) -> Any:
     """Calculates the compound likelihood for the Wages & Tait method.
 
     Args:
@@ -68,13 +70,19 @@ def _wt_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0
     total_log_l = np.sum(log_l, axis=0)
 
     if not theta_is_array:
-        total_log_l = float(total_log_l[0]) if isinstance(total_log_l, np.ndarray) else total_log_l
+        total_log_l = (
+            float(total_log_l[0])
+            if isinstance(total_log_l, np.ndarray)
+            else total_log_l
+        )
         return np.exp(np.clip(total_log_l, -700, 700))
     else:
         return np.exp(np.clip(total_log_l, -700, 700))
 
 
-def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0) -> Any:
+def _wt_log_lik(
+    cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any = 0
+) -> Any:
     """Calculates the compound log-likelihood for the Wages & Tait method.
 
     Args:
@@ -112,12 +120,23 @@ def _wt_log_lik(cases: Any, skeleton: Any, theta: Any, F: Any = empiric, a0: Any
     total_log_l = np.sum(log_l, axis=0)
 
     if not theta_is_array:
-        return float(total_log_l[0]) if isinstance(total_log_l, np.ndarray) else total_log_l
+        return (
+            float(total_log_l[0])
+            if isinstance(total_log_l, np.ndarray)
+            else total_log_l
+        )
     else:
         return total_log_l
 
 
-def _wt_get_theta_hat(cases: Any, skeletons: Any, theta_prior: Any, F: Any = empiric, use_quick_integration: Any = False, estimate_var: Any = False) -> Any:
+def _wt_get_theta_hat(
+    cases: Any,
+    skeletons: Any,
+    theta_prior: Any,
+    F: Any = empiric,
+    use_quick_integration: Any = False,
+    estimate_var: Any = False,
+) -> Any:
     """Estimates the theta parameter for the Wages & Tait method.
 
     Args:
@@ -160,7 +179,14 @@ def _wt_get_theta_hat(cases: Any, skeletons: Any, theta_prior: Any, F: Any = emp
     return theta_hats
 
 
-def _get_post_eff_bayes(cases: Any, skeleton: Any, dose_labels: Any, theta_prior: Any, F: Any = empiric, use_quick_integration: Any = False) -> Any:
+def _get_post_eff_bayes(
+    cases: Any,
+    skeleton: Any,
+    dose_labels: Any,
+    theta_prior: Any,
+    F: Any = empiric,
+    use_quick_integration: Any = False,
+) -> Any:
     """Calculates the posterior probability of efficacy using Bayesian integration.
 
     Args:
@@ -201,17 +227,39 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
     def get_summary_functions(cls) -> Any:
         """Get summary functions for the Wages & Tait protocol."""
         import pandas as pd
+
         return {
             "N": lambda s, p: len(s),
-            "recommended_dose_prob": lambda s, p: pd.Series(
-                [x.get("RecommendedDose") for x in s]
-            )
-            .value_counts(normalize=True)
-            .sort_index()
-            .to_dict(),
+            "recommended_dose_prob": lambda s, p: (
+                pd.Series([x.get("RecommendedDose") for x in s])
+                .value_counts(normalize=True)
+                .sort_index()
+                .to_dict()
+            ),
         }
 
-    def __init__(self, *, skeletons: Any, prior_tox_probs: Any, tox_target: Any, tox_limit: Any, eff_limit: Any, first_dose: Any, max_size: Any, randomisation_stage_size: Any, F_func: Any = empiric, inverse_F: Any = inverse_empiric, theta_prior: Any = norm(0, np.sqrt(1.34)), beta_prior: Any = norm(0, np.sqrt(1.34)), excess_toxicity_alpha: Any = 0.025, deficient_efficacy_alpha: Any = 0.025, model_prior_weights: Any = None, use_quick_integration: Any = False, estimate_var: Any = False, toxicity_estimator: Optional[Any] = None) -> None:
+    def __init__(
+        self,
+        *,
+        skeletons: Any,
+        prior_tox_probs: Any,
+        tox_target: Any,
+        tox_limit: Any,
+        eff_limit: Any,
+        first_dose: Any,
+        max_size: Any,
+        randomisation_stage_size: Any,
+        F_func: Any = empiric,
+        inverse_F: Any = inverse_empiric,
+        theta_prior: Any = norm(0, np.sqrt(1.34)),
+        beta_prior: Any = norm(0, np.sqrt(1.34)),
+        excess_toxicity_alpha: Any = 0.025,
+        deficient_efficacy_alpha: Any = 0.025,
+        model_prior_weights: Any = None,
+        use_quick_integration: Any = False,
+        estimate_var: Any = False,
+        toxicity_estimator: Optional[Any] = None,
+    ) -> None:
         """Initializes a WagesTait trial object.
 
         Args:
@@ -250,6 +298,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
                 if `tox_target` is greater than `tox_limit`.
         """
         from clintrials.core.schema import WagesTaitSchema
+
         schema_args = {
             "skeletons": skeletons,
             "prior_tox_probs": prior_tox_probs,
@@ -263,7 +312,10 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self._schema = WagesTaitSchema(**schema_args)
 
         EfficacyToxicityDoseFindingTrial.__init__(
-            self, first_dose=first_dose, num_doses=len(prior_tox_probs), max_size=max_size
+            self,
+            first_dose=first_dose,
+            num_doses=len(prior_tox_probs),
+            max_size=max_size,
         )
 
         self.skeletons = skeletons
@@ -280,7 +332,11 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         self.deficient_efficacy_alpha = deficient_efficacy_alpha
         if model_prior_weights is not None:
             if self.K != len(model_prior_weights):
-                raise ValueError(ErrorTemplates.EXPECTED_LENGTH.format(name="model_prior_weights", expected_length=self.K))
+                raise ValueError(
+                    ErrorTemplates.EXPECTED_LENGTH.format(
+                        name="model_prior_weights", expected_length=self.K
+                    )
+                )
             if sum(model_prior_weights) == 0:
                 raise ValueError("model_prior_weights cannot sum to zero.")
             self.model_prior_weights = model_prior_weights / sum(model_prior_weights)
@@ -375,6 +431,7 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 
     def _calculate_next_dose(self, **kwargs: Any) -> Any:
         from clintrials._utils import filter_kwargs_for_callable
+
         cases = list(zip(self._doses, self._toxicities, self._efficacies))
         toxicity_cases = []
         for dose, tox, eff in cases:
@@ -468,7 +525,9 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
         """
         return EfficacyToxicityDoseFindingTrial.has_more(self)
 
-    def optimal_decision(self, prob_tox: Sequence[float], prob_eff: Sequence[float]) -> int:
+    def optimal_decision(
+        self, prob_tox: Sequence[float], prob_eff: Sequence[float]
+    ) -> int:
         """Determines the optimal biological dose.
 
         Args:
@@ -526,4 +585,5 @@ class WagesTait(EfficacyToxicityDoseFindingTrial):
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

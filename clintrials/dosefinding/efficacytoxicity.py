@@ -133,6 +133,7 @@ class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
         """
         if len(cases) > 0:
             from clintrials.core.cohort import parse_patient_records
+
             records = parse_patient_records(cases)
             self._tracker.add_records(records)
             self._next_dose = self._calculate_next_dose(**kwargs)
@@ -174,7 +175,9 @@ class EfficacyToxicityDoseFindingTrial(BaseDoseFindingTrial):
                 eff_rates.append(np.nan)
         return np.array(eff_rates)
 
-    def optimal_decision(self, prob_tox: Sequence[float], prob_eff: Sequence[float]) -> int:
+    def optimal_decision(
+        self, prob_tox: Sequence[float], prob_eff: Sequence[float]
+    ) -> int:
         """Gets the optimal dose choice for given toxicity and efficacy curves.
 
         Args:
@@ -248,18 +251,43 @@ def _efftox_patient_outcome_to_label(po: Any) -> Any:
         return "Error"
 
 
-def _efftox_outcome_generator(design: Any, current_size: Any, cohort_size: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any, tolerances: Any, correlated_outcomes: Any, **kwargs: Any) -> Any:
+def _efftox_outcome_generator(
+    design: Any,
+    current_size: Any,
+    cohort_size: Any,
+    true_toxicities: Any,
+    true_efficacies: Any,
+    tox_eff_odds_ratio: Any,
+    tolerances: Any,
+    correlated_outcomes: Any,
+    **kwargs: Any,
+) -> Any:
     dose_level = design.next_dose()
     u = (true_toxicities[dose_level - 1], true_efficacies[dose_level - 1])
     if correlated_outcomes:
         events = correlated_binary_outcomes_from_uniforms(
-            tolerances[current_size : current_size + cohort_size,], u, psi=tox_eff_odds_ratio
+            tolerances[current_size : current_size + cohort_size,],
+            u,
+            psi=tox_eff_odds_ratio,
         ).astype(int)
     else:
-        events = (tolerances[current_size : current_size + cohort_size, 0:2] < u).astype(int)
+        events = (
+            tolerances[current_size : current_size + cohort_size, 0:2] < u
+        ).astype(int)
     return np.column_stack(([dose_level] * cohort_size, events))
 
-def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
+
+def _simulate_trial(
+    design: Any,
+    true_toxicities: Any,
+    true_efficacies: Any,
+    tox_eff_odds_ratio: Any = 1.0,
+    tolerances: Any = None,
+    cohort_size: Any = 1,
+    conduct_trial: Any = 1,
+    calculate_optimal_decision: Any = 1,
+    recruitment_stream: Any = None,
+) -> Any:
     """Simulates a single efficacy-toxicity dose-finding trial.
 
     Args:
@@ -292,10 +320,11 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
     # Simulate trial
     if conduct_trial:
         from clintrials.core.simulation import UniversalProtocolSimulationRunner
+
         runner = UniversalProtocolSimulationRunner(
             design=design,
             outcome_generator=_efftox_outcome_generator,  # type: ignore[arg-type]
-            recruitment_stream=recruitment_stream
+            recruitment_stream=recruitment_stream,
         )
         sim_report = runner.run(
             cohort_size=cohort_size,
@@ -303,7 +332,7 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
             true_efficacies=true_efficacies,
             tox_eff_odds_ratio=tox_eff_odds_ratio,
             tolerances=tolerances,
-            correlated_outcomes=correlated_outcomes
+            correlated_outcomes=correlated_outcomes,
         )
 
     # Report findings
@@ -351,7 +380,17 @@ def _simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox
     return report
 
 
-def simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
+def simulate_trial(
+    design: Any,
+    true_toxicities: Any,
+    true_efficacies: Any,
+    tox_eff_odds_ratio: Any = 1.0,
+    tolerances: Any = None,
+    cohort_size: Any = 1,
+    conduct_trial: Any = 1,
+    calculate_optimal_decision: Any = 1,
+    recruitment_stream: Any = None,
+) -> Any:
     """Simulates a single efficacy-toxicity dose-finding trial.
 
     This function is a wrapper around `_simulate_trial` that performs input
@@ -411,7 +450,17 @@ def simulate_trial(design: Any, true_toxicities: Any, true_efficacies: Any, tox_
     )
 
 
-def simulate_efficacy_toxicity_dose_finding_trials(design_map: Any, true_toxicities: Any, true_efficacies: Any, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = 1, calculate_optimal_decision: Any = 1, recruitment_stream: Any = None) -> Any:
+def simulate_efficacy_toxicity_dose_finding_trials(
+    design_map: Any,
+    true_toxicities: Any,
+    true_efficacies: Any,
+    tox_eff_odds_ratio: Any = 1.0,
+    tolerances: Any = None,
+    cohort_size: Any = 1,
+    conduct_trial: Any = 1,
+    calculate_optimal_decision: Any = 1,
+    recruitment_stream: Any = None,
+) -> Any:
     """Simulates multiple efficacy-toxicity dose-finding trials.
 
     This method allows for the comparison of different designs on the same set
@@ -475,7 +524,16 @@ def simulate_efficacy_toxicity_dose_finding_trials(design_map: Any, true_toxicit
     return report
 
 
-def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, cohort_number: Any = 1, cases_already_observed: Any = [], custom_output_func: Any = None, verbose: Any = False, **kwargs: Any) -> Any:
+def dose_transition_pathways(
+    trial: Any,
+    next_dose: Any,
+    cohort_sizes: Any,
+    cohort_number: Any = 1,
+    cases_already_observed: Any = [],
+    custom_output_func: Any = None,
+    verbose: Any = False,
+    **kwargs: Any,
+) -> Any:
     """Calculates the dose-transition pathways for an efficacy-toxicity design.
 
     Args:
@@ -514,11 +572,15 @@ def dose_transition_pathways(trial: Any, next_dose: Any, cohort_sizes: Any, coho
                 logger.debug("Running %s", cases)
             trial.reset()
             from clintrials.core.cohort import parse_patient_records
+
             obd = trial.update(parse_patient_records(cases), **kwargs)
             # Collect output
             bag_o_tricks = OrderedDict(
                 [
-                    (f"Pat{cohort_number}.{j+1}", _efftox_patient_outcome_to_label(po))
+                    (
+                        f"Pat{cohort_number}.{j + 1}",
+                        _efftox_patient_outcome_to_label(po),
+                    )
                     for (j, po) in enumerate(path)
                 ]
             )
@@ -611,7 +673,9 @@ def _efftox_row_formatter(x: Any, dose_label_func: Any, verbose: Any = False) ->
         return template_txt.format(path, dose_label_func(obd), np.round(prob_sup, 2))
 
 
-def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:  # type: ignore
+def print_dtps(
+    dtps: Any, indent: int = 0, dose_label_func: Optional[Callable[..., Any]] = None
+) -> Any:
     """Prints the dose-transition pathways.
 
     Args:
@@ -631,7 +695,9 @@ def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] =
     )
 
 
-def print_dtps_verbose(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None) -> Any:  # type: ignore
+def print_dtps_verbose(
+    dtps: Any, indent: int = 0, dose_label_func: Optional[Callable[..., Any]] = None
+) -> Any:
     """Prints the dose-transition pathways with verbose information.
 
     Args:
@@ -654,4 +720,5 @@ def print_dtps_verbose(dtps: Any, indent: int = 0, dose_label_func: Optional[Cal
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

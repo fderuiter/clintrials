@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 """Helper visualization utilities."""
+
 from __future__ import annotations
 
 from typing import Any, Dict, List
@@ -15,6 +16,7 @@ def format_label(label: str | Any) -> str | Any:
         return label
     return label.replace("_", " ").title()
 
+
 def format_labels_dict(cols: str | List[str]) -> Dict[str, str]:
     """Create a dictionary mapping column names to their formatted labels."""
     if not isinstance(cols, list):
@@ -25,11 +27,13 @@ def format_labels_dict(cols: str | List[str]) -> Dict[str, str]:
             labels[col] = format_label(col)
     return labels
 
+
 def format_number(v: float | int | Any) -> str:
     """Format numeric values to 4 decimal places, or cast to string if not float."""
     if isinstance(v, (float, np.float64)):
         return f"{v:.4f}"
     return str(v)
+
 
 def build_html_table(df: pd.DataFrame) -> str:
     """Build a standard HTML table from a pandas DataFrame."""

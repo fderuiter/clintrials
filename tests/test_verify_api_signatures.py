@@ -230,17 +230,14 @@ def test_validate_whitelist() -> None:
     mock_manifest = {
         "module1": {
             "approved_func": {"type": "function"},
-            "unapproved_func": {"type": "function"}
+            "unapproved_func": {"type": "function"},
         },
-        "module2": {
-            "another_approved": {"type": "function"}
-        }
+        "module2": {"another_approved": {"type": "function"}},
     }
     mock_whitelist = {
         "module1": ["approved_func"],
-        "module2": ["another_approved", "some_other_func"]
+        "module2": ["another_approved", "some_other_func"],
     }
     unregistered = validate_whitelist(mock_manifest, mock_whitelist)
     assert len(unregistered) == 1
     assert "Export 'unapproved_func' in module 'module1'" in unregistered[0]
-

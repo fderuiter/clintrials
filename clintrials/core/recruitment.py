@@ -141,9 +141,7 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
 
         v = sorted(vertices, key=lambda x: x[0])
         self.shapes = {}  # t1 -> t0, t1, y0, y1 vertex parameters
-        self.recruiment_mass = (
-            {}
-        )  # t1 -> recruitment mass available (i.e. area of quadrilateral) to left of t1
+        self.recruiment_mass = {}  # t1 -> recruitment mass available (i.e. area of quadrilateral) to left of t1
         if len(v) > 0:
             t0 = 0
             y0 = initial_intensity
@@ -282,4 +280,5 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

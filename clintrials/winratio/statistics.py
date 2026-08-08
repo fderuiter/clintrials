@@ -25,6 +25,7 @@ def calculate_confidence_intervals(wr: float, wins: int, losses: int):  # type: 
             the confidence interval.
     """
     from clintrials.core.errors import ErrorTemplates
+
     if wins < 0:
         raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
     if losses < 0:
@@ -55,6 +56,7 @@ def calculate_p_value(wr: float, wins: int, losses: int) -> float:
         float: The p-value.
     """
     from clintrials.core.errors import ErrorTemplates
+
     if wins < 0:
         raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
     if losses < 0:
@@ -84,6 +86,7 @@ def calculate_win_ratio(wins: int, losses: int) -> float:
         float: The win ratio, or infinity if there are no losses.
     """
     from clintrials.core.errors import ErrorTemplates
+
     if wins < 0:
         raise ValueError(ErrorTemplates.GE.format(name="wins", bound=0))
     if losses < 0:
@@ -96,4 +99,5 @@ def calculate_win_ratio(wins: int, losses: int) -> float:
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

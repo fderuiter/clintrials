@@ -40,6 +40,7 @@ class Protocol(metaclass=abc.ABCMeta):
         if self._rng is None:
             # Fallback to local numpy random generator but warn or just create one
             from clintrials.core.rng import get_rng
+
             self._rng = get_rng()
         return self._rng
 
@@ -135,7 +136,9 @@ class Protocol(metaclass=abc.ABCMeta):
         elif hasattr(runner, "rng"):
             runner.rng = self.rng
 
-        results = runner.run(mode=mode, n_sims=n_sims, show_progress=show_progress, **mapped_kwargs)
+        results = runner.run(
+            mode=mode, n_sims=n_sims, show_progress=show_progress, **mapped_kwargs
+        )
 
         return result_container_class(results, mode=method)
 
@@ -265,7 +268,9 @@ class BaseDoseFindingTrial(Protocol):
         Returns:
             int: The number of toxicities at the given dose.
         """
-        return int(np.sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose]))
+        return int(
+            np.sum([t for d, t in zip(self.doses(), self.toxicities()) if d == dose])
+        )
 
     def maximum_dose_given(self) -> Optional[int]:
         """Gets the maximum dose level administered so far.

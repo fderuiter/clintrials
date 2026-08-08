@@ -122,9 +122,7 @@ def test_watu_update_kwargs(mocker):
     mock_crm_exceeds = mocker.patch.object(
         trial.crm, "prob_tox_exceeds", return_value=np.array([0.1])
     )
-    mocker.patch.object(
-        trial, "prob_eff_exceeds", return_value=np.array([0.9])
-    )
+    mocker.patch.object(trial, "prob_eff_exceeds", return_value=np.array([0.9]))
 
     # Stage 1
     trial.update(cases, mc_samples_stage1=2500)

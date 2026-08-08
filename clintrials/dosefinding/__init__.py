@@ -111,6 +111,7 @@ class DoseFindingTrial(BaseDoseFindingTrial):
         """
         if cases:
             from clintrials.core.cohort import parse_patient_records
+
             records = parse_patient_records(cases)
             self._tracker.add_records(records)
 
@@ -141,7 +142,7 @@ class DoseFindingTrial(BaseDoseFindingTrial):
         """
         from clintrials.core.viz_interface import get_visualization_provider
 
-        viz = get_visualization_provider()  # type: ignore
+        viz = get_visualization_provider()
 
         return viz.plot_dose_finding_outcomes(self, chart_title=chart_title)
 
@@ -182,7 +183,9 @@ class SimpleToxicityCountingDoseEscalationTrial(DoseFindingTrial):
     Escalates until a certain number of toxicities are observed.
     """
 
-    def __init__(self, *, first_dose: Any, num_doses: Any, max_size: Any, max_toxicities: Any = 1) -> None:
+    def __init__(
+        self, *, first_dose: Any, num_doses: Any, max_size: Any, max_toxicities: Any = 1
+    ) -> None:
         """Initializes a SimpleToxicityCountingDoseEscalationTrial object.
 
         Args:
@@ -312,7 +315,14 @@ class ThreePlusThree(DoseFindingTrial):
         return DoseFindingTrial.has_more(self) and self._continue
 
 
-def _df_outcome_generator(design: Any, current_size: Any, cohort_size: Any, true_toxicities: Any, tolerances: Any, **kwargs: Any) -> Any:
+def _df_outcome_generator(
+    design: Any,
+    current_size: Any,
+    cohort_size: Any,
+    true_toxicities: Any,
+    tolerances: Any,
+    **kwargs: Any,
+) -> Any:
     dose_level = design.next_dose()
     tox = [
         1 if x < true_toxicities[dose_level - 1] else 0
@@ -320,7 +330,18 @@ def _df_outcome_generator(design: Any, current_size: Any, cohort_size: Any, true
     ]
     return list(zip([dose_level] * cohort_size, tox))
 
-def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficacies: Optional[Any] = None, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = True, calculate_optimal_decision: Any = True, recruitment_stream: Any = None) -> Any:
+
+def simulate_dose_finding_trial(
+    design: Any,
+    true_toxicities: Any,
+    true_efficacies: Optional[Any] = None,
+    tox_eff_odds_ratio: Any = 1.0,
+    tolerances: Any = None,
+    cohort_size: Any = 1,
+    conduct_trial: Any = True,
+    calculate_optimal_decision: Any = True,
+    recruitment_stream: Any = None,
+) -> Any:
     """Simulates a dose-finding trial.
 
     Args:
@@ -350,9 +371,14 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
         _simulate_trial,
     )
 
-    if isinstance(design, EfficacyToxicityDoseFindingTrial) or true_efficacies is not None:
+    if (
+        isinstance(design, EfficacyToxicityDoseFindingTrial)
+        or true_efficacies is not None
+    ):
         if true_efficacies is None:
-            raise ValueError("true_efficacies must be provided for joint efficacy-toxicity designs.")
+            raise ValueError(
+                "true_efficacies must be provided for joint efficacy-toxicity designs."
+            )
         n_patients = design.max_size()
         if tolerances is not None:
             if isinstance(tolerances, np.ndarray) and tolerances.ndim == 2:
@@ -360,9 +386,13 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
             else:
                 flat_tols = list(tolerances)
                 if len(flat_tols) >= 3 * n_patients:
-                    tolerances = np.array(flat_tols[:3 * n_patients]).reshape(n_patients, 3)
+                    tolerances = np.array(flat_tols[: 3 * n_patients]).reshape(
+                        n_patients, 3
+                    )
                 else:
-                    tolerances = np.random.uniform(size=3 * n_patients).reshape(n_patients, 3)
+                    tolerances = np.random.uniform(size=3 * n_patients).reshape(
+                        n_patients, 3
+                    )
         else:
             tolerances = np.random.uniform(size=3 * n_patients).reshape(n_patients, 3)
 
@@ -397,12 +427,12 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
         runner = UniversalProtocolSimulationRunner(
             design=design,
             outcome_generator=_df_outcome_generator,  # type: ignore[arg-type]
-            recruitment_stream=recruitment_stream
+            recruitment_stream=recruitment_stream,
         )
         sim_report = runner.run(
             cohort_size=cohort_size,
             true_toxicities=true_toxicities,
-            tolerances=tolerances
+            tolerances=tolerances,
         )
         if isinstance(sim_report, list):
             sim_report = sim_report[0]
@@ -413,8 +443,12 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
     # Optimal decision, given these specific patient tolerances
     if calculate_optimal_decision:
         try:
-            had_tox = lambda x: x < np.array(true_toxicities)
-            tox_horizons = np.array([had_tox(x) for x in tolerances[:design.max_size()]])  # type: ignore
+            def had_tox(x: Any) -> Any:
+                return x < np.array(true_toxicities)
+
+            tox_horizons = np.array(
+                [had_tox(x) for x in tolerances[: design.max_size()]]
+            )
             tox_hat = tox_horizons.mean(axis=0)
 
             optimal_allocation = design.optimal_decision(tox_hat)
@@ -426,7 +460,17 @@ def simulate_dose_finding_trial(design: Any, true_toxicities: Any, true_efficaci
     return report
 
 
-def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, true_efficacies: Optional[Any] = None, tox_eff_odds_ratio: Any = 1.0, tolerances: Any = None, cohort_size: Any = 1, conduct_trial: Any = True, calculate_optimal_decision: Any = True, recruitment_stream: Any = None) -> Any:
+def simulate_dose_finding_trials(
+    design_map: Any,
+    true_toxicities: Any,
+    true_efficacies: Optional[Any] = None,
+    tox_eff_odds_ratio: Any = 1.0,
+    tolerances: Any = None,
+    cohort_size: Any = 1,
+    conduct_trial: Any = True,
+    calculate_optimal_decision: Any = True,
+    recruitment_stream: Any = None,
+) -> Any:
     """Simulates multiple toxicity-driven dose-finding trials.
 
     Runs simulations from the same patient data.
@@ -454,7 +498,11 @@ def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, true_eff
             keys corresponding to the design labels.
     """
     from clintrials.dosefinding.efficacytoxicity import EfficacyToxicityDoseFindingTrial
-    has_joint = any(isinstance(design, EfficacyToxicityDoseFindingTrial) for design in design_map.values())
+
+    has_joint = any(
+        isinstance(design, EfficacyToxicityDoseFindingTrial)
+        for design in design_map.values()
+    )
     max_size = max([design.max_size() for design in design_map.values()])
 
     if tolerances is None:
@@ -484,7 +532,9 @@ def simulate_dose_finding_trials(design_map: Any, true_toxicities: Any, true_eff
     return report
 
 
-def find_mtd(toxicity_target: Any, scenario: Any, strictly_lte: Any = False, verbose: Any = False) -> Any:
+def find_mtd(
+    toxicity_target: Any, scenario: Any, strictly_lte: Any = False, verbose: Any = False
+) -> Any:
     """Finds the MTD in a list of toxicity probabilities.
 
     Args:
@@ -531,7 +581,16 @@ def find_mtd(toxicity_target: Any, scenario: Any, strictly_lte: Any = False, ver
             return loc
 
 
-def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, cohort_sizes: List[int], cohort_number: int = 1, cases_already_observed: List[Tuple] = [], custom_output_func: Optional[Callable] = None, verbose: bool = False, **kwargs: Any) -> Any:  # type: ignore
+def dose_transition_pathways_to_json(
+    trial: DoseFindingTrial,
+    next_dose: int,
+    cohort_sizes: List[int],
+    cohort_number: int = 1,
+    cases_already_observed: List[Tuple[Any, ...]] = [],
+    custom_output_func: Optional[Callable[..., Any]] = None,
+    verbose: bool = False,
+    **kwargs: Any,
+) -> Any:
     """Calculates the dose-transition pathways of a dose-finding trial.
 
     Args:
@@ -562,7 +621,6 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
         possible_dlts = range(0, cohort_size + 1)
 
         for i, num_dlts in enumerate(possible_dlts):
-
             # Invoke dose-decision
             cohort_cases = [(next_dose, 1)] * num_dlts + [(next_dose, 0)] * (
                 cohort_size - num_dlts
@@ -575,6 +633,7 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
             trial.set_next_dose(next_dose)
             # print 'Now next_dose is', trial.next_dose()
             from clintrials.core.cohort import parse_patient_records
+
             mtd = trial.update(parse_patient_records(cases), **kwargs)
             # print 'And now next_dose is', trial.next_dose()
 
@@ -586,7 +645,7 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
             # Collect output
             bag_o_tricks = OrderedDict(
                 [
-                    (f"Pat{cohort_number}.{j+1}", "Tox" if tox else "No Tox")
+                    (f"Pat{cohort_number}.{j + 1}", "Tox" if tox else "No Tox")
                     for (j, (dose, tox)) in enumerate(cohort_cases)
                 ]
             )
@@ -626,7 +685,13 @@ def dose_transition_pathways_to_json(trial: DoseFindingTrial, next_dose: int, co
 dose_transition_pathways = dose_transition_pathways_to_json
 
 
-def print_dtps(dtps: Any, indent: int = 0, dose_label_func: Optional[Callable] = None, row_formatter: Optional[Callable] = None, verbose: bool = False) -> Any:  # type: ignore
+def print_dtps(
+    dtps: Any,
+    indent: int = 0,
+    dose_label_func: Optional[Callable[..., Any]] = None,
+    row_formatter: Optional[Callable[..., Any]] = None,
+    verbose: bool = False,
+) -> Any:
     """Prints the dose-transition pathways.
 
     Args:
@@ -701,7 +766,7 @@ def dtps_to_pandas(dtps: Any, dose_label_func: Optional[Callable] = None) -> Any
     ncols = df.shape[1]
     cols = []
     for i in range(1, 1 + int(ncols / 2)):
-        cols.extend([f"Cohort {i} DLTs", f"Cohort {i+1} Dose"])
+        cols.extend([f"Cohort {i} DLTs", f"Cohort {i + 1} Dose"])
     df.columns = cols
 
     return df

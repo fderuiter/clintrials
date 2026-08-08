@@ -5,6 +5,8 @@
 Random Seed Strategy: {provider_seed_strategy}
 """
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -23,7 +25,15 @@ HIGH_CONTRAST_PALETTE = [
 
 PATTERN_SEQUENCE = ["/", "\\", "x", "-", "|", "+", "."]
 DASH_SEQUENCE = ["solid", "dot", "dash", "longdash", "dashdot", "longdashdot"]
-SYMBOL_SEQUENCE = ["circle", "square", "diamond", "cross", "x", "triangle-up", "triangle-down"]
+SYMBOL_SEQUENCE = [
+    "circle",
+    "square",
+    "diamond",
+    "cross",
+    "x",
+    "triangle-up",
+    "triangle-down",
+]
 
 # Consistent mapping for probability types across trial models
 LINE_DASH_MAP = {
@@ -110,6 +120,7 @@ def create_line_chart(df, x, y, color, title, labels=None, high_contrast=False):
 def generate_text_summary(df, title):  # type: ignore
     """Generates a text summary for a chart based on its dataframe."""
     from clintrials.visualization.models import MultiFormatSummaryContainer
+
     return MultiFormatSummaryContainer(title=title, df=df)
 
 
@@ -354,7 +365,13 @@ def plot_efftox_utility_contours(  # type: ignore
 
 
 def plot_efftox_density(  # type: ignore
-    data_func, trial, x_name="", plot_title="", include_doses=None, boot_samps=1000, high_contrast=False
+    data_func,
+    trial,
+    x_name="",
+    plot_title="",
+    include_doses=None,
+    boot_samps=1000,
+    high_contrast=False,
 ):
     """Plots the EffTox probability densities."""
     if include_doses is None:
@@ -513,12 +530,20 @@ class DefaultVisualizationProvider(VisualizationProvider):
     def plot_dose_finding_outcomes(self, trial, chart_title=None, high_contrast=False):  # type: ignore
         """Plot dose finding outcomes."""
         import clintrials.visualization as viz
-        return viz.plot_dose_finding_outcomes(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
 
-    def plot_crm_toxicity_probabilities(self, trial, chart_title=None, high_contrast=False):  # type: ignore
+        return viz.plot_dose_finding_outcomes(
+            trial, chart_title=chart_title, high_contrast=high_contrast
+        )  # type: ignore
+
+    def plot_crm_toxicity_probabilities(  # type: ignore
+        self, trial, chart_title=None, high_contrast=False
+    ):
         """Plot CRM toxicity probabilities."""
         import clintrials.visualization as viz
-        return viz.plot_crm_toxicity_probabilities(trial, chart_title=chart_title, high_contrast=high_contrast)  # type: ignore
+
+        return viz.plot_crm_toxicity_probabilities(
+            trial, chart_title=chart_title, high_contrast=high_contrast
+        )  # type: ignore
 
     def generate_pdf_report(self, df, design_type, text_summaries=None):  # type: ignore
         """Generates an accessibility-first PDF report for trial simulations."""
@@ -526,37 +551,55 @@ class DefaultVisualizationProvider(VisualizationProvider):
             from clintrials.visualization.report import generate_pdf_report as _gen_pdf
         except ImportError:
             import warnings
-            warnings.warn("PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`.")
+
+            warnings.warn(
+                "PDF generation requires the 'fpdf2' package. Install with `pip install clintrials[viz]`."
+            )
             return None
         return _gen_pdf(df, design_type, text_summaries)
 
     def plot_crm_simulation_recommendation(self, summary_df, high_contrast=False):  # type: ignore
         """Plots CRM simulation recommendation probabilities."""
         import clintrials.visualization as viz
-        return viz.plot_crm_simulation_recommendation(summary_df, high_contrast=high_contrast)  # type: ignore
+
+        return viz.plot_crm_simulation_recommendation(
+            summary_df, high_contrast=high_contrast
+        )  # type: ignore
 
     def plot_bivariate_simulation_recommendation(self, summary_df, high_contrast=False):  # type: ignore
         """Plots EffTox simulation recommendation probabilities."""
         import clintrials.visualization as viz
-        return viz.plot_bivariate_simulation_recommendation(summary_df, high_contrast=high_contrast)  # type: ignore
+
+        return viz.plot_bivariate_simulation_recommendation(
+            summary_df, high_contrast=high_contrast
+        )  # type: ignore
 
     def plot_efftox_simulation_acceptability(self, summary_df, high_contrast=False):  # type: ignore
         """Plots EffTox simulation acceptability probabilities."""
         import clintrials.visualization as viz
-        return viz.plot_efftox_simulation_acceptability(summary_df, high_contrast=high_contrast)  # type: ignore
+
+        return viz.plot_efftox_simulation_acceptability(
+            summary_df, high_contrast=high_contrast
+        )  # type: ignore
 
     def plot_winratio_power_curve(self, df, high_contrast=False):  # type: ignore
         """Plots a Win Ratio simulation power curve."""
         import clintrials.visualization as viz
+
         return viz.plot_winratio_power_curve(df, high_contrast=high_contrast)  # type: ignore
 
-    def create_bar_chart(self, df, x, y, color, title, labels=None, high_contrast=False):  # type: ignore
+    def create_bar_chart(  # type: ignore
+        self, df, x, y, color, title, labels=None, high_contrast=False
+    ):
         """Creates a centralized bar chart with accessibility standards."""
         import clintrials.visualization as viz
-        return viz.create_bar_chart(df, x, y, color, title, labels=labels, high_contrast=high_contrast)  # type: ignore
+
+        return viz.create_bar_chart(
+            df, x, y, color, title, labels=labels, high_contrast=high_contrast
+        )  # type: ignore
 
 
-def get_default_provider():  # type: ignore
+def get_default_provider() -> Any:
     """Get default visualization provider."""
     return DefaultVisualizationProvider()
 
@@ -564,4 +607,5 @@ def get_default_provider():  # type: ignore
 # Inject module-level docstring
 if __doc__:
     from clintrials.core.registry import CORE_REGISTRY
+
     __doc__ = __doc__.format(**CORE_REGISTRY)

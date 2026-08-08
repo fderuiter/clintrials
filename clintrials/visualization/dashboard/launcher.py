@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: MIT
 
 """Dashboard CLI launcher."""
+
 from __future__ import annotations
 
 # ruff: noqa: T201
@@ -11,9 +12,19 @@ import sys
 
 def main():  # type: ignore
     """Launch the Clinical Trials Dashboard Streamlit app programmatically."""
-    parser = argparse.ArgumentParser(description="Programmatic CLI Launcher for Clinical Trials Dashboard")
-    parser.add_argument("--host", "-H", type=str, default=None, help="The host address to bind the server to.")
-    parser.add_argument("--port", "-p", type=int, default=None, help="The port to run the server on.")
+    parser = argparse.ArgumentParser(
+        description="Programmatic CLI Launcher for Clinical Trials Dashboard"
+    )
+    parser.add_argument(
+        "--host",
+        "-H",
+        type=str,
+        default=None,
+        help="The host address to bind the server to.",
+    )
+    parser.add_argument(
+        "--port", "-p", type=int, default=None, help="The port to run the server on."
+    )
     # Support unknown args so standard Streamlit args can also be forwarded
     args, unknown = parser.parse_known_args()
 
@@ -44,6 +55,7 @@ def main():  # type: ignore
     except KeyboardInterrupt:
         print("\nStopping Streamlit server... Safe shutdown initiated.")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()  # type: ignore

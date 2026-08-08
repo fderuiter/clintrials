@@ -4,11 +4,29 @@ import ast
 import sys
 
 RESTRICTED_WIDGETS = {
-    "button", "download_button", "link_button", "page_link", "checkbox", "toggle",
-    "radio", "selectbox", "multiselect", "slider", "select_slider", "text_input",
-    "number_input", "text_area", "date_input", "time_input", "file_uploader",
-    "camera_input", "color_picker", "chat_input", "data_editor"
+    "button",
+    "download_button",
+    "link_button",
+    "page_link",
+    "checkbox",
+    "toggle",
+    "radio",
+    "selectbox",
+    "multiselect",
+    "slider",
+    "select_slider",
+    "text_input",
+    "number_input",
+    "text_area",
+    "date_input",
+    "time_input",
+    "file_uploader",
+    "camera_input",
+    "color_picker",
+    "chat_input",
+    "data_editor",
 }
+
 
 def get_base_name_and_attr(node):
     if isinstance(node, ast.Name):
@@ -18,9 +36,10 @@ def get_base_name_and_attr(node):
         return base, node.attr
     return None, None
 
+
 def check_file(filepath):
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
     except Exception as e:
         print(f"Error reading {filepath}: {e}")
@@ -36,10 +55,10 @@ def check_file(filepath):
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name == 'streamlit' or alias.name.startswith('streamlit.'):
+                if alias.name == "streamlit" or alias.name.startswith("streamlit."):
                     st_aliases.add(alias.asname or alias.name)
         elif isinstance(node, ast.ImportFrom):
-            if node.module and node.module.startswith('streamlit'):
+            if node.module and node.module.startswith("streamlit"):
                 for alias in node.names:
                     st_aliases.add(alias.asname or alias.name)
 
@@ -66,13 +85,16 @@ def check_file(filepath):
 
     if errors:
         for lineno, attr in errors:
-            print(f"{filepath}:{lineno} - Prohibited direct widget attribute call '{attr}' detected. Use centralized widget factory.")
+            print(
+                f"{filepath}:{lineno} - Prohibited direct widget attribute call '{attr}' detected. Use centralized widget factory."
+            )
         return False
     return True
 
+
 def main():
     parser = argparse.ArgumentParser(description="AST-based UI Linter for Streamlit")
-    parser.add_argument('files', nargs='+', help='Files to lint')
+    parser.add_argument("files", nargs="+", help="Files to lint")
     args = parser.parse_args()
 
     all_passed = True
@@ -83,6 +105,7 @@ def main():
     if not all_passed:
         sys.exit(1)
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

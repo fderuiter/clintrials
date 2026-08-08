@@ -4,6 +4,7 @@
 
 Random Seed Strategy: {main_seed_strategy}
 """
+
 from __future__ import annotations
 
 import inspect
@@ -12,7 +13,7 @@ import os
 
 import streamlit as st
 
-from clintrials.core.registry import PROTOCOL_REGISTRY
+from clintrials.core.registry import PROTOCOL_REGISTRY as PROTOCOL_REGISTRY
 from clintrials.visualization.dashboard.factory import create_widget
 
 
@@ -58,11 +59,14 @@ def get_preview_sims(design_type, target_tox, cohort_size, max_size, file_mtimes
             return preview_func(target_tox, cohort_size, max_size)
     return []
 
+
 def main():  # type: ignore
     """Sets up the Streamlit dashboard and renders the appropriate view."""
     try:
         import streamlit.components.v1 as components
-        components.html("""
+
+        components.html(
+            """
         <script>
             let parentDoc;
             try {
@@ -179,17 +183,23 @@ def main():  # type: ignore
                 }, 1000);
             }
         </script>
-        """, height=0, width=0)
+        """,
+            height=0,
+            width=0,
+        )
     except ImportError:
         pass
 
     st.title("Interactive Simulation Dashboard")
 
     st.sidebar.header("Accessibility Settings")
-    st.session_state["accessibility_mode"] = create_widget(st, "checkbox", "accessibility_mode",  # type: ignore
+    st.session_state["accessibility_mode"] = create_widget(
+        st,
+        "checkbox",
+        "accessibility_mode",  # type: ignore
         "Enable Screen-Reader Optimized Mode",
         value=st.session_state.get("accessibility_mode", False),
-        help="Restructures large tables into hierarchical nested details for easier navigation."
+        help="Restructures large tables into hierarchical nested details for easier navigation.",
     )
 
     st.sidebar.header("Select Trial Design")
@@ -223,9 +233,8 @@ def main():  # type: ignore
                 .stApp { background-color: transparent !important; }
             </style>
             """,
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
-
 
     design_type = create_widget(  # type: ignore
         st,
@@ -253,6 +262,7 @@ def main():  # type: ignore
             # Typically Win Ratio
             try:
                 from clintrials.core.schema import WinRatioSchema
+
                 for name, field in WinRatioSchema.model_fields.items():
                     if name in UI_REGISTRY:
                         entries.append((field.description, UI_REGISTRY[name]))
@@ -285,10 +295,13 @@ def main():  # type: ignore
             render_func()
     else:
         st.sidebar.header("Data Mode")
-        data_mode = create_widget(st, "radio", "data_mode",  # type: ignore
+        data_mode = create_widget(
+            st,
+            "radio",
+            "data_mode",  # type: ignore
             "Select Data Source",
             ["Preview Mode", "Manual JSON Upload"],
-            help="Switch between automatically generated preview simulations and manual file upload."
+            help="Switch between automatically generated preview simulations and manual file upload.",
         )
 
         if data_mode == "Manual JSON Upload":
@@ -309,15 +322,48 @@ def main():  # type: ignore
                     render_func(sims)
         else:
             st.sidebar.header("Preview Parameters")
-            target_tox = create_widget(st, "number_input", "target_tox", "Target Toxicity", min_value=0.01, max_value=0.99, value=0.25, step=0.01)  # type: ignore
-            cohort_size = create_widget(st, "number_input", "cohort_size", "Cohort Size", min_value=1, max_value=10, value=3)  # type: ignore
-            max_size = create_widget(st, "number_input", "max_size", "Sample Size (N)", min_value=10, max_value=100, value=60, step=10)  # type: ignore
+            target_tox = create_widget(
+                st,
+                "number_input",
+                "target_tox",
+                "Target Toxicity",
+                min_value=0.01,
+                max_value=0.99,
+                value=0.25,
+                step=0.01,
+            )  # type: ignore
+            cohort_size = create_widget(
+                st,
+                "number_input",
+                "cohort_size",
+                "Cohort Size",
+                min_value=1,
+                max_value=10,
+                value=3,
+            )  # type: ignore
+            max_size = create_widget(
+                st,
+                "number_input",
+                "max_size",
+                "Sample Size (N)",
+                min_value=10,
+                max_value=100,
+                value=60,
+                step=10,
+            )  # type: ignore
 
             from clintrials.visualization.dashboard.utils import announce_status_locally
+
             try:
                 announce_status_locally("Simulation in progress", key="preview-start")
                 file_mtimes = get_design_file_mtimes(design_type)
-                sims = get_preview_sims(design_type, target_tox, cohort_size, max_size, file_mtimes=file_mtimes)
+                sims = get_preview_sims(
+                    design_type,
+                    target_tox,
+                    cohort_size,
+                    max_size,
+                    file_mtimes=file_mtimes,
+                )
                 announce_status_locally("Simulation completed", key="preview-complete")
                 if render_func:
                     render_func(sims)
