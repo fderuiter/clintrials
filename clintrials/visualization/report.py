@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import re
 from contextlib import contextmanager
+from typing import Any
 
 from fpdf import FPDF
 from fpdf.enums import PageMode
@@ -50,7 +51,7 @@ class AccessibleTable(Table):
 class AccessiblePDF(FPDF):
     """A customized FPDF class designed for accessible PDF generation."""
 
-    def __init__(self, title="Trial Simulation Report"):  # type: ignore
+    def __init__(self, title: str = "Trial Simulation Report") -> None:
         """Initializes an accessible PDF instance."""
         super().__init__()
         self.pdf_version = "1.7"
@@ -58,8 +59,8 @@ class AccessiblePDF(FPDF):
         self.set_lang("en-US")
         self.page_mode = PageMode.USE_OUTLINES
         self.viewer_preferences = ViewerPreferences(display_doc_title=True)
-        self.struct_stack = []
-        self.mcid_counter = {}
+        self.struct_stack: list[Any] = []
+        self.mcid_counter: dict[Any, Any] = {}
         self.add_page()
 
         # Patch the structure builder's iterator to support nested structure elements
@@ -130,14 +131,14 @@ class AccessiblePDF(FPDF):
         with self.mark_text("/Table"):
             table.render()
 
-    def add_h1(self, text):  # type: ignore
+    def add_h1(self, text: str) -> None:
         """Adds a heading 1 tagged element to the PDF."""
         self.set_font("helvetica", "B", 16)
         with self.mark_text(struct_type="/H1"):
             self.cell(0, 10, text, new_x="LMARGIN", new_y="NEXT", align="C")
         self.ln(10)
 
-    def add_p(self, text):  # type: ignore
+    def add_p(self, text: str) -> None:
         """Adds a paragraph tagged element to the PDF."""
         self.set_font("helvetica", "", 12)
         with self.mark_text(struct_type="/P"):
@@ -145,21 +146,21 @@ class AccessiblePDF(FPDF):
         self.ln(5)
 
 
-def generate_pdf_report(df, design_type, text_summaries=None):  # type: ignore
+def generate_pdf_report(df: Any, design_type: str, text_summaries: list[Any] | None = None) -> bytes:
     """Generates an accessibility-first PDF report for trial simulations."""
     if text_summaries is None:
         text_summaries = []
 
-    pdf = AccessiblePDF(f"{design_type} Simulation Report")  # type: ignore
+    pdf = AccessiblePDF(f"{design_type} Simulation Report")
 
-    pdf.add_h1(f"{design_type} Simulation Report")  # type: ignore
+    pdf.add_h1(f"{design_type} Simulation Report")
 
-    pdf.add_p(  # type: ignore
+    pdf.add_p(
         f"This is an automated accessibility-first report for {design_type} trial simulations."
     )
-    pdf.add_p(f"Number of scenarios/simulations summarized: {len(df)}")  # type: ignore
+    pdf.add_p(f"Number of scenarios/simulations summarized: {len(df)}")
 
-    pdf.add_h1("Simulation Data Summary")  # type: ignore
+    pdf.add_h1("Simulation Data Summary")
 
     from clintrials.visualization.helpers import format_label as _format_label
     from clintrials.visualization.helpers import format_number as fmt
@@ -167,7 +168,7 @@ def generate_pdf_report(df, design_type, text_summaries=None):  # type: ignore
 
     for summary in text_summaries:
         if isinstance(summary, MultiFormatSummaryContainer):
-            pdf.add_p(f"Data Summary: {summary.title}")  # type: ignore
+            pdf.add_p(f"Data Summary: {summary.title}")
             pdf.set_font("helvetica", "", 10)
             with pdf.accessible_table() as table:
                 row = table.row()
@@ -179,12 +180,12 @@ def generate_pdf_report(df, design_type, text_summaries=None):  # type: ignore
                         row.cell(fmt(val))
             pdf.ln(5)
         else:
-            pdf.add_p(str(summary))  # type: ignore
+            pdf.add_p(str(summary))
 
     return bytes(pdf.output())
 
 
-def parse_pdf_structure(pdf_bytes: bytes) -> dict:  # type: ignore
+def parse_pdf_structure(pdf_bytes: bytes) -> dict[Any, Any]:
     """Parses a generated PDF to extract its logical structure tree.
 
     Returns a dictionary of structure elements.
