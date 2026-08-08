@@ -23,7 +23,7 @@ class AccessibleTable(Table):
             self._current_row_is_header = is_header
             super()._render_table_row(i, row_layout_info, cell_x_positions, **kwargs)
 
-    def _render_table_cell(
+    def _render_table_cell(  # type: ignore
         self,
         i,
         j,
@@ -32,7 +32,7 @@ class AccessibleTable(Table):
         cell_height_info=None,
         cell_x_positions=None,
         **kwargs,
-    ):  # type: ignore
+    ):
         fpdf: AccessiblePDF = self._fpdf  # type: ignore
         height_query_only = cell_height_info is None
         if height_query_only:
