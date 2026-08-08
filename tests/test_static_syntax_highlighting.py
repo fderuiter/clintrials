@@ -12,6 +12,7 @@ def test_static_syntax_highlighting_exists():
     # 1. Compile the documentation if it is not already built
     if not dist_dir.exists() or not list(dist_dir.glob("**/*.html")):
         import shutil
+
         import pytest
 
         # Check for system-level dependencies and python-level extras required to build
@@ -19,9 +20,9 @@ def test_static_syntax_highlighting_exists():
             pytest.skip("Skipping because pandoc is not installed and documentation is not pre-built.")
 
         try:
-            import sphinx  # type: ignore # noqa: F401
-            import nbsphinx  # type: ignore # noqa: F401
             import furo  # type: ignore # noqa: F401
+            import nbsphinx  # type: ignore # noqa: F401
+            import sphinx  # type: ignore # noqa: F401
         except ImportError:
             pytest.skip("Skipping because doc-building extras (sphinx, nbsphinx, furo) are not installed.")
 

@@ -148,6 +148,10 @@ module = "tests.test_accessibility"
 warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
+module = "tests.test_static_syntax_highlighting"
+warn_unused_ignores = false
+
+[[tool.mypy.overrides]]
 module = "scipy.*"
 ignore_missing_imports = true
 
