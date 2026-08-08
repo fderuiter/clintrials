@@ -94,8 +94,7 @@ def test_thall2014_efftox():
     # Cohort 1 - No responses or tox at dose 1
     cases = [(1, 0, 0), (1, 0, 0), (1, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(5)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(5)
     ]
 
     assert np.all([o["NextDose"] == 2 for o in trial_outcomes])
@@ -128,8 +127,7 @@ def test_thall2014_efftox():
     # Cohort 2 - Singled response but no tox at dose 2
     cases = cases + [(2, 0, 1), (2, 0, 0), (2, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(5)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(5)
     ]
 
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
@@ -162,8 +160,7 @@ def test_thall2014_efftox():
     # Cohort 3 - Eff, Tox and a Both at dose level 3
     cases = cases + [(3, 0, 1), (3, 1, 0), (3, 1, 1)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(20)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(20)
     ]
 
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
@@ -238,8 +235,7 @@ def test_matchpoint_efftox():
     epsilon2 = 0.05
     cases = [(3, 0, 0), (3, 1, 0), (3, 1, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)
     ]
     assert np.all(
         np.array([list(o["ProbEff"]) for o in trial_outcomes]).mean(axis=0)
@@ -304,8 +300,7 @@ def test_thall2014_efftox_v2():
     epsilon2 = 0.10
     cases = [(4, 1, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)
     ]
     assert np.all([o["NextDose"] == 1 for o in trial_outcomes])
     assert np.all(
@@ -335,20 +330,17 @@ def test_thall2014_efftox_v2():
     )
     cases = cases + [(2, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)
     ]
     assert np.all([o["NextDose"] == 1 for o in trial_outcomes])
     cases = cases + [(1, 0, 0)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(10)
     ]
     assert np.all([o["NextDose"] in [3, 4] for o in trial_outcomes])
     cases = cases + [(5, 1, 1)]
     trial_outcomes = [
-        run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(5)
+        run_trial(et, cases, assess_efftox_trial, n=10**6) for i in range(5)
     ]
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
 

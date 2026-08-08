@@ -77,15 +77,51 @@ def run_validations() -> list[dict[str, Any]]:
     from tests.helpers import CRMBuilder
 
     tolerances = [
-        0.571, 0.642, 0.466, 0.870, 0.634, 0.390, 0.524, 0.773, 0.175, 0.627,
-        0.321, 0.099, 0.383, 0.995, 0.628, 0.346, 0.919, 0.022, 0.647, 0.469,
+        0.571,
+        0.642,
+        0.466,
+        0.870,
+        0.634,
+        0.390,
+        0.524,
+        0.773,
+        0.175,
+        0.627,
+        0.321,
+        0.099,
+        0.383,
+        0.995,
+        0.628,
+        0.346,
+        0.919,
+        0.022,
+        0.647,
+        0.469,
     ]
     true_toxicity = [0.02, 0.04, 0.10, 0.25, 0.50]
     doses = [3, 5, 5, 3, 4, 4, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4]
     toxicity_events = [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0]
     beta_hats = [
-        0.60, 0.93, 0.04, 0.18, 0.28, 0.34, 0.41, 0.47, 0.31, 0.35,
-        0.25, 0.15, 0.18, 0.21, 0.24, 0.26, 0.28, 0.21, 0.22, 0.24,
+        0.60,
+        0.93,
+        0.04,
+        0.18,
+        0.28,
+        0.34,
+        0.41,
+        0.47,
+        0.31,
+        0.35,
+        0.25,
+        0.15,
+        0.18,
+        0.21,
+        0.24,
+        0.26,
+        0.28,
+        0.21,
+        0.22,
+        0.24,
     ]
     beta_hat_epsilon = 0.005
 
@@ -105,16 +141,18 @@ def run_validations() -> list[dict[str, Any]]:
             delta = abs(local_val - ref_val)
             status = "PASS" if delta <= beta_hat_epsilon else "FAIL"
 
-            results.append({
-                "model": "Bayesian CRM",
-                "scenario": f"Patient {patient_no} (Dose={doses[patient_no-1]}, Tox={toxicity_events[patient_no-1]})",
-                "metric": "beta_hat",
-                "local": f"{local_val:.4f}",
-                "ref": f"{ref_val:.4f}",
-                "delta": f"{delta:.4f}",
-                "tol": f"<= {beta_hat_epsilon}",
-                "status": status,
-            })
+            results.append(
+                {
+                    "model": "Bayesian CRM",
+                    "scenario": f"Patient {patient_no} (Dose={doses[patient_no - 1]}, Tox={toxicity_events[patient_no - 1]})",
+                    "metric": "beta_hat",
+                    "local": f"{local_val:.4f}",
+                    "ref": f"{ref_val:.4f}",
+                    "delta": f"{delta:.4f}",
+                    "tol": f"<= {beta_hat_epsilon}",
+                    "status": status,
+                }
+            )
 
     # -----------------
     # 2. MLE CRM Validation (dfcrm reference)
@@ -122,13 +160,30 @@ def run_validations() -> list[dict[str, Any]]:
     mle_doses = [3, 3, 1, 2, 2, 3, 3, 2, 3, 2, 1, 2, 1, 1, 1, 2, 2]
     mle_toxicity_events = [0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0]
     mle_beta_hats = [
-        np.nan, np.nan, -0.312, -0.193, -0.099, -0.040, 0.030, -0.121, -0.084,
-        -0.177, -0.284, -0.256, -0.336, -0.308, -0.286, -0.266, -0.240,
+        np.nan,
+        np.nan,
+        -0.312,
+        -0.193,
+        -0.099,
+        -0.040,
+        0.030,
+        -0.121,
+        -0.084,
+        -0.177,
+        -0.284,
+        -0.256,
+        -0.336,
+        -0.308,
+        -0.286,
+        -0.266,
+        -0.240,
     ]
     mle_beta_hat_epsilon = 0.005
 
     crm_mle = CRMBuilder().with_max_size(len(mle_doses)).with_method("mle").build()
-    dose = crm_mle.update([(mle_doses[0], mle_toxicity_events[0]), (mle_doses[1], mle_toxicity_events[1])])
+    dose = crm_mle.update(
+        [(mle_doses[0], mle_toxicity_events[0]), (mle_doses[1], mle_toxicity_events[1])]
+    )
 
     mle_milestones = {2: 3, 3: 4, 4: 5, 5: 6, 6: 7, 9: 10, 14: 15, 16: 17}
 
@@ -140,16 +195,18 @@ def run_validations() -> list[dict[str, Any]]:
 
         if patient_no in mle_milestones:
             p_num = mle_milestones[patient_no]
-            results.append({
-                "model": "MLE CRM",
-                "scenario": f"Patient {p_num} (Dose={mle_doses[patient_no]}, Tox={mle_toxicity_events[patient_no]})",
-                "metric": "beta_hat",
-                "local": f"{local_val:.4f}",
-                "ref": f"{ref_val:.4f}",
-                "delta": f"{delta:.4f}",
-                "tol": f"<= {mle_beta_hat_epsilon}",
-                "status": status,
-            })
+            results.append(
+                {
+                    "model": "MLE CRM",
+                    "scenario": f"Patient {p_num} (Dose={mle_doses[patient_no]}, Tox={mle_toxicity_events[patient_no]})",
+                    "metric": "beta_hat",
+                    "local": f"{local_val:.4f}",
+                    "ref": f"{ref_val:.4f}",
+                    "delta": f"{delta:.4f}",
+                    "tol": f"<= {mle_beta_hat_epsilon}",
+                    "status": status,
+                }
+            )
 
         toxicity = mle_toxicity_events[patient_no]
         dose = crm_mle.update([(dose, toxicity)])
@@ -202,16 +259,18 @@ def run_validations() -> list[dict[str, Any]]:
     next_dose = et.next_dose()
     next_dose_ref = 2
     next_dose_status = "PASS" if next_dose == next_dose_ref else "FAIL"
-    results.append({
-        "model": "EffTox",
-        "scenario": "Cohort 1 (Dose 1: 3 patients, 0 eff, 0 tox)",
-        "metric": "next_dose",
-        "local": str(next_dose),
-        "ref": str(next_dose_ref),
-        "delta": "0.0000",
-        "tol": "exact",
-        "status": next_dose_status,
-    })
+    results.append(
+        {
+            "model": "EffTox",
+            "scenario": "Cohort 1 (Dose 1: 3 patients, 0 eff, 0 tox)",
+            "metric": "next_dose",
+            "local": str(next_dose),
+            "ref": str(next_dose_ref),
+            "delta": "0.0000",
+            "tol": "exact",
+            "status": next_dose_status,
+        }
+    )
 
     # ProbEff & ProbTox validation at each dose
     ref_prob_eff = [0.04, 0.19, 0.57, 0.78, 0.87]
@@ -224,32 +283,36 @@ def run_validations() -> list[dict[str, Any]]:
         delta_p_eff = abs(local_p_eff - ref_p_eff)
         status_p_eff = "PASS" if delta_p_eff <= efftox_epsilon else "FAIL"
 
-        results.append({
-            "model": "EffTox",
-            "scenario": f"Cohort 1 (Dose {d_idx+1})",
-            "metric": "prob_eff",
-            "local": f"{local_p_eff:.4f}",
-            "ref": f"{ref_p_eff:.4f}",
-            "delta": f"{delta_p_eff:.4f}",
-            "tol": f"<= {efftox_epsilon}",
-            "status": status_p_eff,
-        })
+        results.append(
+            {
+                "model": "EffTox",
+                "scenario": f"Cohort 1 (Dose {d_idx + 1})",
+                "metric": "prob_eff",
+                "local": f"{local_p_eff:.4f}",
+                "ref": f"{ref_p_eff:.4f}",
+                "delta": f"{delta_p_eff:.4f}",
+                "tol": f"<= {efftox_epsilon}",
+                "status": status_p_eff,
+            }
+        )
 
         local_p_tox = et.prob_tox[d_idx]
         ref_p_tox = ref_prob_tox[d_idx]
         delta_p_tox = abs(local_p_tox - ref_p_tox)
         status_p_tox = "PASS" if delta_p_tox <= efftox_epsilon else "FAIL"
 
-        results.append({
-            "model": "EffTox",
-            "scenario": f"Cohort 1 (Dose {d_idx+1})",
-            "metric": "prob_tox",
-            "local": f"{local_p_tox:.4f}",
-            "ref": f"{ref_p_tox:.4f}",
-            "delta": f"{delta_p_tox:.4f}",
-            "tol": f"<= {efftox_epsilon}",
-            "status": status_p_tox,
-        })
+        results.append(
+            {
+                "model": "EffTox",
+                "scenario": f"Cohort 1 (Dose {d_idx + 1})",
+                "metric": "prob_tox",
+                "local": f"{local_p_tox:.4f}",
+                "ref": f"{ref_p_tox:.4f}",
+                "delta": f"{delta_p_tox:.4f}",
+                "tol": f"<= {efftox_epsilon}",
+                "status": status_p_tox,
+            }
+        )
 
     # -----------------
     # 4. Group Sequential Design (GSD) Validation
@@ -263,20 +326,24 @@ def run_validations() -> list[dict[str, Any]]:
         k=k, alpha=alpha, sfu=spending_function_obrien_fleming
     )
 
-    for idx, (b_local, b_ref) in enumerate(zip(design.efficacy_boundaries, expected_boundaries)):
+    for idx, (b_local, b_ref) in enumerate(
+        zip(design.efficacy_boundaries, expected_boundaries)
+    ):
         rel_diff = abs(b_local - b_ref) / b_ref
         status = "PASS" if rel_diff <= gsd_rtol else "FAIL"
 
-        results.append({
-            "model": "GSD (O'Brien-Fleming)",
-            "scenario": f"Stage {idx+1}",
-            "metric": "efficacy_boundary",
-            "local": f"{b_local:.4f}",
-            "ref": f"{b_ref:.4f}",
-            "delta": f"{abs(b_local - b_ref):.4f}",
-            "tol": f"rtol <= {gsd_rtol}",
-            "status": status,
-        })
+        results.append(
+            {
+                "model": "GSD (O'Brien-Fleming)",
+                "scenario": f"Stage {idx + 1}",
+                "metric": "efficacy_boundary",
+                "local": f"{b_local:.4f}",
+                "ref": f"{b_ref:.4f}",
+                "delta": f"{abs(b_local - b_ref):.4f}",
+                "tol": f"rtol <= {gsd_rtol}",
+                "status": status,
+            }
+        )
 
     return results
 
@@ -311,7 +378,9 @@ def main() -> None:
 
         if args.verbose:
             print(f"System details: {env_info}")
-            print(f"Computed clintrials codebase cryptographic signature: {codebase_hash}\n")
+            print(
+                f"Computed clintrials codebase cryptographic signature: {codebase_hash}\n"
+            )
 
         # 2. Run validations
         results = run_validations()
@@ -476,7 +545,9 @@ def main() -> None:
         print("GxP Qualification Report compiled successfully!\n")
 
         if any_failed:
-            print("ERROR: One or more validation tests failed to meet precision thresholds!")
+            print(
+                "ERROR: One or more validation tests failed to meet precision thresholds!"
+            )
             sys.exit(1)
         else:
             print("System qualification validation completed: SUCCESS")
@@ -485,6 +556,7 @@ def main() -> None:
     except Exception as e:
         print(f"CRITICAL ERROR: Unhandled exception during qualification run:\n{e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(2)
 

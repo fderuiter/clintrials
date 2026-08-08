@@ -248,8 +248,10 @@ def test_validate_whitelist() -> None:
 def test_get_return_type() -> None:
     def no_ann():
         pass
+
     def with_ann() -> int:
         return 42
+
     assert get_return_type(no_ann) is None
     assert get_return_type(with_ann) == "int"
 
@@ -280,45 +282,31 @@ def test_compare_return_types() -> None:
 def test_compare_manifests_return_types() -> None:
     baseline = {
         "module1": {
-            "func_mismatch": {
-                "type": "function",
-                "parameters": [],
-                "returns": "int"
-            },
+            "func_mismatch": {"type": "function", "parameters": [], "returns": "int"},
             "class_mismatch": {
                 "type": "class",
                 "methods": {
-                    "method1": {
-                        "type": "method",
-                        "parameters": [],
-                        "returns": "float"
-                    }
-                }
-            }
+                    "method1": {"type": "method", "parameters": [], "returns": "float"}
+                },
+            },
         }
     }
 
     current = {
         "module1": {
-            "func_mismatch": {
-                "type": "function",
-                "parameters": [],
-                "returns": "str"
-            },
+            "func_mismatch": {"type": "function", "parameters": [], "returns": "str"},
             "class_mismatch": {
                 "type": "class",
                 "methods": {
-                    "method1": {
-                        "type": "method",
-                        "parameters": [],
-                        "returns": "int"
-                    }
-                }
-            }
+                    "method1": {"type": "method", "parameters": [], "returns": "int"}
+                },
+            },
         }
     }
 
     diffs = compare_manifests(baseline, current)
     assert len(diffs) == 2
     assert any("Return type for function 'func_mismatch' changed" in d for d in diffs)
-    assert any("Return type for member 'class_mismatch.method1' changed" in d for d in diffs)
+    assert any(
+        "Return type for member 'class_mismatch.method1' changed" in d for d in diffs
+    )

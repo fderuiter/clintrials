@@ -146,7 +146,9 @@ class AccessiblePDF(FPDF):
         self.ln(5)
 
 
-def generate_pdf_report(df: Any, design_type: str, text_summaries: list[Any] | None = None) -> bytes:
+def generate_pdf_report(
+    df: Any, design_type: str, text_summaries: list[Any] | None = None
+) -> bytes:
     """Generates an accessibility-first PDF report for trial simulations."""
     if text_summaries is None:
         text_summaries = []
