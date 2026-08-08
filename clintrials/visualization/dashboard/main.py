@@ -13,7 +13,7 @@ import os
 
 import streamlit as st
 
-from clintrials.core.registry import PROTOCOL_REGISTRY
+from clintrials.core.registry import PROTOCOL_REGISTRY as PROTOCOL_REGISTRY
 from clintrials.visualization.dashboard.factory import create_widget
 
 
