@@ -109,7 +109,7 @@ def test_dashboard_main_routes_to_crm(monkeypatch):
     def fake_render(data):
         called["data"] = data
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", fake_render)  # type: ignore
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", fake_render)
     main.main()  # type: ignore
     assert called["data"] == [{"foo": "bar"}]
 
@@ -126,7 +126,7 @@ def test_dashboard_main_routes_to_efftox(monkeypatch):
 
     monkeypatch.setitem(
         main.PROTOCOL_REGISTRY._designs["EffTox"], "render", fake_render
-    )  # type: ignore
+    )
     main.main()  # type: ignore
     assert called["data"] == [{"foo": "bar"}]
 
@@ -141,7 +141,7 @@ def test_dashboard_main_routes_to_watu(monkeypatch):
     def fake_render(data):
         called["data"] = data
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["WATU"], "render", fake_render)  # type: ignore
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["WATU"], "render", fake_render)
     main.main()  # type: ignore
     assert called["data"] == [{"foo": "bar"}]
 
@@ -158,7 +158,7 @@ def test_dashboard_main_routes_to_winratio(monkeypatch):
 
     monkeypatch.setitem(
         main.PROTOCOL_REGISTRY._designs["Win Ratio"], "render", fake_render
-    )  # type: ignore
+    )
     main.main()  # type: ignore
     assert called["called"]
 
@@ -402,15 +402,15 @@ def test_main_preview_mode_crm(monkeypatch):
     st_mock.sidebar.radio.return_value = "Preview Mode"
     monkeypatch.setattr(main, "st", st_mock)
 
-    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())  # type: ignore
+    monkeypatch.setitem(main.PROTOCOL_REGISTRY._designs["CRM"], "render", MagicMock())
     monkeypatch.setattr(
         main, "get_preview_sims", MagicMock(return_value=[{"preview": True}])
     )
     main.main()  # type: ignore
     main.get_preview_sims.assert_called_once()  # type: ignore[attr-defined]
-    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with(
+    main.PROTOCOL_REGISTRY.get_render("CRM").assert_called_once_with(  # type: ignore[union-attr]
         [{"preview": True}]
-    )  # type: ignore
+    )
 
 
 def test_main_preview_mode_exception(monkeypatch):

@@ -4,6 +4,7 @@ __author__ = "Kristian Brock"
 __contact__ = "kristian.brock@gmail.com"
 
 from collections import OrderedDict
+from typing import Any
 from unittest.mock import patch
 
 import numpy as np
@@ -37,7 +38,7 @@ def assess_efftox_trial(et):
     return to_return
 
 
-def run_trial(trial, cases, summary_func, **kwargs):
+def run_trial(trial: Any, cases: Any, summary_func: Any, **kwargs: Any) -> Any:
     trial.reset()
     trial.update(cases, **kwargs)
     return summary_func(trial)
@@ -94,7 +95,7 @@ def test_thall2014_efftox():
     cases = [(1, 0, 0), (1, 0, 0), (1, 0, 0)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(5)  # type: ignore
+        for i in range(5)
     ]
 
     assert np.all([o["NextDose"] == 2 for o in trial_outcomes])
@@ -128,7 +129,7 @@ def test_thall2014_efftox():
     cases = cases + [(2, 0, 1), (2, 0, 0), (2, 0, 0)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(5)  # type: ignore
+        for i in range(5)
     ]
 
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
@@ -162,7 +163,7 @@ def test_thall2014_efftox():
     cases = cases + [(3, 0, 1), (3, 1, 0), (3, 1, 1)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(20)  # type: ignore
+        for i in range(20)
     ]
 
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
@@ -238,7 +239,7 @@ def test_matchpoint_efftox():
     cases = [(3, 0, 0), (3, 1, 0), (3, 1, 0)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)  # type: ignore
+        for i in range(10)
     ]
     assert np.all(
         np.array([list(o["ProbEff"]) for o in trial_outcomes]).mean(axis=0)
@@ -304,7 +305,7 @@ def test_thall2014_efftox_v2():
     cases = [(4, 1, 0)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)  # type: ignore
+        for i in range(10)
     ]
     assert np.all([o["NextDose"] == 1 for o in trial_outcomes])
     assert np.all(
@@ -335,19 +336,19 @@ def test_thall2014_efftox_v2():
     cases = cases + [(2, 0, 0)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)  # type: ignore
+        for i in range(10)
     ]
     assert np.all([o["NextDose"] == 1 for o in trial_outcomes])
     cases = cases + [(1, 0, 0)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(10)  # type: ignore
+        for i in range(10)
     ]
     assert np.all([o["NextDose"] in [3, 4] for o in trial_outcomes])
     cases = cases + [(5, 1, 1)]
     trial_outcomes = [
         run_trial(et, cases, assess_efftox_trial, n=10**6)
-        for i in range(5)  # type: ignore
+        for i in range(5)
     ]
     assert np.all([o["NextDose"] == 3 for o in trial_outcomes])
 
