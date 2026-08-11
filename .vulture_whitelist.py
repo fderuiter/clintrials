@@ -68,5 +68,7 @@ ref  # unused attribute in tests/test_utils.py, tests/test_utils_safe_simulation
 normal_method  # unused method (tests/test_verify_api_signatures.py:51)
 class_m  # unused method (tests/test_verify_api_signatures.py:54)
 static_m  # unused method (tests/test_verify_api_signatures.py:58)
+_.prob_superior_utility  # unused method (clintrials/dosefinding/efftox.py)
+
 
 

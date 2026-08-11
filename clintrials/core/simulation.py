@@ -102,6 +102,57 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+def _derive_seed(base_seed: Any, batch_idx: int, iter_idx: int, n2: int) -> Any:
+    """Derives a deterministic, unique seed for a specific batch and iteration."""
+    if isinstance(base_seed, (int, np.integer)):
+        return int((base_seed + batch_idx * n2 + iter_idx) & 0xffffffff)
+    return base_seed
+
+
+def _run_single_sim(sim_func: Callable[..., Any], kwargs: Dict[str, Any]) -> Any:
+    """Helper function to execute a single simulation with given keyword arguments."""
+    return sim_func(**kwargs)
+
+
+class BivariateSimulationWrapper:
+    """Pickleable wrapper for running bivariate simulations with simulate_trial."""
+
+    def __init__(self, trial: Any, cohort_size: int) -> None:
+        self.trial = trial
+        self.cohort_size = cohort_size
+
+    def __call__(self, true_prob_tox: float, true_prob_eff: float, **kwargs: Any) -> Any:
+        import copy
+
+        from clintrials.dosefinding.efficacytoxicity import simulate_trial
+
+        trial_copy = copy.deepcopy(self.trial)
+        seed = kwargs.get("seed")
+        if seed is not None:
+            if hasattr(trial_copy, "set_rng"):
+                from clintrials.core.rng import get_rng
+                trial_copy.set_rng(get_rng(seed))
+            from clintrials.core.rng import get_rng
+            rng = get_rng(seed)
+            n_patients = trial_copy.max_size()
+            tolerances = rng.uniform(size=3 * n_patients).reshape(n_patients, 3)
+            kwargs["tolerances"] = tolerances
+
+        report = simulate_trial(
+            trial_copy,
+            true_toxicities=true_prob_tox,
+            true_efficacies=true_prob_eff,
+            cohort_size=self.cohort_size,
+            **kwargs,
+        )
+        report["true_prob_tox"] = true_prob_tox
+        report["true_prob_eff"] = true_prob_eff
+        return report
+
+
+import numpy as np
+
+
 @Memoize
 def run_sims(
     sim_func: Callable[..., Any],
@@ -110,6 +161,8 @@ def run_sims(
     out_file: Optional[str] = None,
     agg_func: Optional[Callable[..., Any]] = None,
     metadata: Optional[Dict[str, Any]] = None,
+    n_workers: Optional[int] = None,
+    parallel: bool = False,
     **kwargs: Any,
 ) -> Any:
     """Runs simulations using a delegate function.
@@ -125,32 +178,66 @@ def run_sims(
             incremental results. Should have the signature `agg_func(current_sims, new_batch_sims)`.
         metadata (dict, optional): Self-describing metadata headers that detail
             simulation parameters alongside results.
+        n_workers (int, optional): The maximum number of parallel workers.
+        parallel (bool, optional): If True, run simulations in parallel.
         **kwargs: Keyword arguments to be passed to `sim_func`.
 
     Returns:
         list or dict: A list of simulation results, or if metadata is provided,
             a nested dict with "Parameters" and "Simulations" keys.
     """
+    use_parallel = parallel
+    if n_workers is not None:
+        if n_workers > 1:
+            use_parallel = True
+        elif n_workers <= 1:
+            use_parallel = False
+
+    if use_parallel:
+        from concurrent.futures import ProcessPoolExecutor
+        executor = ProcessPoolExecutor(max_workers=n_workers)
+    else:
+        executor = None
+
     sims: Any = [] if agg_func is None else None
-    for j in range(n1):
-        sims1 = [sim_func(**kwargs) for i in range(n2)]
-        if agg_func:
-            sims = agg_func(sims, sims1)
-        else:
-            sims += sims1
-        if out_file:
-            try:
-                with open(out_file, "w") as outfile:
-                    output = (
-                        {"Parameters": metadata, "Simulations": sims}
-                        if metadata is not None
-                        else sims
-                    )
-                    json.dump(output, outfile)
-            except Exception as e:
-                logger.error("Error writing: %s", e)
-        sims_len = len(sims) if isinstance(sims, list) else "agg"
-        logger.info(f"{j} {datetime.now()} {sims_len}")
+    base_seed = kwargs.get("seed")
+
+    try:
+        for j in range(n1):
+            iter_kwargs_list = []
+            for i in range(n2):
+                iter_kwargs = kwargs.copy()
+                if base_seed is not None:
+                    iter_kwargs["seed"] = _derive_seed(base_seed, j, i, n2)
+                iter_kwargs_list.append(iter_kwargs)
+
+            if use_parallel and executor is not None:
+                futures = [executor.submit(_run_single_sim, sim_func, kws) for kws in iter_kwargs_list]
+                sims1 = [fut.result() for fut in futures]
+            else:
+                sims1 = [sim_func(**kws) for kws in iter_kwargs_list]
+
+            if agg_func:
+                sims = agg_func(sims, sims1)
+            else:
+                sims += sims1
+            if out_file:
+                try:
+                    with open(out_file, "w") as outfile:
+                        output = (
+                            {"Parameters": metadata, "Simulations": sims}
+                            if metadata is not None
+                            else sims
+                        )
+                        json.dump(output, outfile)
+                except Exception as e:
+                    logger.error("Error writing: %s", e)
+            sims_len = len(sims) if isinstance(sims, list) else "agg"
+            logger.info(f"{j} {datetime.now()} {sims_len}")
+    finally:
+        if executor is not None:
+            executor.shutdown()
+
     if metadata is not None:
         return {"Parameters": metadata, "Simulations": sims}
     return sims
@@ -165,6 +252,8 @@ def sim_parameter_space(
     out_file: Optional[str] = None,
     agg_func: Optional[Callable[..., Any]] = None,
     metadata: Optional[Dict[str, Any]] = None,
+    n_workers: Optional[int] = None,
+    parallel: bool = False,
 ) -> Any:
     """Runs simulations for a parameter space.
 
@@ -181,6 +270,8 @@ def sim_parameter_space(
             incremental results.
         metadata (dict, optional): Self-describing metadata headers that detail
             simulation parameters alongside results.
+        n_workers (int, optional): The maximum number of parallel workers.
+        parallel (bool, optional): If True, run simulations in parallel.
 
     Returns:
         list or dict: A list of simulation results, or if metadata is provided,
@@ -188,28 +279,61 @@ def sim_parameter_space(
     """
     if not n2 or n2 <= 0:
         n2 = int(ps.size())
+
+    use_parallel = parallel
+    if n_workers is not None:
+        if n_workers > 1:
+            use_parallel = True
+        elif n_workers <= 1:
+            use_parallel = False
+
+    if use_parallel:
+        from concurrent.futures import ProcessPoolExecutor
+        executor = ProcessPoolExecutor(max_workers=n_workers)
+    else:
+        executor = None
+
     sims: Any = [] if agg_func is None else None
     params_iterator = ps.get_cyclical_iterator()
-    for j in range(n1):
-        assert n2 is not None
-        sims1 = [sim_func(**params_iterator.next()) for i in range(n2)]
-        if agg_func:
-            sims = agg_func(sims, sims1)
-        else:
-            sims += sims1
-        if out_file:
-            try:
-                with open(out_file, "w") as outfile:
-                    output = (
-                        {"Parameters": metadata, "Simulations": sims}
-                        if metadata is not None
-                        else sims
-                    )
-                    json.dump(output, outfile)
-            except Exception as e:
-                logger.error("Error writing: %s", e)
-        sims_len = len(sims) if isinstance(sims, list) else "agg"
-        logger.info(f"{j} {datetime.now()} {sims_len}")
+
+    try:
+        for j in range(n1):
+            assert n2 is not None
+            params_list = []
+            for i in range(n2):
+                p = params_iterator.next().copy()
+                base_seed = p.get("seed")
+                if base_seed is not None:
+                    p["seed"] = _derive_seed(base_seed, j, i, n2)
+                params_list.append(p)
+
+            if use_parallel and executor is not None:
+                futures = [executor.submit(_run_single_sim, sim_func, p) for p in params_list]
+                sims1 = [fut.result() for fut in futures]
+            else:
+                sims1 = [sim_func(**p) for p in params_list]
+
+            if agg_func:
+                sims = agg_func(sims, sims1)
+            else:
+                sims += sims1
+            if out_file:
+                try:
+                    with open(out_file, "w") as outfile:
+                        output = (
+                            {"Parameters": metadata, "Simulations": sims}
+                            if metadata is not None
+                            else sims
+                        )
+                        json.dump(output, outfile)
+                except Exception as e:
+                    logger.error("Error writing: %s", e)
+            sims_len = len(sims) if isinstance(sims, list) else "agg"
+            logger.info(f"{j} {datetime.now()} {sims_len}")
+    finally:
+        if executor is not None:
+            executor.shutdown()
+
     if metadata is not None:
         return {"Parameters": metadata, "Simulations": sims}
     return sims
@@ -221,27 +345,21 @@ def run_bivariate_simulations(
     eff_scenarios: Any,
     cohort_size: int,
     n_replicates: int = 10,
+    n_workers: Optional[int] = None,
+    parallel: bool = False,
 ) -> Any:
     """Shared simulation runner for bivariate trial models (EffTox/WATU)."""
-    from clintrials.dosefinding.efficacytoxicity import simulate_trial
     from clintrials.utils import ParameterSpace
 
     ps = ParameterSpace()
     ps.add("true_prob_tox", tox_scenarios)
     ps.add("true_prob_eff", eff_scenarios)
 
-    def wrapped_sim_func(true_prob_tox: float, true_prob_eff: float) -> Any:
-        report = simulate_trial(
-            trial,
-            true_toxicities=true_prob_tox,
-            true_efficacies=true_prob_eff,
-            cohort_size=cohort_size,
-        )
-        report["true_prob_tox"] = true_prob_tox
-        report["true_prob_eff"] = true_prob_eff
-        return report
+    wrapped_sim_func = BivariateSimulationWrapper(trial, cohort_size)
 
-    return sim_parameter_space(wrapped_sim_func, ps, n1=n_replicates)
+    return sim_parameter_space(
+        wrapped_sim_func, ps, n1=n_replicates, n_workers=n_workers, parallel=parallel
+    )
 
 
 def extract_sim_data(

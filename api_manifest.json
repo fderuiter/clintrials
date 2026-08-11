@@ -8554,6 +8554,18 @@
           "kind": "POSITIONAL_OR_KEYWORD",
           "annotation": "int",
           "default": "10"
+        },
+        {
+          "name": "n_workers",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "Optional",
+          "default": "None"
+        },
+        {
+          "name": "parallel",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "bool",
+          "default": "False"
         }
       ],
       "returns": "Any"

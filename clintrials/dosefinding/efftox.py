@@ -1079,13 +1079,32 @@ class EffTox(EfficacyToxicityDoseFindingTrial):
             numpy.ndarray: A matrix where element (i, j) is the
                 probability that dose i has superior utility to dose j.
         """
-        superiority_mat = np.zeros((self.num_doses, self.num_doses))
-        superiority_mat[:] = np.nan
-        for i in range(1, self.num_doses + 1):
-            for j in range(i + 1, self.num_doses + 1):
-                p = self.prob_superior_utility(i, j)
-                superiority_mat[i - 1, j - 1] = p
-                superiority_mat[j - 1, i - 1] = 1 - p
+        samp = self.pds.samples
+        num_samples = len(samp)
+
+        # Calculate utilities for all doses in one pass (no nested loops over pairs)
+        U = np.zeros((self.num_doses, num_samples))
+        scaled_doses = self.scaled_doses()
+        for d_idx in range(self.num_doses):
+            x = scaled_doses[d_idx]
+            tox_probs = _pi_T(x, mu=samp[:, 0], beta=samp[:, 1])
+            eff_probs = _pi_E(x, mu=samp[:, 2], beta1=samp[:, 3], beta2=samp[:, 4])
+            U[d_idx, :] = self.metric(eff_probs, tox_probs)
+
+        # Broadcast comparison: (num_doses, 1, num_samples) > (1, num_doses, num_samples) -> (num_doses, num_doses, num_samples)
+        comparison = U[:, None, :] > U[None, :, :]
+
+        # Multiply by posterior expectation weights
+        weights = self.pds._probs / self.pds._scale
+        superiority_mat = np.mean(comparison * weights[None, None, :], axis=2)
+
+        # Set diagonal to nan
+        np.fill_diagonal(superiority_mat, np.nan)
+
+        # Enforce exact complement on off-diagonals to match 1 - p logic
+        i_idx, j_idx = np.triu_indices(self.num_doses, k=1)
+        superiority_mat[j_idx, i_idx] = 1.0 - superiority_mat[i_idx, j_idx]
+
         return superiority_mat
 
 
