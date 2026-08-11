@@ -97,6 +97,7 @@ __all__ = [
     "TrialDesignWithMaxSize",
     "TrialDesignWithEfficacyBoundaries",
     "TrialDesignWithBulk",
+    "BivariateSimulationWrapper",
 ]
 
 logger = logging.getLogger(__name__)
@@ -118,10 +119,26 @@ class BivariateSimulationWrapper:
     """Pickleable wrapper for running bivariate simulations with simulate_trial."""
 
     def __init__(self, trial: Any, cohort_size: int) -> None:
+        """Initialize the bivariate simulation wrapper.
+
+        Args:
+            trial (Any): The trial design instance.
+            cohort_size (int): Number of patients per cohort.
+        """
         self.trial = trial
         self.cohort_size = cohort_size
 
     def __call__(self, true_prob_tox: float, true_prob_eff: float, **kwargs: Any) -> Any:
+        """Execute a single bivariate trial simulation replication.
+
+        Args:
+            true_prob_tox (float): True probability of toxicity.
+            true_prob_eff (float): True probability of efficacy.
+            **kwargs: Additional simulation keyword arguments.
+
+        Returns:
+            Any: The simulated trial report dictionary.
+        """
         import copy
 
         from clintrials.dosefinding.efficacytoxicity import simulate_trial

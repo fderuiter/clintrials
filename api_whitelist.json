@@ -85,6 +85,7 @@
     "validate_probability"
   ],
   "clintrials.core.simulation": [
+    "BivariateSimulationWrapper",
     "OutcomeGenerator",
     "TrialDesign",
     "TrialDesignWithBulk",
