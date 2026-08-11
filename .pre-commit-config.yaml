@@ -8,22 +8,21 @@ repos:
     rev: v2.11
     hooks:
     -   id: vulture
-        args: ["clintrials", ".vulture_whitelist.py"]
+        args: ["clintrials", "tests", "scripts", ".vulture_whitelist.py"]
 -   repo: local
     hooks:
     -   id: mypy
         name: mypy
-        entry: poetry run mypy
+        entry: poetry run mypy --explicit-package-bases
         language: system
-        files: ^(clintrials/|tests/)
+        files: ^(clintrials/|tests/|scripts/)
         types_or: [python, pyi]
         pass_filenames: true
 
     -   id: deptry
         name: deptry
-        entry: deptry .
-        language: python
-        additional_dependencies: ["deptry==0.22.0"]
+        entry: poetry run deptry .
+        language: system
         pass_filenames: false
         always_run: true
 
@@ -38,5 +37,5 @@ repos:
         name: ast-ui-linter
         entry: poetry run python scripts/ast_ui_linter.py
         language: system
-        files: ^(clintrials/|tests/)visualization/dashboard/views/
+        files: ^(clintrials/|tests/)visualization/dashboard/
         pass_filenames: true

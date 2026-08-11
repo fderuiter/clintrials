@@ -171,7 +171,7 @@ def extract_class_metadata(cls_obj: Any) -> Dict[str, Any]:
 
 def main() -> None:
     """Discovers all public submodules, extracts classes, functions, and parameters, and outputs a manifest JSON."""
-    manifest = {"modules": {}}
+    manifest: Dict[str, Any] = {"modules": {}}
 
     # Discover and parse all public modules
     modules_to_process = []

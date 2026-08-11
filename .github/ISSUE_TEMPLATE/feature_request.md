@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Propose a new clinical or technical feature/capability
+about: Propose a new user-centric or infrastructure feature/capability
 title: '[FEAT] '
 labels: 'enhancement'
 assignees: ''
@@ -8,21 +8,21 @@ assignees: ''
 
 ### Strategic Track Selection
 Please select the strategic track for this feature request:
-- [ ] **Clinical Track** (Bypasses ROADMAP.md; aligns with CLINICAL_STRATEGY.md strategic pillars or personas)
-- [ ] **Technical Track** (Requires alignment with specific technical milestones in ROADMAP.md)
+- [ ] **User-Centric Track** (Bypasses ROADMAP.md; aligns with PRODUCT_STRATEGY.md strategic pillars or personas)
+- [ ] **Infrastructure Track** (Requires alignment with specific technical milestones in ROADMAP.md)
 
 ---
 
 ### Track-Specific References
 
-#### For Clinical Track only:
-**Clinical Strategy Pillar / Persona Alignment**
-How does this request align with clinical strategic pillars or personas (e.g., Dr. Thorne, Eleanor Vance) in `CLINICAL_STRATEGY.md`?
-*(Note: Clinical contributors are NOT forced/required to provide low-level code implementation details or technical performance metrics.)*
+#### For User-Centric Track only:
+**Product Strategy Persona / Alignment**
+How does this request align with strategic personas (e.g., Dr. Thorne, Eleanor Vance, biostatistician, data scientist, developer) in `PRODUCT_STRATEGY.md`?
+*(Note: User-centric contributors are NOT forced/required to provide low-level code implementation details or technical performance metrics.)*
 
 Reference: _____________________________________________
 
-#### For Technical Track only:
+#### For Infrastructure Track only:
 **Roadmap Milestone Reference**
 Does this feature request align with a specific milestone or item in `ROADMAP.md`?
 - [ ] Yes. (Please specify which one: __________)

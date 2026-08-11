@@ -8,14 +8,14 @@ import sys
 # Add the project root to sys.path so we can import clintrials
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from typing import Annotated, get_args, get_origin
+from typing import Annotated, Any, Dict, Optional, get_args, get_origin
 
 from clintrials.core.schema import BaseModel, FieldInfo
 
 
-def get_field_type_info(annotation, field_info):
+def get_field_type_info(annotation: Any, field_info: Optional[FieldInfo]) -> Dict[str, Any]:
     """Extract JSON Schema type and constraints from a Python type annotation."""
-    info = {"type": "string"}
+    info: Dict[str, Any] = {"type": "string"}
 
     origin = get_origin(annotation)
 
@@ -83,9 +83,9 @@ def get_field_type_info(annotation, field_info):
     return info
 
 
-def generate_schema_for_class(cls):
+def generate_schema_for_class(cls: Any) -> Dict[str, Any]:
     """Generate a JSON schema representation for a given dataclass or Pydantic model."""
-    schema = {"type": "object", "properties": {}, "required": []}
+    schema: Dict[str, Any] = {"type": "object", "properties": {}, "required": []}
 
     for name, field_info in cls.model_fields.items():
         prop = get_field_type_info(field_info.annotation, field_info)
@@ -113,7 +113,7 @@ def generate_schema_for_class(cls):
     return schema
 
 
-def main():
+def main() -> None:
     """Serialize all dynamically discovered simulation schemas to hub/schema.json."""
     subclasses = BaseModel.__subclasses__()
     # Sort them by name to keep output deterministic/stable
