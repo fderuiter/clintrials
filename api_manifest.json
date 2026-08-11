@@ -8978,6 +8978,35 @@
           "returns": "None"
         }
       }
+    },
+    "BivariateSimulationWrapper": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "trial",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "Any",
+              "default": null
+            },
+            {
+              "name": "cohort_size",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "int",
+              "default": null
+            }
+          ],
+          "returns": "None"
+        }
+      }
     }
   },
   "clintrials.core.stats": {
