@@ -87,7 +87,7 @@ class Protocol(metaclass=abc.ABCMeta):
     def run(
         self,
         n_sims: int,
-        method: str = "iterative",
+        method: Optional[str] = None,
         seed: Optional[int] = None,
         show_progress: bool = False,
         **kwargs: Any,
@@ -108,6 +108,13 @@ class Protocol(metaclass=abc.ABCMeta):
         from clintrials.core.rng import get_rng
 
         self.set_rng(get_rng(seed))
+
+        if method is None:
+            is_gsd = any(cls.__name__ == "GroupSequentialDesign" for cls in type(self).__mro__)
+            if is_gsd:
+                method = "bulk"
+            else:
+                method = "iterative"
 
         mode = "vectorized" if method == "bulk" else "iterative"
 
