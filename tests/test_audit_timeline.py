@@ -188,8 +188,8 @@ def test_audit_commits_existing_test(temp_git_repo: str) -> None:
     run_git(["add", "clintrials/core/recruitment.py"])
     run_git(["commit", "-m", "Modify impl"])
 
-    # Audit should fail because the existing test file was not modified/added within the evaluated commit range
-    assert audit_commits("main", "HEAD") is False
+    # Audit should pass because the existing test file is pre-populated from the base branch
+    assert audit_commits("main", "HEAD") is True
 
 
 def test_audit_commits_visualization_only(temp_git_repo: str) -> None:
@@ -301,3 +301,104 @@ def test_audit_commits_test_deleted(temp_git_repo: str) -> None:
 
     # Audit should fail because the test file was deleted in the range
     assert audit_commits("main", "HEAD") is False
+
+
+def test_audit_commits_pre_population_with_new_module_failure(temp_git_repo: str) -> None:
+    # Commit recruitment test and impl on main first
+    os.makedirs("tests", exist_ok=True)
+    with open("tests/test_recruitment.py", "w") as f:
+        f.write("def test_foo(): pass")
+
+    os.makedirs("clintrials/core", exist_ok=True)
+    with open("clintrials/core/recruitment.py", "w") as f:
+        f.write("def foo(): pass")
+
+    run_git(["add", "tests/test_recruitment.py", "clintrials/core/recruitment.py"])
+    run_git(["commit", "-m", "Add recruitment on main"])
+
+    # Create feature branch
+    run_git(["checkout", "-b", "feature-branch"])
+
+    # Modify existing recruitment impl (should pass on its own)
+    with open("clintrials/core/recruitment.py", "w") as f:
+        f.write("def foo(): return 42")
+    run_git(["add", "clintrials/core/recruitment.py"])
+    run_git(["commit", "-m", "Modify recruitment"])
+
+    # Introduce a brand new module cohort without its corresponding test
+    with open("clintrials/core/cohort.py", "w") as f:
+        f.write("def cohort_foo(): pass")
+    run_git(["add", "clintrials/core/cohort.py"])
+    run_git(["commit", "-m", "Add new cohort module"])
+
+    # Audit should fail because cohort is a new module with no test
+    assert audit_commits("main", "HEAD") is False
+
+
+def test_audit_commits_pre_population_with_new_module_success(temp_git_repo: str) -> None:
+    # Commit recruitment test and impl on main first
+    os.makedirs("tests", exist_ok=True)
+    with open("tests/test_recruitment.py", "w") as f:
+        f.write("def test_foo(): pass")
+
+    os.makedirs("clintrials/core", exist_ok=True)
+    with open("clintrials/core/recruitment.py", "w") as f:
+        f.write("def foo(): pass")
+
+    run_git(["add", "tests/test_recruitment.py", "clintrials/core/recruitment.py"])
+    run_git(["commit", "-m", "Add recruitment on main"])
+
+    # Create feature branch
+    run_git(["checkout", "-b", "feature-branch"])
+
+    # Modify existing recruitment impl
+    with open("clintrials/core/recruitment.py", "w") as f:
+        f.write("def foo(): return 42")
+    run_git(["add", "clintrials/core/recruitment.py"])
+    run_git(["commit", "-m", "Modify recruitment"])
+
+    # Add test for new cohort module
+    with open("tests/test_cohort.py", "w") as f:
+        f.write("def test_cohort_foo(): pass")
+    run_git(["add", "tests/test_cohort.py"])
+    run_git(["commit", "-m", "Add new cohort test"])
+
+    # Introduce the new cohort module
+    with open("clintrials/core/cohort.py", "w") as f:
+        f.write("def cohort_foo(): pass")
+    run_git(["add", "clintrials/core/cohort.py"])
+    run_git(["commit", "-m", "Add new cohort module"])
+
+    # Audit should pass because recruitment has a base branch test and cohort has a chronological test
+    assert audit_commits("main", "HEAD") is True
+
+
+def test_audit_commits_pre_populated_test_deleted(temp_git_repo: str) -> None:
+    # Commit recruitment test and impl on main first
+    os.makedirs("tests", exist_ok=True)
+    with open("tests/test_recruitment.py", "w") as f:
+        f.write("def test_foo(): pass")
+
+    os.makedirs("clintrials/core", exist_ok=True)
+    with open("clintrials/core/recruitment.py", "w") as f:
+        f.write("def foo(): pass")
+
+    run_git(["add", "tests/test_recruitment.py", "clintrials/core/recruitment.py"])
+    run_git(["commit", "-m", "Add recruitment on main"])
+
+    # Create feature branch
+    run_git(["checkout", "-b", "feature-branch"])
+
+    # Delete recruitment test
+    run_git(["rm", "tests/test_recruitment.py"])
+    run_git(["commit", "-m", "Delete recruitment test"])
+
+    # Modify recruitment impl
+    with open("clintrials/core/recruitment.py", "w") as f:
+        f.write("def foo(): return 42")
+    run_git(["add", "clintrials/core/recruitment.py"])
+    run_git(["commit", "-m", "Modify recruitment impl"])
+
+    # Audit should fail because the test file was deleted
+    assert audit_commits("main", "HEAD") is False
+

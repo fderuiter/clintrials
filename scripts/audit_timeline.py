@@ -82,6 +82,17 @@ def audit_commits(
 
     modified_tests_so_far = set()
 
+    # Pre-populate chronological test registry with pre-existing test files from base branch
+    try:
+        base_files_output = run_git(["ls-tree", "-r", "--name-only", base_ref])
+        for line in base_files_output.splitlines():
+            path = line.strip()
+            if path.startswith("tests/") and path.endswith(".py"):
+                modified_tests_so_far.add(path)
+    except subprocess.CalledProcessError as e:
+        print(f"Error scanning base branch '{base_ref}': {e.stderr}")  # noqa: T201
+        return False
+
     for commit in commits:
         # Check modified files in this commit
         try:
