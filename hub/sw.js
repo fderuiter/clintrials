@@ -8,7 +8,10 @@ const urlsToCache = [
   basePath + 'index.html',
   basePath + 'manifest.json',
   basePath + 'icon.svg',
-  basePath + 'vendor/iframeResizer.contentWindow.min.js'
+  basePath + 'vendor/iframeResizer.contentWindow.min.js',
+  basePath + 'clintrials-0.1.4-py3-none-any.whl',
+  basePath + 'runner.py',
+  basePath + 'schema.json'
 ];
 
 self.addEventListener('install', event => {
@@ -41,9 +44,12 @@ self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   const path = url.pathname;
 
-  // Only intercept requests originating from within the Hub path
-  if (!path.startsWith(basePath)) {
-    return;
+  const isCDN = url.hostname === 'cdn.jsdelivr.net' || url.hostname === 'cdn.plot.ly';
+  if (!isCDN) {
+    // Only intercept requests originating from within the Hub path
+    if (!path.startsWith(basePath)) {
+      return;
+    }
   }
 
   // Restrict runtime caching and intercepting to GET requests only
@@ -102,6 +108,16 @@ self.addEventListener('fetch', event => {
             }
             return response;
           }).catch(err => {
+            // Fallback / revert to known stable local package if a wheel package is requested and fails to load offline
+            if (url.pathname.endsWith('.whl')) {
+              const fallbackWheel = basePath + 'clintrials-0.1.4-py3-none-any.whl';
+              return caches.match(fallbackWheel).then(fallbackResponse => {
+                if (fallbackResponse) {
+                  return fallbackResponse;
+                }
+                return fetch(fallbackWheel);
+              });
+            }
             // Propagate network error rather than returning undefined
             throw err;
           });

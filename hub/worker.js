@@ -60,6 +60,29 @@ async function initPyodide() {
 }
 
 self.onmessage = async function(e) {
+  if (e.data && e.data.type === "validate_version") {
+    const versionStr = e.data.version;
+    try {
+      const pyodide = await initPyodide();
+      const result = await pyodide.runPythonAsync(`
+from clintrials.validation import validate_version
+try:
+    validate_version(${JSON.stringify(versionStr)}, "dependency-version")
+    "valid"
+except Exception as e:
+    str(e)
+`);
+      if (result === "valid") {
+        self.postMessage({ type: "validate_version_result", success: true, version: versionStr });
+      } else {
+        self.postMessage({ type: "validate_version_result", success: false, error: result, version: versionStr });
+      }
+    } catch (err) {
+      self.postMessage({ type: "validate_version_result", success: false, error: err.message, version: versionStr });
+    }
+    return;
+  }
+
   const { schemaName, payload } = e.data;
 
   try {
