@@ -112,7 +112,7 @@ def test_schema_serialization():
     ]:
         assert expected in subclass_names
 
-    wages_tait_schema = generate_schema_for_class(WagesTaitSchema)  # type: ignore[no-untyped-call]
+    wages_tait_schema = generate_schema_for_class(WagesTaitSchema)
     assert wages_tait_schema["type"] == "object"
     assert "skeletons" in wages_tait_schema["properties"]
     assert wages_tait_schema["properties"]["skeletons"]["type"] == "array"

@@ -48,5 +48,25 @@ GSDView  # unused class (clintrials/visualization/dashboard/views/gsd_view.py:17
 WagesTaitView  # unused class (clintrials/visualization/dashboard/views/wagestait_view.py:7)
 WinRatioView  # unused class (clintrials/visualization/dashboard/views/winratio_view.py:14)
 to_1d_list  # unused function (clintrials/_utils.py:40)
+with_beta_prior  # unused method (tests/helpers/crm.py:50)
+temp_git_repo  # unused function/variable in tests/test_audit_timeline.py
+setup_func  # unused function in tests/test_crm.py, tests/test_wagestait.py, tests/test_watu.py
+teardown_func  # unused function in tests/test_crm.py, tests/test_wagestait.py, tests/test_watu.py
+exc_type  # unused variable (tests/test_dashboard_views.py:82)
+return_value  # unused attribute/mock in tests/test_dashboard_views.py, tests/test_efftox.py, tests/test_numerics.py
+pds2  # unused variable (tests/test_efftox_integration.py:44)
+probs2  # unused variable (tests/test_efftox_integration.py:44)
+probs_exp  # unused variable (tests/test_efftox_integration.py:68)
+side_effect  # unused attribute in tests/test_gsd.py
+reset_called  # unused attribute in tests/test_registry.py
+DecoratorRunner  # unused class (tests/test_registry.py:102)
+pos_int  # unused variable (tests/test_schema.py:14)
+p_response  # unused variable (tests/test_schema.py:27)
+p_custom  # unused variable (tests/test_schema.py:50)
+count_custom  # unused variable (tests/test_schema.py:51)
+ref  # unused attribute in tests/test_utils.py, tests/test_utils_safe_simulation_caching.py
+normal_method  # unused method (tests/test_verify_api_signatures.py:51)
+class_m  # unused method (tests/test_verify_api_signatures.py:54)
+static_m  # unused method (tests/test_verify_api_signatures.py:58)
 
 

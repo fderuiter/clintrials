@@ -28,7 +28,7 @@ RESTRICTED_WIDGETS = {
 }
 
 
-def get_base_name_and_attr(node):
+def get_base_name_and_attr(node: ast.AST) -> tuple[str | None, str | None]:
     if isinstance(node, ast.Name):
         return node.id, None
     elif isinstance(node, ast.Attribute):
@@ -37,7 +37,7 @@ def get_base_name_and_attr(node):
     return None, None
 
 
-def check_file(filepath):
+def check_file(filepath: str) -> bool:
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
@@ -92,7 +92,7 @@ def check_file(filepath):
     return True
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="AST-based UI Linter for Streamlit")
     parser.add_argument("files", nargs="+", help="Files to lint")
     args = parser.parse_args()

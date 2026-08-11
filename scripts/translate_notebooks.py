@@ -5,9 +5,10 @@ import json
 import shutil
 import sys
 from pathlib import Path
+from typing import Any
 
 
-def extract_title(notebook_data: dict, file_path: Path) -> str:
+def extract_title(notebook_data: dict[str, Any], file_path: Path) -> str:
     """Extract a descriptive title from notebook metadata or first markdown headers.
 
     Checks metadata title first, then looks for standard h1/h2 headers.
