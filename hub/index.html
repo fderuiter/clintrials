@@ -134,6 +134,17 @@
       <!-- Dedicated, idempotent error region -->
       <div id="error-region"></div>
 
+      <!-- Workspace Settings Section -->
+      <div id="workspace-settings" style="margin-bottom: 25px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+        <h3 style="margin-top: 0; color: #496D89;">Workspace Settings</h3>
+        <div class="form-group" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+          <label for="dependency-version">Target Package Dependency Version *</label>
+          <div class="description">Define target package dependency version for specialized calculations. Must conform to PEP 440 specifications.</div>
+          <input type="text" id="dependency-version" name="dependency-version" value="0.1.4" required placeholder="e.g., 0.1.4, 1.0.0b1, 1.0.0" />
+          <div class="error-msg" id="dependency-version-error"></div>
+        </div>
+      </div>
+
       <select id="schema-selector">
         <option value="">-- Select Model Schema --</option>
       </select>
@@ -218,6 +229,41 @@
       };
 
       let schemas = {};
+      let simulationWorker = null;
+      let activeSimulationCallback = null;
+
+      function getWorker() {
+        if (!simulationWorker) {
+          const isSubpath = window.location.pathname.includes('/clintrials/');
+          const workerUrl = isSubpath ? '/clintrials/hub/worker.js' : '/hub/worker.js';
+          console.log("Spawning simulation background worker at:", workerUrl);
+          simulationWorker = new Worker(workerUrl);
+          simulationWorker.onmessage = (e) => {
+            const msg = e.data;
+            if (msg.type === 'validate_version_result') {
+              const depInput = document.getElementById('dependency-version');
+              const depError = document.getElementById('dependency-version-error');
+              if (depInput && depError && depInput.value.trim() === msg.version) {
+                if (msg.success) {
+                  depInput.classList.remove('invalid');
+                  depError.style.display = 'none';
+                  depError.textContent = '';
+                } else {
+                  depInput.classList.add('invalid');
+                  depError.textContent = msg.error;
+                  depError.style.display = 'block';
+                }
+                triggerResize();
+              }
+            } else {
+              if (activeSimulationCallback) {
+                activeSimulationCallback(msg);
+              }
+            }
+          };
+        }
+        return simulationWorker;
+      }
 
       function triggerResize() {
         if (window.parentIFrame && typeof window.parentIFrame.size === 'function') {
@@ -339,6 +385,30 @@
             }
           }
           
+          // Setup dependency-version field event listener for instant validation
+          const depInput = document.getElementById('dependency-version');
+          const depError = document.getElementById('dependency-version-error');
+          if (depInput && depError) {
+            depInput.addEventListener('input', () => {
+              const val = depInput.value.trim();
+              if (!val) {
+                depInput.classList.add('invalid');
+                depError.textContent = 'This field is required';
+                depError.style.display = 'block';
+                triggerResize();
+                return;
+              }
+              // Send message to background worker for native packaging verification
+              const worker = getWorker();
+              worker.postMessage({ type: 'validate_version', version: val });
+            });
+            // Trigger initial validation
+            if (depInput.value) {
+              const worker = getWorker();
+              worker.postMessage({ type: 'validate_version', version: depInput.value.trim() });
+            }
+          }
+
           triggerResize();
         } catch (err) {
           console.error("Dropdown population error:", err);
@@ -512,8 +582,6 @@
         
         triggerResize();
 
-        let simulationWorker = null;
-
         function runSimulationInWorker(schemaName, payload) {
           const statusContainer = document.getElementById('simulation-status-container');
           const statusMsg = document.getElementById('simulation-status-message');
@@ -536,15 +604,9 @@
 
           triggerResize();
 
-          if (!simulationWorker) {
-            const isSubpath = window.location.pathname.includes('/clintrials/');
-            const workerUrl = isSubpath ? '/clintrials/hub/worker.js' : '/hub/worker.js';
-            console.log("Spawning simulation background worker at:", workerUrl);
-            simulationWorker = new Worker(workerUrl);
-          }
+          const worker = getWorker();
 
-          simulationWorker.onmessage = function(e) {
-            const msg = e.data;
+          activeSimulationCallback = function(msg) {
             if (msg.type === 'status') {
               statusMsg.textContent = msg.message;
               triggerResize();
@@ -636,7 +698,7 @@
             }
           };
 
-          simulationWorker.postMessage({
+          worker.postMessage({
             schemaName: schemaName,
             payload: payload
           });
@@ -644,6 +706,14 @@
 
         form.onsubmit = (e) => {
            e.preventDefault();
+
+           // Check if dependency version is valid first!
+           const depInput = document.getElementById('dependency-version');
+           if (depInput && depInput.classList.contains('invalid')) {
+              showError("Please correct validation errors before submitting.");
+              return;
+           }
+
            let allValid = true;
            const payload = {};
 
