@@ -5133,11 +5133,11 @@
             {
               "name": "timing",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[float]",
+              "annotation": "List[float] | None",
               "default": "None"
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "has_more": {
           "type": "method",
@@ -5149,7 +5149,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "bool"
         },
         "report": {
           "type": "method",
@@ -5161,7 +5161,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "dict[str, Any]"
         },
         "reset": {
           "type": "method",
@@ -5173,7 +5173,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "rng": {
           "type": "property",
@@ -5285,11 +5285,11 @@
             {
               "name": "info",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "float",
+              "annotation": "float | None",
               "default": "None"
             }
           ],
-          "returns": null
+          "returns": "None"
         }
       }
     },
@@ -18411,11 +18411,11 @@
             {
               "name": "timing",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[float]",
+              "annotation": "List[float] | None",
               "default": "None"
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "has_more": {
           "type": "method",
@@ -18427,7 +18427,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "bool"
         },
         "report": {
           "type": "method",
@@ -18439,7 +18439,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "dict[str, Any]"
         },
         "reset": {
           "type": "method",
@@ -18451,7 +18451,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "rng": {
           "type": "property",
@@ -18563,11 +18563,11 @@
             {
               "name": "info",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "float",
+              "annotation": "float | None",
               "default": "None"
             }
           ],
-          "returns": null
+          "returns": "None"
         }
       }
     },
@@ -21720,11 +21720,11 @@
             {
               "name": "timing",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "List[float]",
+              "annotation": "List[float] | None",
               "default": "None"
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "has_more": {
           "type": "method",
@@ -21736,7 +21736,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "bool"
         },
         "report": {
           "type": "method",
@@ -21748,7 +21748,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "dict[str, Any]"
         },
         "reset": {
           "type": "method",
@@ -21760,7 +21760,7 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "None"
         },
         "rng": {
           "type": "property",
@@ -21872,11 +21872,11 @@
             {
               "name": "info",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "float",
+              "annotation": "float | None",
               "default": "None"
             }
           ],
-          "returns": null
+          "returns": "None"
         }
       }
     },
