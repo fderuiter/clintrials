@@ -7445,6 +7445,26 @@
           ],
           "returns": null
         },
+        "available_mass": {
+          "type": "property",
+          "returns": "dict[float, float]"
+        },
+        "cursor": {
+          "type": "property",
+          "returns": "float"
+        },
+        "delta": {
+          "type": "property",
+          "returns": "float"
+        },
+        "initial_intensity": {
+          "type": "property",
+          "returns": "float"
+        },
+        "interpolate": {
+          "type": "property",
+          "returns": "bool"
+        },
         "next": {
           "type": "method",
           "parameters": [
@@ -7455,7 +7475,11 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "float"
+        },
+        "recruiment_mass": {
+          "type": "property",
+          "returns": "dict[float, float]"
         },
         "reset": {
           "type": "method",
@@ -7467,7 +7491,56 @@
               "default": null
             }
           ],
-          "returns": null
+          "returns": "None"
+        },
+        "shapes": {
+          "type": "property",
+          "returns": "dict[float, tuple[float, float, float, float]]"
+        },
+        "vertices": {
+          "type": "property",
+          "returns": "list[tuple[float, float]]"
+        }
+      }
+    },
+    "RecruitmentGeometry": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "intrapatient_gap",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "initial_intensity",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "vertices",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "list[tuple[float, float]]",
+              "default": null
+            },
+            {
+              "name": "interpolate",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "None"
         }
       }
     },
@@ -7523,6 +7596,469 @@
           "returns": null
         }
       }
+    },
+    "RecruitmentStreamState": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "geometry",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "RecruitmentGeometry",
+              "default": null
+            },
+            {
+              "name": "intrapatient_gap",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float | None",
+              "default": "None"
+            }
+          ],
+          "returns": "None"
+        },
+        "next_patient": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ],
+          "returns": "float"
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ],
+          "returns": "None"
+        }
+      }
+    }
+  },
+  "clintrials.core.recruitment_geometry": {
+    "RecruitmentGeometry": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "intrapatient_gap",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "initial_intensity",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "vertices",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "list[tuple[float, float]]",
+              "default": null
+            },
+            {
+              "name": "interpolate",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "None"
+        }
+      }
+    },
+    "RecruitmentProfileGeometry": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "intrapatient_gap",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "initial_intensity",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "vertices",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "list[tuple[float, float]]",
+              "default": null
+            },
+            {
+              "name": "interpolate",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "None"
+        }
+      }
+    },
+    "calculate_interval_mass": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "t0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "interpolate",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "bool",
+          "default": null
+        }
+      ],
+      "returns": "float"
+    }
+  },
+  "clintrials.core.recruitment_solver": {
+    "calculate_interval_mass": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "t0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "interpolate",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "bool",
+          "default": null
+        }
+      ],
+      "returns": "float"
+    },
+    "interpolate_intensity": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "t",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        }
+      ],
+      "returns": "float"
+    },
+    "invert_mass_to_time": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "t0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "mass",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "as_rectangle",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "bool",
+          "default": "False"
+        }
+      ],
+      "returns": "float"
+    }
+  },
+  "clintrials.core.recruitment_state": {
+    "RecruitmentGeometry": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "intrapatient_gap",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "initial_intensity",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float",
+              "default": null
+            },
+            {
+              "name": "vertices",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "list[tuple[float, float]]",
+              "default": null
+            },
+            {
+              "name": "interpolate",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "bool",
+              "default": "True"
+            }
+          ],
+          "returns": "None"
+        }
+      }
+    },
+    "RecruitmentStreamState": {
+      "type": "class",
+      "methods": {
+        "__init__": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "geometry",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "RecruitmentGeometry",
+              "default": null
+            },
+            {
+              "name": "intrapatient_gap",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": "float | None",
+              "default": "None"
+            }
+          ],
+          "returns": "None"
+        },
+        "next_patient": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ],
+          "returns": "float"
+        },
+        "reset": {
+          "type": "method",
+          "parameters": [
+            {
+              "name": "self",
+              "kind": "POSITIONAL_OR_KEYWORD",
+              "annotation": null,
+              "default": null
+            }
+          ],
+          "returns": "None"
+        }
+      }
+    },
+    "interpolate_intensity": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "t",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        }
+      ],
+      "returns": "float"
+    },
+    "invert_mass_to_time": {
+      "type": "function",
+      "parameters": [
+        {
+          "name": "t0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "t1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y0",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "y1",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "mass",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "float",
+          "default": null
+        },
+        {
+          "name": "as_rectangle",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "annotation": "bool",
+          "default": "False"
+        }
+      ],
+      "returns": "float"
     }
   },
   "clintrials.core.registry": {
