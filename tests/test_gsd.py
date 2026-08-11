@@ -196,3 +196,25 @@ def test_gsd_simulate_deprecation():
     assert len(record) == 1
     assert "simulate is deprecated" in str(record[0].message)
     assert "Use run(..., method='bulk') instead" in str(record[0].message)
+
+
+def test_gsd_defaults_to_bulk():
+    """Verify that GroupSequentialDesign.run() defaults to 'bulk' mode."""
+    design = GroupSequentialDesign(k=2, alpha=0.025)
+    results = design.run(n_sims=5)
+    assert results.mode == "bulk"
+
+
+def test_gsd_can_override_to_iterative():
+    """Verify that passing method='iterative' overrides the default to run in iterative mode."""
+    design = GroupSequentialDesign(k=2, alpha=0.025)
+    results = design.run(n_sims=5, method="iterative", z_score=1.5)
+    assert results.mode == "iterative"
+
+
+def test_non_gsd_still_defaults_to_iterative():
+    """Verify that other trial designs still default to 'iterative' mode."""
+    from tests.test_protocol import DummyTrial
+    trial = DummyTrial()  # type: ignore
+    results = trial.run(n_sims=5)
+    assert results.mode == "iterative"
