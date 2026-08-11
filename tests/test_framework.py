@@ -110,3 +110,34 @@ def test_dashboard_view_table_rendering_accessible(monkeypatch):
     assert any("Simulation Summary" in html for html in called_htmls)
     assert any("Expand All" in html for html in called_htmls)
     assert any("<details>" in html for html in called_htmls)
+
+
+def test_dashboard_view_sandbox_initialization(monkeypatch):
+    st_mock = _make_streamlit_mock()  # type: ignore
+    st_mock.session_state = {
+        "accessibility_mode": False,
+        "CRM_sandbox_true_tox_str": "0.05, 0.1, 0.2, 0.3, 0.4",
+        "CRM_sandbox_override_dose": "None / No Override",
+    }
+    monkeypatch.setitem(sys.modules, "streamlit", st_mock)
+
+    summary_df = pd.DataFrame(
+        {
+            "N": [2.123456],
+            "recommended_dose_prob": [{1: 0.5, 2: 0.5}],
+        },
+        index=pd.Index([0.1], name="true_tox"),
+    )
+
+    @dashboard_view(title="Test Title", model_name="CRM", file_prefix="test_prefix")
+    def dummy_render() -> tuple[pd.DataFrame, list[object]]:
+        return summary_df, []
+
+    dummy_render()
+
+    # Verify that the sandbox states have been initialized
+    assert "CRM_sandbox_protocol" in st_mock.session_state
+    assert "CRM_sandbox_history" in st_mock.session_state
+    assert st_mock.session_state["CRM_sandbox_target_tox"] == 0.25
+    assert st_mock.session_state["CRM_sandbox_max_size"] == 60
+
