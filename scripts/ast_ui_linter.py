@@ -2,6 +2,7 @@
 import argparse
 import ast
 import sys
+from typing import Optional, Tuple
 
 RESTRICTED_WIDGETS = {
     "button",
@@ -28,7 +29,7 @@ RESTRICTED_WIDGETS = {
 }
 
 
-def get_base_name_and_attr(node: ast.AST) -> tuple[str | None, str | None]:
+def get_base_name_and_attr(node: ast.AST) -> Tuple[Optional[str], Optional[str]]:
     if isinstance(node, ast.Name):
         return node.id, None
     elif isinstance(node, ast.Attribute):
