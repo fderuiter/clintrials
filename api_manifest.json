@@ -865,8 +865,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -5197,8 +5197,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -5526,8 +5526,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -5793,8 +5793,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -6969,8 +6969,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -7289,8 +7289,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -9227,8 +9227,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -9410,8 +9410,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -10302,8 +10302,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -10713,8 +10713,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -11106,8 +11106,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -12059,8 +12059,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -12661,8 +12661,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -13108,8 +13108,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -14013,8 +14013,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -15076,8 +15076,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -15543,8 +15543,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -16193,8 +16193,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -16910,8 +16910,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -17377,8 +17377,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -18118,8 +18118,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -18475,8 +18475,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -18644,8 +18644,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -20346,8 +20346,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -21095,8 +21095,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -21784,8 +21784,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -22452,8 +22452,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -23323,8 +23323,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -29498,8 +29498,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
@@ -29722,8 +29722,8 @@
             {
               "name": "method",
               "kind": "POSITIONAL_OR_KEYWORD",
-              "annotation": "str",
-              "default": "'iterative'"
+              "annotation": "Optional[str]",
+              "default": "None"
             },
             {
               "name": "seed",
