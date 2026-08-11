@@ -163,18 +163,74 @@ def validate_version(value: Any, name: str) -> None:
         raise ValueError(ErrorTemplates.PEP440_VERSION.format(name=name)) from e
 
 
+def _get_defined_personas_from_strategy() -> list[str]:
+    from pathlib import Path
+    strategy_path = Path("/app/PRODUCT_STRATEGY.md")
+    if not strategy_path.exists():
+        strategy_path = Path("PRODUCT_STRATEGY.md")
+    if not strategy_path.exists():
+        return ["dr. aris thorne", "eleanor vance", "biostatistician", "data scientist", "developer"]
+
+    content = strategy_path.read_text()
+    possible_personas = ["dr. aris thorne", "eleanor vance", "biostatistician", "data scientist", "developer"]
+    defined = []
+    content_lower = content.lower()
+    for persona in possible_personas:
+        if persona in content_lower:
+            defined.append(persona)
+        elif persona == "dr. aris thorne" and "aris thorne" in content_lower:
+            defined.append(persona)
+    return defined
+
+
+def _is_persona_referenced(input_text: str, defined_personas: list[str]) -> bool:
+    input_lower = input_text.lower()
+    for persona in defined_personas:
+        if persona == "dr. aris thorne":
+            if any(term in input_lower for term in ["dr. aris thorne", "aris thorne", "thorne", "dr. thorne"]):
+                return True
+        elif persona == "eleanor vance":
+            if any(term in input_lower for term in ["eleanor vance", "eleanor", "vance"]):
+                return True
+        else:
+            if persona in input_lower:
+                return True
+            if persona.rstrip("s") in input_lower:
+                return True
+    return False
+
+
+def _get_roadmap_milestones() -> list[str]:
+    from pathlib import Path
+    roadmap_path = Path("/app/ROADMAP.md")
+    if not roadmap_path.exists():
+        roadmap_path = Path("ROADMAP.md")
+    if not roadmap_path.exists():
+        return []
+
+    content = roadmap_path.read_text()
+    milestones = []
+    for line in content.splitlines():
+        line = line.strip()
+        if line.startswith("-") or line.startswith("*"):
+            milestone_text = line.lstrip("-* ").strip()
+            if milestone_text:
+                milestones.append(milestone_text)
+    return milestones
+
+
 def validate_feature_request(issue_data: dict[str, Any]) -> bool:
     """Validates a feature request submission based on dual-track rules.
 
-    The Technical Track requires a roadmap milestone reference.
-    The Clinical Track bypasses the technical roadmap milestone requirement,
-    relying instead on alignment with CLINICAL_STRATEGY.md without requiring
+    The Infrastructure Track requires a roadmap milestone reference.
+    The User-Centric Track bypasses the roadmap milestone requirement,
+    relying instead on alignment with PRODUCT_STRATEGY.md without requiring
     low-level code or technical metrics.
 
     Args:
         issue_data (dict): A dictionary representing the submitted issue.
             Expected keys: 'track', 'roadmap_milestone', 'clinical_pillar',
-            'solution_description'.
+            'user_persona', 'solution_description'.
 
     Returns:
         bool: True if the issue data is valid.
@@ -183,27 +239,76 @@ def validate_feature_request(issue_data: dict[str, Any]) -> bool:
         ValueError: If validation fails.
     """
     track = str(issue_data.get("track", "")).lower()
-    if "clinical" in track:
-        # Bypasses the technical roadmap requirement
-        # Ensures no low-level technical performance metrics or code implementation is forced
-        clinical_pillar = issue_data.get("clinical_pillar")
+
+    if "user-centric" in track:
+        clinical_pillar = issue_data.get("clinical_pillar") or issue_data.get("user_persona") or issue_data.get("persona")
+        if not clinical_pillar or str(clinical_pillar).strip() in ("", "None", "N/A"):
+            raise ValueError(
+                "User-Centric track requires a reference to PRODUCT_STRATEGY.md strategic pillars or personas."
+            )
+
+        defined_personas = _get_defined_personas_from_strategy()
+        if not _is_persona_referenced(str(clinical_pillar), defined_personas):
+            raise ValueError(
+                "User-Centric track proposals must reference a defined strategic persona (e.g., Dr. Aris Thorne, Eleanor Vance, biostatistician, or data scientist)."
+            )
+        return True
+
+    elif "clinical" in track:
+        clinical_pillar = issue_data.get("clinical_pillar") or issue_data.get("user_persona") or issue_data.get("persona")
         if not clinical_pillar or str(clinical_pillar).strip() in ("", "None", "N/A"):
             raise ValueError(
                 "Clinical track requires a reference to CLINICAL_STRATEGY.md strategic pillars or personas."
             )
         return True
+
+    elif "infrastructure" in track:
+        roadmap_milestone = issue_data.get("roadmap_milestone")
+        if not roadmap_milestone or str(roadmap_milestone).strip() in ("", "None", "N/A"):
+            raise ValueError(
+                "Infrastructure track requires a valid ROADMAP.md milestone reference."
+            )
+
+        active_milestones = _get_roadmap_milestones()
+        norm_ref = str(roadmap_milestone).strip().lower()
+
+        import re
+        def clean_str(s: str) -> str:
+            return re.sub(r'[^a-z0-9]', '', s.lower())
+
+        norm_ref_clean = clean_str(norm_ref)
+
+        matched = False
+        for am in active_milestones:
+            am_clean = clean_str(am)
+            if norm_ref_clean in am_clean or am_clean in norm_ref_clean:
+                matched = True
+                break
+
+            if len(norm_ref) >= 15:
+                for i in range(len(norm_ref) - 14):
+                    sub = norm_ref[i:i+15]
+                    if sub in am.lower():
+                        matched = True
+                        break
+            if matched:
+                break
+
+        if not matched:
+            raise ValueError(
+                "Infrastructure track requires a valid and active ROADMAP.md milestone reference."
+            )
+        return True
+
     elif "technical" in track:
         roadmap_milestone = issue_data.get("roadmap_milestone")
-        if not roadmap_milestone or str(roadmap_milestone).strip() in (
-            "",
-            "None",
-            "N/A",
-        ):
+        if not roadmap_milestone or str(roadmap_milestone).strip() in ("", "None", "N/A"):
             raise ValueError(
                 "Technical track requires a valid ROADMAP.md milestone reference."
             )
         return True
+
     else:
         raise ValueError(
-            "Invalid track selection. Please select either 'Technical Track' or 'Clinical Track'."
+            "Invalid track selection. Please select either 'User-Centric Track' or 'Infrastructure Track'."
         )
