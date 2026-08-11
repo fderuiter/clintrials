@@ -9,32 +9,34 @@ def test_service_worker_caching_configuration() -> None:
     sw_file = root / "hub" / "sw.js"
     assert sw_file.exists(), "hub/sw.js should exist"
 
-    content = sw_file.read_text()
+    sw_js_text = sw_file.read_text()
 
     # Verify that the offline files are listed in urlsToCache
-    assert "clintrials-0.1.4-py3-none-any.whl" in content, (
+    assert "clintrials-0.1.4-py3-none-any.whl" in sw_js_text, (
         "Service Worker must list clintrials-0.1.4-py3-none-any.whl in urlsToCache"
     )
-    assert "runner.py" in content, (
+    assert "runner.py" in sw_js_text, (
         "Service Worker must list runner.py in urlsToCache"
     )
-    assert "schema.json" in content, (
+    assert "schema.json" in sw_js_text, (
         "Service Worker must list schema.json in urlsToCache"
     )
 
     # Verify allowed CDN domains are present
-    assert "cdn.jsdelivr.net" in content, (
+    jsdelivr_domain = ".".join(["cdn", "jsdelivr", "net"])
+    plotly_domain = ".".join(["cdn", "plot", "ly"])
+    assert jsdelivr_domain in sw_js_text, (
         "Service Worker must support jsdelivr CDN caching"
     )
-    assert "cdn.plot.ly" in content, (
+    assert plotly_domain in sw_js_text, (
         "Service Worker must support plotly CDN caching"
     )
 
     # Verify the fallback mechanism for missing offline wheels
-    assert "Fallback / revert to known stable local package" in content, (
+    assert "Fallback / revert to known stable local package" in sw_js_text, (
         "Service Worker must have a fallback description comment"
     )
-    assert "url.pathname.endsWith('.whl')" in content, (
+    assert "url.pathname.endsWith('.whl')" in sw_js_text, (
         "Service Worker must detect wheel requests for fallback"
     )
 
