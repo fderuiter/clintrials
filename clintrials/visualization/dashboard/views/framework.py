@@ -117,19 +117,10 @@ def dashboard_view(
                 def __getattr__(self, name: str) -> Any:
                     if name in ("sidebar", "session_state"):
                         raise AttributeError(f"DummyContext has no attribute '{name}'")
-                    if self._obj is not None:
-                        try:
-                            return getattr(self._obj, name)
-                        except AttributeError:
-                            pass
-                    if name == "text_input":
-                        return lambda *args, **kwargs: "0.05, 0.1, 0.2, 0.3, 0.4"
-                    if name == "selectbox":
-                        return lambda *args, **kwargs: "None / No Override"
-                    if name == "number_input":
-                        return lambda *args, **kwargs: 3
-                    if name == "button":
-                        return lambda *args, **kwargs: False
+                    if self._obj is not None and hasattr(self._obj, name):
+                        return getattr(self._obj, name)
+                    if hasattr(st, name):
+                        return getattr(st, name)
                     return lambda *args, **kwargs: None
                 def __enter__(self) -> "DummyContext":
                     return self
