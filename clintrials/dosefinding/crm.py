@@ -369,11 +369,14 @@ def _get_beta_hat_mle_bootstrap(
 
         rng = get_rng()
 
-    beta_hats_boot = []
-    for _ in range(B):
-        tox_probs = [F(dose, intercept, beta_hat) for dose in codified_doses_given]
-        toxs_boot = [rng.binomial(1, p) for p in tox_probs]
+    # Draw all bootstrap samples at once using NumPy array operations to eliminate sequential loops.
+    doses_arr = np.asarray(codified_doses_given)
+    tox_probs = np.clip(F(doses_arr, intercept, beta_hat), 0.0, 1.0)
+    toxs_boot_matrix = rng.binomial(1, tox_probs[None, :], size=(B, len(doses_arr)))
 
+    beta_hats_boot = []
+    for row in range(B):
+        toxs_boot = list(toxs_boot_matrix[row])
         beta_hat_boot, _ = _get_beta_hat_mle(
             F, intercept, codified_doses_given, toxs_boot, estimate_var=False
         )
@@ -413,7 +416,7 @@ def _estimate_prob_tox_from_param(
     Returns:
         list[float]: A list of estimated probabilities of toxicity.
     """
-    post_tox = [F(x, a0=intercept, beta=beta_hat) for x in dose_labels]
+    post_tox = F(np.asarray(dose_labels), a0=intercept, beta=beta_hat).tolist()
     return post_tox
 
 
@@ -447,7 +450,12 @@ def _get_post_tox_bayes(
     Returns:
         list[float]: A list of posterior probabilities of toxicity.
     """
+    from scipy.special import logsumexp
+
     from clintrials.core.numerics import integrate_posterior_1d
+
+    if len(dose_labels) == 0:
+        return []
 
     def logpost(t: Any) -> Any:
         ll = _compound_toxicity_likelihood(
@@ -455,16 +463,33 @@ def _get_post_tox_bayes(
         )
         return ll + np.log(beta_pdf(t) + 1e-300)
 
-    post_tox = []
     min_b = min_beta if min_beta is not None else CORE_REGISTRY["crm_min_beta"]
     max_b = max_beta if max_beta is not None else CORE_REGISTRY["crm_max_beta"]
     n_pts = n_points if n_points is not None else CORE_REGISTRY["crm_n_points"]
-    for x in dose_labels:
-        prob = integrate_posterior_1d(
-            logpost, lambda t: F(x, a0=intercept, beta=t), min_b, max_b, n_points=n_pts
-        )
-        post_tox.append(prob)
 
+    # Run the adaptive limits check once to find the expansions count
+    _, diag = integrate_posterior_1d(
+        logpost, lambda t: 1.0, min_b, max_b, n_points=n_pts, return_diagnostics=True
+    )
+    expansions = diag["expansions"]
+
+    # Calculate the expanded lo and hi bounds
+    center = (min_b + max_b) / 2
+    half_width = (max_b - min_b) / 2
+    final_half_width = half_width * (2.0 ** expansions)
+    final_lo = center - final_half_width
+    final_hi = center + final_half_width
+
+    xs = np.linspace(final_lo, final_hi, n_pts)
+    lp = logpost(xs)
+    w = np.exp(lp - logsumexp(lp))
+
+    # Evaluate all doses on the grid simultaneously
+    doses_arr = np.asarray(dose_labels)[:, None]  # shape: (L, 1)
+    beta_arr = xs[None, :]  # shape: (1, n_pts)
+    F_vals = F(doses_arr, a0=intercept, beta=beta_arr)  # shape: (L, n_pts)
+
+    post_tox = np.sum(w[None, :] * F_vals, axis=1).tolist()
     return post_tox
 
 
