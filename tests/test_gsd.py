@@ -114,14 +114,14 @@ def test_spending_function_obrien_fleming_zero():
 def test_gsd_update_and_report():
     design = GroupSequentialDesign(k=3, alpha=0.025)
 
-    assert design.has_more() is True  # type: ignore
+    assert design.has_more() is True
 
     # Update first stage
     design.update(z_score=1.0)
     assert design._stage == 1
     assert design._stopped is False
     assert design._rejected is False
-    assert design.has_more() is True  # type: ignore
+    assert design.has_more() is True
 
     # Update second stage, trigger rejection
     bound_stage_2 = design.efficacy_boundaries[1]
