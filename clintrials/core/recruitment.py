@@ -12,9 +12,9 @@ __contact__ = "kristian.brock@gmail.com"
 
 
 import abc
-import copy
 
-import numpy as np
+from clintrials.core.recruitment_geometry import RecruitmentGeometry
+from clintrials.core.recruitment_state import RecruitmentStreamState
 
 
 class RecruitmentStream(metaclass=abc.ABCMeta):
@@ -125,93 +125,73 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
                 if `initial_intensity` is negative, or if any of the
                 intensities in `vertices` are negative.
         """
-        if intrapatient_gap <= 0:
-            raise ValueError("intrapatient_gap must be strictly positive.")
-        if initial_intensity < 0:
-            raise ValueError(
-                "initial_intensity must be non-negative. Zero is allowed to model "
-                "delayed recruitment start."
-            )
-        if any(v[1] < 0 for v in vertices):
-            raise ValueError("intensity in vertices cannot be negative.")
+        self.geometry = RecruitmentGeometry(
+            intrapatient_gap=intrapatient_gap,
+            initial_intensity=initial_intensity,
+            vertices=vertices,
+            interpolate=interpolate,
+        )
+        self.state = RecruitmentStreamState(self.geometry)
 
-        self.delta = intrapatient_gap
-        self.initial_intensity = initial_intensity
-        self.interpolate = interpolate
+    @property
+    def delta(self) -> float:
+        """The constant time gap between patient recruitments."""
+        return self.geometry.delta
 
-        v = sorted(vertices, key=lambda x: x[0])
-        self.shapes = {}  # t1 -> t0, t1, y0, y1 vertex parameters
-        self.recruiment_mass = {}  # t1 -> recruitment mass available (i.e. area of quadrilateral) to left of t1
-        if len(v) > 0:
-            t0 = 0
-            y0 = initial_intensity
-            for x in v:
-                t1, y1 = x
-                if interpolate:
-                    mass = 0.5 * (t1 - t0) * (y0 + y1)  # Area of trapezium
-                else:
-                    mass = (t1 - t0) * y0  # Are of rectangle
-                self.recruiment_mass[t1] = mass
-                self.shapes[t1] = (t0, t1, y0, y1)
-                t0, y0 = t1, y1
-            self.available_mass = copy.copy(self.recruiment_mass)
-        else:
-            self.available_mass = {}
-        self.vertices = v
-        self.cursor = 0
+    @property
+    def initial_intensity(self) -> float:
+        """The initial recruitment intensity."""
+        return self.geometry.initial_intensity
 
-    def reset(self):  # type: ignore
+    @property
+    def interpolate(self) -> bool:
+        """Whether to linearly interpolate between vertices."""
+        return self.geometry.interpolate
+
+    @property
+    def vertices(self) -> list[tuple[float, float]]:
+        """The sorted vertices representing the recruitment intensity profile."""
+        return self.geometry.vertices
+
+    @property
+    def shapes(self) -> dict[float, tuple[float, float, float, float]]:
+        """The shape properties of the intervals."""
+        return self.geometry.shapes
+
+    @property
+    def recruiment_mass(self) -> dict[float, float]:
+        """The total recruitment potential mass of the intervals."""
+        return self.geometry.recruiment_mass
+
+    @property
+    def cursor(self) -> float:
+        """The current simulation time cursor of the stream."""
+        return self.state.cursor
+
+    @cursor.setter
+    def cursor(self, value: float) -> None:
+        self.state.cursor = value
+
+    @property
+    def available_mass(self) -> dict[float, float]:
+        """The remaining recruitment potential mass in each interval."""
+        return self.state.available_mass
+
+    @available_mass.setter
+    def available_mass(self, value: dict[float, float]) -> None:
+        self.state.available_mass = value
+
+    def reset(self) -> None:
         """Resets the recruitment stream to its initial state."""
-        self.cursor = 0
-        self.available_mass = copy.copy(self.recruiment_mass)
+        self.state.reset()
 
-    def next(self):  # type: ignore
+    def next(self) -> float:
         """Gets the recruitment time of the next patient.
 
         Returns:
             float: The recruitment time of the next patient.
         """
-        sought_mass = self.delta
-        t = sorted(self.available_mass.keys())
-        for t1 in t:
-            avail_mass = self.available_mass[t1]
-            t0, _, y0, y1 = self.shapes[t1]
-            if avail_mass >= sought_mass:
-                if self.interpolate:
-                    y_at_cursor = self._linearly_interpolate_y(  # type: ignore
-                        self.cursor, t0, t1, y0, y1
-                    )
-                    new_cursor = self._invert(  # type: ignore
-                        self.cursor, t1, y_at_cursor, y1, sought_mass
-                    )
-                    self.cursor = new_cursor
-                else:
-                    y_at_cursor = y0
-                    new_cursor = self._invert(  # type: ignore
-                        self.cursor, t1, y_at_cursor, y1, sought_mass, as_rectangle=True
-                    )
-                    self.cursor = new_cursor
-
-                self.available_mass[t1] -= sought_mass
-                return self.cursor
-            else:
-                sought_mass -= avail_mass
-                self.available_mass[t1] = 0.0
-                if t1 > self.cursor:
-                    self.cursor = t1
-
-        # Got here? Satisfy outstanding sought mass using terminal recruitment intensity
-        if len(self.vertices):
-            _, y1 = self.vertices[-1]
-            terminal_rate = y1
-        else:
-            terminal_rate = self.initial_intensity
-
-        if terminal_rate > 0:
-            self.cursor += sought_mass / terminal_rate
-            return self.cursor
-        else:
-            return np.nan
+        return self.state.next_patient()
 
     def _linearly_interpolate_y(self, t, t0, t1, y0, y1):  # type: ignore
         """Linearly interpolates the y-value at time t.
@@ -226,12 +206,8 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
         Returns:
             float: The interpolated y-value at time t.
         """
-        if t1 == t0:
-            # The line either has infiniite gradient or is not a line at all, but a point. No logical response
-            return np.nan
-        else:
-            m = (y1 - y0) / (t1 - t0)
-            return y0 + m * (t - t0)
+        from clintrials.core.recruitment_solver import interpolate_intensity
+        return interpolate_intensity(t, t0, t1, y0, y1)
 
     def _invert(self, t0, t1, y0, y1, mass, as_rectangle=False):  # type: ignore
         """Calculates the time at which the area under the curve equals a given mass.
@@ -252,29 +228,8 @@ class QuadrilateralRecruitmentStream(RecruitmentStream):
             float: The time `t` at which the cumulative recruitment mass
                 equals the target `mass`.
         """
-        if t1 == t0:
-            # The quadrilateral has no area
-            return np.nan
-        elif y0 == y1 and y0 <= 0:
-            # The quadrilateral has no area or is badly defined
-            return np.nan
-        elif (y0 == y1 and y0 > 0) or as_rectangle:
-            # We require area of a rectangle; easy!
-            return t0 + 1.0 * mass / y0
-        else:
-            # We require area of a trapezium. That requires solving a quadratic.
-            m = (y1 - y0) / (t1 - t0)
-            discriminant = y0**2 + 2 * m * mass
-            if discriminant < 0:
-                raise TypeError("Discriminant is negative")
-            z = np.sqrt(discriminant)
-            tau0 = (-y0 + z) / m
-            tau1 = (-y0 - z) / m
-            if tau0 + t0 > 0:
-                return t0 + tau0
-            else:
-                assert t0 + tau1 > 0
-                return t0 + tau1
+        from clintrials.core.recruitment_solver import invert_mass_to_time
+        return invert_mass_to_time(t0, t1, y0, y1, mass, as_rectangle=as_rectangle)
 
 
 # Inject module-level docstring

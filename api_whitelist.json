@@ -60,7 +60,25 @@
   "clintrials.core.recruitment": [
     "ConstantRecruitmentStream",
     "QuadrilateralRecruitmentStream",
-    "RecruitmentStream"
+    "RecruitmentGeometry",
+    "RecruitmentStream",
+    "RecruitmentStreamState"
+  ],
+  "clintrials.core.recruitment_geometry": [
+    "RecruitmentGeometry",
+    "RecruitmentProfileGeometry",
+    "calculate_interval_mass"
+  ],
+  "clintrials.core.recruitment_solver": [
+    "calculate_interval_mass",
+    "interpolate_intensity",
+    "invert_mass_to_time"
+  ],
+  "clintrials.core.recruitment_state": [
+    "RecruitmentGeometry",
+    "RecruitmentStreamState",
+    "interpolate_intensity",
+    "invert_mass_to_time"
   ],
   "clintrials.core.registry": [
     "ProtocolRegistry",
