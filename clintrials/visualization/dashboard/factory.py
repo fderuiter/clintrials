@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 
 class ScopedUIRegistry(dict):  # type: ignore
     """Registry for scoping UI help text to specific designs."""
@@ -129,7 +131,9 @@ def _build_registry():  # type: ignore
 UI_REGISTRY = _build_registry()  # type: ignore
 
 
-def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: ignore
+def create_widget(
+    st_module: Any, widget_type: str, var_name: str, *args: Any, **kwargs: Any
+) -> Any:
     """Factory function to create a Streamlit widget.
 
     It automatically applies help text based on the variable name.
@@ -142,18 +146,24 @@ def create_widget(st_module, widget_type, var_name, *args, **kwargs):  # type: i
     if help_text:
         kwargs["help"] = help_text
 
+    target = st_module
+    if hasattr(st_module, "sidebar") and getattr(st_module, "sidebar") is not None:
+        target = st_module.sidebar
+
     if widget_type == "selectbox":
-        return st_module.sidebar.selectbox(*args, **kwargs)
+        return target.selectbox(*args, **kwargs)
     elif widget_type == "file_uploader":
-        return st_module.sidebar.file_uploader(*args, **kwargs)
+        return target.file_uploader(*args, **kwargs)
     elif widget_type == "number_input":
-        return st_module.sidebar.number_input(*args, **kwargs)
+        return target.number_input(*args, **kwargs)
     elif widget_type == "button":
-        return st_module.sidebar.button(*args, **kwargs)
+        return target.button(*args, **kwargs)
     elif widget_type == "checkbox":
-        return st_module.sidebar.checkbox(*args, **kwargs)
+        return target.checkbox(*args, **kwargs)
     elif widget_type == "radio":
-        return st_module.sidebar.radio(*args, **kwargs)
+        return target.radio(*args, **kwargs)
+    elif widget_type == "text_input":
+        return target.text_input(*args, **kwargs)
     else:
         raise ValueError(f"Unsupported widget type: {widget_type}")
 

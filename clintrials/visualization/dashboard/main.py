@@ -196,7 +196,7 @@ def main():  # type: ignore
     st.session_state["accessibility_mode"] = create_widget(
         st,
         "checkbox",
-        "accessibility_mode",  # type: ignore
+        "accessibility_mode",
         "Enable Screen-Reader Optimized Mode",
         value=st.session_state.get("accessibility_mode", False),
         help="Restructures large tables into hierarchical nested details for easier navigation.",
@@ -236,7 +236,7 @@ def main():  # type: ignore
             unsafe_allow_html=True,
         )
 
-    design_type = create_widget(  # type: ignore
+    design_type = create_widget(
         st,
         "selectbox",
         "design_type",
@@ -298,7 +298,7 @@ def main():  # type: ignore
         data_mode = create_widget(
             st,
             "radio",
-            "data_mode",  # type: ignore
+            "data_mode",
             "Select Data Source",
             ["Preview Mode", "Manual JSON Upload"],
             help="Switch between automatically generated preview simulations and manual file upload.",
@@ -306,7 +306,7 @@ def main():  # type: ignore
 
         if data_mode == "Manual JSON Upload":
             st.sidebar.header("Upload Simulation Results")
-            uploaded_file = create_widget(  # type: ignore
+            uploaded_file = create_widget(
                 st,
                 "file_uploader",
                 "uploaded_file",
@@ -331,7 +331,7 @@ def main():  # type: ignore
                 max_value=0.99,
                 value=0.25,
                 step=0.01,
-            )  # type: ignore
+            )
             cohort_size = create_widget(
                 st,
                 "number_input",
@@ -340,7 +340,7 @@ def main():  # type: ignore
                 min_value=1,
                 max_value=10,
                 value=3,
-            )  # type: ignore
+            )
             max_size = create_widget(
                 st,
                 "number_input",
@@ -350,7 +350,7 @@ def main():  # type: ignore
                 max_value=100,
                 value=60,
                 step=10,
-            )  # type: ignore
+            )
 
             from clintrials.visualization.dashboard.utils import announce_status_locally
 

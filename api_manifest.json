@@ -19674,35 +19674,35 @@
         {
           "name": "st_module",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "widget_type",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "var_name",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "args",
           "kind": "VAR_POSITIONAL",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "kwargs",
           "kind": "VAR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ],
-      "returns": null
+      "returns": "Any"
     },
     "render_accessible_chart": {
       "type": "function",
@@ -19761,35 +19761,35 @@
         {
           "name": "st_module",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "widget_type",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "var_name",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "args",
           "kind": "VAR_POSITIONAL",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "kwargs",
           "kind": "VAR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ],
-      "returns": null
+      "returns": "Any"
     },
     "get_design_file_mtimes": {
       "type": "function",
@@ -21886,35 +21886,35 @@
         {
           "name": "st_module",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "widget_type",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "var_name",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "args",
           "kind": "VAR_POSITIONAL",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "kwargs",
           "kind": "VAR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ],
-      "returns": null
+      "returns": "Any"
     },
     "spending_function_obrien_fleming": {
       "type": "function",
@@ -23753,35 +23753,35 @@
         {
           "name": "st_module",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "widget_type",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "var_name",
           "kind": "POSITIONAL_OR_KEYWORD",
-          "annotation": null,
+          "annotation": "str",
           "default": null
         },
         {
           "name": "args",
           "kind": "VAR_POSITIONAL",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         },
         {
           "name": "kwargs",
           "kind": "VAR_KEYWORD",
-          "annotation": null,
+          "annotation": "Any",
           "default": null
         }
       ],
-      "returns": null
+      "returns": "Any"
     },
     "render": {
       "type": "function",

@@ -34,7 +34,7 @@ class WinRatioView(BaseSimulationView):
             min_val = 0.0 if "Probability" in str(field.annotation) else 1
             max_val = 1.0 if "Probability" in str(field.annotation) else None
 
-            kwargs[name] = create_widget(  # type: ignore
+            kwargs[name] = create_widget(
                 st,
                 "number_input",
                 name,
@@ -44,7 +44,7 @@ class WinRatioView(BaseSimulationView):
                 value=field.default,
             )
 
-        if create_widget(st, "button", "run_simulation_button", "Run Simulation"):  # type: ignore
+        if create_widget(st, "button", "run_simulation_button", "Run Simulation"):
             from clintrials.visualization.dashboard.utils import announce_status_locally
 
             announce_status_locally("Simulation in progress", key="winratio-start")
