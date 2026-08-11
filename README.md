@@ -12,6 +12,7 @@
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Trial Simulation Hub](#trial-simulation-hub)
+- [GxP Validation & System Qualification](#gxp-validation--system-qualification)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Development](#development)
@@ -199,6 +200,30 @@ poetry run python scripts/serialize_schemas.py
 ```
 
 This mirrors the deployment pipeline and ensures `schema.json` (inside the `hub` directory) is present and up-to-date.
+
+## GxP Validation & System Qualification
+
+To support institutional adoption and satisfy rigorous regulatory requirements in clinical trials, `clintrials` provides an automated GxP (Good Clinical Practice) validation and software qualification command-line interface. 
+
+This utility verifies the integrity of the local installation, computes cryptographic codebase signatures to prevent post-deployment tampering, and performs mathematical comparisons of core trial design algorithms against established statistical baselines.
+
+### Running the Qualification CLI
+
+You can execute the validation suite and compile a professional, signed PDF qualification report directly from the command line:
+
+```bash
+# Run validation with detailed console output
+poetry run clintrials-validate --verbose
+
+# Run validation and save the qualification report PDF to a custom location
+poetry run clintrials-validate --output clintrials_validation_report.pdf
+```
+
+The generated qualification report includes:
+1. **System & Environment Metadata:** Accurate logs of the OS, Python version, and dependency versions (NumPy, Pandas, SciPy, Statsmodels).
+2. **Codebase Cryptographic Integrity:** A SHA-256 cryptographic checksum of all Python files in the library to verify the software's build integrity.
+3. **Statistical Validation Comparison:** Results of all 31 mathematical validation checks across Bayesian CRM, MLE CRM, EffTox, and Group Sequential Designs against verified reference baselines.
+4. **Regulatory Sign-off Block:** A formal audit verification page for compliance officers to sign and date.
 
 ## Documentation
 
