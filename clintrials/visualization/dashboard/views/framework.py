@@ -95,6 +95,8 @@ def dashboard_view(
         def wrapper(*args, **kwargs):  # type: ignore
             import streamlit as st
 
+            from clintrials.visualization.dashboard.factory import create_widget
+
             if not hasattr(st, "fragment"):
                 st.fragment = lambda f: f  # type: ignore[assignment]
             if not hasattr(st, "columns"):
@@ -103,22 +105,24 @@ def dashboard_view(
             # Dynamic mocks fallback to prevent test crashes in environments with incomplete streamlit mocks
             if not hasattr(st, "tabs"):
                 class DummyTab:
-                    def __enter__(self):
+                    def __enter__(self) -> "DummyTab":
                         return self
-                    def __exit__(self, exc_type, exc, tb):
+                    def __exit__(self, _exc_type: Any, _exc: Any, _tb: Any) -> None:
                         return None
-                st.tabs = lambda labels: [DummyTab() for _ in labels]
-            
+                st.tabs = lambda labels: [DummyTab() for _ in labels]  # type: ignore[assignment, misc]
+
             class DummyContext:
-                def __init__(self, obj=None):
+                def __init__(self, obj: Any = None) -> None:
                     self._obj = obj
-                def __getattr__(self, name):
+                def __getattr__(self, name: str) -> Any:
+                    if name in ("sidebar", "session_state"):
+                        raise AttributeError(f"DummyContext has no attribute '{name}'")
                     if self._obj is not None:
                         return getattr(self._obj, name)
                     return lambda *args, **kwargs: None
-                def __enter__(self):
+                def __enter__(self) -> "DummyContext":
                     return self
-                def __exit__(self, exc_type, exc, tb):
+                def __exit__(self, _exc_type: Any, _exc: Any, _tb: Any) -> None:
                     return None
 
             original_columns = st.columns
@@ -126,13 +130,13 @@ def dashboard_view(
             dummy_col = DummyContext(None)
 
             if not hasattr(st, "info"):
-                st.info = getattr(st, "markdown", lambda *args, **kwargs: None)
+                st.info = getattr(st, "markdown", lambda *args, **kwargs: None)  # type: ignore[arg-type]
             if not hasattr(st, "metric"):
-                st.metric = lambda *args, **kwargs: None
+                st.metric = lambda *args, **kwargs: None  # type: ignore[assignment]
             if not hasattr(st, "dataframe"):
-                st.dataframe = getattr(st, "markdown", lambda *args, **kwargs: None)
+                st.dataframe = getattr(st, "markdown", lambda *args, **kwargs: None)  # type: ignore[arg-type]
             if not hasattr(st, "selectbox"):
-                st.selectbox = lambda *args, **kwargs: "None / No Override"
+                st.selectbox = lambda *args, **kwargs: "None / No Override"  # type: ignore[assignment]
             if not hasattr(st, "text_input"):
                 st.text_input = lambda *args, **kwargs: "0.05, 0.1, 0.2, 0.3, 0.4"
             if not hasattr(st, "number_input"):
@@ -277,10 +281,11 @@ def dashboard_view(
                     max_size_key = f"{model_name}_sandbox_max_size"
 
                     # 1. State-continuity / persistent helper functions
-                    def init_sandbox_protocol(m_name):
+                    def init_sandbox_protocol(m_name: str) -> None:
                         t_tox = st.session_state.get(target_tox_key, 0.25)
                         m_size = st.session_state.get(max_size_key, 60)
 
+                        protocol_obj: Any = None
                         if m_name == "CRM":
                             from clintrials.dosefinding.crm import CRM
                             protocol_obj = CRM(
@@ -290,7 +295,10 @@ def dashboard_view(
                                 max_size=m_size,
                             )
                         elif m_name == "EffTox":
-                            from clintrials.dosefinding.efftox import EffTox, LpNormCurve
+                            from clintrials.dosefinding.efftox import (
+                                EffTox,
+                                LpNormCurve,
+                            )
                             real_doses = [1.0, 2.0, 3.0, 4.0, 5.0]
                             prior_tox_probs = [0.05, 0.1, 0.2, 0.3, 0.4]
                             prior_eff_probs = [0.2, 0.4, 0.6, 0.7, 0.8]
@@ -327,8 +335,8 @@ def dashboard_view(
                                 randomisation_stage_size=m_size // 2,
                             )
                         elif m_name in ["WATU", "WaTu"]:
-                            from clintrials.dosefinding.watu import WATU
                             from clintrials.dosefinding.efftox import LpNormCurve
+                            from clintrials.dosefinding.watu import WATU
                             skeletons_list = [
                                 [0.60, 0.50, 0.40, 0.30, 0.20],
                                 [0.50, 0.60, 0.50, 0.40, 0.30],
@@ -391,16 +399,21 @@ def dashboard_view(
                         col_p2 = cols_p[1] if len(cols_p) > 1 else dummy_col
 
                         with col_p1:
-                            true_tox_str = st.text_input(
+                            _ = create_widget(
+                                col_p1,
+                                "text_input",
+                                f"{model_name}_sandbox_true_tox_str",
                                 "True Toxicity Rates (comma-separated)",
                                 value="0.05, 0.1, 0.2, 0.3, 0.4",
                                 key=f"{model_name}_sandbox_true_tox_str"
                             )
                         is_joint = model_name in ["EffTox", "Wages & Tait", "WageStait", "WATU", "WaTu"]
-                        true_eff_str = None
                         if is_joint:
                             with col_p2:
-                                true_eff_str = st.text_input(
+                                _ = create_widget(
+                                    col_p2,
+                                    "text_input",
+                                    f"{model_name}_sandbox_true_eff_str",
                                     "True Efficacy Rates (comma-separated)",
                                     value="0.2, 0.3, 0.4, 0.5, 0.6",
                                     key=f"{model_name}_sandbox_true_eff_str"
@@ -411,7 +424,10 @@ def dashboard_view(
                         col_p4 = cols_sub[1] if len(cols_sub) > 1 else dummy_col
 
                         with col_p3:
-                            cohort_size_val = st.number_input(
+                            cohort_size_val = create_widget(
+                                col_p3,
+                                "number_input",
+                                cohort_size_key,
                                 "Cohort Size",
                                 min_value=1,
                                 max_value=10,
@@ -436,7 +452,10 @@ def dashboard_view(
                     col_act3 = cols_act[2] if len(cols_act) > 2 else dummy_col
 
                     with col_act1:
-                        st.selectbox(
+                        create_widget(
+                            col_act1,
+                            "selectbox",
+                            override_key,
                             "Choose Dose Override before execution:",
                             options=override_choices,
                             key=override_key
@@ -445,11 +464,11 @@ def dashboard_view(
                     is_ongoing = protocol.has_more() and protocol.size() < protocol.max_size()
 
                     # Handler for Step execution
-                    def execute_step():
+                    def execute_step() -> None:
                         import numpy as np
 
                         # Validate inputs
-                        def parse_comma_floats(text_val):
+                        def parse_comma_floats(text_val: str) -> Optional[list[float]]:
                             try:
                                 return [float(x.strip()) for x in text_val.split(",") if x.strip()]
                             except Exception:
@@ -466,6 +485,8 @@ def dashboard_view(
                             if not true_eff_vals or len(true_eff_vals) != num_doses:
                                 st.error(f"True Efficacy Rates must be a comma-separated list of exactly {num_doses} floats.")
                                 return
+                            # Assert for mypy index check
+                            assert true_eff_vals is not None
 
                         # Apply override dose if selected
                         chosen_override = st.session_state[override_key]
@@ -483,6 +504,7 @@ def dashboard_view(
 
                         step_cases = []
                         if is_joint:
+                            assert true_eff_vals is not None
                             eff_sample = np.random.binomial(1, true_eff_vals[sim_dose - 1], size=cohort_size_val)
                             step_cases = [
                                 {"dose": sim_dose, "toxicity": int(t), "efficacy": int(e)}
@@ -521,21 +543,24 @@ def dashboard_view(
                         if hasattr(st, "rerun"):
                             st.rerun()
                         else:
-                            st.experimental_rerun()
+                            st.experimental_rerun()  # type: ignore[attr-defined]
 
                     # Handler for Reset execution
-                    def execute_reset():
+                    def execute_reset() -> None:
                         st.session_state[history_key] = []
                         st.session_state[override_key] = "None / No Override"
                         init_sandbox_protocol(model_name)
                         if hasattr(st, "rerun"):
                             st.rerun()
                         else:
-                            st.experimental_rerun()
+                            st.experimental_rerun()  # type: ignore[attr-defined]
 
                     with col_act2:
                         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-                        st.button(
+                        create_widget(
+                            col_act2,
+                            "button",
+                            f"{model_name}_sandbox_simulate_button",
                             "Simulate Next Cohort ➡️",
                             on_click=execute_step,
                             disabled=not is_ongoing,
@@ -543,7 +568,10 @@ def dashboard_view(
                         )
                     with col_act3:
                         st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
-                        st.button(
+                        create_widget(
+                            col_act3,
+                            "button",
+                            f"{model_name}_sandbox_reset_button",
                             "Reset Simulation 🔄",
                             on_click=execute_reset,
                             use_container_width=True

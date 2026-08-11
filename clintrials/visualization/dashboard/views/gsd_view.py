@@ -29,7 +29,7 @@ class GSDView(BaseSimulationView):
     @classmethod
     def _base_render(cls, sims=None, ps=None):  # type: ignore
         """Render the Group Sequential Design simulation interface."""
-        k = create_widget(  # type: ignore
+        k = create_widget(
             st,
             "number_input",
             "gsd_k",
@@ -39,7 +39,7 @@ class GSDView(BaseSimulationView):
             value=3,
         )
 
-        alpha = create_widget(  # type: ignore
+        alpha = create_widget(
             st,
             "number_input",
             "gsd_alpha",
@@ -50,7 +50,7 @@ class GSDView(BaseSimulationView):
             step=0.005,
         )
 
-        sfu_name = create_widget(  # type: ignore
+        sfu_name = create_widget(
             st,
             "selectbox",
             "gsd_sfu",
@@ -59,7 +59,7 @@ class GSDView(BaseSimulationView):
             index=0,
         )
 
-        n_sims = create_widget(  # type: ignore
+        n_sims = create_widget(
             st,
             "number_input",
             "gsd_n_sims",
@@ -70,7 +70,7 @@ class GSDView(BaseSimulationView):
             step=100,
         )
 
-        theta = create_widget(  # type: ignore
+        theta = create_widget(
             st,
             "number_input",
             "gsd_theta",
@@ -81,7 +81,7 @@ class GSDView(BaseSimulationView):
             step=0.1,
         )
 
-        if create_widget(st, "button", "run_simulation_button", "Run Simulation"):  # type: ignore
+        if create_widget(st, "button", "run_simulation_button", "Run Simulation"):
             from clintrials.visualization.dashboard.utils import announce_status_locally
 
             announce_status_locally("Simulation in progress", key="gsd-start")
