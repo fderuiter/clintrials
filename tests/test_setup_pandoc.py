@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: MIT
 
 import os
+import shutil
 import subprocess
 import tempfile
-import shutil
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
