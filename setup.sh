@@ -25,7 +25,14 @@ echo "Running verification tests..."
 poetry run pytest -m "not slow"
 
 echo "Running documentation doctests..."
-poetry run make -C docs doctest
+if command -v pandoc >/dev/null 2>&1; then
+  poetry run make -C docs doctest
+else
+  echo "========================================================================"
+  echo "WARNING: pandoc is not installed. Documentation testing is skipped."
+  echo "To install pandoc, please refer to: https://pandoc.org/installing.html"
+  echo "========================================================================"
+fi
 
 echo "Fetching vendor dependencies..."
 ./fetch_vendor.sh

@@ -24,7 +24,14 @@ Write-Host "Running verification tests..."
 poetry run pytest -m "not slow"
 
 Write-Host "Running documentation doctests..."
-poetry run sphinx-build -b doctest -d docs/_build/doctrees docs docs/_build/doctest
+if (Get-Command "pandoc" -ErrorAction SilentlyContinue) {
+    poetry run sphinx-build -b doctest -d docs/_build/doctrees docs docs/_build/doctest
+} else {
+    Write-Host "========================================================================"
+    Write-Host "WARNING: 'pandoc' is not installed. Documentation testing is skipped."
+    Write-Host "To install pandoc, please refer to: https://pandoc.org/installing.html"
+    Write-Host "========================================================================"
+}
 
 Write-Host "Fetching vendor dependencies..."
 .\fetch_vendor.ps1
