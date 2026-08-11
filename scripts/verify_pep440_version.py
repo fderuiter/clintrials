@@ -16,7 +16,7 @@ from typing import Union
 if sys.version_info >= (3, 11):
     import tomllib
 else:
-    import tomli as tomllib  # type: ignore
+    import tomli as tomllib
 
 from clintrials.validation import validate_version
 
