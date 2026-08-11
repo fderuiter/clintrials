@@ -12,7 +12,7 @@
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Trial Simulation Hub](#trial-simulation-hub)
-- [GxP Validation & System Qualification](#gxp-validation--system-qualification)
+- [GxP Validation & System Qualification](#gxp-validation-system-qualification)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Development](#development)
