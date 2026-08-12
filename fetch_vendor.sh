@@ -52,6 +52,12 @@ download_with_retry \
     "$SCRIPT_DIR/hub/vendor/iframeResizer.contentWindow.min.js" \
     "nested client-side iframe communication and automatic height resizing of the embedded Simulation Hub dashboard inside parent layouts"
 
+# Plotly visualization dependency
+download_with_retry \
+    "https://cdn.plot.ly/plotly-2.24.1.min.js" \
+    "$SCRIPT_DIR/hub/vendor/plotly-2.24.1.min.js" \
+    "interactive charting and scientific visualization of clinical trial simulations within the Simulation Hub dashboard"
+
 # Docs dependencies
 download_with_retry \
     "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.min.js" \

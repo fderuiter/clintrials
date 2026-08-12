@@ -56,6 +56,11 @@ Download-FileWithRetry `
     -FeatureDesc "nested client-side iframe communication and automatic height resizing of the embedded Simulation Hub dashboard inside parent layouts"
 
 Download-FileWithRetry `
+    -Uri "https://cdn.plot.ly/plotly-2.24.1.min.js" `
+    -OutFile "$PSScriptRoot/hub/vendor/plotly-2.24.1.min.js" `
+    -FeatureDesc "interactive charting and scientific visualization of clinical trial simulations within the Simulation Hub dashboard"
+
+Download-FileWithRetry `
     -Uri "https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.min.js" `
     -OutFile "$PSScriptRoot/docs/_static/vendor/iframeResizer.min.js" `
     -FeatureDesc "interactive embedded frame resizing and layout responsiveness within clinical trials documentation pages, such as the Simulation Hub drawer"
