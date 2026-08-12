@@ -222,8 +222,8 @@ def _get_roadmap_milestones() -> list[str]:
 def validate_feature_request(issue_data: dict[str, Any]) -> bool:
     """Validates a feature request submission based on dual-track rules.
 
-    The Infrastructure Track requires a roadmap milestone reference.
-    The User-Centric Track bypasses the roadmap milestone requirement,
+    The unified Technical / Infrastructure Track requires a roadmap milestone reference.
+    The unified User-Centric / Clinical Track bypasses the roadmap milestone requirement,
     relying instead on alignment with PRODUCT_STRATEGY.md without requiring
     low-level code or technical metrics.
 
@@ -240,33 +240,25 @@ def validate_feature_request(issue_data: dict[str, Any]) -> bool:
     """
     track = str(issue_data.get("track", "")).lower()
 
-    if "user-centric" in track:
+    if "user-centric" in track or "clinical" in track:
         clinical_pillar = issue_data.get("clinical_pillar") or issue_data.get("user_persona") or issue_data.get("persona")
         if not clinical_pillar or str(clinical_pillar).strip() in ("", "None", "N/A"):
             raise ValueError(
-                "User-Centric track requires a reference to PRODUCT_STRATEGY.md strategic pillars or personas."
+                "User-Centric / Clinical track requires a reference to PRODUCT_STRATEGY.md strategic pillars or personas."
             )
 
         defined_personas = _get_defined_personas_from_strategy()
         if not _is_persona_referenced(str(clinical_pillar), defined_personas):
             raise ValueError(
-                "User-Centric track proposals must reference a defined strategic persona (e.g., Dr. Aris Thorne, Eleanor Vance, biostatistician, or data scientist)."
+                "User-Centric / Clinical track proposals must reference a defined strategic persona (e.g., Dr. Aris Thorne, Eleanor Vance, biostatistician, or data scientist)."
             )
         return True
 
-    elif "clinical" in track:
-        clinical_pillar = issue_data.get("clinical_pillar") or issue_data.get("user_persona") or issue_data.get("persona")
-        if not clinical_pillar or str(clinical_pillar).strip() in ("", "None", "N/A"):
-            raise ValueError(
-                "Clinical track requires a reference to CLINICAL_STRATEGY.md strategic pillars or personas."
-            )
-        return True
-
-    elif "infrastructure" in track:
+    elif "infrastructure" in track or "technical" in track:
         roadmap_milestone = issue_data.get("roadmap_milestone")
         if not roadmap_milestone or str(roadmap_milestone).strip() in ("", "None", "N/A"):
             raise ValueError(
-                "Infrastructure track requires a valid ROADMAP.md milestone reference."
+                "Technical / Infrastructure track requires a valid ROADMAP.md milestone reference."
             )
 
         active_milestones = _get_roadmap_milestones()
@@ -296,19 +288,11 @@ def validate_feature_request(issue_data: dict[str, Any]) -> bool:
 
         if not matched:
             raise ValueError(
-                "Infrastructure track requires a valid and active ROADMAP.md milestone reference."
-            )
-        return True
-
-    elif "technical" in track:
-        roadmap_milestone = issue_data.get("roadmap_milestone")
-        if not roadmap_milestone or str(roadmap_milestone).strip() in ("", "None", "N/A"):
-            raise ValueError(
-                "Technical track requires a valid ROADMAP.md milestone reference."
+                "Technical / Infrastructure track requires a valid and active ROADMAP.md milestone reference."
             )
         return True
 
     else:
         raise ValueError(
-            "Invalid track selection. Please select either 'User-Centric Track' or 'Infrastructure Track'."
+            "Invalid track selection. Please select either 'User-Centric / Clinical Track' or 'Technical / Infrastructure Track'."
         )

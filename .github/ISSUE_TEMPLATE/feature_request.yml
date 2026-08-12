@@ -7,18 +7,18 @@ body:
     id: track
     attributes:
       label: Strategic Track Selection
-      description: Select either the Technical or Clinical track to align with our dual-track strategic framework.
+      description: Select either the Technical / Infrastructure or User-Centric / Clinical track to align with our dual-track strategic framework.
       options:
-        - "Clinical Track"
-        - "Technical Track"
+        - "User-Centric / Clinical Track"
+        - "Technical / Infrastructure Track"
     validations:
       required: true
   - type: textarea
     id: clinical_pillar
     attributes:
-      label: Clinical Strategy Pillar / Persona Alignment
+      label: Clinical Strategy / Product Strategy Persona Alignment
       description: |
-        Required if Clinical Track is chosen. Specify which clinical persona (e.g., Dr. Thorne, Eleanor Vance) or validation framework pillar this feature request aligns with.
+        Required if User-Centric / Clinical Track is chosen. Specify which clinical persona (e.g., Dr. Thorne, Eleanor Vance, biostatistician, data scientist, developer) this feature request aligns with.
         Note: You DO NOT need to provide low-level code implementation details or technical performance metrics.
       placeholder: "e.g., Aligns with Persona A (Dr. Thorne) to allow clinicians to override automatic dose suggestions..."
     validations:
@@ -27,8 +27,8 @@ body:
     id: roadmap_milestone
     attributes:
       label: Roadmap Milestone Reference
-      description: Required if Technical Track is chosen. Does this feature request align with a specific milestone or item in `ROADMAP.md`?
-      placeholder: "e.g., Section 1: CRM optimizations..."
+      description: Required if Technical / Infrastructure Track is chosen. Does this feature request align with a specific milestone or item in `ROADMAP.md`?
+      placeholder: "e.g., Section 1: Modularize core numerical integration..."
     validations:
       required: false
   - type: textarea

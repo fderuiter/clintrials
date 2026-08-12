@@ -8,21 +8,21 @@ assignees: ''
 
 ### Strategic Track Selection
 Please select the strategic track for this feature request:
-- [ ] **User-Centric Track** (Bypasses ROADMAP.md; aligns with PRODUCT_STRATEGY.md strategic pillars or personas)
-- [ ] **Infrastructure Track** (Requires alignment with specific technical milestones in ROADMAP.md)
+- [ ] **User-Centric / Clinical Track** (Bypasses ROADMAP.md; aligns with PRODUCT_STRATEGY.md strategic pillars or personas)
+- [ ] **Technical / Infrastructure Track** (Requires alignment with specific technical milestones in ROADMAP.md)
 
 ---
 
 ### Track-Specific References
 
-#### For User-Centric Track only:
+#### For User-Centric / Clinical Track only:
 **Product Strategy Persona / Alignment**
 How does this request align with strategic personas (e.g., Dr. Thorne, Eleanor Vance, biostatistician, data scientist, developer) in `PRODUCT_STRATEGY.md`?
-*(Note: User-centric contributors are NOT forced/required to provide low-level code implementation details or technical performance metrics.)*
+*(Note: User-centric and clinical contributors are NOT forced/required to provide low-level code implementation details or technical performance metrics.)*
 
 Reference: _____________________________________________
 
-#### For Infrastructure Track only:
+#### For Technical / Infrastructure Track only:
 **Roadmap Milestone Reference**
 Does this feature request align with a specific milestone or item in `ROADMAP.md`?
 - [ ] Yes. (Please specify which one: __________)
