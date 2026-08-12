@@ -163,40 +163,90 @@ def validate_version(value: Any, name: str) -> None:
         raise ValueError(ErrorTemplates.PEP440_VERSION.format(name=name)) from e
 
 
+def _load_personas_config() -> list[dict[str, Any]]:
+    """Loads and validates the external JSON personas configuration.
+
+    Returns:
+        list[dict[str, Any]]: The list of persona definitions.
+
+    Raises:
+        ValueError: If the external JSON configuration is missing, empty, or structurally invalid.
+    """
+    import json
+    from pathlib import Path
+
+    personas_path = Path("/app/personas.json")
+    if not personas_path.exists():
+        personas_path = Path("personas.json")
+
+    if not personas_path.exists():
+        raise ValueError("External JSON configuration file is missing: personas.json")
+
+    try:
+        content = personas_path.read_text().strip()
+    except Exception as e:
+        raise ValueError(f"Failed to read external JSON configuration file: {e}")
+
+    if not content:
+        raise ValueError("External JSON configuration file is empty: personas.json")
+
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"External JSON configuration file is structurally invalid: {e}")
+
+    if not isinstance(data, list):
+         raise ValueError("External JSON configuration must be a list of persona definitions.")
+
+    for item in data:
+         if not isinstance(item, dict) or "name" not in item:
+              raise ValueError("Each persona definition must be a JSON object with a 'name' field.")
+
+    return data
+
+
 def _get_defined_personas_from_strategy() -> list[str]:
     from pathlib import Path
     strategy_path = Path("/app/PRODUCT_STRATEGY.md")
     if not strategy_path.exists():
         strategy_path = Path("PRODUCT_STRATEGY.md")
+
+    personas_config = _load_personas_config()
+
     if not strategy_path.exists():
-        return ["dr. aris thorne", "eleanor vance", "biostatistician", "data scientist", "developer"]
+        return [p["name"].lower() for p in personas_config]
 
     content = strategy_path.read_text()
-    possible_personas = ["dr. aris thorne", "eleanor vance", "biostatistician", "data scientist", "developer"]
-    defined = []
     content_lower = content.lower()
-    for persona in possible_personas:
-        if persona in content_lower:
-            defined.append(persona)
-        elif persona == "dr. aris thorne" and "aris thorne" in content_lower:
-            defined.append(persona)
+    defined = []
+    for persona_def in personas_config:
+        name = persona_def["name"].lower()
+        matched = False
+        if name in content_lower:
+            matched = True
+        else:
+            aliases = persona_def.get("aliases", [])
+            for alias in aliases:
+                if alias.lower() in content_lower:
+                    matched = True
+                    break
+        if matched:
+            defined.append(name)
     return defined
 
 
 def _is_persona_referenced(input_text: str, defined_personas: list[str]) -> bool:
     input_lower = input_text.lower()
-    for persona in defined_personas:
-        if persona == "dr. aris thorne":
-            if any(term in input_lower for term in ["dr. aris thorne", "aris thorne", "thorne", "dr. thorne"]):
-                return True
-        elif persona == "eleanor vance":
-            if any(term in input_lower for term in ["eleanor vance", "eleanor", "vance"]):
-                return True
-        else:
-            if persona in input_lower:
-                return True
-            if persona.rstrip("s") in input_lower:
-                return True
+    personas_config = _load_personas_config()
+    for persona_def in personas_config:
+        name = persona_def["name"].lower()
+        if name in defined_personas:
+            aliases = persona_def.get("aliases", [name])
+            for alias in aliases:
+                if alias.lower() in input_lower:
+                    return True
+                if alias.lower().rstrip("s") in input_lower:
+                    return True
     return False
 
 
@@ -238,6 +288,9 @@ def validate_feature_request(issue_data: dict[str, Any]) -> bool:
     Raises:
         ValueError: If validation fails.
     """
+    # Always load/validate personas configuration to catch missing, empty, or invalid JSON
+    _load_personas_config()
+
     track = str(issue_data.get("track", "")).lower()
 
     if "user-centric" in track or "clinical" in track:
@@ -249,8 +302,25 @@ def validate_feature_request(issue_data: dict[str, Any]) -> bool:
 
         defined_personas = _get_defined_personas_from_strategy()
         if not _is_persona_referenced(str(clinical_pillar), defined_personas):
+            # Dynamic list of defined personas for the error message
+            persona_strs = []
+            for p in defined_personas:
+                if p == "dr. aris thorne":
+                    persona_strs.append("Dr. Aris Thorne")
+                elif p == "eleanor vance":
+                    persona_strs.append("Eleanor Vance")
+                else:
+                    persona_strs.append(p)
+
+            if len(persona_strs) > 1:
+                persona_list_str = ", ".join(persona_strs[:-1]) + ", or " + persona_strs[-1]
+            elif persona_strs:
+                persona_list_str = persona_strs[0]
+            else:
+                persona_list_str = "defined strategic personas"
+
             raise ValueError(
-                "User-Centric / Clinical track proposals must reference a defined strategic persona (e.g., Dr. Aris Thorne, Eleanor Vance, biostatistician, or data scientist)."
+                f"User-Centric / Clinical track proposals must reference a defined strategic persona (e.g., {persona_list_str})."
             )
         return True
 
