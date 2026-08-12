@@ -36,6 +36,7 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
         assert "WARNING: Failed to download unreachable dependency:" in result.stderr
         assert "iframeResizer.contentWindow.min.js" in result.stderr
         assert "iframeResizer.min.js" in result.stderr
+        assert "plotly-2.24.1.min.js" in result.stderr
         assert (
             "nested client-side iframe communication and automatic height resizing"
             in result.stderr
@@ -44,11 +45,15 @@ def test_fetch_vendor_soft_fails_and_warns_on_network_failure():
             "interactive embedded frame resizing and layout responsiveness"
             in result.stderr
         )
+        assert (
+            "interactive charting and scientific visualization of clinical trial simulations"
+            in result.stderr
+        )
 
         # Since it retries 3 times per download (making 4 attempts total)
-        # Verify curl was called 8 times total (4 for each file)
+        # Verify curl was called 12 times total (4 for each file)
         attempts_count = result.stdout.count("attempt ")
-        assert attempts_count == 8
+        assert attempts_count == 12
 
 
 def test_setup_sh_contains_timeouts():

@@ -9,6 +9,7 @@ const urlsToCache = [
   basePath + 'manifest.json',
   basePath + 'icon.svg',
   basePath + 'vendor/iframeResizer.contentWindow.min.js',
+  basePath + 'vendor/plotly-2.24.1.min.js',
   basePath + 'clintrials-0.1.4-py3-none-any.whl',
   basePath + 'runner.py',
   basePath + 'schema.json'
