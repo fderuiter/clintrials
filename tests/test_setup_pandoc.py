@@ -28,18 +28,23 @@ def test_setup_sh_without_pandoc():
             f.write('#!/bin/bash\necho "poetry called with: $@"\nexit 0\n')
         os.chmod(poetry_path, 0o755)
 
-        # Set PATH to prepended tmpdir, ensuring standard pandoc is masked out via a custom exported command function.
+        # Set PATH to prepended tmpdir
         env = os.environ.copy()
         env["PATH"] = tmpdir + os.pathsep + env.get("PATH", "")
 
-        # Run setup.sh with a bash wrapper that defines and exports a custom command function to simulate the absence of pandoc.
+        # Create a mock BASH_ENV file to define a custom 'command' function
+        bash_env_path = os.path.join(tmpdir, "bash_env.sh")
+        with open(bash_env_path, "w") as f:
+            f.write(
+                'command() { if [ "$1" = "-v" ] && [ "$2" = "pandoc" ]; then return 1; fi; builtin command "$@"; }\n'
+            )
+
+        env["BASH_ENV"] = bash_env_path
+
+        # Run setup.sh
         bash_executable = shutil.which("bash") or "bash"
         result = subprocess.run(
-            [
-                bash_executable,
-                "-c",
-                'command() { if [ "$1" = "-v" ] && [ "$2" = "pandoc" ]; then return 1; fi; builtin command "$@"; }; export -f command; ./setup.sh',
-            ],
+            [bash_executable, "./setup.sh"],
             capture_output=True,
             text=True,
             env=env,
