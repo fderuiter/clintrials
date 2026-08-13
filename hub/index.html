@@ -297,6 +297,24 @@
       async function initializeApp() {
         clearError();
 
+        // Dynamically fetch target dependency version from the build manifest
+        try {
+          const isSubpath = window.location.pathname.includes('/clintrials/');
+          const basePath = isSubpath ? '/clintrials/hub/' : '/hub/';
+          const manifestResponse = await fetch(basePath + 'build-manifest.json');
+          if (manifestResponse.ok) {
+            const manifestData = await manifestResponse.json();
+            if (manifestData && manifestData.version) {
+              const depInput = document.getElementById('dependency-version');
+              if (depInput) {
+                depInput.value = manifestData.version;
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Failed to dynamically fetch target version from build-manifest.json:", err);
+        }
+
         let response;
         try {
           response = await fetch('schema.json', { cache: 'no-store' });
