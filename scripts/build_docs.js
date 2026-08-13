@@ -21,7 +21,7 @@ marked.use({
           const highlighted = hljs.highlight(code, { language: 'python' }).value;
           return `<pre><code class="language-python">${highlighted}</code></pre>`;
         } catch (err) {
-          console.error('Error highlighting Python code:', err);
+          console.warn('[Warning] Syntax highlighting failed for python block in code block. Falling back to plain text.');
         }
       }
 
@@ -83,16 +83,28 @@ function walkAndCompile(currentDir, relativePath = "") {
       let markdownBody = content;
 
       // Extract title from frontmatter if present
-      const frontmatterMatch = content.match(/^---\r?\ntitle:\s*"([^"]+)"\r?\n---\r?\n([\s\S]*)$/);
-      if (frontmatterMatch) {
-        title = frontmatterMatch[1];
-        markdownBody = frontmatterMatch[2];
+      const frontmatterBoundMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
+      if (frontmatterBoundMatch) {
+        const yamlBlock = frontmatterBoundMatch[1];
+        markdownBody = frontmatterBoundMatch[2];
+        const titleMatch = yamlBlock.match(/^\s*title:\s*["']?([^"'\r\n]+)["']?/m);
+        if (titleMatch) {
+          title = titleMatch[1].trim();
+        } else {
+          console.warn(`[Warning] Missing or unparseable title in frontmatter of ${itemRelPath}`);
+        }
+      } else {
+        if (content.startsWith('---')) {
+          console.warn(`[Warning] Unparseable frontmatter block in ${itemRelPath}`);
+        } else {
+          console.warn(`[Warning] Missing frontmatter block in ${itemRelPath}`);
+        }
       }
 
       // Compile markdown to HTML
       let htmlContent = marked.parse(markdownBody);
 
-      // Rewrite relative links to use .html extensions
+      // Rewrite relative links to use .html extensions and validate them
       function rewriteRelativeLink(href) {
         if (!href) return href;
         if (
@@ -108,14 +120,81 @@ function walkAndCompile(currentDir, relativePath = "") {
         let [mainPath, queryPart] = pathPart.split('?');
         if (!mainPath) return href;
 
-        const ext = path.extname(mainPath);
-        if (!ext) {
-          if (mainPath.endsWith('/')) {
-            mainPath = mainPath.slice(0, -1);
+        // Perform validation of relative links
+        let absolutePathOnDisk;
+        if (mainPath.startsWith('/reference/')) {
+          absolutePathOnDisk = path.resolve(referenceDir, mainPath.slice('/reference/'.length));
+        } else if (mainPath === '/reference') {
+          absolutePathOnDisk = referenceDir;
+        } else {
+          absolutePathOnDisk = path.resolve(path.dirname(itemPath), mainPath);
+        }
+
+        let exists = false;
+        if (fs.existsSync(absolutePathOnDisk)) {
+          exists = true;
+        } else {
+          // Check extensions .mdx, .md, .rst
+          if (
+            fs.existsSync(absolutePathOnDisk + '.mdx') ||
+            fs.existsSync(absolutePathOnDisk + '.md') ||
+            fs.existsSync(absolutePathOnDisk + '.rst')
+          ) {
+            exists = true;
+          } else {
+            // Check if it ends with .html and matches a source file
+            const extOnDisk = path.extname(absolutePathOnDisk);
+            if (extOnDisk === '.html') {
+              const baseWithoutHtml = absolutePathOnDisk.slice(0, -5);
+              if (
+                fs.existsSync(baseWithoutHtml + '.mdx') ||
+                fs.existsSync(baseWithoutHtml + '.md') ||
+                fs.existsSync(baseWithoutHtml + '.rst') ||
+                fs.existsSync(baseWithoutHtml)
+              ) {
+                exists = true;
+              }
+            }
           }
-          mainPath += '.html';
-        } else if (['.md', '.mdx', '.rst'].includes(ext)) {
-          mainPath = mainPath.slice(0, -ext.length) + '.html';
+        }
+
+        if (!exists) {
+          console.warn(`[Warning] Broken relative link found in ${itemRelPath}: "${href}"`);
+        }
+
+        // Perform path rewriting with robust directory/root links handling
+        let isDir = false;
+        if (mainPath === '.' || mainPath === '..') {
+          isDir = true;
+        } else if (mainPath.endsWith('/') || mainPath.endsWith('/.') || mainPath.endsWith('/..')) {
+          isDir = true;
+        } else if (mainPath === '/reference' || mainPath.startsWith('/reference/')) {
+          isDir = true;
+        } else {
+          try {
+            const resolvedPath = path.resolve(path.dirname(itemPath), mainPath);
+            if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
+              isDir = true;
+            }
+          } catch (e) {}
+        }
+
+        if (!isDir) {
+          const ext = path.extname(mainPath);
+          if (!ext) {
+            if (mainPath.endsWith('/')) {
+              mainPath = mainPath.slice(0, -1);
+            }
+            mainPath += '.html';
+          } else if (['.md', '.mdx', '.rst'].includes(ext)) {
+            mainPath = mainPath.slice(0, -ext.length) + '.html';
+          }
+        } else {
+          if (mainPath.endsWith('/')) {
+            mainPath += 'index.html';
+          } else {
+            mainPath += '/index.html';
+          }
         }
 
         let newHref = mainPath;
@@ -664,6 +743,9 @@ fs.writeFileSync(path.join(distDir, 'index.html'), indexHtmlContent, 'utf8');
 
 // Copy docs/_static recursively to docs/dist/_static and docs/dist/clintrials/_static
 const staticSrc = path.resolve(__dirname, '../docs/_static');
+if (!fs.existsSync(staticSrc)) {
+  fs.mkdirSync(staticSrc, { recursive: true });
+}
 const staticDestRoot = path.resolve(distDir, '_static');
 const staticDestClintrials = path.resolve(distDir, 'clintrials/_static');
 
