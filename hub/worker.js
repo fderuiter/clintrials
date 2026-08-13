@@ -32,8 +32,26 @@ async function initPyodide() {
 
     // Resolve absolute URLs relative to worker location
     const baseUrl = self.location.href.substring(0, self.location.href.lastIndexOf('/') + 1);
-    const wheelUrl = baseUrl + "clintrials-0.1.4-py3-none-any.whl";
     const runnerUrl = baseUrl + "runner.py";
+
+    self.postMessage({ type: "status", message: "Resolving scientific wheel package from manifest..." });
+    let wheelUrl;
+    try {
+      const manifestRes = await fetch(baseUrl + "build-manifest.json");
+      if (manifestRes.ok) {
+        const manifestData = await manifestRes.json();
+        if (manifestData && manifestData.wheel) {
+          wheelUrl = baseUrl + manifestData.wheel;
+        } else {
+          throw new Error("Invalid manifest schema");
+        }
+      } else {
+        throw new Error(`HTTP ${manifestRes.status}`);
+      }
+    } catch (err) {
+      console.warn("Background worker failed to fetch build-manifest.json, using fallback wheel:", err);
+      wheelUrl = baseUrl + "clintrials-0.1.4-py3-none-any.whl";
+    }
 
     self.postMessage({ type: "status", message: "Installing clintrials scientific wheel..." });
     const micropip = pyodide.pyimport("micropip");

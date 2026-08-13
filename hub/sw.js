@@ -10,17 +10,34 @@ const urlsToCache = [
   basePath + 'icon.svg',
   basePath + 'vendor/iframeResizer.contentWindow.min.js',
   basePath + 'vendor/plotly-2.24.1.min.js',
-  basePath + 'clintrials-0.1.4-py3-none-any.whl',
   basePath + 'runner.py',
-  basePath + 'schema.json'
+  basePath + 'schema.json',
+  basePath + 'build-manifest.json'
 ];
 
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
+      .then(async cache => {
+        // Cache the standard static assets first
+        await cache.addAll(urlsToCache);
+
+        // Dynamically fetch and cache the active wheel package from the manifest
+        try {
+          const manifestRes = await fetch(basePath + 'build-manifest.json');
+          if (manifestRes.ok) {
+            const manifestData = await manifestRes.json();
+            if (manifestData && manifestData.wheel) {
+              const dynamicWheel = basePath + manifestData.wheel;
+              await cache.add(dynamicWheel);
+            }
+          }
+        } catch (err) {
+          console.error("Service worker failed to dynamically fetch/cache wheel from manifest:", err);
+          // Fallback to cache the stable default wheel
+          await cache.add(basePath + 'clintrials-0.1.4-py3-none-any.whl');
+        }
       })
   );
 });
@@ -58,8 +75,9 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Determine if this is a dynamic asset (schema.json, index.html, or base paths)
+  // Determine if this is a dynamic asset (schema.json, build-manifest.json, index.html, or base paths)
   const isDynamic = path.endsWith('/schema.json') ||
+                    path.endsWith('/build-manifest.json') ||
                     path.endsWith('/index.html') ||
                     path === basePath ||
                     path === basePath + 'index.html' ||
