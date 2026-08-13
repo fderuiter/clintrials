@@ -46,6 +46,7 @@ intersphinx_mapping = {
 templates_path = ["_templates"]
 exclude_patterns = [
     "_build",
+    "dist",
     "Thumbs.db",
     ".DS_Store",
     "**/*draft*",
@@ -58,6 +59,8 @@ exclude_patterns = [
     "**/*Temp*",
     "**/*TEMP*",
 ]
+
+suppress_warnings = ["myst.xref_missing"]
 
 html_theme = "furo"
 html_static_path = ["_static"]

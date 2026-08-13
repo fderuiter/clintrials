@@ -47,6 +47,7 @@ Welcome to **clintrials**, a Python library providing clinical trial designs and
    win_ratio_simulation
    reference/index
    CONTRIBUTING
+   DOCUMENTATION_GUIDE
    changelog
 
 Clintrials aims to make trial simulations and design exploration easier. Use the sections above to get started, browse tutorials, or dig into the API reference.
