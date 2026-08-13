@@ -112,7 +112,10 @@ def validate_fields(schema_name: str, payload: dict) -> dict[str, str]:
 
 
 def run_simulation_py(
-    schema_name: str, payload_json: str, progress_callback: Callable[[int], None]
+    schema_name: str,
+    payload_json: str,
+    progress_callback: Callable[[int], None],
+    accessibility_mode: bool = False,
 ) -> str:
     """Run a clinical trial simulation from Pyodide in the browser."""
     payload = json.loads(payload_json)
@@ -153,7 +156,7 @@ def run_simulation_py(
         )
 
         # Scenarios: Scenario 1 is the prior, Scenario 2 is scaled
-        scenarios = [list(prior), [min(1.0, p * 1.5) for p in prior]]
+        scenarios = [tuple(prior), tuple(min(1.0, p * 1.5) for p in prior)]
 
         n_replicates = 20
         total_sims = len(scenarios) * n_replicates
@@ -209,8 +212,8 @@ def run_simulation_py(
             first_dose=payload.get("first_dose", 1),
         )
 
-        tox_scenarios = [list(prior_tox_probs)]
-        eff_scenarios = [list(prior_eff_probs)]
+        tox_scenarios = [tuple(prior_tox_probs)]
+        eff_scenarios = [tuple(prior_eff_probs)]
 
         n_replicates = 10
         total_sims = len(tox_scenarios) * len(eff_scenarios) * n_replicates
@@ -277,8 +280,8 @@ def run_simulation_py(
             first_dose=payload.get("first_dose", 1),
         )
 
-        tox_scenarios = [list(prior_tox_probs)]
-        eff_scenarios = [skeletons[0]]
+        tox_scenarios = [tuple(prior_tox_probs)]
+        eff_scenarios = [tuple(skeletons[0])]
 
         n_replicates = 10
         total_sims = len(tox_scenarios) * len(eff_scenarios) * n_replicates
@@ -337,8 +340,8 @@ def run_simulation_py(
             randomisation_stage_size=payload.get("randomisation_stage_size", 16),
         )
 
-        tox_scenarios = [list(prior_tox_probs)]
-        eff_scenarios = [skeletons[0]]
+        tox_scenarios = [tuple(prior_tox_probs)]
+        eff_scenarios = [tuple(skeletons[0])]
 
         n_replicates = 10
         total_sims = len(tox_scenarios) * len(eff_scenarios) * n_replicates
@@ -466,7 +469,35 @@ def run_simulation_py(
         raise ValueError(f"Unknown schema name: {schema_name}")
 
     # Serialize results to HTML and Plotly JSON format
-    summary_html = summary_df.to_html(classes="table table-striped", index=True)
+    if accessibility_mode:
+        from clintrials.visualization.models import MultiFormatSummaryContainer
+
+        df_for_rendering = summary_df.copy()
+
+        # Reset index to include true_tox / scenario variables as grouping columns
+        if df_for_rendering.index.names and any(
+            name is not None for name in df_for_rendering.index.names
+        ):
+            df_for_rendering = df_for_rendering.reset_index()
+
+        # Rename any empty/unnamed index columns
+        rename_map = {}
+        for c in df_for_rendering.columns:
+            if str(c).lower() == "index" or c == "":
+                rename_map[c] = "Index"
+        df_for_rendering = df_for_rendering.rename(columns=rename_map)
+
+        # Convert unhashable columns (like dicts) to strings
+        for col in df_for_rendering.columns:
+            try:
+                df_for_rendering[col].nunique()
+            except TypeError:
+                df_for_rendering[col] = df_for_rendering[col].astype(str)
+
+        container = MultiFormatSummaryContainer(title=schema_name, df=df_for_rendering)
+        summary_html = container._generate_hierarchical_html()
+    else:
+        summary_html = summary_df.to_html(classes="table table-striped", index=True)
 
     # We serialize each plotly figure to JSON
     serialized_figures = []
