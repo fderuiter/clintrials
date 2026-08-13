@@ -49,7 +49,13 @@ This project enforces strict Test-Driven Development (TDD) practices for all new
 - Link your pull request to the relevant issue.
 - Describe your changes clearly in the pull request description.
 
-### Documentation Verification
+### Documentation Guidelines and Build Verification
+For detailed guidelines on setting up and running our dual-build documentation pipelines, please refer to our dedicated [Robust Documentation Guide](/docs/DOCUMENTATION_GUIDE.md).
+
+We support two documentation systems:
+1. **Sphinx Pipeline:** Built from reStructuredText (`.rst`) files, useful for traditional API and manual structure.
+2. **Custom Node Pipeline:** Compiles modern MDX/Markdown (`.md`/`.mdx`) files under `docs/reference` into a fast, fully searchable static site under `docs/dist`.
+
 When modifying documentation files (Markdown or reStructuredText), please ensure that all internal repository links and file paths are valid. You can run the automated documentation path-validation test locally using the following command:
 
 ```bash
