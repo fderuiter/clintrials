@@ -37,12 +37,12 @@ def calculate_codebase_hash(root_dir: Path) -> str:
             for p in root_dir.glob("**/*.py")
             if "__pycache__" not in p.parts and ".pytest_cache" not in p.parts
         ],
-        key=lambda p: p.relative_to(root_dir),
+        key=lambda p: p.relative_to(root_dir).as_posix(),
     )
     for f in py_files:
         content = f.read_bytes()
         normalized_content = content.replace(b"\r\n", b"\n")
-        hasher.update(str(f.relative_to(root_dir)).encode("utf-8"))
+        hasher.update(f.relative_to(root_dir).as_posix().encode("utf-8"))
         hasher.update(normalized_content)
     return hasher.hexdigest()
 
