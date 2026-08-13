@@ -28,18 +28,33 @@ def test_setup_sh_without_pandoc():
             f.write('#!/bin/bash\necho "poetry called with: $@"\nexit 0\n')
         os.chmod(poetry_path, 0o755)
 
-        # Set PATH to prepended tmpdir
+        # Set PATH to prepended tmpdir and filter out any real pandoc by shadow symlinking
         env = os.environ.copy()
-        env["PATH"] = tmpdir + os.pathsep + env.get("PATH", "")
+        path_dirs = env.get("PATH", "").split(os.pathsep)
+        new_path_dirs = [tmpdir]
 
-        # Create a mock BASH_ENV file to define a custom 'command' function
-        bash_env_path = os.path.join(tmpdir, "bash_env.sh")
-        with open(bash_env_path, "w") as f:
-            f.write(
-                'command() { if [ "$1" = "-v" ] && [ "$2" = "pandoc" ]; then return 1; fi; builtin command "$@"; }\n'
-            )
+        shadow_index = 0
+        for d in path_dirs:
+            if not d:
+                continue
+            pandoc_in_dir = os.path.join(d, "pandoc")
+            if os.path.exists(pandoc_in_dir) and os.path.isfile(pandoc_in_dir):
+                shadow_dir = os.path.join(tmpdir, f"shadow_bin_{shadow_index}")
+                os.makedirs(shadow_dir, exist_ok=True)
+                shadow_index += 1
+                try:
+                    for item in os.listdir(d):
+                        if item != "pandoc":
+                            src = os.path.join(d, item)
+                            dst = os.path.join(shadow_dir, item)
+                            os.symlink(src, dst)
+                    new_path_dirs.append(shadow_dir)
+                except Exception:
+                    new_path_dirs.append(d)
+            else:
+                new_path_dirs.append(d)
 
-        env["BASH_ENV"] = bash_env_path
+        env["PATH"] = os.pathsep.join(new_path_dirs)
 
         # Run setup.sh
         bash_executable = shutil.which("bash") or "bash"
