@@ -28,14 +28,25 @@ def test_setup_sh_without_pandoc():
         os.chmod(poetry_path, 0o755)
 
         # Build custom PATH that includes our tmpdir but does NOT include any real pandoc
-        # Since pandoc is not installed on the system, standard PATH is fine.
-        # But to be extremely robust, we can filter out any path containing pandoc if it existed.
+        # We do this by creating a directory of symlinks to standard system commands, excluding pandoc.
         env = os.environ.copy()
-        clean_path = []
-        for p in env.get("PATH", "").split(os.pathsep):
-            if "pandoc" not in p.lower():
-                clean_path.append(p)
-        env["PATH"] = tmpdir + os.pathsep + os.pathsep.join(clean_path)
+        bin_dir = os.path.join(tmpdir, "bin")
+        os.makedirs(bin_dir, exist_ok=True)
+        for path_dir in env.get("PATH", "").split(os.pathsep):
+            if not path_dir or not os.path.exists(path_dir):
+                continue
+            if "pandoc" in path_dir.lower():
+                continue
+            try:
+                for entry in os.scandir(path_dir):
+                    if entry.is_file() and os.access(entry.path, os.X_OK):
+                        if entry.name != "pandoc":
+                            link_path = os.path.join(bin_dir, entry.name)
+                            if not os.path.exists(link_path):
+                                os.symlink(entry.path, link_path)
+            except Exception:
+                pass
+        env["PATH"] = tmpdir + os.pathsep + bin_dir
 
         # Run setup.sh
         result = subprocess.run(
