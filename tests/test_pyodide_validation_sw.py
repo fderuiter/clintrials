@@ -31,9 +31,7 @@ def test_service_worker_caching_configuration() -> None:
     assert jsdelivr_domain in sw_js_text, (
         "Service Worker must support jsdelivr CDN caching"
     )
-    assert plotly_domain in sw_js_text, (
-        "Service Worker must support plotly CDN caching"
-    )
+    assert plotly_domain in sw_js_text, "Service Worker must support plotly CDN caching"
 
     # Verify the fallback mechanism for missing offline wheels
     assert "Fallback / revert to known stable local package" in sw_js_text, (
@@ -56,10 +54,10 @@ def test_background_worker_validation() -> None:
     assert 'type === "validate_version"' in content, (
         "worker.js must listen for validate_version events"
     )
-    assert 'validate_version(' in content, (
+    assert "validate_version(" in content, (
         "worker.js must call the native validate_version Python function"
     )
-    assert 'validate_version_result' in content, (
+    assert "validate_version_result" in content, (
         "worker.js must post message back with validate_version_result"
     )
 
@@ -81,13 +79,13 @@ def test_index_html_settings_and_validation() -> None:
     )
 
     # Verify client application handles dynamic validation trigger and errors
-    assert 'validate_version' in content, (
+    assert "validate_version" in content, (
         "index.html must trigger version validation on input/init"
     )
-    assert 'validate_version_result' in content, (
+    assert "validate_version_result" in content, (
         "index.html must handle the worker's validate_version_result"
     )
-    assert 'dependency-version-error' in content, (
+    assert "dependency-version-error" in content, (
         "index.html must display errors under dependency-version-error"
     )
 
@@ -122,3 +120,90 @@ def test_runtime_manifest_resolution() -> None:
     assert "manifestData.version" in index_text or "manifestData['version']" in index_text or "version" in index_text, (
         "index.html must dynamically determine target package version from the manifest"
     )
+
+
+def test_hub_accessibility_parity_structure() -> None:
+    """Verify that hub/index.html implements accessible landmarks, skip link, live regions, and toggle."""
+    root = Path(__file__).parent.parent
+    index_file = root / "hub" / "index.html"
+    assert index_file.exists(), "hub/index.html should exist"
+
+    content = index_file.read_text(encoding="utf-8")
+
+    # Verify Skip to Content Link
+    assert "skip-link" in content, "index.html must have a skip-link CSS class"
+    assert 'href="#main-content"' in content, (
+        "index.html must have skip-to-content link"
+    )
+
+    # Verify Native HTML5 Structural Landmarks
+    assert "<header" in content, (
+        "index.html must contain a native <header> landmark element"
+    )
+    assert "</header>" in content
+    assert "<nav" in content, "index.html must contain a native <nav> landmark element"
+    assert "</nav>" in content
+    assert '<main id="main-content"' in content, (
+        "index.html must contain a native <main> landmark element with ID 'main-content'"
+    )
+    assert "</main>" in content
+
+    # Verify Screen-Reader Optimized Mode Toggle
+    assert 'id="accessibility-mode-toggle"' in content, (
+        "index.html must have the accessibility-mode-toggle input checkbox"
+    )
+    assert "localStorage.getItem('accessibilityMode')" in content, (
+        "index.html must load the accessibilityMode toggle state from localStorage"
+    )
+
+    # Verify Dynamic Live Announcement Regions
+    assert 'id="error-region" aria-live="polite"' in content, (
+        "index.html must have an aria-live='polite' attribute on its error region"
+    )
+    assert 'id="simulation-status-message" aria-live="polite"' in content, (
+        "index.html must have an aria-live='polite' attribute on its simulation status message"
+    )
+
+    # Verify form elements have aria-describedby
+    assert "aria-describedby" in content, (
+        "index.html must configure aria-describedby for form inputs"
+    )
+
+
+def test_runner_accessibility_mode_integration() -> None:
+    """Verify runner.py handles the accessibility_mode parameter and structures HTML with details/summary."""
+    import json
+
+    from hub.runner import run_simulation_py
+
+    payload = {
+        "prior": [0.01, 0.08, 0.15, 0.22, 0.29, 0.36],
+        "target": 0.30,
+        "first_dose": 1,
+        "max_size": 30,
+        "lowest_dose_too_toxic_hurdle": 0.0,
+        "lowest_dose_too_toxic_certainty": 0.0,
+        "coherency_threshold": 0.0,
+        "bootstrap_samples": 200,
+    }
+
+    # Test with accessibility_mode = True
+    result_str_acc = run_simulation_py(
+        "CRMSchema", json.dumps(payload), lambda p: None, accessibility_mode=True
+    )
+    result_acc = json.loads(result_str_acc)
+    html_acc = result_acc["summary_html"]
+
+    # Verify nested details and summary tags exist in structured mode
+    assert "<details" in html_acc, "Hierarchical output must contain <details> tag"
+    assert "<summary" in html_acc, "Hierarchical output must contain <summary> tag"
+
+    # Test with accessibility_mode = False (standard flat table)
+    result_str_std = run_simulation_py(
+        "CRMSchema", json.dumps(payload), lambda p: None, accessibility_mode=False
+    )
+    result_std = json.loads(result_str_std)
+    html_std = result_std["summary_html"]
+
+    assert "<table" in html_std, "Standard output must contain <table> tag"
+    assert "<details" not in html_std, "Standard output must not contain <details> tag"

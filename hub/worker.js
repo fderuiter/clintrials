@@ -101,7 +101,7 @@ except Exception as e:
     return;
   }
 
-  const { schemaName, payload } = e.data;
+  const { schemaName, payload, accessibilityMode } = e.data;
 
   try {
     const pyodide = await initPyodide();
@@ -113,12 +113,13 @@ except Exception as e:
     };
 
     const payloadStr = JSON.stringify(payload);
+    const isAccessibilityMode = !!accessibilityMode;
 
     // Run the runner function
     const resultJson = await pyodide.runPythonAsync(`
 import js
 from runner import run_simulation_py
-run_simulation_py("${schemaName}", ${JSON.stringify(payloadStr)}, js.self.progressCallback)
+run_simulation_py("${schemaName}", ${JSON.stringify(payloadStr)}, js.self.progressCallback, ${isAccessibilityMode ? 'True' : 'False'})
     `);
 
     const result = JSON.parse(resultJson);

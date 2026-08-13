@@ -24,9 +24,64 @@
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
-        padding: 40px;
+        padding: 0;
         background-color: #F0F2F6;
         color: #31333F;
+      }
+      .main-container-wrapper {
+        padding: 40px;
+      }
+      .skip-link {
+        position: absolute;
+        top: -100px;
+        left: 10px;
+        background: #496D89;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 4px;
+        z-index: 1000;
+        text-decoration: none;
+        font-weight: bold;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+      .skip-link:focus {
+        top: 10px;
+        outline: 2px solid #31333F;
+      }
+      .app-header {
+        background-color: #496D89;
+        color: white;
+        padding: 15px 40px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      .header-content {
+        max-width: 800px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .app-title {
+        font-weight: 700;
+        font-size: 1.1em;
+        letter-spacing: 0.5px;
+      }
+      .nav-link {
+        color: #e2e8f0;
+        text-decoration: none;
+        font-weight: 500;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: color 0.2s, background-color 0.2s;
+      }
+      .nav-link:hover, .nav-link:focus {
+        color: white;
+        background-color: rgba(255,255,255,0.1);
+      }
+      .nav-link.active {
+        color: white;
+        border-bottom: 2px solid white;
+        border-radius: 0;
       }
       .container {
         max-width: 800px;
@@ -127,50 +182,75 @@
     </style>
   </head>
   <body>
-    <div class="container">
-      <h1>Simulation Configuration</h1>
-      <p>Select a trial model to configure parameters.</p>
-      
-      <!-- Dedicated, idempotent error region -->
-      <div id="error-region"></div>
+    <!-- Skip to Content Link -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
 
-      <!-- Workspace Settings Section -->
-      <div id="workspace-settings" style="margin-bottom: 25px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
-        <h3 style="margin-top: 0; color: #496D89;">Workspace Settings</h3>
-        <div class="form-group" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
-          <label for="dependency-version">Target Package Dependency Version *</label>
-          <div class="description">Define target package dependency version for specialized calculations. Must conform to PEP 440 specifications.</div>
-          <input type="text" id="dependency-version" name="dependency-version" value="0.1.4" required placeholder="e.g., 0.1.4, 1.0.0b1, 1.0.0" />
-          <div class="error-msg" id="dependency-version-error"></div>
+    <!-- Native HTML5 Banner Landmark -->
+    <header class="app-header">
+      <div class="header-content">
+        <span class="app-title">Clinical Trial Simulation Hub</span>
+        <!-- Native HTML5 Navigation Landmark -->
+        <nav aria-label="Main Navigation">
+          <a href="#" class="nav-link active" aria-current="page">Simulation Hub</a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Native HTML5 Main Landmark -->
+    <main id="main-content" tabindex="-1" class="main-container-wrapper">
+      <div class="container">
+        <h1>Simulation Configuration</h1>
+        <p>Select a trial model to configure parameters.</p>
+        
+        <!-- Dedicated, idempotent error region with aria-live for announcements -->
+        <div id="error-region" aria-live="polite"></div>
+
+        <!-- Workspace Settings Section -->
+        <div id="workspace-settings" style="margin-bottom: 25px; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;">
+          <h3 style="margin-top: 0; color: #496D89;">Workspace Settings</h3>
+          <div class="form-group" style="border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 20px;">
+            <label for="dependency-version">Target Package Dependency Version *</label>
+            <div class="description">Define target package dependency version for specialized calculations. Must conform to PEP 440 specifications.</div>
+            <input type="text" id="dependency-version" name="dependency-version" value="0.1.4" required placeholder="e.g., 0.1.4, 1.0.0b1, 1.0.0" />
+            <div class="error-msg" id="dependency-version-error"></div>
+          </div>
+          <!-- Screen-Reader Optimized Mode Toggle -->
+          <div class="form-group" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 0;">
+              <input type="checkbox" id="accessibility-mode-toggle" style="width: auto; margin: 0; cursor: pointer;" />
+              <span style="font-weight: 600;">Screen-Reader Optimized Mode</span>
+            </label>
+            <div class="description">Restructures large flat table grids into hierarchical collapsible sections using native HTML details and summary tags for easier audio and screen reader navigation.</div>
+          </div>
+        </div>
+
+        <select id="schema-selector">
+          <option value="">-- Select Model Schema --</option>
+        </select>
+        
+        <form id="dynamic-form" style="display: none;">
+          <div id="form-fields"></div>
+          <button type="submit" class="submit">Run Simulation</button>
+        </form>
+
+        <!-- Simulation progress and status region with aria-live -->
+        <div id="simulation-status-container" style="display: none; margin-top: 30px; padding: 20px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+          <h3 style="margin-top: 0; color: #496D89;">Simulation Status</h3>
+          <div id="simulation-status-message" aria-live="polite" style="margin-bottom: 12px; font-weight: 500; color: #475569;">Preparing WebAssembly environment...</div>
+          <div style="width: 100%; background: #e2e8f0; border-radius: 4px; height: 16px; overflow: hidden; margin-bottom: 10px;">
+            <div id="simulation-progress-bar" style="width: 0%; height: 100%; background: #496D89; transition: width 0.3s ease;"></div>
+          </div>
+          <div id="simulation-progress-percent" style="font-size: 14px; color: #64748b; text-align: right; font-weight: bold;">0%</div>
+        </div>
+
+        <!-- Simulation results region -->
+        <div id="simulation-results-container" style="display: none; margin-top: 30px; padding: 25px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
+          <h2 style="color: #496D89; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; margin-top: 0;">Simulation Results</h2>
+          <div id="simulation-results-summary" style="margin-top: 20px; overflow-x: auto;"></div>
+          <div id="simulation-results-figures" style="margin-top: 30px;"></div>
         </div>
       </div>
-
-      <select id="schema-selector">
-        <option value="">-- Select Model Schema --</option>
-      </select>
-      
-      <form id="dynamic-form" style="display: none;">
-        <div id="form-fields"></div>
-        <button type="submit" class="submit">Run Simulation</button>
-      </form>
-
-      <!-- Simulation progress and status region -->
-      <div id="simulation-status-container" style="display: none; margin-top: 30px; padding: 20px; border-radius: 8px; background: #f8fafc; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-        <h3 style="margin-top: 0; color: #496D89;">Simulation Status</h3>
-        <div id="simulation-status-message" style="margin-bottom: 12px; font-weight: 500; color: #475569;">Preparing WebAssembly environment...</div>
-        <div style="width: 100%; background: #e2e8f0; border-radius: 4px; height: 16px; overflow: hidden; margin-bottom: 10px;">
-          <div id="simulation-progress-bar" style="width: 0%; height: 100%; background: #496D89; transition: width 0.3s ease;"></div>
-        </div>
-        <div id="simulation-progress-percent" style="font-size: 14px; color: #64748b; text-align: right; font-weight: bold;">0%</div>
-      </div>
-
-      <!-- Simulation results region -->
-      <div id="simulation-results-container" style="display: none; margin-top: 30px; padding: 25px; border-radius: 8px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">
-        <h2 style="color: #496D89; border-bottom: 2px solid #edf2f7; padding-bottom: 10px; margin-top: 0;">Simulation Results</h2>
-        <div id="simulation-results-summary" style="margin-top: 20px; overflow-x: auto;"></div>
-        <div id="simulation-results-figures" style="margin-top: 30px;"></div>
-      </div>
-    </div>
+    </main>
 
     <script>
       const LABEL_MAPPING = {
@@ -427,6 +507,16 @@
             }
           }
 
+          // Setup accessibility-mode-toggle event listener for instant state preservation
+          const accToggle = document.getElementById('accessibility-mode-toggle');
+          if (accToggle) {
+            accToggle.checked = localStorage.getItem('accessibilityMode') === 'true';
+            accToggle.addEventListener('change', () => {
+              localStorage.setItem('accessibilityMode', accToggle.checked);
+              sendStateToParent();
+            });
+          }
+
           triggerResize();
         } catch (err) {
           console.error("Dropdown population error:", err);
@@ -545,6 +635,7 @@
           const input = isArray ? document.createElement('textarea') : document.createElement('input');
           input.id = key;
           input.name = key;
+          input.setAttribute('aria-describedby', key + '-error');
 
           if (!isArray) {
             if (prop.type === 'integer' || prop.type === 'number') {
@@ -716,9 +807,13 @@
             }
           };
 
+          const accToggle = document.getElementById('accessibility-mode-toggle');
+          const accessibilityMode = accToggle ? accToggle.checked : false;
+
           worker.postMessage({
             schemaName: schemaName,
-            payload: payload
+            payload: payload,
+            accessibilityMode: accessibilityMode
           });
         }
 
