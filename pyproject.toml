@@ -34,7 +34,7 @@ docs = [
 ]
 viz = [
     "streamlit>=1.0.0",
-    "plotly>=5.0.0",
+    "plotly>=7.0.0",
     "matplotlib>=3.5.0",
     "fpdf2>=2.7.9,<3.0.0",
 ]
